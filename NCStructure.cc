@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.2 2000/10/06 01:22:02 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.3 2003/12/08 18:06:37 edavis Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -49,6 +49,9 @@ NCStructure::read(const string &)
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.3  2003/12/08 18:06:37  edavis
+// Merge release-3-4 into trunk
+//
 // Revision 1.2  2000/10/06 01:22:02  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.
