@@ -25,7 +25,9 @@
 #include "Str.h"
 #include "NCAccess.h"
 
+#if 0
 extern Str * NewStr(const string &n);
+#endif
 
 class NCStr: public Str, public NCAccess {
 protected:
@@ -48,6 +50,9 @@ public:
 
 /* 
  * $Log: NCStr.h,v $
+ * Revision 1.10  2005/03/31 00:04:51  jimg
+ * Modified to use the factory class in libdap++ 3.5.
+ *
  * Revision 1.9  2005/02/26 00:43:20  jimg
  * Check point: This version of the CL can now translate strings from the
  * server into char arrays. This is controlled by two things: First a

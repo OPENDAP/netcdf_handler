@@ -28,7 +28,9 @@
 #include "NCAccess.h"
 #include "DimProjInfo.h"
 
+#if 0
 extern Array * NewArray(const string &n, BaseType *v);
+#endif
 
 class NCArray: public Array, public NCAccess {
     
@@ -72,6 +74,9 @@ public:
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.13  2005/03/31 00:04:51  jimg
+ * Modified to use the factory class in libdap++ 3.5.
+ *
  * Revision 1.12  2005/02/26 00:43:20  jimg
  * Check point: This version of the CL can now translate strings from the
  * server into char arrays. This is controlled by two things: First a

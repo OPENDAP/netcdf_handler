@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.11 2005/02/17 23:44:13 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.12 2005/03/31 00:04:51 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -26,11 +26,13 @@ static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.11 2005/02/17 23:44:13 jim
 #include "nc_util.h"
 #include "Dnetcdf.h"
 
+#if 0
 Float64 *
 NewFloat64(const string &n)
 {
     return new NCFloat64(n);
 }
+#endif
 
 void 
 NCFloat64::m_duplicate(const NCFloat64 &bt)
@@ -136,6 +138,9 @@ NCFloat64::read(const string &dataset)
 }
 
 // $Log: NCFloat64.cc,v $
+// Revision 1.12  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.11  2005/02/17 23:44:13  jimg
 // Modifications for processing of command line projections combined
 // with the limit stuff and projection info passed in from the API. I also

@@ -25,7 +25,7 @@
  
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.3 2003/12/08 18:06:37 edavis Exp $"};
+static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.4 2005/03/31 00:04:51 jimg Exp $"};
 
 #include <iostream>
 #include <string>
@@ -38,6 +38,8 @@ static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.3 2003/12/08 18:06:37 edav
 #include "ObjectType.h"
 #include "cgi_util.h"
 
+#include "NCTypeFactory.h"
+
 extern void read_variables(DAS &das, const string &filename) throw (Error);
 extern void read_descriptors(DDS &dds, const string &filename)  throw (Error);
 
@@ -46,6 +48,8 @@ const string cgi_version = DODS_SERVER_VERSION;
 int 
 main(int argc, char *argv[])
 {
+    NCTypeFactory *nctf = new NCTypeFactory;
+
     try { 
 	DODSFilter df(argc, argv);
 	if (df.get_cgi_version() == "")
@@ -62,7 +66,7 @@ main(int argc, char *argv[])
 	  }
 
 	  case DODSFilter::DDS_Response: {
-	    DDS dds;
+	    DDS dds(nctf);
 
 	    read_descriptors(dds, df.get_dataset_name());
 	    df.read_ancillary_dds(dds);
@@ -71,7 +75,7 @@ main(int argc, char *argv[])
 	  }
 
 	  case DODSFilter::DataDDS_Response: {
-	    DDS dds;
+	    DDS dds(nctf);
 
 	    dds.filename(df.get_dataset_name());
 	    read_descriptors(dds, df.get_dataset_name()); 
@@ -81,7 +85,7 @@ main(int argc, char *argv[])
 	  }
 
 	  case DODSFilter::DDX_Response: {
-	    DDS dds;
+	    DDS dds(nctf);
 	    DAS das;
 
 	    dds.filename(df.get_dataset_name());
@@ -109,15 +113,20 @@ main(int argc, char *argv[])
 	}
     }
     catch (Error &e) {
+	delete nctf; nctf = 0;
 	set_mime_text(cout, dods_error, cgi_version);
 	e.print(cout);
 	return 1;
     }
 
+    delete nctf; nctf = 0;
     return 0;
 }
 
 // $Log: nc_handler.cc,v $
+// Revision 1.4  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.3  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //

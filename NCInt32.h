@@ -25,7 +25,9 @@
 #include "Int32.h"
 #include "NCAccess.h"
 
+#if 0
 extern Int32 * NewInt32(const string &n);
+#endif
 
 class NCInt32: public Int32, public NCAccess {
 protected:
@@ -45,6 +47,9 @@ public:
 
 /* 
  * $Log: NCInt32.h,v $
+ * Revision 1.10  2005/03/31 00:04:51  jimg
+ * Modified to use the factory class in libdap++ 3.5.
+ *
  * Revision 1.9  2005/01/26 23:25:51  jimg
  * Implemented a fix for Sequence access by row number when talking to a
  * 3.4 or earlier server (which contains a bug in is_end_of_rows()).

@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.8 2005/02/26 00:43:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.9 2005/03/31 00:04:51 jimg Exp $"};
 
 #include <algorithm>
 
@@ -25,11 +25,13 @@ static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.8 2005/02/26 00:43:20 ji
 
 const string spr = "."; // structure rename
 
+#if 0
 Structure *
 NewStructure(const string &n)
 {
     return new NCStructure(n);
 }
+#endif
 
 // protected
 
@@ -111,6 +113,9 @@ NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.9  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.8  2005/02/26 00:43:20  jimg
 // Check point: This version of the CL can now translate strings from the
 // server into char arrays. This is controlled by two things: First a

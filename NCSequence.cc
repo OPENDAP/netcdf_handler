@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.13 2005/03/19 00:33:03 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.14 2005/03/31 00:04:51 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -31,11 +31,13 @@ static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.13 2005/03/19 00:33:03 ji
 
 const string spr = ".";
 
+#if 0
 Sequence *
 NewSequence(const string &n)
 {
     return new NCSequence(n);
 }
+#endif
 
 // protected
 
@@ -387,6 +389,9 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.14  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.13  2005/03/19 00:33:03  jimg
 // Checkpoint: All tests pass and only one memory leak remains (in
 // NCConnect::flatten_attributes()).

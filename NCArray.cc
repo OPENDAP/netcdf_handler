@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.21 2005/03/05 00:16:58 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.22 2005/03/31 00:04:51 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,11 +40,13 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.21 2005/03/05 00:16:58 jimg 
 
 const string spr = "."; // structure rename
 
+#if 0
 Array *
 NewArray(const string &n, BaseType *v)
 {
     return new NCArray(n, v);
 }
+#endif
 
 BaseType *
 NCArray::ptr_duplicate()
@@ -637,8 +639,12 @@ NCArray::set_source(BaseType *s) throw(InternalErr)
 VarList
 NCArray::flatten(const ClientParams &cp, const string &parent_name)
 {
+    BaseType *btp = var();
+    NCAccess *nca = dynamic_cast<NCAccess*>(btp);
+    VarList template_vars = nca->flatten(cp, parent_name);
+#if 0
     VarList template_vars = dynamic_cast<NCAccess*>(var())->flatten(cp, parent_name);
-
+#endif
     // At this point we can delete the original template variable (which 
     // might be a Structure or Sequence, so there may be several variables
     // in place of the single template). Deleting the template keeps from
@@ -661,6 +667,9 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.22  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.21  2005/03/05 00:16:58  jimg
 // checkpoint: working on memory leaks found using unit tests
 //

@@ -7,7 +7,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.11 2005/02/17 23:44:13 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.12 2005/03/31 00:04:51 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -20,11 +20,13 @@ static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.11 2005/02/17 23:44:13 jimg
 #include "NCSequence.h"
 #include "NCUInt16.h"
 
+#if 0
 UInt16 *
 NewUInt16(const string &n)
 {
     return new NCUInt16(n);
 }
+#endif
 
 void 
 NCUInt16::m_duplicate(const NCUInt16 &bt)
@@ -131,6 +133,9 @@ NCUInt16::read(const string &dataset)
 }
 
 // $Log: NCUInt16.cc,v $
+// Revision 1.12  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.11  2005/02/17 23:44:13  jimg
 // Modifications for processing of command line projections combined
 // with the limit stuff and projection info passed in from the API. I also

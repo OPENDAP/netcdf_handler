@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.13 2005/02/26 00:43:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.14 2005/03/31 00:04:51 jimg Exp $"};
 
 #include <sstream>
 
@@ -31,11 +31,13 @@ static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.13 2005/02/26 00:43:20 jimg E
 #include "nc_util.h"
 #include "debug.h"
 
+#if 0
 Grid *
 NewGrid(const string &n)
 {
     return new NCGrid(n);
 }
+#endif
 
 // protected
 
@@ -203,6 +205,9 @@ NCGrid::get_nc_type() throw(InternalErr)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.14  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.13  2005/02/26 00:43:20  jimg
 // Check point: This version of the CL can now translate strings from the
 // server into char arrays. This is controlled by two things: First a

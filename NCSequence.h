@@ -22,7 +22,9 @@
 #include "NCAccess.h"
 #include "nc_util.h"
 
+#if 0
 extern Sequence * NewSequence(const string &n);
+#endif
 
 class NCSequence: public Sequence, public NCAccess {
 private:
@@ -55,6 +57,9 @@ public:
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.11  2005/03/31 00:04:51  jimg
+ * Modified to use the factory class in libdap++ 3.5.
+ *
  * Revision 1.10  2005/01/29 00:20:29  jimg
  * Checkpoint: CEs ont he command line/ncopen() almost work.
  *

@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdds.cc,v 1.6 2003/12/08 18:06:37 edavis Exp $"};
+static char not_used rcsid[]={"$Id: ncdds.cc,v 1.7 2005/03/31 00:04:51 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,30 +50,30 @@ static char Msgt[255];
 // netCDF data type.
 //
 
-BaseType *
-Get_bt(string varname, nc_type datatype) 
+static BaseType *
+Get_bt(BaseTypeFactory *factory, string varname, nc_type datatype) 
 {
     switch (datatype) {
       case NC_CHAR:
-	return (NewStr(varname));
+	return (factory->NewStr(varname));
 
       case NC_BYTE:
-	return (NewByte(varname));
+	return (factory->NewByte(varname));
 	
       case NC_SHORT:
-	return (NewInt16(varname));
+	return (factory->NewInt16(varname));
 
       case NC_LONG:
-	return (NewInt32(varname));
+	return (factory->NewInt32(varname));
 
       case NC_FLOAT:
-	return (NewFloat32(varname));
+	return (factory->NewFloat32(varname));
 
       case NC_DOUBLE:
-	return (NewFloat64(varname));
+	return (factory->NewFloat64(varname));
 	
       default:
-	return (NewStr(varname));
+	return (factory->NewStr(varname));
     }
 }
 
@@ -116,7 +116,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	    return errstat;
 	}
 
-	BaseType *bt = Get_bt(varname1,nctype);
+	BaseType *bt = Get_bt(dds_table.get_factory(), varname1, nctype);
     
 	// is an Atomic-class ?
 
@@ -198,7 +198,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
       
 	    // Create common array for both Array and Grid types
       
-	    ar = NewArray(varname1);
+	    ar = dds_table.get_factory()->NewArray(varname1);
 	    ar->add_var(bt);
 	    for (d = 0; d < ndims; ++d) 
 		ar->append_dim(dim_szs[d],dim_nms[d]);
@@ -206,13 +206,14 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 #ifndef NOGRID
       
 	    if (ndims == dim_match){   // Found Grid type, add it
-		gr = NewGrid(varname1);
+		gr = dds_table.get_factory()->NewGrid(varname1);
 		pr = array;
 		gr->add_var(ar,pr);
 		pr = maps;
 		for ( d = 0; d < ndims; ++d){
 		    ar = new NCArray; 
-		    bt = Get_bt(var_match[d],typ_match[d]);
+		    bt = Get_bt(dds_table.get_factory(), var_match[d],
+				typ_match[d]);
 		    ar->add_var(bt);     
 		    ar->append_dim(dim_szs[d],dim_nms[d]);
 		    gr->add_var(ar,pr);
@@ -306,6 +307,9 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdds.cc,v $
+// Revision 1.7  2005/03/31 00:04:51  jimg
+// Modified to use the factory class in libdap++ 3.5.
+//
 // Revision 1.6  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //
