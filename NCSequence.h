@@ -22,33 +22,55 @@
 #endif
 #endif
 
+#include <list>
+
 #include "Sequence.h"
 #include "NCAccess.h"
 
 extern Sequence * NewSequence(const string &n);
 
 class NCSequence: public Sequence, public NCAccess {
+public:
+    typedef list<BaseType*> VarList;
+    typedef list<BaseType*>::iterator VarListIter;
+    typedef list<BaseType*>::const_iterator VarListCIter;
+
+private:
     int d_size;           //< The 'dimension size' Used for/by translation
-    
+
+    VarList d_variables;
+
+protected:
+    void _duplicate(const NCSequence &bt);
+        
 public:
     NCSequence(const string &n = "");
+    NCSequence(const NCSequence &rhs);
     virtual ~NCSequence();
 
-    virtual BaseType *ptr_duplicate();
-
-    virtual bool read(const string &dataset);
+    NCSequence &operator=(const NCSequence &rhs);
     
+    virtual BaseType *ptr_duplicate();
+    void variables_to_list(VarList &v);
+        
     virtual string build_constraint(int outtype, const size_t *start,
         const size_t *edges, const ptrdiff_t *stride) throw(Error);
-
     virtual void extract_values(void *values, int outtype) throw(Error);
 
-    virtual void set_size(int size);
-    virtual int get_size();
+    virtual VarList &get_variables_list() { return d_variables; }
+    virtual void set_size(int size) { d_size = size; }
+    virtual int get_size() { return d_size; };
+
+    virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.7  2004/11/05 17:13:57  jimg
+ * Added code to copy the BaseType pointers from the vector container into
+ * a list. This will enable more efficient translation software to be
+ * written.
+ *
  * Revision 1.6  2004/10/22 21:51:34  jimg
  * More massive changes: Translation of Sequences now works so long as the
  * Sequence contains only atomic types.

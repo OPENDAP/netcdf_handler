@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.4 2004/09/08 22:08:22 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.5 2004/11/05 17:13:57 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -21,11 +21,25 @@ static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.4 2004/09/08 22:08:22 ji
 
 #include "InternalErr.h"
 #include "NCStructure.h"
+#include "nc_util.h"
+
 
 Structure *
 NewStructure(const string &n)
 {
     return new NCStructure(n);
+}
+
+// protected
+
+void
+NCStructure::_duplicate(const NCStructure &rhs)
+{
+    // Perform a deep copy of the variables in d_variables.    
+    VarListCIter i = rhs.d_variables.begin();
+    VarListCIter i_end = rhs.d_variables.end();
+    while (i != i_end)
+        d_variables.push_back((*i++)->ptr_duplicate());
 }
 
 BaseType *
@@ -38,8 +52,39 @@ NCStructure::NCStructure(const string &n) : Structure(n)
 {
 }
 
+NCStructure::NCStructure(const NCStructure &rhs) : Structure(rhs)
+{
+    _duplicate(rhs);
+}
+
 NCStructure::~NCStructure()
 {
+}
+
+NCStructure &
+NCStructure::operator=(const NCStructure &rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<Structure&>(*this) = rhs; // run Structure assignment
+        
+    _duplicate(rhs);
+    
+    return *this;
+}
+
+void
+NCStructure::variables_to_list(VarList &v)
+{
+    ::variables_to_list(var_begin(), var_end(), v);
+#if 0
+    Structure::Vars_iter s = var_begin();
+    Structure::Vars_iter s_end = var_end();
+    while (s != s_end) {
+        v.push_back((*s++)->ptr_duplicate());
+    }
+#endif
 }
 
 bool
@@ -49,6 +94,11 @@ NCStructure::read(const string &)
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.5  2004/11/05 17:13:57  jimg
+// Added code to copy the BaseType pointers from the vector container into
+// a list. This will enable more efficient translation software to be
+// written.
+//
 // Revision 1.4  2004/09/08 22:08:22  jimg
 // More Massive changes: Code moved from the files that clone the netCDF
 // function calls into NCConnect, NCAccess or nc_util.cc. Much of the

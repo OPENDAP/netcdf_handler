@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.5 2004/10/22 21:51:34 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.6 2004/11/05 17:13:57 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -22,6 +22,7 @@ static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.5 2004/10/22 21:51:34 jim
 #include <sstream>
 
 #include "NCSequence.h"
+#include "nc_util.h"
 
 #include "InternalErr.h"
 #include "debug.h"
@@ -34,20 +35,63 @@ NewSequence(const string &n)
 
 // protected
 
+void
+NCSequence::_duplicate(const NCSequence &rhs)
+{
+    d_size = rhs.d_size;
+
+    // Perform a deep copy of the variables in d_variables.    
+    VarListCIter i = rhs.d_variables.begin();
+    VarListCIter i_end = rhs.d_variables.end();
+    while (i != i_end)
+        d_variables.push_back((*i++)->ptr_duplicate());
+}
+
+// public
+
 BaseType *
 NCSequence::ptr_duplicate()
 {
     return new NCSequence(*this);
 }
 
-// public
-
 NCSequence::NCSequence(const string &n) : Sequence(n)
 {
 }
 
+NCSequence::NCSequence(const NCSequence &rhs) : Sequence(rhs)
+{
+    _duplicate(rhs);
+}
+
 NCSequence::~NCSequence()
 {
+}
+
+NCSequence &
+NCSequence::operator=(const NCSequence &rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<Sequence &>(*this) = rhs; // run Sequence assignment
+        
+    _duplicate(rhs);
+    
+    return *this;
+}
+
+void
+NCSequence::variables_to_list(VarList &v)
+{
+    ::variables_to_list(var_begin(), var_end(), v);
+#if 0
+    Sequence::Vars_iter s = var_begin();
+    Sequence::Vars_iter s_end = var_end();
+    while (s != s_end) {
+        v.push_back((*s++)->ptr_duplicate());
+    }
+#endif
 }
 
 bool 
@@ -120,19 +164,12 @@ NCSequence::extract_values(void *values, int outtype) throw(Error)
 {
 }
 
-void
-NCSequence::set_size(int size)
-{
-    d_size = size;
-}
-
-int
-NCSequence::get_size()
-{
-    return d_size;
-}
-
 // $Log: NCSequence.cc,v $
+// Revision 1.6  2004/11/05 17:13:57  jimg
+// Added code to copy the BaseType pointers from the vector container into
+// a list. This will enable more efficient translation software to be
+// written.
+//
 // Revision 1.5  2004/10/22 21:51:34  jimg
 // More massive changes: Translation of Sequences now works so long as the
 // Sequence contains only atomic types.

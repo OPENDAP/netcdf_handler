@@ -22,6 +22,7 @@
 #endif
 #endif
 
+#include <list>
 #include "Structure.h"
 #include "NCAccess.h"
 
@@ -29,16 +30,39 @@ extern Structure * NewStructure(const string &n);
 
 class NCStructure: public Structure, public NCAccess {
 public:
+    typedef list<BaseType*> VarList;
+    typedef list<BaseType*>::iterator VarListIter;
+    typedef list<BaseType*>::const_iterator VarListCIter;
+
+private:
+    VarList d_variables;
+
+public:
+protected:
+    void _duplicate(const NCStructure &bt);
+        
+public:
     NCStructure(const string &n = "");
+    NCStructure(const NCStructure &rhs);
     virtual ~NCStructure();
 
+    NCStructure &operator=(const NCStructure &rhs);
+    
     virtual BaseType *ptr_duplicate();
+    
+    void variables_to_list(VarList &v);
+    virtual VarList &get_variables_list() { return d_variables; }
 
     virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCStructure.h,v $
+ * Revision 1.7  2004/11/05 17:13:57  jimg
+ * Added code to copy the BaseType pointers from the vector container into
+ * a list. This will enable more efficient translation software to be
+ * written.
+ *
  * Revision 1.6  2004/09/08 22:08:22  jimg
  * More Massive changes: Code moved from the files that clone the netCDF
  * function calls into NCConnect, NCAccess or nc_util.cc. Much of the

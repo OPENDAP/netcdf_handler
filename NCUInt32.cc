@@ -7,7 +7,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.8 2004/10/22 21:51:34 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.9 2004/11/05 17:13:57 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -61,7 +61,9 @@ NCUInt32::extract_values(void *values, int outtype) throw(Error)
     int bytes = 0;
 
     if (ncq) {
+#if 0
         dods_uint32 *tptr = tmpbufin;
+#endif
         for (int i = 0; i < nels; ++i) {
             bytes += ncq->var_value(i, name())->buf2val((void **)&tmpbufin);
             ++tmpbufin;
@@ -143,6 +145,11 @@ NCUInt32::read(const string &dataset)
 }
 
 // $Log: NCUInt32.cc,v $
+// Revision 1.9  2004/11/05 17:13:57  jimg
+// Added code to copy the BaseType pointers from the vector container into
+// a list. This will enable more efficient translation software to be
+// written.
+//
 // Revision 1.8  2004/10/22 21:51:34  jimg
 // More massive changes: Translation of Sequences now works so long as the
 // Sequence contains only atomic types.
