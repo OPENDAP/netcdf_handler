@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.30 2005/03/04 18:10:49 jimg Exp $
+# $Id: Makefile.in,v 1.31 2005/03/16 20:17:53 jimg Exp $
 
 @SET_MAKE@
 
@@ -15,7 +15,7 @@ DEFS = -DLOCAL @DEFS@
 CPPFLAGS = @CPPFLAGS@ $(DEFS) $(INCS)
 #CFLAGS = @CFLAGS@
 CFLAGS = -g3 -O0
-CXXFLAGS_DEBUG = -g3 -O0 -Wall -fno-default-inline -fno-defer-pop
+CXXFLAGS_DEBUG = -g3 -O0 -Wall -fno-defer-pop
 #CXXFLAGS = @CXXFLAGS@
 CXXFLAGS = $(CXXFLAGS_DEBUG)
 TEST_COV_FLAGS = -ftest-coverage -fprofile-arcs
@@ -123,9 +123,9 @@ all: $(PROG) nc_module.o
 nc_handler: $(HANDLER_OBJS) libnc-dods.a
 	$(CXX) $(LDFLAGS) -o nc_handler $(HANDLER_OBJS) $(NCDODS) $(LIBS)
 
-libnc-dods.a: $(LIBOBJS) $(NCOBJS) 
+libnc-dods.a: $(LIBOBJS) $(NCOBJS)
 	-(cd fortran && $(MAKE) $(MFLAGS) all)
-	$(AR) -cru $@ $(LIBOBJS) $(NCOBJS) 
+	$(AR) -cru $@ $(LIBOBJS) $(NCOBJS)
 	$(RANLIB) $@
 
 libnc-server4.a: $(LIBOBJS) $(NCOBJS) ncdas.o ncdds.o NCRequestHandler.o 
@@ -160,24 +160,6 @@ NCSequenceTest: NCSequenceTest.o libnc-dods.a
 
 NCUtilTest: NCUtilTest.o libnc-dods.a
 	$(CXX) -o $@ $(LDFLAGS) $< -lcppunit $(NCOBJ) $(NCDODS) $(LIBS)
-
-run:
-
-FNOC1=http://localhost/dods-trunk/nph-dods/data/nc/fnoc1.nc
-fnoc1_data: ncdump
-	ncdump/dncdump -v lat $(FNOC1)
-fnoc1_header: ncdump
-	ncdump/dncdump -h $(FNOC1)
-
-COADS=http://localhost/dods-trunk/nph-dods/data/nc/coads_climatology.nc
-coads_data: ncdump
-	ncdump/dncdump "$(COADS)?SST[1][45:47][100:102]"
-
-AVHRR=http://localhost/dods-trunk/nph-dods/data/ff/1998-6-avhrr.dat
-avhrr_header: ncdump
-	ncdump/dncdump -h $(AVHRR)
-avhrr_data: ncdump
-	ncdump/dncdump -v GSO_AVHRR.satellite $(AVHRR)
 
 # Standard targets with some customization for das-test and dds-test
 

@@ -9014,7 +9014,7 @@ fi;
 
 
 
-                                                  ac_config_files="$ac_config_files Makefile lnetcdf/Makefile ncdump/Makefile nc_test/Makefile fortran/Makefile"
+                                        ac_config_files="$ac_config_files Makefile ncdump/Makefile nc_test/Makefile fortran/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -9541,7 +9541,6 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "lnetcdf/Makefile" ) CONFIG_FILES="$CONFIG_FILES lnetcdf/Makefile" ;;
   "ncdump/Makefile" ) CONFIG_FILES="$CONFIG_FILES ncdump/Makefile" ;;
   "nc_test/Makefile" ) CONFIG_FILES="$CONFIG_FILES nc_test/Makefile" ;;
   "fortran/Makefile" ) CONFIG_FILES="$CONFIG_FILES fortran/Makefile" ;;
