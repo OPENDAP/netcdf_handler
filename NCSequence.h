@@ -29,7 +29,7 @@ private:
     int d_size;           //< The 'dimension size' Used for/by translation
 
 protected:
-    void _duplicate(const NCSequence &bt);
+    void m_duplicate(const NCSequence &bt);
         
 public:
     NCSequence(const string &n = "");
@@ -37,9 +37,7 @@ public:
     virtual ~NCSequence();
 
     NCSequence &operator=(const NCSequence &rhs);
-    
     virtual BaseType *ptr_duplicate();
-    // void variables_to_list(VarList &v);
         
     virtual string build_constraint(int outtype, const size_t *start,
         const size_t *edges, const ptrdiff_t *stride) throw(Error);
@@ -48,14 +46,15 @@ public:
     virtual int get_size() { return d_size; };
 
     virtual VarList flatten(const ClientParams &cp, const string &parent_name);
-    // virtual bool read(const string &dataset);
-    
     virtual BaseType *var_value(size_t row, const string &name);
-    // virtual BaseType *var_value(size_t row, size_t i);
 };
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.9  2005/01/26 23:25:51  jimg
+ * Implemented a fix for Sequence access by row number when talking to a
+ * 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+ *
  * Revision 1.8  2004/11/30 22:11:35  jimg
  * I replaced the flatten_*() functions with a flatten() method in
  * NCAccess. The default version of this method is in NCAccess and works

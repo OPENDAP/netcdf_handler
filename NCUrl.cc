@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.6 2004/09/08 22:08:22 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.7 2005/01/26 23:25:51 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -28,9 +28,45 @@ NewUrl(const string &n)
     return new NCUrl(n);
 }
 
+void 
+NCUrl::m_duplicate(const NCUrl &bt)
+{
+#if 0
+    if (nca.d_source)
+        d_source = nca.d_source->ptr_duplicate();
+    else
+        d_source = 0;
+#endif    
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
+}
+
+
 NCUrl::NCUrl(const string &n) : Url(n)
 {
 }
+
+NCUrl::NCUrl(const NCUrl &rhs) : Url(rhs)
+{
+    m_duplicate(rhs);
+}
+
+NCUrl::~NCUrl()
+{
+}
+
+NCUrl &
+NCUrl::operator=(const NCUrl &rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<NCUrl&>(*this) = rhs;
+
+    m_duplicate(rhs);
+
+    return *this;
+}
+
 
 BaseType *
 NCUrl::ptr_duplicate()
@@ -64,6 +100,10 @@ NCUrl::get_nc_type() throw(InternalErr)
 }
 
 // $Log: NCUrl.cc,v $
+// Revision 1.7  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.6  2004/09/08 22:08:22  jimg
 // More Massive changes: Code moved from the files that clone the netCDF
 // function calls into NCConnect, NCAccess or nc_util.cc. Much of the

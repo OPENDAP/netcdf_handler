@@ -7,7 +7,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.10 2004/11/30 22:11:35 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.11 2005/01/26 23:25:51 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -26,8 +26,42 @@ NewUInt32(const string &n)
     return new NCUInt32(n);
 }
 
+void 
+NCUInt32::m_duplicate(const NCUInt32 &bt)
+{
+#if 0
+    if (nca.d_source)
+        d_source = nca.d_source->ptr_duplicate();
+    else
+        d_source = 0;
+#endif    
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
+}
+
 NCUInt32::NCUInt32(const string &n) : UInt32(n)
 {
+}
+
+NCUInt32::NCUInt32(const NCUInt32 &rhs) : UInt32(rhs)
+{
+    m_duplicate(rhs);
+}
+
+NCUInt32::~NCUInt32()
+{
+}
+
+NCUInt32 &
+NCUInt32::operator=(const NCUInt32 &rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<NCUInt32&>(*this) = rhs;
+
+    m_duplicate(rhs);
+
+    return *this;
 }
 
 BaseType *
@@ -102,6 +136,10 @@ NCUInt32::read(const string &dataset)
 }
 
 // $Log: NCUInt32.cc,v $
+// Revision 1.11  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.10  2004/11/30 22:11:35  jimg
 // I replaced the flatten_*() functions with a flatten() method in
 // NCAccess. The default version of this method is in NCAccess and works

@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.25 2004/11/30 22:11:35 jimg Exp $
+# $Id: Makefile.in,v 1.26 2005/01/26 23:25:51 jimg Exp $
 
 @SET_MAKE@
 
@@ -78,6 +78,10 @@ TAGS = etags
 STRIP = strip
 VPATH = .:lnetcdf
 VALGRIND = @VALGRIND@
+
+# testsuite specifics
+RUNTEST = runtest
+RUNTESTFLAGS = #--all --verbose
 
 NCSRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc \
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc \
@@ -176,8 +180,13 @@ Makefile: Makefile.in
 	    ./configure; \
 	fi
 
-check:
+check: ncdump-check
 	-(cd nc_test && $(MAKE) $(MFLAGS) check)
+
+# This testsuite specifically tests the translation features of the
+# client library.
+ncdump-check:
+	${RUNTEST} ${RUNTESTFLAGS} --tool dncdump --srcdir testsuite
 
 unit-check: $(UNIT_TEST_PROGS)
 	@echo "If using valgrind, export GLIBCPP_FORCE_NEW (gcc 3.2.2+)"

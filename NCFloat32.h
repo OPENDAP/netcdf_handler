@@ -28,10 +28,15 @@
 extern Float32 * NewFloat32(const string &n);
 
 class NCFloat32: public Float32, public NCAccess {
+protected:
+    void m_duplicate(const NCFloat32 &bt);
+
 public:
     NCFloat32(const string &n = "");
-    virtual ~NCFloat32() {}
+    NCFloat32(const NCFloat32 &rhs);
+    virtual ~NCFloat32();
 
+    NCFloat32 &operator=(const NCFloat32 &rhs);
     virtual BaseType *ptr_duplicate();
 
     virtual nc_type get_nc_type() throw(InternalErr);
@@ -40,6 +45,10 @@ public:
 };
 
 // $Log: NCFloat32.h,v $
+// Revision 1.9  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.8  2004/11/30 22:11:35  jimg
 // I replaced the flatten_*() functions with a flatten() method in
 // NCAccess. The default version of this method is in NCAccess and works

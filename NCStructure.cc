@@ -13,7 +13,9 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.6 2004/11/30 22:11:35 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.7 2005/01/26 23:25:51 jimg Exp $"};
+
+#include <algorithm>
 
 #include "InternalErr.h"
 
@@ -32,8 +34,9 @@ NewStructure(const string &n)
 // protected
 
 void
-NCStructure::_duplicate(const NCStructure &rhs)
+NCStructure::m_duplicate(const NCStructure &rhs)
 {
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));      
 }
 
 BaseType *
@@ -48,7 +51,7 @@ NCStructure::NCStructure(const string &n) : Structure(n)
 
 NCStructure::NCStructure(const NCStructure &rhs) : Structure(rhs)
 {
-    _duplicate(rhs);
+    m_duplicate(rhs);
 }
 
 NCStructure::~NCStructure()
@@ -63,10 +66,28 @@ NCStructure::operator=(const NCStructure &rhs)
 
     dynamic_cast<Structure&>(*this) = rhs; // run Structure assignment
         
-    _duplicate(rhs);
+    m_duplicate(rhs);
     
     return *this;
 }
+
+/** When flattening a Structure, make sure to add an attribute to the 
+    new variables that indicate they are the product of translation. */
+
+class AddAttribute: public unary_function<BaseType *, void> {
+    
+public:
+    AddAttribute() {}
+
+    void operator()(BaseType *a) {
+        AttrTable *at;
+        AttrTable::Attr_iter aiter;
+        a->get_attr_table().find("translation", &at, &aiter);
+        if (a->get_attr_table().attr_end() == aiter)
+            a->get_attr_table().append_attr("translation", "String",
+                                            "\"translated\"");
+    }
+};
 
 VarList
 NCStructure::flatten(const ClientParams &cp, const string &parent_name)
@@ -80,6 +101,7 @@ NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 
     while (field != field_end) {
         VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
+        for_each(embedded_vars.begin(), embedded_vars.end(), AddAttribute());
         new_vars.splice(new_vars.end(), embedded_vars);
         ++field;
     }
@@ -88,6 +110,10 @@ NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.7  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.6  2004/11/30 22:11:35  jimg
 // I replaced the flatten_*() functions with a flatten() method in
 // NCAccess. The default version of this method is in NCAccess and works

@@ -26,10 +26,15 @@
 #include "NCAccess.h"
 
 class NCGrid: public Grid, public NCAccess {
+protected:
+    void m_duplicate(const NCGrid &bt);
+
 public:
     NCGrid(const string &n = "");
+    NCGrid(const NCGrid &rhs);
     virtual ~NCGrid();
-    
+
+    NCGrid &operator=(const NCGrid &rhs);
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
@@ -45,6 +50,10 @@ public:
 
 /* 
  * $Log: NCGrid.h,v $
+ * Revision 1.7  2005/01/26 23:25:51  jimg
+ * Implemented a fix for Sequence access by row number when talking to a
+ * 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+ *
  * Revision 1.6  2004/09/08 22:08:22  jimg
  * More Massive changes: Code moved from the files that clone the netCDF
  * function calls into NCConnect, NCAccess or nc_util.cc. Much of the

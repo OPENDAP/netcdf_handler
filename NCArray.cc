@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.13 2004/11/30 22:11:35 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.14 2005/01/26 23:25:51 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -69,7 +69,7 @@ NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
 NCArray::NCArray(const NCArray &rhs) : Array(rhs)
 {
     DBG(cerr << "Entering NCArray::NCArray(const NCArray &rhs)" << endl);
-    _duplicate(rhs);
+    m_duplicate(rhs);
     DBG(cerr << "Exiting NCArray::NCArray(const NCArray &rhs)" << endl);
 }
 
@@ -83,7 +83,7 @@ NCArray::~NCArray()
 }
 
 void
-NCArray::_duplicate(const NCArray &nca)
+NCArray::m_duplicate(const NCArray &nca)
 {
     DBG(cerr << "Entering NCArray::_duplicate()" << endl);
 
@@ -91,6 +91,8 @@ NCArray::_duplicate(const NCArray &nca)
         d_source = nca.d_source->ptr_duplicate();
     else
         d_source = 0;
+    
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(nca));
 
     DBG(cerr << "Exiting NCArray::_duplicate()" << endl);
 }
@@ -104,7 +106,7 @@ NCArray::operator=(const NCArray &rhs)
 
     dynamic_cast<Array &>(*this) = rhs;
 
-    _duplicate(rhs);
+    m_duplicate(rhs);
 
     return *this;
     DBG(cerr << "Exiting NCArray::operator=(const NCArray &rhs)" << endl);
@@ -141,6 +143,13 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_
     return nels;
 }
 
+void
+NCArray::store_projection(const string &proj)
+{
+    // Scan the projection clauses for one mathing this variable.
+    
+}
+
 string
 NCArray::build_constraint(int outtype, const size_t *start,
             const size_t *edges, const ptrdiff_t *stride) throw(Error)
@@ -166,9 +175,11 @@ NCArray::build_constraint(int outtype, const size_t *start,
                 DBG(cerr << "pre-stop: " << dimension_stop(d, true) << endl);
                 DBG(cerr << "pre-stride: " << dimension_stride(d, true) << endl);
                 
+                // This transfers the hyper slab info to the Sequence
                 NCSequence *ncq = dynamic_cast<NCSequence*>(d_source);
                 ncq->set_row_number_constraint(dimension_start(d, true),
-                    dimension_stop(d, true), dimension_stride(d, true));
+                                               dimension_stop(d, true),
+                                               dimension_stride(d, true));
                 ncq->set_size(dimension_size(d));
                 break;
             }
@@ -180,8 +191,13 @@ NCArray::build_constraint(int outtype, const size_t *start,
                     + d_source->get_parent()->type_name()
                     + string(" source variables."));
         }
-        return dynamic_cast<NCAccess*>(d_source)->build_constraint(outtype,
-            start, edges, stride);
+        
+        // This calls NCSequence::build_constraint() after the info has 
+        // been transferred.
+        // Copy version info to accommodate a bug in servers upto 3.4
+        NCAccess *nca = dynamic_cast<NCAccess*>(d_source);
+        nca->set_implementation_version(get_implementation_version());
+        return nca->build_constraint(outtype, start, edges, stride);
     }
 
     string expr = name();
@@ -242,8 +258,6 @@ NCArray::build_constraint(int outtype, const size_t *start,
     return expr;
 }
 
-#if 1
-// I don't think this is needed; use the version in NCAccess. jhrg 11/3/04
 bool
 NCArray::is_convertable(int outtype)
 {
@@ -256,7 +270,6 @@ NCArray::is_convertable(int outtype)
     else
         return true;
 }
-#endif
 
 void
 NCArray::extract_values(void *values, int outtype) throw(Error)
@@ -611,6 +624,10 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.14  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.13  2004/11/30 22:11:35  jimg
 // I replaced the flatten_*() functions with a flatten() method in
 // NCAccess. The default version of this method is in NCAccess and works

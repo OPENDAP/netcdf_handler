@@ -30,7 +30,7 @@ extern Array * NewArray(const string &n, BaseType *v);
 class NCArray: public Array, public NCAccess {
     BaseType *d_source;       /// Reference to source var if translated
 
-    void _duplicate(const NCArray &nca);
+    void m_duplicate(const NCArray &nca);
     
 public:
     NCArray(const string &n = "", BaseType *v = 0);
@@ -47,9 +47,10 @@ public:
 
     virtual string build_constraint(int outtype, const size_t *start,
             const size_t *edges, const ptrdiff_t *stride) throw(Error);
-#if 1       
+
+    virtual void store_projection(const string &proj);            
     virtual bool is_convertable(int outtype);
-#endif
+
     virtual nc_type get_nc_type() throw(InternalErr);
     
     virtual void extract_values(void *values, int outtype) throw(Error);
@@ -61,6 +62,10 @@ public:
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.10  2005/01/26 23:25:51  jimg
+ * Implemented a fix for Sequence access by row number when talking to a
+ * 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+ *
  * Revision 1.9  2004/11/30 22:11:35  jimg
  * I replaced the flatten_*() functions with a flatten() method in
  * NCAccess. The default version of this method is in NCAccess and works

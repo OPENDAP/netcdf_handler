@@ -13,10 +13,12 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.7 2004/11/30 22:11:35 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.8 2005/01/26 23:25:51 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
+
+// #define DODS_DEBUG 1
 
 #include "InternalErr.h"
 #include "debug.h"
@@ -38,9 +40,12 @@ NewSequence(const string &n)
 // protected
 
 void
-NCSequence::_duplicate(const NCSequence &rhs)
+NCSequence::m_duplicate(const NCSequence &rhs)
 {
     d_size = rhs.d_size;
+
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));
+    
 }
 
 // public
@@ -57,7 +62,7 @@ NCSequence::NCSequence(const string &n) : Sequence(n)
 
 NCSequence::NCSequence(const NCSequence &rhs) : Sequence(rhs)
 {
-    _duplicate(rhs);
+    m_duplicate(rhs);
 }
 
 NCSequence::~NCSequence()
@@ -72,7 +77,7 @@ NCSequence::operator=(const NCSequence &rhs)
 
     dynamic_cast<Sequence &>(*this) = rhs; // run Sequence assignment
         
-    _duplicate(rhs);
+    m_duplicate(rhs);
     
     return *this;
 }
@@ -109,6 +114,16 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     int ext_step = get_row_stride();
     int ext_stop = get_ending_row_number();
 
+    string version_info = get_implementation_version();
+
+    version_info.replace(version_info.find("/"), 1, " ");
+
+    istringstream iss(version_info);
+    string implementation;
+    float version;
+    iss >> implementation;
+    iss >> version;
+        
     DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
     DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
 
@@ -118,6 +133,12 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     int Tstop = (ext_stop < ext_start+(instart+(inedges-1)*instep)*ext_step) 
                 ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
 
+    // Fix bug in the 3.4 and prior Sequence CE code.
+    if (implementation == "dap" && version < 3.5) {
+        // ext_start--;
+        Tstop++;
+    }
+    
     // Check the validity of the array constraints
     if ((instart >= get_size())
         || (instart < 0)||(inedges < 0))
@@ -131,7 +152,8 @@ NCSequence::build_constraint(int outtype, const size_t *start,
         throw Error(NC_NOERR, "The constraint would return no data.");
 
     ce << "[" << Tstart << ":" << Tstep << ":" << Tstop << "]";
-
+    DBG(cerr << "ce: " << ce.str() << endl);
+    
     expr += ce.str();     // Return ce via value-result parameter.
     return expr;
 }
@@ -147,7 +169,32 @@ public:
     AddDimension(Sequence *s, const ClientParams &cp) : d_seq(s), d_cp(cp) {}
 
     operator VarList() { return d_new_vars; }   // Implicit type conversion.
- 
+
+    void add_translation_attribute(BaseType *a) {
+        AttrTable *at;
+        AttrTable::Attr_iter aiter;
+        a->get_attr_table().find("translation", &at, &aiter);
+        if (a->get_attr_table().attr_end() == aiter)
+            a->get_attr_table().append_attr("translation", "String",
+                                            "\"translated\"");
+    }
+    
+    void size_new_dimension(NCArray *a, BaseType *e) {
+        // Find any limits set for either the Sequence and/or this field.
+        int field_limit = d_cp.get_limit(e->name());
+        int seq_limit = d_cp.get_limit(d_seq->name());
+        // Rule: If there's a limit on the field, it supersedes a limit
+        // on the containing sequence. Create a new named dimension in
+        // that case. Note that if only a default limit is set, then
+        // both field_limit and seq_limit will be the same.
+        if (field_limit != 0 && field_limit != seq_limit)
+            a->append_dim(field_limit, e->name());
+        else if (seq_limit != 0)
+            a->append_dim(seq_limit, d_seq->name());
+        else
+            a->append_dim(1, d_seq->name());
+    }
+    
     void operator()(BaseType *e) {
         if (e->type() == dods_array_c) {
             // Since the design calls for the first dimension to be the 
@@ -157,16 +204,18 @@ public:
             BaseType *btp = src_array->var()->ptr_duplicate();
             NCArray *a = new NCArray("", btp);
             a->set_source(d_seq);
-            int limit = d_cp.get_limit(e->name());
-            a->append_dim(max(limit, 1), d_seq->name());
+
+            size_new_dimension(a, e);
+            
             Array::Dim_iter i = src_array->dim_begin();
             while (i != src_array->dim_end()) {
                 a->append_dim(src_array->dimension_size(i), 
                               src_array->dimension_name(i));
                 ++i;
             }
-            a->get_attr_table().append_attr("translation", "String",
-                                            "\"translated\"");
+            
+            add_translation_attribute(a);
+            
             d_new_vars.push_back(a);
         }
         else {
@@ -174,10 +223,23 @@ public:
             NCArray *a = new NCArray("", btp);
             a->set_source(d_seq);
 
-            int limit = d_cp.get_limit(e->name());
-            a->append_dim(max(limit, 1), d_seq->name());
+            size_new_dimension(a, e);
+#if 0
+            // See comment above about limit values
+            int field_limit = d_cp.get_limit(e->name());
+            int seq_limit = d_cp.get_limit(d_seq->name());
+            if (field_limit != 0 && field_limit != seq_limit)
+                a->append_dim(field_limit, e->name());
+            else if (seq_limit != 0)
+                a->append_dim(seq_limit, d_seq->name());
+            else
+                a->append_dim(1, d_seq->name());
+#endif
+            add_translation_attribute(a);
+#if 0
             a->get_attr_table().append_attr("translation", "String",
                                             "\"translated\"");
+#endif
             // Insert the new variable right after the 
             d_new_vars.push_back(a);
         }
@@ -251,6 +313,10 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.8  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.7  2004/11/30 22:11:35  jimg
 // I replaced the flatten_*() functions with a flatten() method in
 // NCAccess. The default version of this method is in NCAccess and works

@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCInt16.cc,v 1.9 2004/11/30 22:11:35 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCInt16.cc,v 1.10 2005/01/26 23:25:51 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -32,9 +32,45 @@ NewInt16(const string &n)
     return new NCInt16(n);
 }
 
+void 
+NCInt16::m_duplicate(const NCInt16 &bt)
+{
+#if 0
+    if (nca.d_source)
+        d_source = nca.d_source->ptr_duplicate();
+    else
+        d_source = 0;
+#endif    
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
+}
+
+
 NCInt16::NCInt16(const string &n) : Int16(n)
 {
 }
+
+NCInt16::NCInt16(const NCInt16 &rhs) : Int16(rhs)
+{
+    m_duplicate(rhs);
+}
+
+NCInt16::~NCInt16()
+{
+}
+
+NCInt16 &
+NCInt16::operator=(const NCInt16 &rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<NCInt16&>(*this) = rhs;
+
+    m_duplicate(rhs);
+
+    return *this;
+}
+
 
 BaseType *
 NCInt16::ptr_duplicate(){
@@ -108,6 +144,10 @@ NCInt16::read(const string &dataset)
 }
 
 // $Log: NCInt16.cc,v $
+// Revision 1.10  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.9  2004/11/30 22:11:35  jimg
 // I replaced the flatten_*() functions with a flatten() method in
 // NCAccess. The default version of this method is in NCAccess and works

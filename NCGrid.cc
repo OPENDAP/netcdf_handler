@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.10 2004/09/08 22:08:22 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.11 2005/01/26 23:25:51 jimg Exp $"};
 
 #include <sstream>
 
@@ -39,6 +39,18 @@ NewGrid(const string &n)
 
 // protected
 
+void 
+NCGrid::m_duplicate(const NCGrid &bt)
+{
+#if 0
+    if (nca.d_source)
+        d_source = nca.d_source->ptr_duplicate();
+    else
+        d_source = 0;
+#endif    
+    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
+}
+
 BaseType *
 NCGrid::ptr_duplicate()
 {
@@ -51,9 +63,29 @@ NCGrid::NCGrid(const string &n) : Grid(n)
 {
 }
 
+NCGrid::NCGrid(const NCGrid &rhs) : Grid(rhs)
+{
+    m_duplicate(rhs);
+}
+
+
 NCGrid::~NCGrid()
 {
 }
+
+NCGrid &
+NCGrid::operator=(const NCGrid &rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<NCGrid&>(*this) = rhs;
+
+    m_duplicate(rhs);
+
+    return *this;
+}
+
 
 bool
 NCGrid::read(const string &dataset)
@@ -177,6 +209,10 @@ NCGrid::get_nc_type() throw(InternalErr)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.11  2005/01/26 23:25:51  jimg
+// Implemented a fix for Sequence access by row number when talking to a
+// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
+//
 // Revision 1.10  2004/09/08 22:08:22  jimg
 // More Massive changes: Code moved from the files that clone the netCDF
 // function calls into NCConnect, NCAccess or nc_util.cc. Much of the
