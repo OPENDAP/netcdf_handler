@@ -1,5 +1,5 @@
 
-$Id: INSTALL,v 1.4 2002/05/03 00:01:52 jimg Exp $
+$Id: INSTALL,v 1.5 2003/05/02 16:30:29 jimg Exp $
 
 Installing the NetCDF server software and client library for DODS.
 
@@ -27,7 +27,7 @@ BUILDING THE SOFTWARE
 3c) Optionally run the tests. The tests for this server take a significant
     amount of time to run but, unlike most of the automated tests bundled
     with DODS software, they do not require the DejaGNU package. To run the
-    tests use `make check.' 
+    tests use `make check.' (You must first install the server.)
 
     In most cases you will need to supply extra information to configure to
     run the tests. You must tell configure where to install the test dataset
