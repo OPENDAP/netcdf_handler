@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.7 2003/12/08 18:06:37 edavis Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.8 2004/02/25 00:47:52 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -232,7 +232,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	}
 
 	// add all the attributes in the array
-	for (int loc=0; loc < len ; loc++) {
+	for (unsigned int loc=0; loc < len ; loc++) {
 	    char *print_rep = print_attr(datatype, loc, (void *)value);	
 	    at->append_attr(attrname, print_type(datatype), print_rep);
 	    delete [] print_rep;
@@ -345,6 +345,10 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.8  2004/02/25 00:47:52  jimg
+// This code will translate Structures, including ones that are nested.
+// Not tested much; needs work.
+//
 // Revision 1.7  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //
