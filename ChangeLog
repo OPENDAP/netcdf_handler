@@ -1,3 +1,10 @@
+2003-05-02  James Gallagher  <jimg@dcz.dods.org>
+
+	* Patch to the Fortran/fort-control.c file. This provides fixes
+	needed to use the library with the new Fortran calls that are part
+	of NetCDF 3.5. This is a temporary fix from Yuan Ho (Thanks!)
+	until Reza can get the code completely switched over to 3.5
+
 2003-04-28  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with release-3-3-1.
