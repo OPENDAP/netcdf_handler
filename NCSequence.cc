@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.11 2005/02/26 00:43:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.12 2005/03/05 00:16:58 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -273,6 +273,8 @@ public:
             NCArray *src_array = dynamic_cast<NCArray*>(e);
             BaseType *btp = src_array->var()->ptr_duplicate();
             NCArray *a = new NCArray("", btp);
+            delete btp; btp = 0;
+
             a->set_source(d_seq);
 
             size_new_dimension(a, e);
@@ -292,6 +294,8 @@ public:
         else {
             BaseType *btp = e->ptr_duplicate();
             NCArray *a = new NCArray("", btp);
+            delete btp; btp = 0;
+
             a->set_source(d_seq);
 
             size_new_dimension(a, e);
@@ -301,6 +305,8 @@ public:
             
             d_new_vars.push_back(a);
         }
+        
+        delete e;
     }
 };
 
@@ -322,10 +328,13 @@ NCSequence::flatten(const ClientParams &cp, const string &parent_name)
 
     while (field != field_end) {
         VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
-        // AddDimension ad(this, cp);
+
+        // Note that AddDimension also deletes the BaseType objects in
+        // embedded_vars.
         VarList ev_added_dim = for_each(embedded_vars.begin(), 
                                         embedded_vars.end(), 
                                         AddDimension(this, cp));
+
         new_vars.splice(new_vars.end(), ev_added_dim);
         ++field;
     }
@@ -377,6 +386,9 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.12  2005/03/05 00:16:58  jimg
+// checkpoint: working on memory leaks found using unit tests
+//
 // Revision 1.11  2005/02/26 00:43:20  jimg
 // Check point: This version of the CL can now translate strings from the
 // server into char arrays. This is controlled by two things: First a

@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.20 2005/03/04 18:10:49 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.21 2005/03/05 00:16:58 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,53 +43,46 @@ const string spr = "."; // structure rename
 Array *
 NewArray(const string &n, BaseType *v)
 {
-    DBG2(cerr << "Entering NC NewArray" << endl);
     return new NCArray(n, v);
-    DBG2(cerr << "Exiting NC NewArray" << endl);
 }
 
 BaseType *
 NCArray::ptr_duplicate()
 {
-    DBG2(cerr << "Entering NCArray::ptr_duplicate()" << endl);
     return new NCArray(*this);
-    DBG2(cerr << "Exiting NCArray::ptr_duplicate()" << endl);
 }
 
+/** Build an NCArray instance.
+    @param n The name of the array.
+    @param v Use this variable as a template for type of array elements. 
+    The variable will be copied, so the caller is responsible for freeing
+    storage used by the actual parameter. Also, if the actual parameter
+    is an Array, libdap++ code will use the template of that Array as the
+    template for this NCArray. */
 NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
 {
-    DBG2(cerr << "Entering NCArray::NCArray(const string &n, BaseType *v)" << endl);
-    // d_source = 0;         // A value of zero indicates no translation.
-    DBG2(cerr << "Exiting NCArray::NCArray(const string &n, BaseType *v)" << endl);
 }
 
 NCArray::NCArray(const NCArray &rhs) : Array(rhs)
 {
-    DBG2(cerr << "Entering NCArray::NCArray(const NCArray &rhs)" << endl);
     m_duplicate(rhs);
-    DBG2(cerr << "Exiting NCArray::NCArray(const NCArray &rhs)" << endl);
 }
 
 NCArray::~NCArray()
 {
-    DBG2(cerr << "Entering ~NCArray()" << endl);
-    // delete d_source;
-    DBG2(cerr << "Exiting ~NCArray()" << endl);
+    DBG(cerr << "delete d_source " << d_source << endl);
+    delete d_source; d_source = 0;
 }
 
 void
 NCArray::m_duplicate(const NCArray &nca)
 {
-    DBG2(cerr << "Entering NCArray::_duplicate()" << endl);
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(nca));
-
-    DBG2(cerr << "Exiting NCArray::_duplicate()" << endl);
 }
 
 NCArray &
 NCArray::operator=(const NCArray &rhs)
 {
-    DBG2(cerr << "Entering NCArray::operator=(const NCArray &rhs)" << endl);
     if (this == &rhs)
         return *this;
 
@@ -98,7 +91,6 @@ NCArray::operator=(const NCArray &rhs)
     m_duplicate(rhs);
 
     return *this;
-    DBG2(cerr << "Exiting NCArray::operator=(const NCArray &rhs)" << endl);
 }
 
 
@@ -628,8 +620,9 @@ NCArray::set_source(BaseType *s) throw(InternalErr)
 {
     if (s->type() == dods_array_c)
         throw InternalErr(__FILE__, __LINE__, "Array's source is an Array!");
-        
+     
     d_source = s->ptr_duplicate();
+    DBG(cerr << "s " << s << ", d_source " << d_source << endl);
 }
 
 /** Arrays are really constructor types. To flateen one, flatten the 
@@ -668,6 +661,9 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.21  2005/03/05 00:16:58  jimg
+// checkpoint: working on memory leaks found using unit tests
+//
 // Revision 1.20  2005/03/04 18:10:49  jimg
 // At this point valgrind runs the Unidata tests for both local and remote access
 // and shows no errors or leaks. There are 8 bytes still reachable from an
