@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdds.cc,v 1.4 2003/01/28 07:08:24 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdds.cc,v 1.5 2003/09/25 23:09:36 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -84,7 +84,7 @@ Get_bt(string varname, nc_type datatype)
 // Returns: false if an error accessing the netcdf file was detected, true
 // otherwise.
 
-bool
+int
 read_class(DDS &dds_table, int ncid, int nvars, string *error)
 {
     char varname1[MAX_NC_NAME];
@@ -98,20 +98,22 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
     int tmp_dim_ids[MAX_VAR_DIMS];
     nc_type typ_match[MAX_NC_VARS];
     int ndims, ndims2, dim_match;
-    long dim_sz, tmp_sz;  
+    size_t dim_sz, tmp_sz;  
     nc_type nctype;
     Array *ar;
     Grid *gr;
     Part pr;
-  
+    int errstat;
+
     //add all the variables in this file to DDS table 
 
     for (int v1 = 0; v1 < nvars; ++v1) {
-	if (lncvarinq(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0) == -1){
-	    sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v1);
+      errstat = lnc_inq_var(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0);
+      if (errstat != NC_NOERR){
+	sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v1);
 	    ErrMsgT(Msgt); //local error messag
 	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-	    return false;
+	    return errstat;
 	}
 
 	BaseType *bt = Get_bt(varname1,nctype);
@@ -131,22 +133,23 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	    // match all the dimensions of this variable to other variables
 	    int d;
 	    for (d = 0; d < ndims; ++d){
-		if (lncdiminq(ncid, dim_ids[d], dimname, &dim_sz) == -1){
-		    sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v1);
-		    ErrMsgT(Msgt); //server error messag
-		    *error = (string)"\"" + (string)Msgt + (string)"\"";
-		    return false;
-		}
-		dim_szs[d] = (int) dim_sz;
-		(void) strcpy(dim_nms[d],dimname);
+	      errstat = lnc_inq_dim(ncid, dim_ids[d], dimname, &dim_sz);
+	      if (errstat != NC_NOERR){
+		sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v1);
+		ErrMsgT(Msgt); //server error messag
+		*error = (string)"\"" + (string)Msgt + (string)"\"";
+		return errstat;
+	      }
+	      dim_szs[d] = (int) dim_sz;
+	      (void) strcpy(dim_nms[d],dimname);
 	
-		for (int v2 = 0; v2 < nvars; ++v2) { 
-		    if (lncvarinq(ncid,v2,varname2[v2],&nctype,&ndims2,
-				  tmp_dim_ids,(int *)0) == -1){
+	      for (int v2 = 0; v2 < nvars; ++v2) { 
+		errstat = lnc_inq_var(ncid,v2,varname2[v2],&nctype,&ndims2,tmp_dim_ids,(int *)0);
+		    if (errstat != NC_NOERR) {
 			sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v2);
 			ErrMsgT(Msgt); 
 			*error = (string)"\"" + (string)Msgt + (string)"\"";
-			return false;
+			return errstat;
 		    }
 	  
 		    // Is it a Grid ?     1) variable name = the dimension name
@@ -155,12 +158,14 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 		    //                    4) They are the same size
 		    if ((v1 != v2) && (strcmp(dimname,varname2[v2]) == 0) && 
 			(ndims2 == 1)){
-			if (lncdiminq(ncid,tmp_dim_ids[0],(char *)0, &tmp_sz)== -1){
-			    sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v2);
-			    ErrMsgT(Msgt);
-			    *error = (string)"\"" + (string)Msgt + (string)"\"";
-			    return false;
-			}
+
+		      errstat = lnc_inq_dim(ncid,tmp_dim_ids[0],(char *)0, &tmp_sz);
+		      if (errstat != NC_NOERR){
+			sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v2);
+			ErrMsgT(Msgt);
+			*error = (string)"\"" + (string)Msgt + (string)"\"";
+			return errstat;
+		      }
 			if (tmp_sz == dim_sz){    
 			    typ_match[dim_match] = nctype; 
 			    var_match[dim_match] = varname2[v2]; 
@@ -177,11 +182,12 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 		// dimensions in the variable.
 		if (dim_match != d+1) {
 		    for (int d2 = d+1; d2 < ndims; ++d2){
-			if (lncdiminq(ncid, dim_ids[d2], dimname2, &dim_sz) == -1){
-			    sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d (ncdds)",d2,v1);
+		      errstat = lnc_inq_dim(ncid, dim_ids[d2], dimname2, &dim_sz);
+		      if (errstat != NC_NOERR){
+			sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d (ncdds)",d2,v1);
 			    ErrMsgT(Msgt);
 			    *error = (string)"\"" + (string)Msgt + (string)"\"";
-			    return false;
+			    return errstat;
 			}
 			dim_szs[d2] = (int) dim_sz;
 			(void) strcpy(dim_nms[d2],dimname2);
@@ -224,7 +230,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	}
     }
   
-    return true;
+    return NC_NOERR;
 }
 
 // Given a reference to an instance of class DDS and a filename that refers
@@ -240,33 +246,38 @@ read_descriptors(DDS &dds_table, const string &filename) throw (Error)
 
 {
   ncopts = 0;
-  int ncid = lncopen(filename.c_str(), NC_NOWRITE);
+  int ncid, errstat;
   int nvars; 
   
-    if (ncid == -1) {
+    errstat = lnc_open(filename.c_str(), NC_NOWRITE, &ncid);
+    if (errstat != NC_NOERR) {
      //local error
       sprintf (Msgt,"netCDF server: Could not open file %s ", filename.c_str());
       ErrMsgT(Msgt); //local error messag
       string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
-      throw Error(msg);
+      throw Error(errstat, msg);
      
      }
   
     // how many variables? 
-    if (lncinquire(ncid, (int *)0, &nvars, (int *)0, (int *)0) == -1) {
+
+    errstat = lnc_inq_nvars(ncid, &nvars);
+    if (errstat != NC_NOERR) {
       ErrMsgT("Could not inquire about netcdf file (ncdds)");
       string msg = (string)"Could not inquire about netcdf file: " 
 	+ path_to_filename(filename) + "."; 
-      throw Error(msg);
+      throw Error(errstat, msg);
     }
     // dataset name
     dds_table.set_dataset_name(name_path(filename));
   
     // read variables class
     string *error;
-    if (!read_class(dds_table,ncid,nvars,error)){      
-      string msg = (string) *error;
-      throw Error(msg);
+
+    errstat = read_class(dds_table,ncid,nvars,error);
+    if (errstat != NC_NOERR) {
+	string msg = (string) *error;
+	throw Error(errstat, msg);
     }
 }
 
@@ -295,6 +306,12 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdds.cc,v $
+// Revision 1.5  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.4.4.1  2003/06/06 08:23:41  reza
+// Updated the servers to netCDF-3 and fixed error handling between client and server.
+//
 // Revision 1.4  2003/01/28 07:08:24  jimg
 // Merged with release-3-2-8.
 //

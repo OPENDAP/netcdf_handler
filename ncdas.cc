@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.5 2003/01/28 07:08:24 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.6 2003/09/25 23:09:36 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -181,28 +181,31 @@ print_type(nc_type datatype)
 // Returns: false if an error was detected reading from the netcdf file, true
 // otherwise. 
 
-bool
+int
 read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 {
     char attrname[MAX_NC_NAME];
     nc_type datatype;
-    int len;
+    size_t len;
+    int errstat = NC_NOERR;
     char *value;
 
     for (int a = 0; a < natts; ++a) {
-	if (lncattname(ncid, v, a, attrname) == -1) {
+        errstat = lnc_inq_attname(ncid, v, a, attrname);
+        if (errstat != NC_NOERR) {
             sprintf (Msgt,"nc_das server: could not get the name for attribute %d",a);
 	    ErrMsgT(Msgt); //local error messag
 	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-	    return false;
+	    return errstat;
 	}
-	if (lncattinq(ncid, v, attrname, &datatype, &len) == -1) {
+	errstat = lnc_inq_att(ncid, v, attrname, &datatype, &len);
+	if (errstat != NC_NOERR) {
       	    sprintf(Msgt,
 		    "nc_das server: could not gettype or length for attribute %s",
 		    attrname);
 	    ErrMsgT(Msgt); //local error message
 	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-	    return false;
+	    return errstat;
 	}
 
 	value = new char [(len + 1) * lnctypelen(datatype)];
@@ -210,13 +213,14 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	if (!value) {
             ErrMsgT("nc_das server: Out of memory!");
 	    *(error) =  (string)"\"nc_das: Out of memory! \"";
-	    (void) lncclose(ncid);
-	    return false;
+	    (void) lnc_close(ncid);
+	    return ENOMEM;
 	}
-	if (lncattget(ncid, v, attrname, (void *)value) == -1) {
+	errstat = lnc_get_att(ncid, v, attrname, (void *)value);
+	if (errstat != NC_NOERR) {
             ErrMsgT("nc_das server: could not read attribute value");
 	    *(error) =  (string)"\"nc_das: Could not read attribute value \"";
-   	    return false;
+   	    return errstat;
 	}
 
 	// If the datatype is NC_CHAR then we have a string. netCDF
@@ -237,7 +241,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	delete [] value;
     }
     
-    return true;
+    return errstat;
 }
 
 // Given a reference to an instance of class DAS and a filename that refers
@@ -252,53 +256,60 @@ void
 read_variables(DAS &das, const string &filename) throw (Error) 
 {
     ncopts = 0;
-    int ncid = lncopen(filename.c_str(), NC_NOWRITE);
+    int ncid, errstat; 
     int nvars, ngatts, natts = 0 ;
     string *error = NULL ;
     AttrTable *attr_table_ptr = NULL ;
 
-    if (ncid == -1) {
+    errstat = lnc_open(filename.c_str(), NC_NOWRITE, &ncid);
+
+    if (errstat != NC_NOERR) {
         sprintf (Msgt,"nc_das server: could not open file %s", filename.c_str());
         ErrMsgT(Msgt); //local error message
         string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
-        throw Error(msg);
+        throw Error(errstat, msg); 
     }
 
     // how many variables? how many global attributes? 
-    if (lncinquire(ncid, (int *)0, &nvars, &ngatts, (int *)0) == -1) {
+    errstat = lnc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
+
+    if (errstat != NC_NOERR) {
         ErrMsgT("nc_das: Could not inquires about netcdf file");
 	string msg = (string)"Could not inquire about netcdf file: " 
 	+ path_to_filename(filename) + "."; 
-	throw Error(msg);
+	throw Error(errstat, msg);
     }
 
     // for each variable
     char varname[MAX_NC_NAME];
     for (int v = 0; v < nvars; ++v) {
-	if (lncvarinq(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, 
-		      &natts) == -1) {
+        errstat = lnc_inq_var(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, &natts);
+	if (errstat != NC_NOERR) {
             sprintf (Msgt, "nc_das server: could not get information for variable %d",v);
             ErrMsgT(Msgt); //local error message 
 	    string msg = (string)Msgt;
-	    throw Error(msg);
+	    throw Error(errstat, msg);
 	}
 
 	attr_table_ptr = das.get_table(varname);
 	if (!attr_table_ptr)
 	    attr_table_ptr = das.add_table(varname, new AttrTable);
 
-	if (!read_attributes(ncid, v, natts, attr_table_ptr, error)){
+	errstat = read_attributes(ncid, v, natts, attr_table_ptr, error);
+	if (errstat != NC_NOERR){
 	  string msg = (string) *error;
-	  throw Error(msg);
+	  throw Error(errstat, msg);
 	}
     }
 
     // global attributes
     if (ngatts > 0) {
 	attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
-	if (!read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr, error)){
+
+	errstat = read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr, error);
+	if (errstat != NC_NOERR){
 	  string msg = (string) *error;
-	  throw Error(msg);
+	  throw Error(errstat, msg);
 	}
     }
 
@@ -334,6 +345,12 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.6  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.5.4.1  2003/06/06 08:23:41  reza
+// Updated the servers to netCDF-3 and fixed error handling between client and server.
+//
 // Revision 1.5  2003/01/28 07:08:24  jimg
 // Merged with release-3-2-8.
 //

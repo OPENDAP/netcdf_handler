@@ -18,7 +18,7 @@ LIBPATH		= /libpath:$(INSTALLLIBDIR)
 LEXEFLAGS	= /nologo /subsystem:console $(LIBPATH)
 LLIBFLAGS	= -lib /nologo
 
-DODSLIBS	= libdap++.lib pthreadVCE.lib libcurl.lib librx.lib libz.lib libxdr.lib
+DODSLIBS	= libdap++.lib pthreadVCE.lib libxml2.lib libcurl.lib librx.lib libz.lib libxdr.lib
 SYSLIBS		= ws2_32.lib advapi32.lib
 LINKLIBS	= $(DODSLIBS) $(SYSLIBS)
 

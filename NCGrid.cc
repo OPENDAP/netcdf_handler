@@ -18,7 +18,7 @@
 #include "config_nc.h"
 #include "util.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.5 2003/01/28 07:08:24 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.6 2003/09/25 23:09:36 jimg Exp $"};
 
 #include "NCGrid.h"
 #include "debug.h"
@@ -58,12 +58,12 @@ NCGrid::read(const string &dataset)
     DBG(cerr << "In NCGrid, reading components for " << name() << endl);
 
     // read array elements
-    if (array_var()->send_p())
+    if (array_var()->send_p() || array_var()->is_in_selection())
 	array_var()->read(dataset);
 
     // read maps elements
     for (Pix p = first_map_var(); p; next_map_var(p))
-	if (map_var(p)->send_p())
+	if (map_var(p)->send_p() || map_var(p)->is_in_selection())
 	    map_var(p)->read(dataset);
 
     set_read_p(true);
@@ -72,6 +72,16 @@ NCGrid::read(const string &dataset)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.6  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.5.4.1  2003/09/06 23:33:14  jimg
+// I modified the read() method implementations so that they test the new
+// in_selection property. If it is true, the methods will read values
+// even if the send_p property is not true. This is so that variables used
+// in the selection part of the CE, or as function arguments, will be read.
+// See bug 657.
+//
 // Revision 1.5  2003/01/28 07:08:24  jimg
 // Merged with release-3-2-8.
 //

@@ -77,7 +77,7 @@
 #define not_used 
 #endif
 
-#define DODS_SERVER_VERSION "nc-dods/3.2.6"
+#define DODS_SERVER_VERSION "nc-dods/3.4"
 
 #endif /* _config_nc_h */
 

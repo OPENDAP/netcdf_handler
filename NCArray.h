@@ -16,8 +16,10 @@
 #ifndef _ncarray_h
 #define _ncarray_h 1
 
+#ifndef __POWERPC__
 #ifdef __GNUG__
 #pragma interface
+#endif
 #endif
 
 #include "Array.h"
@@ -31,12 +33,21 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
-    long format_constraint(long *cor, long *step, long *edg, 
+    long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, 
 			   bool *has_stride);
 };
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.4  2003/09/25 23:09:36  jimg
+ * Meerged from 3.4.1.
+ *
+ * Revision 1.3.4.2  2003/06/24 11:36:32  rmorris
+ * Removed #pragma interface directives for the OS X.
+ *
+ * Revision 1.3.4.1  2003/06/07 22:02:32  reza
+ * Fixed char vs. byte and long vs. nclong error checks.
+ *
  * Revision 1.3  2002/05/03 00:01:52  jimg
  * Merged with release-3-2-7.
  *

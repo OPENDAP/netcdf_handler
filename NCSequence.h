@@ -16,8 +16,10 @@
 #ifndef _ncsequence_h
 #define _ncsequence_h 1
 
+#ifndef __POWERPC__
 #ifdef __GNUG__
 #pragma interface
+#endif
 #endif
 
 #include "Sequence.h"
@@ -35,6 +37,12 @@ public:
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.3  2003/09/25 23:09:36  jimg
+ * Meerged from 3.4.1.
+ *
+ * Revision 1.2.8.1  2003/06/24 11:36:32  rmorris
+ * Removed #pragma interface directives for the OS X.
+ *
  * Revision 1.2  2000/10/06 01:22:02  jimg
  * Moved the CVS Log entries to the ends of files.
  * Modified the read() methods to match the new definition in the dap library.

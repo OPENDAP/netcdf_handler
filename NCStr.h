@@ -16,8 +16,10 @@
 #ifndef _ncstr_h
 #define _ncstr_h 1
 
+#ifndef __POWERPC__
 #ifdef __GNUG__
 #pragma interface
+#endif
 #endif
 
 #if 0
@@ -39,6 +41,12 @@ public:
 
 /* 
  * $Log: NCStr.h,v $
+ * Revision 1.4  2003/09/25 23:09:36  jimg
+ * Meerged from 3.4.1.
+ *
+ * Revision 1.3.4.1  2003/06/24 11:36:32  rmorris
+ * Removed #pragma interface directives for the OS X.
+ *
  * Revision 1.3  2002/05/03 00:01:52  jimg
  * Merged with release-3-2-7.
  *

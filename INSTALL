@@ -1,5 +1,5 @@
 
-$Id: INSTALL,v 1.5 2003/05/02 16:30:29 jimg Exp $
+$Id: INSTALL,v 1.6 2003/09/25 23:09:36 jimg Exp $
 
 Installing the NetCDF server software and client library for DODS.
 
@@ -47,7 +47,7 @@ BUILDING THE SOFTWARE
     To tell configure which URL to use to access, use the option
     --with-data-url=URL where URL is the full URL to the test dataset.
 
-3d) Set the dods.ini file so that the server will know how to handle
+3d) Set the dods.rc file so that the server will know how to handle
     different types of files you are serving.
 
     The nph-dods dispatch script receives a request and dispatches it to the
@@ -57,7 +57,7 @@ BUILDING THE SOFTWARE
     of the configuration file contains a pattern and the name of a "handler"
     to use for files that match that pattern.
 
-    Here is the default configuration file:
+    Here is the default configuration:
 
     .*\.(HDF|hdf)(.Z|.gz)*$ hdf
     .*\.(NC|nc|cdf|CDF)$ nc
@@ -79,7 +79,7 @@ BUILDING THE SOFTWARE
     dispatched to the mat-dods (or mat-dds or mat-das) programs for
     processing.
 
-    NOTE: The default configuration file is set up so that files without
+    NOTE: The default configuration is set up so that files without
     extensions are handled by the JGOFS service programs. If this is not
     right for your installation, delete the last line shown above.
 
@@ -124,13 +124,8 @@ BUILDING THE SOFTWARE
 
 REQUIREMENTS
 
-  o You need to have the DAP library, libwww, libtcl, libtk, libz and librx
+  o You need to have the DAP library, libcurl, libz and librx
     from the third-party packages installed before building this software.
-    The Tcl and Tk libraries are only needed by the ncdump client program,
-    and then only for the popup displays used by libdap++-gui.a. If you want
-    to build the netCDF software but cannot (for some reason) get libtcl
-    and/or libtk to build, you can edit the ncdump Makefile replacing
-    libdap++-gui.a with libdap++.a and removing libtcl and libtk.
 
 NOTES
 

@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.2 2000/10/06 01:22:03 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.3 2003/09/25 23:09:36 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -38,13 +38,25 @@ NCUrl::ptr_duplicate()
     return new NCUrl(*this);
 }
 
+#if 0
 bool
 NCUrl::read(const string &)
 {
   throw InternalErr(__FILE__, __LINE__, "Unimplemented read() method called!");
 }
+#endif
 
 // $Log: NCUrl.cc,v $
+// Revision 1.3  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.2.8.1  2003/09/06 23:33:14  jimg
+// I modified the read() method implementations so that they test the new
+// in_selection property. If it is true, the methods will read values
+// even if the send_p property is not true. This is so that variables used
+// in the selection part of the CE, or as function arguments, will be read.
+// See bug 657.
+//
 // Revision 1.2  2000/10/06 01:22:03  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.

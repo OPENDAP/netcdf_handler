@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.5 2002/05/03 00:01:52 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.6 2003/09/25 23:09:36 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -57,7 +57,7 @@ NCArray::~NCArray()
 // parse constraint expr. and make netcdf coordinate point location.
 // return number of elements to read. 
 long
-NCArray::format_constraint(long *cor, long *step, long *edg, bool *has_stride)
+NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_stride)
 {
     int start, stride, stop;
     int id = 0;
@@ -89,13 +89,13 @@ NCArray::read(const string &dataset)
 {
     int varid;                  /* variable Id */
     nc_type datatype;           /* variable data type */
-    long cor[MAX_NC_DIMS];      /* corner coordinates */
-    long edg[MAX_NC_DIMS];      /* edges of hypercube */
-    long step[MAX_NC_DIMS];     /* stride of hypercube */
+    size_t cor[MAX_NC_DIMS];      /* corner coordinates */
+    size_t edg[MAX_NC_DIMS];      /* edges of hypercube */
+    ptrdiff_t step[MAX_NC_DIMS];     /* stride of hypercube */
     int vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
     int num_dim;                /* number of dim. in variable */
     long nels;                  /* number of elements in buffer */
-    long vdim_siz;
+    size_t vdim_siz;
     // pointers to buffers for incoming data
     double *dblbuf;
     float *fltbuf;
@@ -118,19 +118,23 @@ NCArray::read(const string &dataset)
 
     DBG(cerr << "In NCArray, opening the dataset, reading " << name() << endl);
 
-    int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
+    int ncid, errstat;
 
-    if (ncid == -1)
-      throw Error(no_such_file, "Could not open the dataset's file.");
+    errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
-    varid = lncvarid(ncid, name().c_str());
+    if (errstat != NC_NOERR)
+      throw Error(errstat, "Could not open the dataset's file.");
+ 
+    errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+      throw Error(errstat, "Could not get variable ID.");
 
-    int status = lncvarinq(ncid, varid, (char *)0, &datatype, &num_dim,
-			   vdims, (int *)0);
-    if (status == -1)
-      throw Error(unknown_error, 
-		  string("Could not read information about the variable `") 
-		  + name() + string("'."));
+    errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdims,
+			(int *)0);
+    if (errstat != NC_NOERR)
+    throw Error(errstat, 
+		string("Could not read information about the variable `") 
+		+ name() + string("'."));
 
     nels = format_constraint(cor, step, edg, &has_stride);
 
@@ -140,7 +144,13 @@ NCArray::read(const string &dataset)
 	has_stride = false;
         for (id = 0; id < num_dim; id++) {
             cor[id] = 0;
-            (void) lncdiminq(ncid, vdims[id], (char *)0, &vdim_siz);
+
+            errstat = lnc_inq_dim(ncid, vdims[id], (char *)0, &vdim_siz);
+	    if (errstat != NC_NOERR)
+	      throw Error(errstat, 
+			  string("Could not inquire dimension information for variable `") 
+			  + name() + string("'."));
+
             edg[id] = vdim_siz;
             nels *= vdim_siz;      /* total number of values for variable */
         }
@@ -154,12 +164,12 @@ NCArray::read(const string &dataset)
         fltbuf = (float *) new char [(nels*lnctypelen(datatype))];
 
 	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *)fltbuf);
+	  errstat = lnc_get_vars_float(ncid, varid, cor, edg, step, fltbuf);
 	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *)fltbuf);
+	  errstat = lnc_get_vara_float(ncid, varid, cor, edg, fltbuf);
 
-	if (status == -1)
-	  throw Error(no_such_variable, 
+	if (errstat != NC_NOERR)
+	  throw Error(errstat, 
 		      string("Could not read the variable `") + name() 
 		      + string("'."));
 
@@ -181,13 +191,12 @@ NCArray::read(const string &dataset)
         dblbuf = (double *) new char [(nels*lnctypelen(datatype))];
 
 	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) dblbuf);
+	    errstat = lnc_get_vars_double(ncid, varid, cor, edg, step, dblbuf);
 	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *) dblbuf);
+	    errstat = lnc_get_vara_double(ncid, varid, cor, edg, dblbuf);
 
-	if (status == -1)
-	  throw Error(no_such_variable, 
-		      string("Could not read the variable `") + name() 
+	if (errstat != NC_NOERR)
+	  throw Error(errstat,string("Could not read the variable `") + name() 
 		      + string("'."));
 
 	flt64 = new dods_float64 [nels]; 
@@ -208,12 +217,12 @@ NCArray::read(const string &dataset)
         shtbuf = (short *)new char [(nels*lnctypelen(datatype))];
 
 	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) shtbuf);
+	    errstat = lnc_get_vars_short(ncid, varid, cor, edg, step, shtbuf);
 	else 
-	    status = lncvarget (ncid, varid, cor, edg, (void *) shtbuf);
+	    errstat = lnc_get_vara_short(ncid, varid, cor, edg, shtbuf);
 	
-	if (status == -1)
-	  throw Error(no_such_variable, 
+	if (errstat != NC_NOERR)
+	  throw Error(errstat, 
 		      string("Could not read the variable `") + name() 
 		      + string("'."));
 
@@ -232,16 +241,15 @@ NCArray::read(const string &dataset)
     else if ((datatype == NC_LONG) 
 	&& (lnctypelen(datatype) != sizeof(dods_int32))) {
 
-        lngbuf = (nclong *)new char [(nels*lnctypelen(datatype))];
+      lngbuf = (nclong *)new char [(nels*lnctypelen(datatype))];
 
 	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) lngbuf);
+	    errstat = lnc_get_vars(ncid, varid, cor, edg, step, lngbuf);
 	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *) lngbuf);
+	    errstat = lnc_get_vara(ncid, varid, cor, edg, lngbuf);
 
-	if (status == -1)
-	  throw Error(no_such_variable, 
-		      string("Could not read the variable `") + name() 
+	if (errstat != NC_NOERR)
+	  throw Error(errstat,string("Could not read the variable `") + name() 
 		      + string("'."));
 
 	intg32 = new dods_int32 [nels];
@@ -262,13 +270,12 @@ NCArray::read(const string &dataset)
 
 	// read the vlaues in from the local netCDF file
 	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) chrbuf);
+	    errstat = lnc_get_vars_text(ncid, varid, cor, edg, step,chrbuf);
 	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *) chrbuf);
+	    errstat = lnc_get_vara_text(ncid, varid, cor, edg, chrbuf);
 
-	if (status == -1)
-	  throw Error(no_such_variable, 
-		      string("Could not read the variable `") + name() 
+	if (errstat != NC_NOERR)
+	  throw Error(errstat,string("Could not read the variable `") + name() 
 		      + string("'."));
 
 	string *strg = new string [nels]; // array of strings
@@ -290,17 +297,16 @@ NCArray::read(const string &dataset)
 	delete [] chrbuf;
     }
     else {
-      //default (no type conversion needed)
+      //default (no type conversion needed and the type Byte)
       char *convbuf = new char [(nels*lnctypelen(datatype))];
 
       if( has_stride)
-	status = lncvargets (ncid, varid, cor, edg, step, (void *)convbuf);
+	errstat = lnc_get_vars(ncid, varid, cor, edg, step, (void *)convbuf);
       else
-	status = lncvarget (ncid, varid, cor, edg, (void *)convbuf);
-
-      if (status == -1)
-	  throw Error(no_such_variable, 
-		      string("Could not read the variable `") + name() 
+	errstat = lnc_get_vara(ncid, varid, cor, edg, (void *)convbuf);
+ 
+      if (errstat != NC_NOERR)
+	  throw Error(errstat,string("Could not read the variable `") + name() 
 		      + string("'."));
 
       set_read_p(true);  
@@ -309,13 +315,19 @@ NCArray::read(const string &dataset)
       delete [] convbuf;
     }
 
-    if (lncclose(ncid) == -1)
+    if (lnc_close(ncid) != NC_NOERR)
       throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
     return false;
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.6  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.5.4.1  2003/06/07 22:02:32  reza
+// Fixed char vs. byte and long vs. nclong error checks.
+//
 // Revision 1.5  2002/05/03 00:01:52  jimg
 // Merged with release-3-2-7.
 //

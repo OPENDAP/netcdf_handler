@@ -25,7 +25,7 @@
  
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.1 2003/05/13 22:03:34 jimg Exp $"};
+static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.2 2003/09/25 23:09:36 jimg Exp $"};
 
 #include <iostream>
 #include <string>
@@ -48,6 +48,8 @@ main(int argc, char *argv[])
 {
     try { 
 	DODSFilter df(argc, argv);
+	if (df.get_cgi_version() == "")
+	    df.set_cgi_version(cgi_version);
 
 	switch (df.get_response()) {
 	  case DODSFilter::DAS_Response: {
@@ -78,9 +80,25 @@ main(int argc, char *argv[])
 	    break;
 	  }
 
+	  case DODSFilter::DDX_Response: {
+	    DDS dds;
+	    DAS das;
+
+	    dds.filename(df.get_dataset_name());
+
+	    read_descriptors(dds, df.get_dataset_name()); 
+	    df.read_ancillary_dds(dds);
+
+	    read_variables(das, df.get_dataset_name());
+	    df.read_ancillary_das(das);
+
+	    dds.transfer_attributes(&das);
+
+	    df.send_ddx(dds, stdout);
+	    break;
+	  }
+
 	  case DODSFilter::Version_Response: {
-	    if (df.get_cgi_version() == "")
-		df.set_cgi_version(cgi_version);
 	    df.send_version_info();
 
 	    break;
@@ -100,6 +118,9 @@ main(int argc, char *argv[])
 }
 
 // $Log: nc_handler.cc,v $
+// Revision 1.2  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
 // Revision 1.1  2003/05/13 22:03:34  jimg
 // Created. This works with newly modified DODS_Dispatch.pm script and
 // DODSFilter class.

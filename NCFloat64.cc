@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.4 2000/10/06 01:22:02 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.5 2003/09/25 23:09:36 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -45,7 +45,7 @@ NCFloat64::read(const string &dataset)
 
     int varid;                  /* variable Id */
     nc_type datatype;           /* variable data type */
-    long cor[MAX_NC_DIMS];      /* corner coordinates */
+    size_t cor[MAX_NC_DIMS];      /* corner coordinates */
     int num_dim;                /* number of dim. in variable */
     dods_float64 flt64;
     int id;
@@ -53,16 +53,20 @@ NCFloat64::read(const string &dataset)
     if (read_p()) // nothing to do here
         return false;
 
-    int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
+    int ncid, errstat;
+    errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
-    if (ncid == -1)
-      throw Error(no_such_file, "Could not open the dataset's file.");
- 
-    varid = lncvarid(ncid, name().c_str());
+    if (errstat != NC_NOERR)
+      throw Error(errstat, "Could not open the dataset's file.");
 
-    if (lncvarinq(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
-		  (int *)0) == -1)
-      throw Error(unknown_error, 
+    errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+      throw Error(errstat, "Could not get variable ID.");
+
+    errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+			  (int *)0);
+    if (errstat != NC_NOERR)
+      throw Error(errstat, 
 		  string("Could not read information about the variable `") 
 		  + name() + string("'."));
 
@@ -72,8 +76,9 @@ NCFloat64::read(const string &dataset)
     if (datatype == NC_DOUBLE){
 	double dbl;
 
-	if (lncvarget1 (ncid, varid, cor, &dbl) == -1)
-	  throw Error(no_such_variable, 
+	errstat = lnc_get_var1_double(ncid, varid, cor, &dbl);
+	if (errstat != NC_NOERR)
+	  throw Error(errstat, 
 		      string("Could not read the variable `") + name() 
 		      + string("'."));
 
@@ -82,7 +87,7 @@ NCFloat64::read(const string &dataset)
 	flt64 = (dods_float64) dbl;
 	val2buf((void *) &flt64 );
 
-	if (lncclose(ncid) == -1)
+	if (lnc_close(ncid) != NC_NOERR)
 	  throw InternalErr(__FILE__, __LINE__, 
 			    "Could not close the dataset!");
     }
@@ -94,6 +99,12 @@ NCFloat64::read(const string &dataset)
 }
 
 // $Log: NCFloat64.cc,v $
+// Revision 1.5  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.4.8.1  2003/06/06 08:23:41  reza
+// Updated the servers to netCDF-3 and fixed error handling between client and server.
+//
 // Revision 1.4  2000/10/06 01:22:02  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.

@@ -7,7 +7,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.4 2000/10/06 01:22:02 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.5 2003/09/25 23:09:36 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -38,7 +38,7 @@ NCUInt32::read(const string &dataset)
 {
   int varid;                  /* variable Id */
   nc_type datatype;           /* variable data type */
-  long cor[MAX_NC_DIMS];      /* corner coordinates */
+  size_t cor[MAX_NC_DIMS];      /* corner coordinates */
   int num_dim;                /* number of dim. in variable */
   dods_uint32 uintg32;
   int id;
@@ -46,16 +46,20 @@ NCUInt32::read(const string &dataset)
   if (read_p()) // nothing to do
     return false;
 
-  int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
-
-  if (ncid == -1)
-    throw Error(no_such_file, "Could not open the dataset's file.");
+  int ncid, errstat;
  
-  varid = lncvarid(ncid, name().c_str());
+  errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+  if (errstat != NC_NOERR)
+    throw Error(errstat, "Could not open the dataset's file.");
+ 
+  errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+  if (errstat != NC_NOERR)
+    throw Error(errstat, "Could not get variable ID during read.");
 
-  if (lncvarinq(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0, 
-		(int *)0) == -1)
-    throw Error(unknown_error, 
+  errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0, 
+			(int *)0);
+  if (errstat != NC_NOERR)
+    throw Error(errstat, 
 		string("Could not read information about the variable `") 
 		+ name() + string("'."));
 
@@ -65,9 +69,10 @@ NCUInt32::read(const string &dataset)
   if (datatype == NC_LONG)
     {
       nclong lng;
-
-      if (lncvarget1 (ncid, varid, cor, &lng) == -1)
-	throw Error(no_such_variable, 
+      //      long lng;
+      errstat = lnc_get_var1(ncid, varid, cor, &lng);
+	if (errstat != NC_NOERR)
+	throw Error(errstat, 
 		    string("Could not read the variable `") + name() 
 		    + string("'."));
 
@@ -76,18 +81,27 @@ NCUInt32::read(const string &dataset)
       uintg32 = (dods_uint32) lng;
       val2buf( &uintg32 );
 
-      if (lncclose(ncid) == -1)
+      if (lnc_close(ncid) != NC_NOERR)
 	throw InternalErr(__FILE__, __LINE__, 
 			  "Could not close the dataset!");
     }
   else
     throw InternalErr(__FILE__, __LINE__,
-		      "Entered NCByte::read() with non-byte variable!");
+		      "Entered NCUInt32::read() with non-long variable!");
 
   return false;
 }
 
 // $Log: NCUInt32.cc,v $
+// Revision 1.5  2003/09/25 23:09:36  jimg
+// Meerged from 3.4.1.
+//
+// Revision 1.4.8.2  2003/06/07 22:02:32  reza
+// Fixed char vs. byte and long vs. nclong error checks.
+//
+// Revision 1.4.8.1  2003/06/06 08:23:41  reza
+// Updated the servers to netCDF-3 and fixed error handling between client and server.
+//
 // Revision 1.4  2000/10/06 01:22:02  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.
