@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.8 2004/10/22 21:51:34 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.9 2004/11/05 17:02:56 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -51,7 +51,7 @@ NCStr::extract_values(void *values, int outtype) throw(Error)
     // Read values from the Sequence and then use this instance to process
     // the values. 
     if (get_parent()->type() == dods_sequence_c) {
-        cerr << "Extract_values from a Sequence-->Str" << endl;
+        DBG(cerr << "Extract_values from a Sequence-->Str" << endl);
         ncq = dynamic_cast<NCSequence*>(get_parent());
         nels = ncq->number_of_rows();
     }
@@ -78,7 +78,7 @@ NCStr::extract_values(void *values, int outtype) throw(Error)
             *tbfr++ = *(cp->c_str() + cntr);
         }
         
-        cerr << "Value: " << *cp << endl;
+        DBG(cerr << "Value: " << *cp << endl);
         // Now get rid of the C++ string object.
         delete cp;
     }
@@ -150,6 +150,9 @@ NCStr::read(const string &dataset)
 }
 
 // $Log: NCStr.cc,v $
+// Revision 1.9  2004/11/05 17:02:56  jimg
+// Wrapped some instrumentation in DBG() macros.
+//
 // Revision 1.8  2004/10/22 21:51:34  jimg
 // More massive changes: Translation of Sequences now works so long as the
 // Sequence contains only atomic types.
