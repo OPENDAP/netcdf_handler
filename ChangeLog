@@ -1,3 +1,42 @@
+2003-01-27    <jimg@dcz.dods.org>
+
+	* merged with release-3-2-8.
+
+	* I removed tests for the Progress Indicator from the configure.in
+	and configure scripts. Also removed was the libdap++-gui.a library
+	and any use of it by the Makefile.in templates. Finally, the
+	src/packages/libtcl and libtk directories were removed (from the
+	cvs repository; they are in the src/packages/Attic directory).
+	This removes all vestiges of the tcl/tk based progress indicator
+	from our code.
+
+	* Fixed call to Connect::request_dds(...). The local method
+	request_Cdds(...) uses Connect's new version of request_dds(...).
+	This file was 'fixed' once to use my first try at a new interface
+	for Connect. I then fixed Connect some more and broke this code
+	again... I think the current interface supported by Connect is
+	much better.
+
+	* Memory free errors found by Purity (pwest).
+
+	* Memory leaks and a read error fixed (pwest).
+
+	* Fixes for the IteratorAdapter.
+
+	* Fixes to the Makefile.in.
+
+	* Changes for gcc 3.2 build (which now works).
+
+2002-12-16  Ethan Davis  <edavis@ucar.edu>
+
+	* configure.in, configure, Makefile.in, ncdump/Makefile.in,
+	nc_test/Makefile.in: removed all references to XTRALIBS, this
+	function now handled by libcurl (curl-config script).
+
+	* nc_test/Makefile.in (Repository): change use of 'm4' to '$M4'.
+
+	* configure.in, configure: added setting of M4 environment variable.
+
 2002-04-30    <jimg@dcz.dods.org>
 
 	* Merged with release-3-2-7.
