@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.32 2005/03/31 00:04:51 jimg Exp $
+# $Id: Makefile.in,v 1.33 2005/04/06 17:41:45 jimg Exp $
 
 @SET_MAKE@
 
@@ -7,7 +7,7 @@
 # DEFS gets the `-D' defines that describe what a particular system has
 # or doesn't have.
 
-PROG = libnc-dods.a libnc-server4.a nc_handler ncdump
+PROG = libnc-dods.a nc_handler ncdump
 DODS_ROOT = @dods_relative@
 
 INCS = -I./lnetcdf @INCS@
