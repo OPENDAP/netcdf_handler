@@ -1,3 +1,11 @@
+2004-03-25  James Gallagher  <jimg@comet.dods.org>
+
+	* Makefile.in: There was a persistent problem with the build
+	failing because make thought it had to build netcdf.h (when it
+	should be found in the DODS_ROOT/include dir). The fix was to
+	rebuild the dependencies *after* building and installing in
+	src/nc3-dods. 
+
 2004-03-09  James Gallagher  <jimg@comet.dods.org>
 
 	* This code no longer uses the Pix classes.
