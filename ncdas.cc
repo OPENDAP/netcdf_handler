@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.3 2000/10/06 01:22:03 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.4 2001/08/30 23:08:24 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -248,25 +248,28 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 // Returns: false if an error accessing the netcdf file was detected, true
 // otherwise. 
 
-bool
-read_variables(DAS &das, const string &filename, string *error)
+void
+read_variables(DAS &das, const string &filename) throw (Error) 
 {
+    ncopts = 0;
     int ncid = lncopen(filename.c_str(), NC_NOWRITE);
     int nvars, ngatts, natts;
+    string *error;
     AttrTable *attr_table_ptr;
 
     if (ncid == -1) {
         sprintf (Msgt,"nc_das server: could not open file %s", filename.c_str());
         ErrMsgT(Msgt); //local error message
-	*error = (string)"\"" + (string)Msgt + (string)"\"";
-	return false;
+        string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
+        throw Error(msg);
     }
 
     // how many variables? how many global attributes? 
     if (lncinquire(ncid, (int *)0, &nvars, &ngatts, (int *)0) == -1) {
         ErrMsgT("nc_das: Could not inquires about netcdf file");
-	*(error) =  (string)"\"nc_das server: could not inquires about netcdf file \"";
- 	return false;
+	string msg = (string)"Could not inquire about netcdf file: " 
+	+ path_to_filename(filename) + "."; 
+	throw Error(msg);
     }
 
     // for each variable
@@ -274,26 +277,29 @@ read_variables(DAS &das, const string &filename, string *error)
     for (int v = 0; v < nvars; ++v) {
 	if (lncvarinq(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, 
 		      &natts) == -1) {
-            sprintf (Msgt, "nc_das server: could not get information for variable %d",
-		     v);
+            sprintf (Msgt, "nc_das server: could not get information for variable %d",v);
             ErrMsgT(Msgt); //local error message 
-	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-  	    return false;
+	    string msg = (string)Msgt;
+	    throw Error(msg);
 	}
 
 	attr_table_ptr = das.get_table(varname);
 	if (!attr_table_ptr)
 	    attr_table_ptr = das.add_table(varname, new AttrTable);
 
-	if (!read_attributes(ncid, v, natts, attr_table_ptr, error))
-	    return false;
+	if (!read_attributes(ncid, v, natts, attr_table_ptr, error)){
+	  string msg = (string) *error;
+	  throw Error(msg);
+	}
     }
 
     // global attributes
     if (ngatts > 0) {
 	attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
-	if (!read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr, error))
-	    return false;
+	if (!read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr, error)){
+	  string msg = (string) *error;
+	  throw Error(msg);
+	}
     }
 
     // Add unlimited dimension name in DODS_EXTRA attribute table
@@ -310,7 +316,6 @@ read_variables(DAS &das, const string &filename, string *error)
 	delete [] print_rep;
     }
 
-    return true;
 }
 
 #ifdef TEST
@@ -329,6 +334,12 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.4  2001/08/30 23:08:24  jimg
+// Merged with 3.2.4
+//
+// Revision 1.3.4.1  2001/06/22 04:45:28  reza
+// Added/Fixed exception handling.
+//
 // Revision 1.3  2000/10/06 01:22:03  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.

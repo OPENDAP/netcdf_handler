@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.5 2000/10/30 17:28:12 jimg Exp $
+# $Id: Makefile.in,v 1.6 2001/08/30 23:08:23 jimg Exp $
 
 @SET_MAKE@
 
@@ -8,10 +8,9 @@
 # or doesn't have.
 
 PROG = libnc-dods.a nc_das nc_dds nc_dods
-DODS_ROOT = ../..
+DODS_ROOT = @dods_relative@
 
-WWW_ROOT = @WWW_ROOT@
-INCS = -I$(DODS_ROOT)/include -I./lnetcdf @INCS@
+INCS = -I./lnetcdf @INCS@
 DEFS = -DLOCAL @DEFS@
 CPPFLAGS = @CPPFLAGS@ $(DEFS) $(INCS)
 CFLAGS = @CFLAGS@
@@ -22,12 +21,11 @@ TAGS_FLAGS = -i ../dap/TAGS
 # Make sure that the core software libraries just built can be found without
 # first running make install, but that if `make install' and `make clean' has
 # been run those libraries will be found in the `lib' directory.
-LDFLAGS = -L. -L./lnetcdf -L$(DODS_ROOT)/lib @LDFLAGS@
+LDFLAGS = -L. -L./lnetcdf @LDFLAGS@
 LFLAGS=-8
 YFLAGS=-d
 NCDODS = -lnc-dods -ldap++ -lnc-dods -ldap++
 LIBS = @LIBS@
-# GUILIBS = @GUILIBS@
 XTRALIBS = @XTRALIBS@ 
 
 # Set the instalation directories; prefix can be set on the command line
@@ -35,14 +33,14 @@ XTRALIBS = @XTRALIBS@
 
 prefix = @prefix@
 exec_prefix = $(prefix)
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
-includedir = $(prefix)/include
+bindir = $(exec_prefix)bin
+libdir = $(exec_prefix)lib
+includedir = $(prefix)include
 manext = 1
-mandir = $(prefix)/man/man$(manext)
+mandir = $(prefix)man/man$(manext)
 
-src = $(DODS_ROOT)/src
-etcdir = $(DODS_ROOT)/etc
+src = $(DODS_ROOT)src
+etcdir = $(DODS_ROOT)etc
 
 INSTALLMAN = man
 
@@ -102,6 +100,12 @@ NCHDRS = lnetcdf.h
 NCOBJS = lattr.o ldim.o lerror.o llibvers.o lnc.o lncio.o \
 	 lncx.o lputget.o lstring.o lv1hpg.o lv2i.o lvar.o 
 
+FOBJS = fortran/fort-attio.o fortran/fort-genvar.o fortran/fort-varaio.o \
+fortran/fort-control.o	fortran/fort-lib.o	 fortran/fort-vario.o \
+fortran/fort-dim.o	fortran/fort-misc.o	 fortran/fort-varmio.o \
+fortran/fort-genatt.o	fortran/fort-v2compat.o  fortran/fort-varsio.o \
+fortran/fort-geninq.o	fortran/fort-var1io.o
+
 # Matlab client can be suppressed by a switch to configure.
 all: libnc-dods.a nc_das nc_dds nc_dods ncdump
 
@@ -114,8 +118,9 @@ nc_dds: $(DDSOBJS) libnc-dods.a
 nc_dods: $(SRVOBJS) libnc-dods.a
 	$(CXX) $(LDFLAGS) -o nc_dods $(SRVOBJS) $(NCDODS) $(LIBS) $(XTRALIBS)
 
-libnc-dods.a: $(LIBOBJS) $(NCOBJS) fortran
-	$(AR) -cru $@ $(LIBOBJS) $(NCOBJS)
+libnc-dods.a: $(LIBOBJS) $(NCOBJS) 
+	-(cd fortran && $(MAKE) $(MFLAGS) all)
+	$(AR) -cru $@ $(LIBOBJS) $(NCOBJS) 
 	$(RANLIB) $@
 
 .PHONY: fortran
@@ -129,10 +134,15 @@ ncdump:
 # Standard targets with some customization for das-test and dds-test
 
 configure: configure.in
-	autoconf --localdir=$(DODS_ROOT)/etc
+	autoconf --localdir=$(DODS_ROOT)etc
 
 Makefile: Makefile.in configure
-	./configure
+	if [ -x ./config.status ]; \
+	then \
+	    ${SHELL} ./config.status; \
+	else \
+	    ./configure; \
+	fi
 
 check:
 	-(cd nc_test && $(MAKE) $(MFLAGS) check)
@@ -157,10 +167,10 @@ install: libnc-dods.a nc_das nc_dds nc_dods
 	$(INSTALL_DATA) libnc-dods.a $(libdir)
 	$(RANLIB) $(libdir)/libnc-dods.a
 	$(INSTALL_DATA) lnetcdf/netcdf.h $(includedir)
+	$(INSTALL_DATA) fortran/netcdf.inc $(includedir)
 	$(INSTALL_PROGRAM) -s nc_das $(etcdir)
 	$(INSTALL_PROGRAM) -s nc_dds $(etcdir)
 	$(INSTALL_PROGRAM) -s nc_dods $(etcdir)
-	$(INSTALL_PROGRAM) nph-nc $(etcdir)
 	-(cd ncdump && $(MAKE) $(MFLAGS) install)
 
 # Do not intall in the fortran jackets directory - the jackets are added to
@@ -177,7 +187,7 @@ clean:
 distclean:
 	-rm -f *.o *.sum *.log *~ core
 	-rm -f $(PROG) libnc-dods.a
-	-rm -f config.status config.log config.cache nph-nc
+	-rm -f config.status config.log config.cache
 	-rm -f site.exp config_nc.h lnetcdf/ncconfig.h
 	-(cd ncdump && $(MAKE) $(MFLAGS) distclean)
 	-(cd fortran && $(MAKE) $(MFLAGS) distclean)
@@ -194,8 +204,8 @@ depend:
 tar:
 	-rm -f config.cache config.log config.status
 	cd $(DODS_ROOT)/.. && \
-	$(TAR) --exclude '*/old' --exclude '*/.#*' --exclude '*/CVS' \
-	    --exclude '*/.snprj*' --exclude '*/.flc*' \
+	$(TAR) --exclude 'old' --exclude '.#*' --exclude 'CVS' \
+	    --exclude '.snprj*' --exclude '.flc*' \
 	    --gzip --create --dereference --file DODS-$(dir).tar.gz \
 	    DODS/src/$(dir)
 
@@ -203,14 +213,14 @@ tar:
 #
 .PHONY: binary-tar
 binary-tar:
-	cd $(DODS_ROOT)/.. && \
+	cd $(DODS_ROOT).. && \
 	$(TAR) --gzip --create --dereference \
             --file DODS-nc-library-$(version)-$(host).tar.gz \
             DODS/lib/libnc-dods.a \
-            DODS/include/netcdf.h && \
+            DODS/include/netcdf.h \
+            DODS/include/netcdf.inc && \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-server-$(version)-$(host).tar.gz \
-            DODS/etc/nph-nc \
             DODS/etc/nc_das \
             DODS/etc/nc_dds \
             DODS/etc/nc_dods && \
@@ -226,14 +236,14 @@ update-version: check-version
 	if [ ! -d ../$(dir) ]; then \
 	    mv ../$(basedir)* ../$(dir);\
 	fi
-	touch $(DODS_ROOT)/VERSION; cat $(DODS_ROOT)/VERSION | \
+	touch $(DODS_ROOT)VERSION; cat $(DODS_ROOT)VERSION | \
 	  $(AWK) ' \
 	    BEGIN { found = 0 } \
 	    { if ( $$0 ~ /^$(COMPONENT_NAME):/) \
 	        { print "$(COMPONENT_NAME): $(version)"; found = 1 } \
 	      else { print $$0 } } \
 	    END { if ( ! found) { print "$(COMPONENT_NAME): $(version)" } \
-	        }' > $(DODS_ROOT)/VERSION
+	        }' > $(DODS_ROOT)VERSION
 
 # Compare the version encoded in this Makefile (set by configure) with the
 # version in version.h. The version make variable is set up near the top of
@@ -263,10 +273,10 @@ tags:
 
 # DO NOT DELETE; depend depends on this line.
 nc_das.o: nc_das.cc config_nc.h ../../include/DAS.h \
- ../../include/AttrTable.h ../../include/cgi_util.h \
- ../../include/Connect.h ../../include/DDS.h ../../include/BaseType.h \
- ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
- ../../include/debug.h ../../include/Error.h ../../include/util.h \
+ ../../include/AttrTable.h ../../include/Error.h \
+ ../../include/cgi_util.h ../../include/Connect.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/util.h \
  ../../include/Byte.h ../../include/dods-datatypes.h \
  ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
  ../../include/UInt32.h ../../include/Float32.h \
@@ -277,9 +287,9 @@ nc_das.o: nc_das.cc config_nc.h ../../include/DAS.h \
  ../../include/DODSFilter.h
 ncdas.o: ncdas.cc config_nc.h ../../include/cgi_util.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
- ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/Error.h ../../include/util.h ../../include/Byte.h \
+ ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
+ ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+ ../../include/debug.h ../../include/util.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/Int16.h \
  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
@@ -301,9 +311,9 @@ nc_dds.o: nc_dds.cc config_nc.h ../../include/DDS.h \
  ../../include/DODSFilter.h
 ncdds.o: ncdds.cc config_nc.h Dnetcdf.h lnetcdf.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
- ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/Error.h ../../include/util.h ../../include/Byte.h \
+ ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
+ ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+ ../../include/debug.h ../../include/util.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/Int16.h \
  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
@@ -315,9 +325,9 @@ ncdds.o: ncdds.cc config_nc.h Dnetcdf.h lnetcdf.h \
  ../../include/cgi_util.h
 nc_dods.o: nc_dods.cc config_nc.h ../../include/cgi_util.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
- ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/Error.h ../../include/util.h ../../include/Byte.h \
+ ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
+ ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+ ../../include/debug.h ../../include/util.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/Int16.h \
  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
@@ -326,9 +336,9 @@ nc_dods.o: nc_dods.cc config_nc.h ../../include/cgi_util.h \
  ../../include/Sequence.h ../../include/Grid.h \
  ../../include/DODSFilter.h
 NCConnect.o: NCConnect.cc config_nc.h ../../include/Connect.h \
- ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
- ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/DAS.h ../../include/AttrTable.h ../../include/Error.h \
+ ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
  ../../include/util.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/Int16.h \
  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
@@ -337,9 +347,9 @@ NCConnect.o: NCConnect.cc config_nc.h ../../include/Connect.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
  ../../include/Sequence.h ../../include/Grid.h NCConnect.h
 inst.o: inst.cc config_nc.h ../../include/Connect.h \
- ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
- ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/DAS.h ../../include/AttrTable.h ../../include/Error.h \
+ ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
  ../../include/util.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/Int16.h \
  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \

@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdds.cc,v 1.2 2000/10/06 01:22:03 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdds.cc,v 1.3 2001/08/30 23:08:24 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -240,33 +240,39 @@ for dimension %d in variable %d (ncdds)",d2,v1);
 // Returns: false if an error accessing the netcdf file was detected, true
 // otherwise. 
 
-bool
-read_descriptors(DDS &dds_table, const string &filename, string *error)
+void
+read_descriptors(DDS &dds_table, const string &filename) throw (Error) 
+
 {
-    int ncid = lncopen(filename.c_str(), NC_NOWRITE);
-    int nvars; 
+  ncopts = 0;
+  int ncid = lncopen(filename.c_str(), NC_NOWRITE);
+  int nvars; 
   
     if (ncid == -1) {
-	sprintf (Msgt,"netCDF server: Could not open file %s ", filename.c_str());
-	ErrMsgT(Msgt); //local error messag
-	*error = (string)"\"" + (string)Msgt + (string)"\"";
-	return false;
-    }
+     //local error
+      sprintf (Msgt,"netCDF server: Could not open file %s ", filename.c_str());
+      ErrMsgT(Msgt); //local error messag
+      string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
+      throw Error(msg);
+     
+     }
   
     // how many variables? 
     if (lncinquire(ncid, (int *)0, &nvars, (int *)0, (int *)0) == -1) {
-	ErrMsgT("Could not inquire about netcdf file (ncdds)");
-	*(error) = (string)"\"netCDF server: Could not inquire about netcdf file \"";
-	return false;
+      ErrMsgT("Could not inquire about netcdf file (ncdds)");
+      string msg = (string)"Could not inquire about netcdf file: " 
+	+ path_to_filename(filename) + "."; 
+      throw Error(msg);
     }
     // dataset name
     dds_table.set_dataset_name(name_path(filename));
   
     // read variables class
-    if (!read_class(dds_table,ncid,nvars,error))
-	return false;
-  
-    return true;
+    string *error;
+    if (!read_class(dds_table,ncid,nvars,error)){      
+      string msg = (string) *error;
+      throw Error(msg);
+    }
 }
 
 #ifdef TEST
@@ -275,16 +281,31 @@ int
 main(int argc, char *argv[])
 {
   DDS dds;
-  
-  if(!read_descriptors(dds, argv[1]))
+  /*  
+    if(!read_descriptors(dds, argv[1]))
     abort();
-  
-  dds.print();
+  */
+  try {
+      read_descriptors(dds, (string)argv[1]);
+      dds.print();
+    }
+    catch (Error &e) {
+      e.display_message();
+      return 1;
+    }
+
+    //  dds.print();
 }
 
 #endif
 
 // $Log: ncdds.cc,v $
+// Revision 1.3  2001/08/30 23:08:24  jimg
+// Merged with 3.2.4
+//
+// Revision 1.2.4.1  2001/06/22 04:45:28  reza
+// Added/Fixed exception handling.
+//
 // Revision 1.2  2000/10/06 01:22:03  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.

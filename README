@@ -1,5 +1,9 @@
 
-$Id: README,v 1.1 1999/07/28 00:22:45 jimg Exp $
+$Id: README,v 1.2 2001/08/30 23:08:24 jimg Exp $
+
+Release 3.2.3 (release candidate 1) contains changes that address a number of
+problems. However, this version of the netCDF client and server software does
+not currently pass many of its testsuite. Use with caution! 6/19/2001 jhrg
 
 	      			  nc-dods
 				Version 2.0
