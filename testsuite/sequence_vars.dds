@@ -1,0 +1,7 @@
+# This Sequence data set is used for testing.
+Dataset {
+	Sequence {
+		Float32 f3;
+		Int16 i4;
+	} s;
+} d1;

@@ -1,0 +1,7 @@
+# Used for testing
+Dataset {
+	Structure {
+		Int32 i5;
+		String s6;
+	} t;
+} d1;

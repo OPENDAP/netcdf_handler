@@ -1,0 +1,8 @@
+# Used for testing
+Dataset {
+	Byte b8[256];
+	Structure {
+		Float64 lat;
+		Float64 lon;
+	} points[1024];
+} d1;

@@ -1,0 +1,3 @@
+Dataset {
+    Byte val[lat = 512][lon = 512];
+} TestPat.nc;
