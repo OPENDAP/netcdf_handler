@@ -1,4 +1,9 @@
 
+client.cc,50
+test_open(24,468
+test_close(34,607
+main(41,685
+
 Dattr.cc,926
 static char rcsid[15,330
 static char rcsid[] not_used 15,330
@@ -53,44 +58,44 @@ nc_rename_dim(225,4946
 ncdimrename(243,5318
 
 Dnc.cc,860
-static char rcsid[22,777
-static char rcsid[] not_used 22,777
-extern char *cdf_routine_name;41,1215
-extern int ncopts;42,1246
-extern int ncerr;43,1265
-char *cdf_routine_name;45,1289
-int ncopts 46,1313
-int ncerr;47,1338
-int rcode;50,1357
-Connections<NCConnect *> *conns 52,1369
-nc__create(56,1412
-nc_create(86,2011
-nccreate(93,2139
-nc__open(123,2692
-nc_open(233,5174
-ncopen(241,5301
-nc_close(396,8914
-ncclose(427,9430
-nc_inq(457,9927
-nc_inq_ndims(487,10572
-nc_inq_nvars(508,10968
-nc_inq_natts(529,11362
-nc_inq_unlimdim(550,11757
-ncinquire(571,12167
-nc_sync(604,12866
-ncsync(622,13178
-nc_abort(643,13572
-ncabort(661,13909
-ncnobuf(686,14310
-nc_redef(701,14534
-ncredef(719,14850
-nc__enddef(739,15248
-nc_enddef(760,15718
-ncendef(778,16064
-nc_set_fill(798,16398
-ncsetfill(819,16860
-nc_inq_libvers(840,17298
-nc_strerror(849,17429
+static char rcsid[21,773
+static char rcsid[] not_used 21,773
+extern char *cdf_routine_name;40,1218
+extern int ncopts;41,1249
+extern int ncerr;42,1268
+char *cdf_routine_name;44,1292
+int ncopts 45,1316
+int ncerr;46,1341
+int rcode;49,1360
+Connections<NCConnect *> *conns 51,1372
+nc__create(55,1415
+nc_create(85,2014
+nccreate(92,2142
+nc__open(122,2695
+nc_open(230,5087
+ncopen(236,5207
+nc_close(388,8613
+ncclose(419,9129
+nc_inq(449,9626
+nc_inq_ndims(479,10271
+nc_inq_nvars(500,10667
+nc_inq_natts(521,11061
+nc_inq_unlimdim(542,11456
+ncinquire(563,11866
+nc_sync(596,12565
+ncsync(614,12877
+nc_abort(635,13271
+ncabort(653,13608
+ncnobuf(678,14009
+nc_redef(693,14233
+ncredef(711,14549
+nc__enddef(731,14947
+nc_enddef(752,15417
+ncendef(770,15763
+nc_set_fill(790,16097
+ncsetfill(811,16559
+nc_inq_libvers(832,16997
+nc_strerror(843,17156
 
 Dncx.cc,308
 #define  SHORT_MAX 13,245
@@ -106,7 +111,7 @@ putn_into_float(299,6524
 putn_into_double(351,7650
 putn_into_text(397,8608
 
-Dputget.cc,3276
+Dputget.cc,3275
 static char rcsid[18,416
 static char rcsid[] not_used 18,416
 #define        Tvoid 28,620
@@ -122,110 +127,110 @@ Dtypelen(42,917
 type_conv(67,1602
 HyperGet(138,3251
 DODvario(164,4101
-GenRead(506,12572
-ncvarputg(649,16802
-ncvarputs(670,17367
-nc_get_rec(690,17907
-ncrecget(709,18365
-nc_inq_rec(728,18814
-ncrecinq(747,19306
-ncvarput1(786,20190
-ncvarput(805,20668
-nc_put_rec(824,21167
-ncrecput(841,21525
-nctypelen(859,21976
-nc_put_var1_text(865,22038
-nc_put_var1_uchar(880,22418
-nc_put_var1_schar(895,22809
-nc_put_var1_short(911,23199
-nc_put_var1_int(926,23579
-nc_put_var1_long(941,23956
-nc_put_var1_float(956,24337
-nc_put_var1_double(971,24721
-nc_put_var1(986,25108
-nc_put_vara_text(1000,25471
-nc_put_vara_uchar(1015,25880
-nc_put_vara_schar(1030,26299
-nc_put_vara_short(1045,26716
-nc_put_vara_int(1060,27127
-nc_put_vara_long(1075,27532
-nc_put_vara_float(1091,27942
-nc_put_vara_double(1106,28353
-nc_put_vara(1121,28768
-nc_put_var_text(1136,29166
-nc_put_var_uchar(1150,29508
-nc_put_var_schar(1164,29861
-nc_put_var_short(1178,30212
-nc_put_var_int(1192,30557
-nc_put_var_long(1206,30896
-nc_put_var_float(1220,31238
-nc_put_var_double(1234,31583
-nc_put_varm_text(1249,31932
-nc_put_varm_uchar(1267,32424
-nc_put_varm_schar(1285,32927
-nc_put_varm_short(1303,33429
-nc_put_varm_int(1321,33925
-nc_put_varm_long(1339,34414
-nc_put_varm_float(1357,34906
-nc_put_varm_double(1376,35402
-nc_put_varm 1395,35901
-nc_put_vars_text 1416,36414
-nc_put_vars_uchar 1429,36704
-nc_put_vars_schar 1442,37005
-nc_put_vars_short 1455,37304
-nc_put_vars_int 1467,37596
-nc_put_vars_long 1480,37883
-nc_put_vars_float 1493,38173
-nc_put_vars_double 1506,38466
-nc_put_vars 1518,38761
-nc_get_var1_text(1532,39042
-nc_get_var1_uchar(1558,39640
-nc_get_var1_schar(1584,40248
-nc_get_var1_short(1610,40855
-nc_get_var1_int(1636,41456
-nc_get_var1_long(1662,42049
-nc_get_var1_float(1688,42646
-nc_get_var1_double(1714,43246
-nc_get_var1(1740,43850
-nc_get_vara_text(1767,44436
-nc_get_vara_uchar(1783,44898
-nc_get_vara_schar(1799,45370
-nc_get_vara_short(1815,45840
-nc_get_vara_int(1831,46304
-nc_get_vara_long(1847,46760
-nc_get_vara_float(1863,47220
-nc_get_vara_double(1880,47686
-nc_get_vara(1896,48154
-nc_get_var_text(1913,48605
-nc_get_var_uchar(1928,48981
-nc_get_var_schar(1942,49368
-nc_get_var_short(1956,49753
-nc_get_var_int(1970,50132
-nc_get_var_long(1984,50503
-nc_get_var_float(1998,50878
-nc_get_var_double(2012,51257
-nc_get_varm_text(2027,51643
-nc_get_varm_uchar(2047,52205
-nc_get_varm_schar(2067,52779
-nc_get_varm_short(2087,53352
-nc_get_varm_int(2107,53919
-nc_get_varm_long(2127,54478
-nc_get_varm_float(2147,55041
-nc_get_varm_double(2167,55607
-nc_get_varm 2187,56177
-nc_get_vars_text 2210,56759
-nc_get_vars_uchar 2224,57044
-nc_get_vars_schar 2237,57339
-nc_get_vars_short 2250,57632
-nc_get_vars_int 2262,57918
-nc_get_vars_long 2275,58199
-nc_get_vars_float 2288,58483
-nc_get_vars_double 2301,58770
-nc_get_vars 2315,59061
-ncvarget1(2329,59364
-ncvarget(2351,59873
-ncvargets(2378,60509
-ncvargetg(2413,61431
+GenRead(508,12642
+ncvarputg(643,16648
+ncvarputs(664,17213
+nc_get_rec(684,17753
+ncrecget(703,18211
+nc_inq_rec(722,18660
+ncrecinq(741,19152
+ncvarput1(780,20036
+ncvarput(799,20514
+nc_put_rec(818,21013
+ncrecput(835,21371
+nctypelen(853,21822
+nc_put_var1_text(859,21884
+nc_put_var1_uchar(874,22264
+nc_put_var1_schar(889,22655
+nc_put_var1_short(905,23045
+nc_put_var1_int(920,23425
+nc_put_var1_long(935,23802
+nc_put_var1_float(950,24183
+nc_put_var1_double(965,24567
+nc_put_var1(980,24954
+nc_put_vara_text(994,25317
+nc_put_vara_uchar(1009,25726
+nc_put_vara_schar(1024,26145
+nc_put_vara_short(1039,26562
+nc_put_vara_int(1054,26973
+nc_put_vara_long(1069,27378
+nc_put_vara_float(1085,27788
+nc_put_vara_double(1100,28199
+nc_put_vara(1115,28614
+nc_put_var_text(1130,29012
+nc_put_var_uchar(1144,29354
+nc_put_var_schar(1158,29707
+nc_put_var_short(1172,30058
+nc_put_var_int(1186,30403
+nc_put_var_long(1200,30742
+nc_put_var_float(1214,31084
+nc_put_var_double(1228,31429
+nc_put_varm_text(1243,31778
+nc_put_varm_uchar(1261,32270
+nc_put_varm_schar(1279,32773
+nc_put_varm_short(1297,33275
+nc_put_varm_int(1315,33771
+nc_put_varm_long(1333,34260
+nc_put_varm_float(1351,34752
+nc_put_varm_double(1370,35248
+nc_put_varm 1389,35747
+nc_put_vars_text 1410,36260
+nc_put_vars_uchar 1423,36550
+nc_put_vars_schar 1436,36851
+nc_put_vars_short 1449,37150
+nc_put_vars_int 1461,37442
+nc_put_vars_long 1474,37729
+nc_put_vars_float 1487,38019
+nc_put_vars_double 1500,38312
+nc_put_vars 1512,38607
+nc_get_var1_text(1526,38888
+nc_get_var1_uchar(1552,39486
+nc_get_var1_schar(1578,40094
+nc_get_var1_short(1604,40701
+nc_get_var1_int(1630,41302
+nc_get_var1_long(1656,41895
+nc_get_var1_float(1682,42492
+nc_get_var1_double(1708,43092
+nc_get_var1(1734,43696
+nc_get_vara_text(1761,44282
+nc_get_vara_uchar(1777,44744
+nc_get_vara_schar(1793,45216
+nc_get_vara_short(1809,45686
+nc_get_vara_int(1825,46150
+nc_get_vara_long(1841,46606
+nc_get_vara_float(1857,47066
+nc_get_vara_double(1874,47532
+nc_get_vara(1890,48000
+nc_get_var_text(1907,48451
+nc_get_var_uchar(1922,48827
+nc_get_var_schar(1936,49214
+nc_get_var_short(1950,49599
+nc_get_var_int(1964,49978
+nc_get_var_long(1978,50349
+nc_get_var_float(1992,50724
+nc_get_var_double(2006,51103
+nc_get_varm_text(2021,51489
+nc_get_varm_uchar(2041,52051
+nc_get_varm_schar(2061,52625
+nc_get_varm_short(2081,53198
+nc_get_varm_int(2101,53765
+nc_get_varm_long(2121,54324
+nc_get_varm_float(2141,54887
+nc_get_varm_double(2161,55453
+nc_get_varm 2181,56023
+nc_get_vars_text 2204,56605
+nc_get_vars_uchar 2218,56890
+nc_get_vars_schar 2231,57185
+nc_get_vars_short 2244,57478
+nc_get_vars_int 2256,57764
+nc_get_vars_long 2269,58045
+nc_get_vars_float 2282,58329
+nc_get_vars_double 2295,58616
+nc_get_vars 2309,58907
+ncvarget1(2323,59210
+ncvarget(2345,59719
+ncvargets(2372,60355
+ncvargetg(2407,61277
 
 Dvar.cc,435
 static char rcsid[14,274
@@ -248,15 +253,19 @@ ncvarinq(480,10734
 ncvarcopy(522,11848
 nc_copy_var(648,15092
 
+inst.cc,63
+static char rcsid[17,430
+static char rcsid[] not_used 17,430
+
 NCArray.cc,221
 static char rcsid[18,377
 static char rcsid[] not_used 18,377
-NewArray(37,710
-NCArray::ptr_duplicate(43,795
-NCArray::NCArray(48,856
-NCArray::~NCArray(52,922
-NCArray::format_constraint(59,1060
-NCArray::read(87,1747
+NewArray(38,734
+NCArray::ptr_duplicate(44,819
+NCArray::NCArray(49,880
+NCArray::~NCArray(53,946
+NCArray::format_constraint(60,1084
+NCArray::read(88,1771
 
 NCByte.cc,157
 static char rcsid[16,360
@@ -266,26 +275,63 @@ NCByte::NCByte(47,1395
 NCByte::ptr_duplicate(52,1453
 NCByte::read(58,1517
 
-NCConnect.cc,578
+NCConnect.cc,627
 static char rcsid[14,297
 static char rcsid[] not_used 14,297
-NCConnect::init_list(28,526
-NCConnect::NCConnect(37,618
-NCConnect::~NCConnect(52,919
-NCConnect::ncid(59,1065
-NCConnect::ndims(68,1207
-NCConnect::nvars(78,1358
-NCConnect::recdim(90,1567
-NCConnect::dim_size(102,1780
-NCConnect::dim_name(114,2031
-NCConnect::das_loc(126,2259
-NCConnect::set_recdim(138,2509
-NCConnect::parse_das_loc(160,3039
-NCConnect::parse_grid_dims(200,4448
-NCConnect::parse_array_dims(246,5653
-NCConnect::parse_dims(305,6978
-NCConnect::request_Cdds(324,7319
-NCConnect::Cdds(341,7620
+using std::cerr;27,541
+using std::endl;28,558
+NCConnect::init_list(34,607
+NCConnect::NCConnect(43,699
+NCConnect::~NCConnect(58,1000
+NCConnect::ncid(65,1146
+NCConnect::ndims(74,1288
+NCConnect::nvars(84,1439
+NCConnect::recdim(96,1648
+NCConnect::dim_size(108,1861
+NCConnect::dim_name(120,2112
+NCConnect::das_loc(132,2340
+NCConnect::set_recdim(144,2590
+NCConnect::parse_das_loc(166,3120
+NCConnect::parse_grid_dims(206,4529
+NCConnect::parse_array_dims(252,5734
+NCConnect::parse_dims(311,7059
+NCConnect::request_Cdds(330,7400
+NCConnect::Cdds(381,8350
+
+nc_das.cc,70
+static char not_used rcsid[17,572
+extern void read_variables(26,766
+
+ncdas.cc,370
+static char not_used rcsid[22,745
+static const char STRING[39,1092
+static const char BYTE[40,1129
+static const char INT32[41,1162
+static const char INT16[42,1197
+static const char FLOAT64[43,1232
+static const char FLOAT32[44,1271
+static char Msgt[48,1331
+print_attr(59,1668
+print_type(149,3651
+read_attributes(185,4326
+read_variables(252,6422
+main(324,8656
+
+nc_dds.cc,72
+static char not_used rcsid[18,560
+extern void read_descriptors(27,754
+
+ncdds.cc,139
+static char not_used rcsid[20,553
+static char Msgt[47,1074
+Get_bt(54,1204
+read_class(88,1909
+read_descriptors(244,6484
+main(281,7491
+
+nc_dods.cc,72
+static char not_used rcsid[15,442
+extern void read_descriptors(26,658
 
 NCFloat32.cc,168
 static char rcsid[18,377
@@ -306,11 +352,11 @@ NCFloat64::read(43,822
 NCGrid.cc,177
 static char rcsid[20,407
 static char rcsid[] not_used 20,407
-NewGrid(25,523
-NCGrid::ptr_duplicate(33,604
-NCGrid::NCGrid(40,674
-NCGrid::~NCGrid(44,721
-NCGrid::read(49,749
+NewGrid(26,546
+NCGrid::ptr_duplicate(34,627
+NCGrid::NCGrid(41,697
+NCGrid::~NCGrid(45,744
+NCGrid::read(50,772
 
 NCInt16.cc,158
 static char rcsid[16,360
@@ -387,58 +433,32 @@ NCUrl::NCUrl(31,599
 NCUrl::ptr_duplicate(36,654
 NCUrl::read(42,716
 
-client.cc,50
-test_open(24,468
-test_close(34,607
-main(41,685
-
-inst.cc,63
-static char rcsid[17,430
-static char rcsid[] not_used 17,430
-
-nc_das.cc,48
-static char not_used rcsid[18,573
-main(30,846
-
-nc_dds.cc,48
-static char not_used rcsid[18,560
-main(30,835
-
-nc_dods.cc,48
-static char not_used rcsid[16,443
-main(30,740
-
-ncdas.cc,370
-static char not_used rcsid[22,745
-static const char STRING[39,1088
-static const char BYTE[40,1125
-static const char INT32[41,1158
-static const char INT16[42,1193
-static const char FLOAT64[43,1228
-static const char FLOAT32[44,1267
-static char Msgt[48,1327
-print_attr(59,1664
-print_type(149,3647
-read_attributes(185,4322
-read_variables(252,6418
-main(319,8524
-
-ncdds.cc,139
-static char not_used rcsid[20,553
-static char Msgt[47,1070
-Get_bt(54,1200
-read_class(88,1905
-read_descriptors(244,6480
-main(275,7305
+config_nc.h,473
+#define _config_nc_h4,161
+#define HAVE_VPRINTF 13,391
+#define STDC_HEADERS 25,726
+#define HAVE_STRERROR 42,1357
+#define HAVE_STRTOL 45,1429
+#define HAVE_FCNTL_H 48,1505
+#define HAVE_LIMITS_H 51,1583
+#define HAVE_UNISTD_H 54,1662
+#define SIZEOF_CHAR 60,1787
+#define SIZEOF_DOUBLE 63,1850
+#define SIZEOF_FLOAT 66,1914
+#define SIZEOF_INT 69,1975
+#define SIZEOF_LONG 72,2035
+#define not_used 77,2169
+#define not_used 79,2217
+#define DODS_SERVER_VERSION 82,2243
 
 Dncx.h,24
 #define _dncx_h 11,162
 
-Dnetcdf.h,136
+Dnetcdf.h,140
 #define _dnetcdf_h 7,98
 extern Connections<NCConnect *>  *conns;18,353
-extern char *cdf_routine_name;22,471
-extern int rcode;23,502
+extern "C" char *cdf_routine_name;22,471
+extern int rcode;23,506
 
 Dv2i.h,254
 # define NDIMS_DECL9,172
@@ -450,6 +470,10 @@ nvdims(27,575
 # define A_DECL(A_DECL39,775
 # define A_FREE(A_FREE42,859
 # define A_INIT(A_INIT45,911
+
+lnetcdf.h,59
+#define _LNETCDF_4,23
+#define ncvarcpy(ncvarcpy210,4783
 
 NCArray.h,27
 #define _ncarray_h 17,371
@@ -495,27 +519,6 @@ NCUInt32.h,28
 
 NCUrl.h,25
 #define _ncurl_h 17,369
-
-config_nc.h,436
-#define _config_nc_h4,161
-#define HAVE_VPRINTF 13,391
-#define STDC_HEADERS 25,726
-#define HAVE_STRERROR 42,1357
-#define HAVE_STRTOL 45,1429
-#define HAVE_FCNTL_H 48,1505
-#define HAVE_LIMITS_H 51,1583
-#define HAVE_UNISTD_H 54,1662
-#define SIZEOF_CHAR 60,1787
-#define SIZEOF_DOUBLE 63,1850
-#define SIZEOF_FLOAT 66,1914
-#define SIZEOF_INT 69,1975
-#define SIZEOF_LONG 72,2035
-#define not_used 77,2169
-#define not_used 79,2217
-
-lnetcdf.h,59
-#define _LNETCDF_4,23
-#define ncvarcpy(ncvarcpy210,4783
 
 onstack.h,351
 #define _ONSTACK_H_8,225
@@ -700,277 +703,277 @@ lnc_set_fill(1275,21994
 lnetcdf/lncio.c,0
 
 lnetcdf/lncx.c,8745
-#define  SHORT_MAX 34,1107
-#define  SHORT_MIN 35,1136
-#define USHORT_MAX 36,1165
-# define FLT_MAX 40,1299
-# define X_FLOAT_MAX 53,1610
-# define X_FLOAT_MIN 55,1658
-#define INT_MAX 61,1781
-#define INT_MIN 63,1849
-#define LONG_MAX 65,1918
-#define LONG_MIN 67,1988
-#define LONG_MAX 70,2072
-#define LONG_MIN 72,2144
-static const char nada[76,2199
-#define SWAP2(SWAP285,2413
-#define SWAP4(SWAP488,2481
-swapn2b(94,2626
-swap4b(107,2808
-swapn4b(119,2983
-swap8b(136,3214
-swapn8b(153,3466
-typedef short ix_short;ix_short188,3950
-#define SIZEOF_IX_SHORT 189,3974
-#define IX_SHORT_MAX 190,4011
-typedef int ix_short;ix_short192,4071
-#define SIZEOF_IX_SHORT 193,4093
-#define IX_SHORT_MAX 194,4128
-typedef long ix_short;ix_short196,4187
-#define SIZEOF_IX_SHORT 197,4210
-#define IX_SHORT_MAX 198,4246
-get_ix_short(204,4335
-put_ix_short(219,4621
-ncx_get_short_schar(228,4743
-ncx_get_short_uchar(239,4922
-ncx_get_short_short(250,5093
-ncx_get_short_int(268,5443
-ncx_get_short_long(286,5779
-ncx_get_short_float(301,6065
-ncx_get_short_double(314,6293
-ncx_put_short_schar(324,6455
-ncx_put_short_uchar(336,6624
-ncx_put_short_short(345,6747
-ncx_put_short_int(362,7108
-ncx_put_short_long(379,7459
-ncx_put_short_float(396,7815
-ncx_put_short_double(406,7995
-typedef short ix_int;ix_int418,8213
-#define SIZEOF_IX_INT 419,8235
-#define IX_INT_MAX 420,8270
-typedef int ix_int;ix_int422,8327
-#define SIZEOF_IX_INT 423,8347
-#define IX_INT_MAX 424,8380
-typedef long ix_int;ix_int426,8436
-#define SIZEOF_IX_INT 427,8457
-#define IX_INT_MAX 428,8491
-get_ix_int(435,8577
-put_ix_int(453,8910
-ncx_get_int_schar(465,9114
-ncx_get_int_uchar(476,9287
-ncx_get_int_short(487,9452
-ncx_get_int_int(505,9784
-ncx_get_int_long(523,10102
-ncx_get_int_float(541,10442
-ncx_get_int_double(554,10664
-ncx_put_int_schar(564,10819
-ncx_put_int_uchar(584,11065
-ncx_put_int_short(595,11221
-ncx_put_int_int(612,11562
-ncx_put_int_long(629,11893
-ncx_put_int_float(646,12229
-ncx_put_int_double(656,12425
-get_ix_float(671,12695
-put_ix_float(681,12844
-struct	ieee_single ieee_single693,13061
-struct	vax_single vax_single703,13321
-#define VAX_SNG_BIAS	710,13462
-#define IEEE_SNG_BIAS	711,13488
-static struct sgl_limits sgl_limits713,13516
-} max 716,13591
-static struct sgl_limits min 720,13699
-get_ix_float(726,13837
-put_ix_float(778,14973
-word_align(837,16385
-struct ieee_single_hi ieee_single_hi843,16489
-typedef struct ieee_single_hi ieee_single_hi;ieee_single_hi849,16611
-struct ieee_single_lo ieee_single_lo851,16658
-typedef struct ieee_single_lo ieee_single_lo;ieee_single_lo857,16780
-static const int ieee_single_bias 859,16827
-struct ieee_double ieee_double861,16870
-typedef struct ieee_double ieee_double;ieee_double866,16966
-static const int ieee_double_bias 868,17007
-struct cray_single cray_single872,17079
-typedef struct cray_single cray_single;cray_single877,17175
-static const int cs_ieis_bias 879,17216
-static const int cs_id_bias 881,17264
-get_ix_float(885,17324
-put_ix_float(939,18257
-get_ix_float(1042,20078
-put_ix_float(1080,20786
-get_ix_float(1108,21468
-put_ix_float(1114,21569
-ncx_get_float_schar(1124,21709
-ncx_get_float_uchar(1135,21893
-ncx_get_float_short(1146,22069
-ncx_get_float_int(1157,22253
-ncx_get_float_long(1168,22443
-ncx_get_float_float(1179,22622
-ncx_get_float_double(1187,22729
-ncx_put_float_schar(1198,22862
-ncx_put_float_uchar(1206,22983
-ncx_put_float_short(1214,23104
-ncx_put_float_int(1226,23348
-ncx_put_float_long(1238,23588
-ncx_put_float_float(1250,23830
-ncx_put_float_double(1261,24017
-get_ix_double(1275,24294
-put_ix_double(1285,24446
-struct	ieee_double ieee_double1297,24666
-struct  vax_double vax_double1309,24932
-#define VAX_DBL_BIAS	1318,25134
-#define IEEE_DBL_BIAS	1319,25160
-#define MASK(MASK1320,25188
-static const struct dbl_limits dbl_limits1322,25228
-} dbl_limits[1325,25309
-get_ix_double(1334,25568
-put_ix_double(1382,26677
-get_ix_double(1450,28168
-put_ix_double(1474,28615
-get_ix_double(1531,29699
-put_ix_double(1537,29802
-ncx_get_double_schar(1546,29944
-ncx_get_double_uchar(1557,30131
-ncx_get_double_short(1568,30310
-ncx_get_double_int(1579,30497
-ncx_get_double_long(1590,30674
-ncx_get_double_float(1601,30856
-ncx_get_double_double(1620,31132
-ncx_put_double_schar(1629,31244
-ncx_put_double_uchar(1637,31369
-ncx_put_double_short(1645,31494
-ncx_put_double_int(1657,31746
-ncx_put_double_long(1669,31994
-ncx_put_double_float(1681,32244
-ncx_put_double_double(1693,32496
-ncx_put_size_t(1712,32854
-ncx_get_size_t(1729,33298
-ncx_put_off_t(1752,33818
-ncx_get_off_t(1769,34244
-ncx_getn_schar_schar(1794,34666
-ncx_getn_schar_uchar(1802,34834
-ncx_getn_schar_short(1810,35002
-ncx_getn_schar_int(1824,35195
-ncx_getn_schar_long(1838,35384
-ncx_getn_schar_float(1852,35575
-ncx_getn_schar_double(1866,35768
-ncx_pad_getn_schar_schar(1881,35964
-ncx_pad_getn_schar_uchar(1895,36219
-ncx_pad_getn_schar_short(1909,36474
-ncx_pad_getn_schar_int(1927,36747
-ncx_pad_getn_schar_long(1945,37016
-ncx_pad_getn_schar_float(1963,37287
-ncx_pad_getn_schar_double(1981,37560
-ncx_putn_schar_schar(2000,37836
-ncx_putn_schar_uchar(2009,38005
-ncx_putn_schar_short(2018,38174
-ncx_putn_schar_int(2035,38458
-ncx_putn_schar_long(2052,38738
-ncx_putn_schar_float(2069,39020
-ncx_putn_schar_double(2086,39304
-ncx_pad_putn_schar_schar(2104,39591
-ncx_pad_putn_schar_uchar(2124,39936
-ncx_pad_putn_schar_short(2144,40281
-ncx_pad_putn_schar_int(2173,40739
-ncx_pad_putn_schar_long(2202,41193
-ncx_pad_putn_schar_float(2231,41649
-ncx_pad_putn_schar_double(2260,42107
-ncx_getn_short_schar(2293,42582
-ncx_getn_short_uchar(2310,42922
-ncx_getn_short_short(2329,43321
-ncx_getn_short_short(2341,43602
-ncx_getn_short_int(2359,43949
-ncx_getn_short_long(2376,44283
-ncx_getn_short_float(2393,44620
-ncx_getn_short_double(2410,44960
-ncx_pad_getn_short_schar(2428,45304
-ncx_pad_getn_short_uchar(2450,45720
-ncx_pad_getn_short_short(2472,46136
-ncx_pad_getn_short_int(2494,46552
-ncx_pad_getn_short_long(2516,46962
-ncx_pad_getn_short_float(2538,47375
-ncx_pad_getn_short_double(2560,47791
-ncx_putn_short_schar(2583,48211
-ncx_putn_short_uchar(2600,48527
-ncx_putn_short_short(2619,48902
-ncx_putn_short_short(2631,49172
-ncx_putn_short_int(2649,49495
-ncx_putn_short_long(2666,49805
-ncx_putn_short_float(2683,50118
-ncx_putn_short_double(2700,50434
-ncx_pad_putn_short_schar(2718,50754
-ncx_pad_putn_short_uchar(2743,51202
-ncx_pad_putn_short_short(2768,51650
-ncx_pad_putn_short_int(2793,52098
-ncx_pad_putn_short_long(2818,52540
-ncx_pad_putn_short_float(2843,52985
-ncx_pad_putn_short_double(2868,53433
-ncx_getn_int_schar(2897,53897
-ncx_getn_int_uchar(2914,54231
-ncx_getn_int_short(2931,54565
-ncx_getn_int_int(2950,54954
-ncx_getn_int_int(2962,55225
-ncx_getn_int_long(2982,55616
-ncx_getn_int_long(2994,55890
-ncx_getn_int_float(3012,56228
-ncx_getn_int_double(3029,56562
-ncx_putn_int_schar(3047,56900
-ncx_putn_int_uchar(3064,57210
-ncx_putn_int_short(3081,57520
-ncx_putn_int_int(3100,57885
-ncx_putn_int_int(3112,58145
-ncx_putn_int_long(3132,58512
-ncx_putn_int_long(3144,58774
-ncx_putn_int_float(3162,59088
-ncx_putn_int_double(3179,59398
-ncx_getn_float_schar(3200,59726
-ncx_getn_float_uchar(3217,60066
-ncx_getn_float_short(3234,60406
-ncx_getn_float_int(3251,60746
-ncx_getn_float_long(3268,61080
-ncx_getn_float_float(3287,61503
-ncx_getn_float_float(3299,61788
-ncx_getn_float_float(3359,63090
-ncx_getn_float_float(3370,63335
-ncx_getn_float_double(3388,63667
-ncx_putn_float_schar(3406,64011
-ncx_putn_float_uchar(3423,64327
-ncx_putn_float_short(3440,64643
-ncx_putn_float_int(3457,64959
-ncx_putn_float_long(3474,65269
-ncx_putn_float_float(3493,65668
-ncx_putn_float_float(3505,65942
-ncx_putn_float_float(3564,67280
-ncx_putn_float_float(3575,67519
-ncx_putn_float_double(3593,67833
-ncx_getn_double_schar(3614,68168
-ncx_getn_double_uchar(3631,68511
-ncx_getn_double_short(3648,68854
-ncx_getn_double_int(3665,69197
-ncx_getn_double_long(3682,69534
-ncx_getn_double_float(3699,69874
-ncx_getn_double_double(3718,70305
-ncx_getn_double_double(3730,70595
-ncx_getn_double_double(3786,71885
-ncx_getn_double_double(3797,72134
-ncx_putn_double_schar(3816,72473
-ncx_putn_double_uchar(3833,72792
-ncx_putn_double_short(3850,73111
-ncx_putn_double_int(3867,73430
-ncx_putn_double_long(3884,73743
-ncx_putn_double_float(3901,74059
-ncx_putn_double_double(3920,74466
-ncx_putn_double_double(3932,74745
-ncx_putn_double_double(4006,76391
-ncx_putn_double_double(4017,76634
-ncx_getn_text(4043,77017
-ncx_pad_getn_text(4052,77177
-ncx_putn_text(4067,77424
-ncx_pad_putn_text(4077,77585
-ncx_getn_void(4101,77937
-ncx_pad_getn_void(4110,78097
-ncx_putn_void(4125,78344
-ncx_pad_putn_void(4135,78505
+#define  SHORT_MAX 34,1115
+#define  SHORT_MIN 35,1144
+#define USHORT_MAX 36,1173
+# define FLT_MAX 40,1307
+# define X_FLOAT_MAX 53,1618
+# define X_FLOAT_MIN 55,1666
+#define INT_MAX 61,1789
+#define INT_MIN 63,1857
+#define LONG_MAX 65,1926
+#define LONG_MIN 67,1996
+#define LONG_MAX 70,2080
+#define LONG_MIN 72,2152
+static const char nada[76,2207
+#define SWAP2(SWAP285,2421
+#define SWAP4(SWAP488,2489
+swapn2b(94,2634
+swap4b(107,2832
+swapn4b(119,3023
+swap8b(136,3270
+swapn8b(153,3538
+typedef short ix_short;ix_short188,4038
+#define SIZEOF_IX_SHORT 189,4062
+#define IX_SHORT_MAX 190,4099
+typedef int ix_short;ix_short192,4159
+#define SIZEOF_IX_SHORT 193,4181
+#define IX_SHORT_MAX 194,4216
+typedef long ix_short;ix_short196,4275
+#define SIZEOF_IX_SHORT 197,4298
+#define IX_SHORT_MAX 198,4334
+get_ix_short(204,4423
+put_ix_short(219,4709
+ncx_get_short_schar(228,4831
+ncx_get_short_uchar(239,5010
+ncx_get_short_short(250,5181
+ncx_get_short_int(268,5531
+ncx_get_short_long(286,5867
+ncx_get_short_float(301,6153
+ncx_get_short_double(314,6381
+ncx_put_short_schar(324,6543
+ncx_put_short_uchar(336,6712
+ncx_put_short_short(345,6835
+ncx_put_short_int(362,7196
+ncx_put_short_long(379,7547
+ncx_put_short_float(396,7903
+ncx_put_short_double(406,8083
+typedef short ix_int;ix_int418,8301
+#define SIZEOF_IX_INT 419,8323
+#define IX_INT_MAX 420,8358
+typedef int ix_int;ix_int422,8415
+#define SIZEOF_IX_INT 423,8435
+#define IX_INT_MAX 424,8468
+typedef long ix_int;ix_int426,8524
+#define SIZEOF_IX_INT 427,8545
+#define IX_INT_MAX 428,8579
+get_ix_int(435,8665
+put_ix_int(453,8998
+ncx_get_int_schar(465,9202
+ncx_get_int_uchar(476,9375
+ncx_get_int_short(487,9540
+ncx_get_int_int(505,9872
+ncx_get_int_long(523,10190
+ncx_get_int_float(541,10530
+ncx_get_int_double(554,10752
+ncx_put_int_schar(564,10907
+ncx_put_int_uchar(584,11153
+ncx_put_int_short(595,11309
+ncx_put_int_int(612,11650
+ncx_put_int_long(629,11981
+ncx_put_int_float(646,12317
+ncx_put_int_double(656,12513
+get_ix_float(671,12783
+put_ix_float(681,12932
+struct	ieee_single ieee_single693,13149
+struct	vax_single vax_single703,13409
+#define VAX_SNG_BIAS	710,13550
+#define IEEE_SNG_BIAS	711,13576
+static struct sgl_limits sgl_limits713,13604
+} max 716,13679
+static struct sgl_limits min 720,13787
+get_ix_float(726,13925
+put_ix_float(778,15061
+word_align(837,16473
+struct ieee_single_hi ieee_single_hi843,16577
+typedef struct ieee_single_hi ieee_single_hi;ieee_single_hi849,16699
+struct ieee_single_lo ieee_single_lo851,16746
+typedef struct ieee_single_lo ieee_single_lo;ieee_single_lo857,16868
+static const int ieee_single_bias 859,16915
+struct ieee_double ieee_double861,16958
+typedef struct ieee_double ieee_double;ieee_double866,17054
+static const int ieee_double_bias 868,17095
+struct cray_single cray_single872,17167
+typedef struct cray_single cray_single;cray_single877,17263
+static const int cs_ieis_bias 879,17304
+static const int cs_id_bias 881,17352
+get_ix_float(885,17412
+put_ix_float(939,18345
+get_ix_float(1042,20166
+put_ix_float(1080,20874
+get_ix_float(1108,21556
+put_ix_float(1114,21657
+ncx_get_float_schar(1124,21797
+ncx_get_float_uchar(1135,21981
+ncx_get_float_short(1146,22157
+ncx_get_float_int(1157,22341
+ncx_get_float_long(1168,22531
+ncx_get_float_float(1179,22710
+ncx_get_float_double(1187,22817
+ncx_put_float_schar(1198,22950
+ncx_put_float_uchar(1206,23071
+ncx_put_float_short(1214,23192
+ncx_put_float_int(1226,23436
+ncx_put_float_long(1238,23676
+ncx_put_float_float(1250,23918
+ncx_put_float_double(1261,24105
+get_ix_double(1275,24382
+put_ix_double(1285,24534
+struct	ieee_double ieee_double1297,24754
+struct  vax_double vax_double1309,25020
+#define VAX_DBL_BIAS	1318,25222
+#define IEEE_DBL_BIAS	1319,25248
+#define MASK(MASK1320,25276
+static const struct dbl_limits dbl_limits1322,25316
+} dbl_limits[1325,25397
+get_ix_double(1334,25656
+put_ix_double(1382,26765
+get_ix_double(1450,28256
+put_ix_double(1474,28703
+get_ix_double(1531,29787
+put_ix_double(1537,29890
+ncx_get_double_schar(1546,30032
+ncx_get_double_uchar(1557,30219
+ncx_get_double_short(1568,30398
+ncx_get_double_int(1579,30585
+ncx_get_double_long(1590,30762
+ncx_get_double_float(1601,30944
+ncx_get_double_double(1620,31220
+ncx_put_double_schar(1629,31332
+ncx_put_double_uchar(1637,31457
+ncx_put_double_short(1645,31582
+ncx_put_double_int(1657,31834
+ncx_put_double_long(1669,32082
+ncx_put_double_float(1681,32332
+ncx_put_double_double(1693,32584
+ncx_put_size_t(1712,32942
+ncx_get_size_t(1729,33386
+ncx_put_off_t(1752,33906
+ncx_get_off_t(1769,34332
+ncx_getn_schar_schar(1794,34754
+ncx_getn_schar_uchar(1802,34922
+ncx_getn_schar_short(1810,35090
+ncx_getn_schar_int(1824,35283
+ncx_getn_schar_long(1838,35472
+ncx_getn_schar_float(1852,35663
+ncx_getn_schar_double(1866,35856
+ncx_pad_getn_schar_schar(1881,36052
+ncx_pad_getn_schar_uchar(1895,36307
+ncx_pad_getn_schar_short(1909,36562
+ncx_pad_getn_schar_int(1927,36835
+ncx_pad_getn_schar_long(1945,37104
+ncx_pad_getn_schar_float(1963,37375
+ncx_pad_getn_schar_double(1981,37648
+ncx_putn_schar_schar(2000,37924
+ncx_putn_schar_uchar(2009,38093
+ncx_putn_schar_short(2018,38262
+ncx_putn_schar_int(2035,38546
+ncx_putn_schar_long(2052,38826
+ncx_putn_schar_float(2069,39108
+ncx_putn_schar_double(2086,39392
+ncx_pad_putn_schar_schar(2104,39679
+ncx_pad_putn_schar_uchar(2124,40024
+ncx_pad_putn_schar_short(2144,40369
+ncx_pad_putn_schar_int(2173,40827
+ncx_pad_putn_schar_long(2202,41281
+ncx_pad_putn_schar_float(2231,41737
+ncx_pad_putn_schar_double(2260,42195
+ncx_getn_short_schar(2293,42670
+ncx_getn_short_uchar(2310,43010
+ncx_getn_short_short(2329,43409
+ncx_getn_short_short(2341,43690
+ncx_getn_short_int(2359,44037
+ncx_getn_short_long(2376,44371
+ncx_getn_short_float(2393,44708
+ncx_getn_short_double(2410,45048
+ncx_pad_getn_short_schar(2428,45392
+ncx_pad_getn_short_uchar(2450,45808
+ncx_pad_getn_short_short(2472,46224
+ncx_pad_getn_short_int(2494,46640
+ncx_pad_getn_short_long(2516,47050
+ncx_pad_getn_short_float(2538,47463
+ncx_pad_getn_short_double(2560,47879
+ncx_putn_short_schar(2583,48299
+ncx_putn_short_uchar(2600,48615
+ncx_putn_short_short(2619,48990
+ncx_putn_short_short(2631,49260
+ncx_putn_short_int(2649,49583
+ncx_putn_short_long(2666,49893
+ncx_putn_short_float(2683,50206
+ncx_putn_short_double(2700,50522
+ncx_pad_putn_short_schar(2718,50842
+ncx_pad_putn_short_uchar(2743,51290
+ncx_pad_putn_short_short(2768,51738
+ncx_pad_putn_short_int(2793,52186
+ncx_pad_putn_short_long(2818,52628
+ncx_pad_putn_short_float(2843,53073
+ncx_pad_putn_short_double(2868,53521
+ncx_getn_int_schar(2897,53985
+ncx_getn_int_uchar(2914,54319
+ncx_getn_int_short(2931,54653
+ncx_getn_int_int(2950,55042
+ncx_getn_int_int(2962,55313
+ncx_getn_int_long(2982,55704
+ncx_getn_int_long(2994,55978
+ncx_getn_int_float(3012,56316
+ncx_getn_int_double(3029,56650
+ncx_putn_int_schar(3047,56988
+ncx_putn_int_uchar(3064,57298
+ncx_putn_int_short(3081,57608
+ncx_putn_int_int(3100,57973
+ncx_putn_int_int(3112,58233
+ncx_putn_int_long(3132,58600
+ncx_putn_int_long(3144,58862
+ncx_putn_int_float(3162,59176
+ncx_putn_int_double(3179,59486
+ncx_getn_float_schar(3200,59814
+ncx_getn_float_uchar(3217,60154
+ncx_getn_float_short(3234,60494
+ncx_getn_float_int(3251,60834
+ncx_getn_float_long(3268,61168
+ncx_getn_float_float(3287,61591
+ncx_getn_float_float(3299,61876
+ncx_getn_float_float(3359,63178
+ncx_getn_float_float(3370,63423
+ncx_getn_float_double(3388,63755
+ncx_putn_float_schar(3406,64099
+ncx_putn_float_uchar(3423,64415
+ncx_putn_float_short(3440,64731
+ncx_putn_float_int(3457,65047
+ncx_putn_float_long(3474,65357
+ncx_putn_float_float(3493,65756
+ncx_putn_float_float(3505,66030
+ncx_putn_float_float(3564,67368
+ncx_putn_float_float(3575,67607
+ncx_putn_float_double(3593,67921
+ncx_getn_double_schar(3614,68256
+ncx_getn_double_uchar(3631,68599
+ncx_getn_double_short(3648,68942
+ncx_getn_double_int(3665,69285
+ncx_getn_double_long(3682,69622
+ncx_getn_double_float(3699,69962
+ncx_getn_double_double(3718,70393
+ncx_getn_double_double(3730,70683
+ncx_getn_double_double(3786,71973
+ncx_getn_double_double(3797,72222
+ncx_putn_double_schar(3816,72561
+ncx_putn_double_uchar(3833,72880
+ncx_putn_double_short(3850,73199
+ncx_putn_double_int(3867,73518
+ncx_putn_double_long(3884,73831
+ncx_putn_double_float(3901,74147
+ncx_putn_double_double(3920,74554
+ncx_putn_double_double(3932,74833
+ncx_putn_double_double(4006,76479
+ncx_putn_double_double(4017,76722
+ncx_getn_text(4043,77105
+ncx_pad_getn_text(4052,77265
+ncx_putn_text(4067,77512
+ncx_pad_putn_text(4077,77673
+ncx_getn_void(4101,78025
+ncx_pad_getn_void(4110,78185
+ncx_putn_void(4125,78432
+ncx_pad_putn_void(4135,78593
 
 lnetcdf/lncx_cray.c,7956
 #define  SHORT_MAX 24,613

@@ -25,7 +25,7 @@
 #endif
 
 #include "Str.h"
-extern Str * NewStr(const string &n = "");
+extern Str * NewStr(const string &n);
 
 class NCStr: public Str {
 public:
@@ -39,6 +39,13 @@ public:
 
 /* 
  * $Log: NCStr.h,v $
+ * Revision 1.3  2002/05/03 00:01:52  jimg
+ * Merged with release-3-2-7.
+ *
+ * Revision 1.2.4.1  2001/12/26 03:35:38  rmorris
+ * Removed redundant default arg's.  VC++ doesn't allow default args to
+ * be specified twice.
+ *
  * Revision 1.2  2000/10/06 01:22:02  jimg
  * Moved the CVS Log entries to the ends of files.
  * Modified the read() methods to match the new definition in the dap library.

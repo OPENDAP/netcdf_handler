@@ -21,7 +21,7 @@
 #endif
 
 #include "UInt32.h"
-extern UInt32 * NewUInt32(const string &n = "");
+extern UInt32 * NewUInt32(const string &n);
 
 class NCUInt32: public UInt32 {
 public:
@@ -35,6 +35,13 @@ public:
 
 /* 
  * $Log: NCUInt32.h,v $
+ * Revision 1.3  2002/05/03 00:01:52  jimg
+ * Merged with release-3-2-7.
+ *
+ * Revision 1.2.4.1  2001/12/26 01:56:22  rmorris
+ * Reduncant default argument removed.  VC++ doesn't tolerate a default
+ * arg value being specified twice (in the .c* and the .h).
+ *
  * Revision 1.2  2000/10/06 01:22:03  jimg
  * Moved the CVS Log entries to the ends of files.
  * Modified the read() methods to match the new definition in the dap library.

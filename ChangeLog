@@ -1,3 +1,20 @@
+2002-04-30    <jimg@dcz.dods.org>
+
+	* Merged with release-3-2-7.
+
+2002-04-25  Ethan Davis  <edavis@ucar.edu>
+
+	* Makefile.in: remove config.status dependency in Makefile
+	target.
+
+2002-04-17    <jimg@dcz.dods.org>
+
+	* nc_test/nc_test.c (NC_TEST): Now uses ** instead of *** for tests.
+
+	* Dnc.cc (ncopen): Fixed bug 393.
+
+	* lnetcdf/lv2i.c (NCadvise): Fixed garbled messages.
+
 2001-10-13  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with release-3-2-6.

@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.3 2001/09/28 17:18:41 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.4 2002/05/03 00:01:52 jimg Exp $"};
 
 #include "NCGrid.h"
 #include "debug.h"
@@ -57,11 +57,13 @@ NCGrid::read(const string &dataset)
     DBG(cerr << "In NCGrid, reading components for " << name() << endl);
 
     // read array elements
-    array_var()->read(dataset);
+    if (array_var()->send_p())
+	array_var()->read(dataset);
 
     // read maps elements
     for (Pix p = first_map_var(); p; next_map_var(p))
-      map_var(p)->read(dataset);
+	if (map_var(p)->send_p())
+	    map_var(p)->read(dataset);
 
     set_read_p(true);
 
@@ -69,6 +71,17 @@ NCGrid::read(const string &dataset)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.4  2002/05/03 00:01:52  jimg
+// Merged with release-3-2-7.
+//
+// Revision 1.2.4.2  2002/01/29 18:55:40  jimg
+// I modified NCGrid::read so that before reading the array and each map, it
+// first checks to make sure that field has been marked as one that's to be
+// sent. In the DAP if any field of an aggregate type is to be sent, then both
+// that field *and* the container that holds it (i.e., the Grid) will be marked
+// as things to send. The fix makes sure that only the parts the clients wants
+// are actually read. This saves reading data that will never be sent.
+//
 // Revision 1.3  2001/09/28 17:18:41  jimg
 // Merged with 3.2.5.
 // CVS  Committing in .

@@ -21,7 +21,7 @@
 #endif
 
 #include "Int16.h"
-extern Int16 * NewInt16(const string &n = "");
+extern Int16 * NewInt16(const string &n);
 
 class NCInt16: public Int16 {
 public:
@@ -35,6 +35,13 @@ public:
 
 /* 
  * $Log: NCInt16.h,v $
+ * Revision 1.3  2002/05/03 00:01:52  jimg
+ * Merged with release-3-2-7.
+ *
+ * Revision 1.2.4.1  2001/12/26 03:32:24  rmorris
+ * Removed redundant default args.  VC++ only allows them to be specified
+ * a single time.
+ *
  * Revision 1.2  2000/10/06 01:22:02  jimg
  * Moved the CVS Log entries to the ends of files.
  * Modified the read() methods to match the new definition in the dap library.

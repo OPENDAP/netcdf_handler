@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.8 2001/10/14 01:49:10 jimg Exp $
+# $Id: Makefile.in,v 1.9 2002/05/03 00:01:52 jimg Exp $
 
 @SET_MAKE@
 
@@ -136,7 +136,7 @@ ncdump:
 configure: configure.in $(DODS_ROOT)etc/aclocal.m4
 	autoconf --localdir=$(DODS_ROOT)etc
 
-Makefile: Makefile.in configure
+Makefile: Makefile.in
 	if [ -x ./config.status ]; \
 	then \
 	    ${SHELL} ./config.status; \
@@ -205,7 +205,7 @@ tar:
 	-rm -f config.cache config.log config.status
 	cd $(DODS_ROOT)/.. && \
 	$(TAR) --exclude 'old' --exclude '.#*' --exclude 'CVS' \
-	    --exclude '.snprj*' --exclude '.flc*' \
+	    --exclude '.snprj*' --exclude '.flc*' --exclude 'Makefile' \
 	    --gzip --create --dereference --file DODS-$(dir).tar.gz \
 	    DODS/src/$(dir)
 
@@ -216,19 +216,22 @@ binary-tar:
 	cd $(DODS_ROOT).. && ( \
 	$(TAR) --gzip --create --dereference \
             --file DODS-nc-library-$(version)-$(host).tar.gz \
-            DODS/readme/README DODS/readme/README-nc-library \
+            DODS/NEWS \
+            DODS/docs/README DODS/docs/README-nc-library \
             DODS/lib/libnc-dods.a \
             DODS/include/netcdf.h \
             DODS/include/netcdf.inc ; \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-server-$(version)-$(host).tar.gz \
-            DODS/readme/README DODS/readme/README-nc-server \
+            DODS/NEWS \
+            DODS/docs/README DODS/docs/README-nc-server \
             DODS/etc/nc_das \
             DODS/etc/nc_dds \
             DODS/etc/nc_dods ; \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-client-$(version)-$(host).tar.gz \
-            DODS/readme/README DODS/readme/README-nc-client \
+            DODS/NEWS \
+            DODS/docs/README DODS/docs/README-nc-client \
             DODS/bin/dncdump \
             DODS/bin/dncview \
             DODS/bin/Ncview  )
@@ -236,17 +239,11 @@ binary-tar:
 .PHONY: update-version
 update-version: check-version
 	@echo "Version is: `cat version.h`"
-	if [ ! -d ../$(dir) ]; then \
-	    mv ../$(basedir)* ../$(dir);\
-	fi
-	touch $(DODS_ROOT)VERSION; cat $(DODS_ROOT)VERSION | \
-	  $(AWK) ' \
-	    BEGIN { found = 0 } \
-	    { if ( $$0 ~ /^$(COMPONENT_NAME):/) \
-	        { print "$(COMPONENT_NAME): $(version)"; found = 1 } \
-	      else { print $$0 } } \
-	    END { if ( ! found) { print "$(COMPONENT_NAME): $(version)" } \
-	        }' > $(DODS_ROOT)VERSION
+	if test ! -d ../$(dir); then mv ../$(basedir)* ../$(dir); fi
+	if test ! -f $(DODS_ROOT)VERSION; then touch $(DODS_ROOT)VERSION; fi
+	$(etcdir)/update-manifest.pl "$(COMPONENT_NAME)" $(version) \
+		< $(DODS_ROOT)VERSION > tmp.dods.manifest
+	mv tmp.dods.manifest $(DODS_ROOT)VERSION
 
 # Compare the version encoded in this Makefile (set by configure) with the
 # version in version.h. The version make variable is set up near the top of

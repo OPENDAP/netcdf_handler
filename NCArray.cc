@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.4 2001/09/28 17:18:41 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.5 2002/05/03 00:01:52 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -25,7 +25,7 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.4 2001/09/28 17:18:41 jimg E
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <iostream.h>
+#include <iostream>
 
 #include "Error.h"
 #include "InternalErr.h"
@@ -316,6 +316,14 @@ NCArray::read(const string &dataset)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.5  2002/05/03 00:01:52  jimg
+// Merged with release-3-2-7.
+//
+// Revision 1.3.4.2  2001/12/26 03:41:25  rmorris
+// Force in <iostream> instead of <iostream.h>.  Under unix <iostream> is
+// typically a wrapper around <iostream.h>, but under win32 it is something
+// completely different from iostream.h
+//
 // Revision 1.4  2001/09/28 17:18:41  jimg
 // Merged with 3.2.5.
 // CVS  Committing in .

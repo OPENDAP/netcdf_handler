@@ -21,7 +21,7 @@
 #endif
 
 #include "UInt16.h"
-extern UInt16 * NewUInt16(const string &n = "");
+extern UInt16 * NewUInt16(const string &n);
 
 class NCUInt16: public UInt16 {
 public:
@@ -35,6 +35,12 @@ public:
 
 /* 
  * $Log: NCUInt16.h,v $
+ * Revision 1.3  2002/05/03 00:01:52  jimg
+ * Merged with release-3-2-7.
+ *
+ * Revision 1.2.4.1  2001/12/26 01:54:22  rmorris
+ * Redundant default argument removed.  VC++ won't allow that reduncancy.
+ *
  * Revision 1.2  2000/10/06 01:22:02  jimg
  * Moved the CVS Log entries to the ends of files.
  * Modified the read() methods to match the new definition in the dap library.
