@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.15 2005/01/29 00:20:29 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.16 2005/02/02 03:35:35 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -29,7 +29,7 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.15 2005/01/29 00:20:29 jimg 
 #include <iostream>
 #include <sstream>
 
-#define DODS_DEBUG 1
+// #define DODS_DEBUG 1
 
 #include "Error.h"
 #include "InternalErr.h"
@@ -638,6 +638,9 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.16  2005/02/02 03:35:35  jimg
+// Removed DODS_DEBUG
+//
 // Revision 1.15  2005/01/29 00:20:29  jimg
 // Checkpoint: CEs ont he command line/ncopen() almost work.
 //
