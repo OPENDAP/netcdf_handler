@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.33 2005/04/06 17:41:45 jimg Exp $
+# $Id: Makefile.in,v 1.34 2005/04/06 18:49:13 jimg Exp $
 
 @SET_MAKE@
 
@@ -116,7 +116,7 @@ fortran/fort-genatt.o	fortran/fort-v2compat.o  fortran/fort-varsio.o \
 fortran/fort-geninq.o	fortran/fort-var1io.o
 
 # Matlab client can be suppressed by a switch to configure.
-all: $(PROG) nc_module.o
+all: $(PROG)
 
 nc_handler: $(HANDLER_OBJS) libnc-dods.a
 	$(CXX) $(LDFLAGS) -o nc_handler $(HANDLER_OBJS) $(NCDODS) $(LIBS)
