@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.12 2005/03/05 00:16:58 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.13 2005/03/19 00:33:03 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -185,7 +185,6 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     int ext_stop = (d_stop == -1) ? get_size()-1 : d_stop;
 
     string version_info = get_implementation_version();
-
     version_info.replace(version_info.find("/"), 1, " ");
 
     istringstream iss(version_info);
@@ -193,7 +192,7 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     float version;
     iss >> implementation;
     iss >> version;
-        
+    
     DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
     DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
 
@@ -204,7 +203,9 @@ NCSequence::build_constraint(int outtype, const size_t *start,
                 ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
 
     // Fix bug in the 3.4 and prior Sequence CE code.
-    if (implementation == "dap" && version < 3.5) {
+    if ((implementation.find("dap") != string::npos
+         || implementation.find("dods") != string::npos)
+        && version < 3.5) {
         // ext_start--;
         Tstop++;
     }
@@ -386,6 +387,10 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.13  2005/03/19 00:33:03  jimg
+// Checkpoint: All tests pass and only one memory leak remains (in
+// NCConnect::flatten_attributes()).
+//
 // Revision 1.12  2005/03/05 00:16:58  jimg
 // checkpoint: working on memory leaks found using unit tests
 //
