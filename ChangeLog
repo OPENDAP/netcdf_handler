@@ -1,3 +1,14 @@
+2004-03-09  James Gallagher  <jimg@comet.dods.org>
+
+	* This code no longer uses the Pix classes.
+
+	* Translation of Structures is almost there. Missing is
+	translation of the attributes.
+
+	* Changed the implementation of the netCDF 2 interface. This
+	software now uses the Unidata emulation code in v2i.c. See the
+	README in lnetcdf.
+
 2004-02-24  James Gallagher  <jimg@comet.dods.org>
 
 	* Replaced the old version of ncdump with the version found in the
