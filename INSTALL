@@ -1,5 +1,5 @@
 
-$Id: INSTALL,v 1.1 1999/07/28 00:22:42 jimg Exp $
+$Id: INSTALL,v 1.2 2000/09/29 15:34:21 tom Exp $
 
 Note: This directory contains two sample programs (ncdump and ncview) which
 are relinked with the DODS libraries. These two applications are
@@ -44,6 +44,13 @@ directory (e.g., on my system the cgi binary directory is called
 you don't know it by looking in the http server's srm.conf configuration file
 (which will be located in a directory called `conf' within the http server's
 home directory. 
+
+  Note that the DODS server scripts use specialized versions of
+  several Perl modules, shipped with DODS.  These libraries must be
+  in the same directory as the DODS server scripts.  However, if they
+  are in the same directory as other scripts that use the standard
+  versions of these modules, conflicts will develop.  In this case, it
+  may be best to establish a CGI directory just for DODS.
 
 To install a secure server - one that only specific machines or users can
 access, see the file SECURITY.
