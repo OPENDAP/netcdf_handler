@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.11 2004/10/28 16:38:19 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.12 2004/11/05 17:10:14 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -108,8 +108,8 @@ NCArray::operator=(const NCArray &rhs)
     DBG(cerr << "Exiting NCArray::operator=(const NCArray &rhs)" << endl);
 }
 
-// parse constraint expr. and make netcdf coordinate point location.
-// return number of elements to read. 
+
+// Should this be a private method? jhrg 11/3/04
 long
 NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_stride)
 {
@@ -153,16 +153,16 @@ NCArray::build_constraint(int outtype, const size_t *start,
     if (d_source) {
         // If d_source is non-null then the library must use d_source to 
         // build the constraint.
-        cerr << "Source is non-null" << endl;
+        DBG(cerr << "Source is non-null" << endl);
         // cerr << d_source->toString() << endl;
         switch (d_source->type()) {
             case dods_sequence_c: {
                 Array::Dim_iter d = dim_begin();
                 
-                cerr << "size: " << dimension_size(d) << endl;
-                cerr << "pre-start: " << dimension_start(d, true) << endl;
-                cerr << "pre-stop: " << dimension_stop(d, true) << endl;
-                cerr << "pre-stride: " << dimension_stride(d, true) << endl;
+                DBG(cerr << "size: " << dimension_size(d) << endl);
+                DBG(cerr << "pre-start: " << dimension_start(d, true) << endl);
+                DBG(cerr << "pre-stop: " << dimension_stop(d, true) << endl);
+                DBG(cerr << "pre-stride: " << dimension_stride(d, true) << endl);
                 
                 NCSequence *ncq = dynamic_cast<NCSequence*>(d_source);
                 ncq->set_row_number_constraint(dimension_start(d, true),
@@ -238,6 +238,7 @@ NCArray::build_constraint(int outtype, const size_t *start,
     return expr;
 }
 
+// I don't think this is needed; use the version in NCAccess. jhrg 11/3/04
 bool
 NCArray::is_convertable(int outtype)
 {
@@ -568,6 +569,9 @@ NCArray::set_source(BaseType *s) throw(InternalErr)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.12  2004/11/05 17:10:14  jimg
+// Fiddled with some comments and added DBG() macros to some instrumentation.
+//
 // Revision 1.11  2004/10/28 16:38:19  jimg
 // Added support for error handling to ClientParams. Added use of
 // ClientParams to NCConnect, although that's not complete yet. NCConnect
