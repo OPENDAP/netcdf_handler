@@ -1,3 +1,16 @@
+2003-04-28  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with release-3-3-1.
+
+	* Linux build fixes; some changes were made to the Makefile.in
+	files, esp in the Fortran bindings, and some generated files were
+	removed from CVS so that they would not get included in the
+	distributions or confused the nightly builds.
+
+2003-04-23  James Gallagher  <jimg@dcz.dods.org>
+
+	* The win32 build files were lost and added back into the code.
+
 2003-01-27    <jimg@dcz.dods.org>
 
 	* merged with release-3-2-8.
