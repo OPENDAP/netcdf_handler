@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.20 2004/07/09 18:42:35 jimg Exp $
+# $Id: Makefile.in,v 1.21 2004/07/26 19:10:44 jimg Exp $
 
 @SET_MAKE@
 
@@ -90,8 +90,9 @@ HANDLER_OBJS = ncdas.o ncdds.o nc_handler.o
 NETSRC = NCConnect.cc inst.cc $(NCSRC)
 NETOBJ = NCConnect.o inst.o $(NCOBJ)
 
-LIBSRCS = $(NETSRC) Ddim.cc Dattr.cc Dvar.cc Dnc.cc Dputget.cc Dncx.cc 
-LIBOBJS = $(NETOBJ) Ddim.o Dattr.o Dvar.o Dnc.o Dputget.o Dncx.o
+LIBSRCS = $(NETSRC) Ddim.cc Dattr.cc Dvar.cc Dnc.cc Dputget.cc Dncx.cc \
+	nc_util.cc
+LIBOBJS = $(NETOBJ) Ddim.o Dattr.o Dvar.o Dnc.o Dputget.o Dncx.o nc_util.o
 
 NCHDRS = lnetcdf.h
 
@@ -267,20 +268,21 @@ ncdas.o: ncdas.cc config_nc.h ../../include/cgi_util.h \
   ../../include/BaseType.h ../../include/AttrTable.h \
   ../../include/Error.h ../../include/InternalErr.h \
   ../../include/dods-datatypes.h ../../include/DAS.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/ObjectType.h ../../include/EncodingType.h Dnetcdf.h \
-  lnetcdf/netcdf.h lnetcdf.h ../../include/Connect.h ../../include/util.h \
-  ../../include/Byte.h ../../include/Int16.h ../../include/UInt16.h \
-  ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
-  ../../include/Float64.h ../../include/Str.h ../../include/dods-limits.h \
-  ../../include/Url.h ../../include/Array.h ../../include/Vector.h \
-  ../../include/Structure.h ../../include/Constructor.h \
-  ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/DODSResponseObject.h ../../include/Clause.h \
+  ../../include/expr.h ../../include/RValue.h ../../include/ObjectType.h \
+  ../../include/EncodingType.h Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h \
+  ../../include/Connect.h ../../include/util.h ../../include/Byte.h \
+  ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+  ../../include/UInt32.h ../../include/Float32.h ../../include/Float64.h \
+  ../../include/Str.h ../../include/dods-limits.h ../../include/Url.h \
+  ../../include/Array.h ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/HTTPCache.h \
-  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/HTTPCache.h ../../include/config_dap.h \
+  ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -291,7 +293,8 @@ ncdas.o: ncdas.cc config_nc.h ../../include/cgi_util.h \
 ncdds.o: ncdds.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
   ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
   ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
-  ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
+  ../../include/Error.h ../../include/DODSResponseObject.h \
+  ../../include/DDS.h ../../include/BaseType.h \
   ../../include/InternalErr.h ../../include/dods-datatypes.h \
   ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
   ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
@@ -302,11 +305,10 @@ ncdds.o: ncdds.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
   ../../include/Constructor.h ../../include/Sequence.h \
   ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -318,7 +320,8 @@ ncdds.o: ncdds.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
   ../../include/cgi_util.h ../../include/EncodingType.h
 nc_handler.o: nc_handler.cc config_nc.h ../../include/DODSFilter.h \
   ../../include/DAS.h ../../include/Pix.h ../../include/IteratorAdapter.h \
-  ../../include/AttrTable.h ../../include/Error.h ../../include/DDS.h \
+  ../../include/AttrTable.h ../../include/Error.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/BaseType.h ../../include/InternalErr.h \
   ../../include/dods-datatypes.h ../../include/Clause.h \
   ../../include/expr.h ../../include/RValue.h ../../include/DataDDS.h \
@@ -327,7 +330,8 @@ nc_handler.o: nc_handler.cc config_nc.h ../../include/DODSFilter.h \
 NCConnect.o: NCConnect.cc config_nc.h lnetcdf/netcdf.h NCConnect.h \
   ../../include/AISConnect.h ../../include/Connect.h ../../include/DAS.h \
   ../../include/Pix.h ../../include/IteratorAdapter.h \
-  ../../include/AttrTable.h ../../include/Error.h ../../include/DDS.h \
+  ../../include/AttrTable.h ../../include/Error.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/BaseType.h ../../include/InternalErr.h \
   ../../include/dods-datatypes.h ../../include/Clause.h \
   ../../include/expr.h ../../include/RValue.h ../../include/util.h \
@@ -338,11 +342,10 @@ NCConnect.o: NCConnect.cc config_nc.h lnetcdf/netcdf.h NCConnect.h \
   ../../include/Structure.h ../../include/Constructor.h \
   ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h ../../include/AISMerge.h \
@@ -350,7 +353,8 @@ NCConnect.o: NCConnect.cc config_nc.h lnetcdf/netcdf.h NCConnect.h \
   ../../include/Resource.h ../../include/AISExceptions.h
 inst.o: inst.cc config_nc.h lnetcdf/netcdf.h ../../include/Connect.h \
   ../../include/DAS.h ../../include/Pix.h ../../include/IteratorAdapter.h \
-  ../../include/AttrTable.h ../../include/Error.h ../../include/DDS.h \
+  ../../include/AttrTable.h ../../include/Error.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/BaseType.h ../../include/InternalErr.h \
   ../../include/dods-datatypes.h ../../include/Clause.h \
   ../../include/expr.h ../../include/RValue.h ../../include/util.h \
@@ -361,11 +365,10 @@ inst.o: inst.cc config_nc.h lnetcdf/netcdf.h ../../include/Connect.h \
   ../../include/Structure.h ../../include/Constructor.h \
   ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -377,21 +380,21 @@ NCArray.o: NCArray.cc config_nc.h ../../include/Error.h \
   ../../include/InternalErr.h Dnetcdf.h lnetcdf/netcdf.h \
   ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
   ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
-  ../../include/DDS.h ../../include/BaseType.h \
-  ../../include/dods-datatypes.h ../../include/Clause.h \
-  ../../include/expr.h ../../include/RValue.h ../../include/util.h \
-  ../../include/Byte.h ../../include/Int16.h ../../include/UInt16.h \
-  ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
-  ../../include/Float64.h ../../include/Str.h ../../include/dods-limits.h \
-  ../../include/Url.h ../../include/Array.h ../../include/Vector.h \
-  ../../include/Structure.h ../../include/Constructor.h \
-  ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
+  ../../include/BaseType.h ../../include/dods-datatypes.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+  ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -404,7 +407,8 @@ NCByte.o: NCByte.cc config_nc.h ../../include/InternalErr.h \
   ../../include/dods-datatypes.h ../../include/BaseType.h \
   ../../include/AttrTable.h ../../include/Pix.h \
   ../../include/IteratorAdapter.h Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h \
-  ../../include/Connect.h ../../include/DAS.h ../../include/DDS.h \
+  ../../include/Connect.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
   ../../include/util.h ../../include/Int16.h ../../include/UInt16.h \
   ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
@@ -413,11 +417,10 @@ NCByte.o: NCByte.cc config_nc.h ../../include/InternalErr.h \
   ../../include/Structure.h ../../include/Constructor.h \
   ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -430,7 +433,8 @@ NCFloat64.o: NCFloat64.cc config_nc.h ../../include/InternalErr.h \
   ../../include/dods-datatypes.h ../../include/BaseType.h \
   ../../include/AttrTable.h ../../include/Pix.h \
   ../../include/IteratorAdapter.h Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h \
-  ../../include/Connect.h ../../include/DAS.h ../../include/DDS.h \
+  ../../include/Connect.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
   ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
   ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
@@ -439,11 +443,10 @@ NCFloat64.o: NCFloat64.cc config_nc.h ../../include/InternalErr.h \
   ../../include/Structure.h ../../include/Constructor.h \
   ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -459,14 +462,16 @@ NCGrid.o: NCGrid.cc config_nc.h ../../include/util.h \
   ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
   ../../include/Float64.h ../../include/Str.h ../../include/dods-limits.h \
   ../../include/Url.h ../../include/Array.h ../../include/Vector.h \
-  ../../include/DDS.h ../../include/DAS.h ../../include/Clause.h \
+  ../../include/DDS.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/Clause.h \
   ../../include/expr.h ../../include/RValue.h ../../include/Structure.h \
   ../../include/Constructor.h ../../include/Sequence.h \
   ../../include/Grid.h NCGrid.h ../../include/debug.h
 NCUInt32.o: NCUInt32.cc config_nc.h ../../include/InternalErr.h \
   ../../include/Error.h Dnetcdf.h lnetcdf/netcdf.h ../../include/Pix.h \
   ../../include/IteratorAdapter.h lnetcdf.h ../../include/Connect.h \
-  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
+  ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/BaseType.h ../../include/dods-datatypes.h \
   ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
   ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
@@ -477,11 +482,10 @@ NCUInt32.o: NCUInt32.cc config_nc.h ../../include/InternalErr.h \
   ../../include/Constructor.h ../../include/Sequence.h \
   ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -492,7 +496,8 @@ NCUInt32.o: NCUInt32.cc config_nc.h ../../include/InternalErr.h \
 NCInt32.o: NCInt32.cc config_nc.h ../../include/InternalErr.h \
   ../../include/Error.h Dnetcdf.h lnetcdf/netcdf.h ../../include/Pix.h \
   ../../include/IteratorAdapter.h lnetcdf.h ../../include/Connect.h \
-  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
+  ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
   ../../include/BaseType.h ../../include/dods-datatypes.h \
   ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
   ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
@@ -503,11 +508,10 @@ NCInt32.o: NCInt32.cc config_nc.h ../../include/InternalErr.h \
   ../../include/Constructor.h ../../include/Sequence.h \
   ../../include/Grid.h ../../include/DataDDS.h \
   ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
   ../../include/HTTPCacheDisconnectedMode.h \
   ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
@@ -526,220 +530,7 @@ NCStr.o: NCStr.cc config_nc.h ../../include/InternalErr.h \
   ../../include/AttrTable.h ../../include/Pix.h \
   ../../include/IteratorAdapter.h ../../include/dods-datatypes.h \
   Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h ../../include/Connect.h \
-  ../../include/DAS.h ../../include/DDS.h ../../include/Clause.h \
-  ../../include/expr.h ../../include/RValue.h ../../include/util.h \
-  ../../include/Byte.h ../../include/Int16.h ../../include/UInt16.h \
-  ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
-  ../../include/Float64.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Structure.h \
-  ../../include/Constructor.h ../../include/Sequence.h \
-  ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h \
-  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h
-NCStructure.o: NCStructure.cc config_nc.h ../../include/InternalErr.h \
-  ../../include/Error.h NCStructure.h ../../include/Structure.h \
-  ../../include/Pix.h ../../include/IteratorAdapter.h \
-  ../../include/BaseType.h ../../include/AttrTable.h \
-  ../../include/dods-datatypes.h ../../include/Constructor.h \
-  ../../include/DDS.h ../../include/DAS.h ../../include/Clause.h \
-  ../../include/expr.h ../../include/RValue.h
-NCUrl.o: NCUrl.cc config_nc.h ../../include/InternalErr.h \
-  ../../include/Error.h NCUrl.h ../../include/Url.h \
-  ../../include/dods-limits.h ../../include/BaseType.h \
-  ../../include/AttrTable.h ../../include/Pix.h \
-  ../../include/IteratorAdapter.h ../../include/dods-datatypes.h \
-  ../../include/Str.h
-NCUInt16.o: NCUInt16.cc config_nc.h ../../include/InternalErr.h \
-  ../../include/Error.h Dnetcdf.h lnetcdf/netcdf.h ../../include/Pix.h \
-  ../../include/IteratorAdapter.h lnetcdf.h ../../include/Connect.h \
-  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
-  ../../include/BaseType.h ../../include/dods-datatypes.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Structure.h \
-  ../../include/Constructor.h ../../include/Sequence.h \
-  ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h \
-  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h NCUInt16.h
-NCInt16.o: NCInt16.cc config_nc.h ../../include/InternalErr.h \
-  ../../include/Error.h Dnetcdf.h lnetcdf/netcdf.h ../../include/Pix.h \
-  ../../include/IteratorAdapter.h lnetcdf.h ../../include/Connect.h \
-  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
-  ../../include/BaseType.h ../../include/dods-datatypes.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Structure.h \
-  ../../include/Constructor.h ../../include/Sequence.h \
-  ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h \
-  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h NCInt16.h
-NCFloat32.o: NCFloat32.cc config_nc.h ../../include/InternalErr.h \
-  ../../include/Error.h NCFloat32.h ../../include/Float32.h \
-  ../../include/dods-datatypes.h ../../include/BaseType.h \
-  ../../include/AttrTable.h ../../include/Pix.h \
-  ../../include/IteratorAdapter.h Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h \
-  ../../include/Connect.h ../../include/DAS.h ../../include/DDS.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float64.h ../../include/Str.h ../../include/dods-limits.h \
-  ../../include/Url.h ../../include/Array.h ../../include/Vector.h \
-  ../../include/Structure.h ../../include/Constructor.h \
-  ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/curlver.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/curl/types.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/config_dap.h \
-  ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h \
-  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h
-Ddim.o: Ddim.cc ../../include/config_dap.h Dnetcdf.h lnetcdf/netcdf.h \
-  ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
-  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
-  ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
-  ../../include/InternalErr.h ../../include/dods-datatypes.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Structure.h \
-  ../../include/Constructor.h ../../include/Sequence.h \
-  ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/types.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/RCReader.h \
-  ../../include/ObjectType.h ../../include/HTTPCache.h \
-  ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h
-Dattr.o: Dattr.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
-  ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
-  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
-  ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
-  ../../include/InternalErr.h ../../include/dods-datatypes.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Structure.h \
-  ../../include/Constructor.h ../../include/Sequence.h \
-  ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/types.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/RCReader.h \
-  ../../include/ObjectType.h ../../include/HTTPCache.h \
-  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h Dncx.h
-Dvar.o: Dvar.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
-  ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
-  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
-  ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
-  ../../include/InternalErr.h ../../include/dods-datatypes.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Structure.h \
-  ../../include/Constructor.h ../../include/Sequence.h \
-  ../../include/Grid.h ../../include/DataDDS.h \
-  ../../include/HTTPConnect.h ../../include/curl/curl.h \
-  ../../include/curl/types.h ../../include/curl/easy.h \
-  ../../include/curl/multi.h ../../include/RCReader.h \
-  ../../include/ObjectType.h ../../include/HTTPCache.h \
-  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h
-Dnc.o: Dnc.cc ../../include/config_dap.h NCStructure.h \
-  ../../include/Structure.h ../../include/Pix.h \
-  ../../include/IteratorAdapter.h ../../include/BaseType.h \
-  ../../include/AttrTable.h ../../include/Error.h \
-  ../../include/InternalErr.h ../../include/dods-datatypes.h \
-  ../../include/Constructor.h ../../include/DDS.h ../../include/DAS.h \
-  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
-  Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h ../../include/Connect.h \
-  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
-  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
-  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
-  ../../include/Vector.h ../../include/Sequence.h ../../include/Grid.h \
-  ../../include/DataDDS.h ../../include/HTTPConnect.h \
-  ../../include/curl/curl.h ../../include/curl/types.h \
-  ../../include/curl/easy.h ../../include/curl/multi.h \
-  ../../include/RCReader.h ../../include/ObjectType.h \
-  ../../include/HTTPCache.h ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h ../../include/HTTPResponse.h \
-  ../../include/Response.h ../../include/debug.h NCConnect.h \
-  ../../include/AISConnect.h ../../include/AISMerge.h \
-  ../../include/AISResources.h ../../include/Regex.h \
-  ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h
-Dputget.o: Dputget.cc config_nc.h ../../include/Str.h \
-  ../../include/dods-limits.h ../../include/BaseType.h \
-  ../../include/AttrTable.h ../../include/Pix.h \
-  ../../include/IteratorAdapter.h ../../include/Error.h \
-  ../../include/InternalErr.h ../../include/dods-datatypes.h Dnetcdf.h \
-  lnetcdf/netcdf.h lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
+  ../../include/DAS.h ../../include/DODSResponseObject.h \
   ../../include/DDS.h ../../include/Clause.h ../../include/expr.h \
   ../../include/RValue.h ../../include/util.h ../../include/Byte.h \
   ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
@@ -752,10 +543,234 @@ Dputget.o: Dputget.cc config_nc.h ../../include/Str.h \
   ../../include/curl/multi.h ../../include/RCReader.h \
   ../../include/ObjectType.h ../../include/HTTPCache.h \
   ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
-  ../../include/HTTPCacheDisconnectedMode.h ../../include/HTTPResponse.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
   ../../include/Response.h ../../include/debug.h NCConnect.h \
   ../../include/AISConnect.h ../../include/AISMerge.h \
   ../../include/AISResources.h ../../include/Regex.h \
   ../../include/Resource.h ../../include/AISExceptions.h \
-  ../../include/Connections.h Dncx.h Dv2i.h onstack.h
+  ../../include/Connections.h
+NCStructure.o: NCStructure.cc config_nc.h ../../include/InternalErr.h \
+  ../../include/Error.h NCStructure.h ../../include/Structure.h \
+  ../../include/Pix.h ../../include/IteratorAdapter.h \
+  ../../include/BaseType.h ../../include/AttrTable.h \
+  ../../include/dods-datatypes.h ../../include/Constructor.h \
+  ../../include/DDS.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/Clause.h \
+  ../../include/expr.h ../../include/RValue.h
+NCUrl.o: NCUrl.cc config_nc.h ../../include/InternalErr.h \
+  ../../include/Error.h NCUrl.h ../../include/Url.h \
+  ../../include/dods-limits.h ../../include/BaseType.h \
+  ../../include/AttrTable.h ../../include/Pix.h \
+  ../../include/IteratorAdapter.h ../../include/dods-datatypes.h \
+  ../../include/Str.h
+NCUInt16.o: NCUInt16.cc config_nc.h ../../include/InternalErr.h \
+  ../../include/Error.h Dnetcdf.h lnetcdf/netcdf.h ../../include/Pix.h \
+  ../../include/IteratorAdapter.h lnetcdf.h ../../include/Connect.h \
+  ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
+  ../../include/BaseType.h ../../include/dods-datatypes.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+  ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h NCUInt16.h
+NCInt16.o: NCInt16.cc config_nc.h ../../include/InternalErr.h \
+  ../../include/Error.h Dnetcdf.h lnetcdf/netcdf.h ../../include/Pix.h \
+  ../../include/IteratorAdapter.h lnetcdf.h ../../include/Connect.h \
+  ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
+  ../../include/BaseType.h ../../include/dods-datatypes.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+  ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h NCInt16.h
+NCFloat32.o: NCFloat32.cc config_nc.h ../../include/InternalErr.h \
+  ../../include/Error.h NCFloat32.h ../../include/Float32.h \
+  ../../include/dods-datatypes.h ../../include/BaseType.h \
+  ../../include/AttrTable.h ../../include/Pix.h \
+  ../../include/IteratorAdapter.h Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h \
+  ../../include/Connect.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float64.h ../../include/Str.h ../../include/dods-limits.h \
+  ../../include/Url.h ../../include/Array.h ../../include/Vector.h \
+  ../../include/Structure.h ../../include/Constructor.h \
+  ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h
+Ddim.o: Ddim.cc ../../include/config_dap.h Dnetcdf.h lnetcdf/netcdf.h \
+  ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
+  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/Error.h ../../include/DODSResponseObject.h \
+  ../../include/DDS.h ../../include/BaseType.h \
+  ../../include/InternalErr.h ../../include/dods-datatypes.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+  ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h
+Dattr.o: Dattr.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
+  ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
+  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/Error.h ../../include/DODSResponseObject.h \
+  ../../include/DDS.h ../../include/BaseType.h \
+  ../../include/InternalErr.h ../../include/dods-datatypes.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+  ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h Dncx.h
+Dvar.o: Dvar.cc config_nc.h Dnetcdf.h lnetcdf/netcdf.h \
+  ../../include/Pix.h ../../include/IteratorAdapter.h lnetcdf.h \
+  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+  ../../include/Error.h ../../include/DODSResponseObject.h \
+  ../../include/DDS.h ../../include/BaseType.h \
+  ../../include/InternalErr.h ../../include/dods-datatypes.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+  ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h
+Dnc.o: Dnc.cc ../../include/config_dap.h NCStructure.h \
+  ../../include/Structure.h ../../include/Pix.h \
+  ../../include/IteratorAdapter.h ../../include/BaseType.h \
+  ../../include/AttrTable.h ../../include/Error.h \
+  ../../include/InternalErr.h ../../include/dods-datatypes.h \
+  ../../include/Constructor.h ../../include/DDS.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/Clause.h \
+  ../../include/expr.h ../../include/RValue.h Dnetcdf.h lnetcdf/netcdf.h \
+  lnetcdf.h ../../include/Connect.h ../../include/util.h \
+  ../../include/Byte.h ../../include/Int16.h ../../include/UInt16.h \
+  ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
+  ../../include/Float64.h ../../include/Str.h ../../include/dods-limits.h \
+  ../../include/Url.h ../../include/Array.h ../../include/Vector.h \
+  ../../include/Sequence.h ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h ../../include/debug.h NCConnect.h \
+  ../../include/AISConnect.h ../../include/AISMerge.h \
+  ../../include/AISResources.h ../../include/Regex.h \
+  ../../include/Resource.h ../../include/AISExceptions.h \
+  ../../include/Connections.h
+Dputget.o: Dputget.cc config_nc.h ../../include/Str.h \
+  ../../include/dods-limits.h ../../include/BaseType.h \
+  ../../include/AttrTable.h ../../include/Pix.h \
+  ../../include/IteratorAdapter.h ../../include/Error.h \
+  ../../include/InternalErr.h ../../include/dods-datatypes.h \
+  ../../include/debug.h Dnetcdf.h lnetcdf/netcdf.h lnetcdf.h \
+  ../../include/Connect.h ../../include/DAS.h \
+  ../../include/DODSResponseObject.h ../../include/DDS.h \
+  ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+  ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+  ../../include/Float32.h ../../include/Float64.h ../../include/Url.h \
+  ../../include/Array.h ../../include/Vector.h ../../include/Structure.h \
+  ../../include/Constructor.h ../../include/Sequence.h \
+  ../../include/Grid.h ../../include/DataDDS.h \
+  ../../include/HTTPConnect.h ../../include/curl/curl.h \
+  ../../include/curl/types.h ../../include/curl/easy.h \
+  ../../include/curl/multi.h ../../include/RCReader.h \
+  ../../include/ObjectType.h ../../include/HTTPCache.h \
+  ../../include/config_dap.h ../../include/ResponseTooBigErr.h \
+  ../../include/HTTPCacheDisconnectedMode.h \
+  ../../include/SignalHandlerRegisteredErr.h ../../include/HTTPResponse.h \
+  ../../include/Response.h NCConnect.h ../../include/AISConnect.h \
+  ../../include/AISMerge.h ../../include/AISResources.h \
+  ../../include/Regex.h ../../include/Resource.h \
+  ../../include/AISExceptions.h ../../include/Connections.h Dncx.h Dv2i.h \
+  onstack.h
 Dncx.o: Dncx.cc Dncx.h lnetcdf/netcdf.h
