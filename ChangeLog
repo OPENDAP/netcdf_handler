@@ -1,0 +1,27 @@
+1999-05-07  James Gallagher  <jimg@dcz.dods.org>
+
+	* String-->string
+
+1999-05-05  James Gallagher  <jimg@dcz.dods.org>
+
+	* Added test-coverage target to Makefile.in
+
+1999-01-21  James Gallagher  <jimg@dcz.cvo.oneworld.com>
+
+	* The server now registers the file name properly. This ensures
+	that the new projection functions can call the read() member
+	function and not fail.
+
+1998-11-11  James Gallagher  <jimg@dcz.cvo.oneworld.com>
+
+	* Fixed a resource leak when working with local files.
+
+1998-11-02  James Gallagher  <jimg@dcz.cvo.oneworld.com>
+
+	* Fixed the configure scripts.
+
+	* Fixed up the ncview directory to work correctly with the new
+	Makefile organization.
+
+	* Fixed a bug where local connections were not properly freed.
+

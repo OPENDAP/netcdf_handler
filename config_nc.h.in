@@ -1,0 +1,109 @@
+/* config_nc.h.in.  Generated automatically from configure.in by autoheader.  */
+#ifndef _CONFIG_NC_H_
+#define _CONFIG_NC_H_
+
+/* $Log: config_nc.h.in,v $
+/* Revision 1.1  1999/07/28 00:22:46  jimg
+/* Added
+/*
+/* Revision 1.5  1999/05/07 23:45:33  jimg
+/* String --> string fixes
+/*
+/* Revision 1.4  1996/12/18 17:27:47  jimg
+/* Removed OLD_FILLVALUES.
+/*
+ * Revision 1.3  1996/11/13 22:02:43  jimg
+ * Fixed SIZEOF macros.
+ *
+ * Revision 1.2  1996/08/23 15:23:48  jimg
+ * Added __unused__ macro. This can be used to mark identifiers as unused
+ * without the long syntax required by gcc/g++.
+ *
+ * Revision 1.1  1995/10/30 20:30:43  jimg
+ * Added.
+ *
+ * Revision 1.1  1995/10/30  20:02:00  jimg
+ * Created from acconfig.h in src/dap.
+ *
+ */
+
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef off_t
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* If defined, enable memory leak detection through libdbnew.a. Make sure to */
+/* link with that library. */
+#undef TRACE_NEW
+
+/* If defined, the DBG() macro defined in debug.h is activated. This macro */
+/* is used for nominal program instrumentation */
+#undef DEBUG
+
+/* If defined, the DBG2() macro defined in debug.h is activated. This macro */
+/* is used for detailed program instrumentation. Anything that prints half a */
+/* page or more of stuff every time it is executed should be inside DBG2(), */
+/* not DBG(). */
+#undef DEBUG2
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the strtol function.  */
+#undef HAVE_STRTOL
+
+/* Define if you have the <fcntl.h> header file.  */
+#undef HAVE_FCNTL_H
+
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Used by the NetCDF library */
+#undef OLD_FILLVALUES
+
+/* The number of bytes in a char.  */
+#undef SIZEOF_CHAR
+
+/* The number of bytes in a double.  */
+#undef SIZEOF_DOUBLE
+
+/* The number of bytes in a float.  */
+#undef SIZEOF_FLOAT
+
+/* The number of bytes in a int.  */
+#undef SIZEOF_INT
+
+/* The number of bytes in a long.  */
+#undef SIZEOF_LONG
+
+/* GNU gcc/g++ provides a way to mark variables, etc. as unused */
+
+#if defined(__GNUG__) || defined(__GNUC__)
+#define not_used __attribute__ ((unused))
+#else
+#define not_used 
+#endif
+
+#endif /* _CONFIG_NC_H_ */
+
+

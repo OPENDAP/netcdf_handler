@@ -1,0 +1,74 @@
+
+$Id: README,v 1.1 1999/07/28 00:22:45 jimg Exp $
+
+	      			  nc-dods
+				Version 2.0
+				  May 1996
+
+This file contains information about the DODS-netCDF software. For information
+about building and using the software, see the files INSTALL and USING. For
+information about secure servers (that limit access to domains or individual
+people) see the file SECURITY.
+
+The Distributed Oceanographic Data System (DODS) allows you to access local
+and/or remote data sets without the need for format conversion or changes
+to the original software. Instead, existing software can be rebuilt using 
+the DODS replacements for certain standard components. This rebuilt would make
+the software into a DODS client which can now communicate with DODS servers.
+
+DODS also makes it simple to provide others with direct, over-the-network,
+access to your data. There is no need to reformat your data so that a new
+system can read it. Instead DODS uses the http server along with a dispatch 
+script and a set of three server programs (Data Attribute Server, Data 
+Structure Server, and Data Server) to make your existing data files available
+to anyone who has access to a program rebuilt with DODS components.
+
+For more information about DODS, see the URL
+
+    http://dods.gso.uri.edu
+
+nc-dods is a client-server implementation of the Unidata netCDF API, based on
+the Distributed Oceanographic Data System. nc-dods contains a new
+implementation of the netCDF library which can be linked with programs which
+currently are built with the standard implementation of the API. In addition,
+the software also contains a matching data server which can be used along
+with the client library.
+
+The replacement library included in the nc-dods distribution mirrors the
+standard implementation of the netCDF API very closely. A variety of software
+packages have been developed for netCDF data display and analysis; rebuilding
+these packages with nc-dods library instead of the original netCDF library
+makes them capable of accessing data over the network through the provided
+server software. The user can refer to the entire remote dataset using a URL
+instead of the local file name. Furthermore, if the user wants to work only
+with a small part of the data set, a constraint expression can be supplied
+along with the URL to save on network data transmition time.
+
+The current nc-dods client software supports the C programming interface 
+and the Fortran Jacket of the netCDF for UNIX platform.
+
+You can obtain a copy of the latest version of nc-dods software using
+anonymous FTP from:
+
+    Source files: ftp://dods.gso.uri.ed/pub/dods/
+    Binary files: ftp://dods.gso.uri.ed/pub/dods/binaries/<platform>/...
+
+Or, using the Web:
+    
+    http://dods.gso.uri.edu/DODS/home/software.html
+
+To built from the source, You need to have the latest version of DODS core 
+software which is also available from dods.gso.uri.edu.
+
+Included in this distribution are: 
+
+ - The netCDF surrogate client library,
+ - The Fortran jacket for the netCDF surrogate library,
+ - server programs and their dispatch script (nc-dods, nc-das, nc-dds, nc),
+ - ncdump and ncview programs rebuilt with nc-dods client library, 
+ - test programs, and documentation.
+
+Questions about nc-dods may be sent to reza@dods.gso.uri.edu.
+
+Good Luck :-)
+Reza Nekovei, URI

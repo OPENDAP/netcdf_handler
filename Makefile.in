@@ -1,0 +1,235 @@
+
+# $Id: Makefile.in,v 1.1 1999/07/28 00:22:42 jimg Exp $
+
+@SET_MAKE@
+
+# Set makefile variables, some with values supplid by configure 
+# DEFS gets the `-D' defines that describe what a particular system has
+# or doesn't have.
+
+PROG = libnc-dods.a nc_das nc_dds nc_dods
+DODS_ROOT = ../..
+
+WWW_ROOT = @WWW_ROOT@
+INCS = -I$(DODS_ROOT)/include -I./lnetcdf @INCS@
+DEFS = -DUSE_LIBGXX_INLINES -DLOCAL @SWAP@ @NETLONG@ @DEFS@
+CPPFLAGS = @CPPFLAGS@ $(DEFS) $(INCS)
+CFLAGS = @CFLAGS@ $(SWAP) $(NETLONG)
+CXXFLAGS = @CXXFLAGS@
+TEST_COV_FLAGS = -ftest-coverage -fprofile-arcs
+TAGS_FLAGS = -i ../dap/TAGS
+
+# Make sure that the core software libraries just built can be found without
+# first running make install, but that if `make install' and `make clean' has
+# been run those libraries will be found in the `lib' directory.
+LDFLAGS = -L. -L./lnetcdf -L$(DODS_ROOT)/lib @LDFLAGS@
+LFLAGS=-8
+YFLAGS=-d
+LIBS = -lnc-dods -ldap++ -lnc-dods -ldap++ @LIBS@
+
+# Set the instalation directories; prefix can be set on the command line
+# during Makefile construction with `./configure --prefix /my/choice'
+
+prefix = @prefix@
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+includedir = $(prefix)/include
+manext = 1
+mandir = $(prefix)/man/man$(manext)
+
+src = $(DODS_ROOT)/src
+etcdir = $(DODS_ROOT)/etc
+
+INSTALLMAN = man
+
+SHELL = /bin/sh
+srcdir = @srcdir@
+version = @VERSION@
+dir = nc-dods-@VERSION@
+
+COMPONENT_NAME = DODS netCDF Server
+AWK = @AWK@
+
+# testsuite specifics
+RUNTEST= runtest
+RUNTESTFLAGS= #--all --verbose
+
+# names of key programs
+
+LN_S = @LN_S@
+AWK = @AWK@
+CC = @CC@
+CXX = @CXX@
+YACC = @YACC@
+LEX = @LEX@
+AR = ar
+RANLIB = @RANLIB@
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+TAGS = etags
+STRIP = strip
+VPATH = .:lnetcdf
+
+NCSRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc \
+	NCInt32.cc NCList.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc \
+	NCUInt16.cc NCInt16.cc NCFloat32.cc
+
+NCOBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
+	NCList.o NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
+	NCUInt16.o NCInt16.o NCFloat32.o
+
+SSRCS = nc_das.cc ncdas.cc nc_dds.cc ncdds.cc nc_dods.cc $(NETSRC)
+DASOBJS = nc_das.o ncdas.o $(NETOBJ)
+DDSOBJS = nc_dds.o ncdds.o $(NETOBJ)
+SRVOBJS = nc_dods.o ncdds.o $(NETOBJ)
+
+NETSRC = NCConnect.cc inst.cc $(NCSRC)
+NETOBJ = NCConnect.o inst.o $(NCOBJ)
+
+LIBSRCS = $(NETSRC) Ddim.cc Dattr.cc Dvar.cc Dnc.cc Dputget.cc \
+           Dncx.cc 
+LIBOBJS = $(NETOBJ) Ddim.o Dattr.o Dvar.o Dnc.o Dputget.o Dncx.o
+
+NCHDRS = lnetcdf.h
+# XDRFILE	= @XDRFILE@
+
+NCOBJS = lattr.o ldim.o lerror.o llibvers.o lnc.o lncio.o \
+	 lncx.o lputget.o lstring.o lt_nc.o lv1hpg.o lv2i.o lvar.o 
+# 	 l@XDRFILE@.o
+
+# Matlab client can be suppressed by a switch to configure.
+all: libnc-dods.a nc_das nc_dds nc_dods ncdump
+
+nc_das:	$(DASOBJS) libnc-dods.a
+	$(CXX) $(LDFLAGS) -o nc_das $(DASOBJS) $(LIBS)	
+
+nc_dds: $(DDSOBJS) libnc-dods.a
+	$(CXX) $(LDFLAGS) -o nc_dds $(DDSOBJS)  $(LIBS)
+
+nc_dods: $(SRVOBJS) libnc-dods.a
+	$(CXX) $(LDFLAGS) -o nc_dods $(SRVOBJS) $(LIBS)
+
+libnc-dods.a: $(LIBOBJS) $(NCOBJS) fortran
+	$(AR) -cru $@ $?
+	$(RANLIB) $@
+
+.PHONY: fortran
+fortran:
+	-(cd fortran && $(MAKE) $(MFLAGS) all)
+
+.PHONY:	ncdump
+ncdump:
+	-(cd ncdump && $(MAKE) $(MFLAGS) all)
+
+# Standard targets with some customization for das-test and dds-test
+
+Makefile: ${srcdir}/Makefile.in
+	${SHELL} config.status
+
+check:
+	-(cd nc_test && $(MAKE) $(MFLAGS) check)
+
+test-coverage: clean
+	$(MAKE) $(MFLAGS) CXXFLAGS="$(CXXFLAGS) $(TEST_COV_FLAGS)" check
+
+# Note that the gcov options -f and -b are useful but sometimes make looking
+# at the results of coverage analysis a little taxing. -b reports on all
+# branched and -f reports on all functions. The -l -o options summarize on a
+# per-file basis. 3/27/98 jhrg
+collect-coverage-data:
+	(cd test-coverage; \
+         cov_dat="coverage-data-`date +%m.%d.%y`"; \
+	 touch $$cov_dat; \
+	 for f in $(ALLSRCS); do \
+	     echo "\n*** Coverage data for $$f ***\n" >> $$cov_dat; \
+	     gcov -l -o ../ $$f >> $$cov_dat; \
+         done)
+
+install: libnc-dods.a fortran nc_das nc_dds nc_dods
+	$(INSTALL_DATA) libnc-dods.a $(libdir)
+	$(RANLIB) $(libdir)/libnc-dods.a
+	$(INSTALL_PROGRAM) -s nc_das $(etcdir)
+	$(INSTALL_PROGRAM) -s nc_dds $(etcdir)
+	$(INSTALL_PROGRAM) -s nc_dods $(etcdir)
+	$(INSTALL_PROGRAM) nph-nc $(etcdir)
+	-(cd ncdump && $(MAKE) $(MFLAGS) install)
+
+# Do not intall in the fortran jackets directory - the jackets are added to
+# the library at build time
+# cd fortran && $(MAKE) $(MFLAGS) install && cd ..
+
+clean:	
+	-rm -f *.o *.sum *.log *~ core
+	-rm -f $(PROG) libnc-dods.a
+	-(cd ncdump && $(MAKE) $(MFLAGS) clean)
+	-(cd fortran && $(MAKE) $(MFLAGS) clean)
+
+distclean:
+	-rm -f *.o *.sum *.log *~ core
+	-rm -f $(PROG) libnc-dods.a
+	-rm -f config.status config.log config.cache nph-nc
+	-rm -f site.exp
+	-(cd ncdump && $(MAKE) $(MFLAGS) distclean)
+	-(cd fortran && $(MAKE) $(MFLAGS) distclean)
+
+.PHONY: depend
+depend: 
+	> dependencies
+	@depend@ -m dependencies \
+	-- $(CPPFLAGS) -I@GPP_INC@ -- \
+	$(SSRCS) $(CSRCS)
+	-(cd ncdump && $(MAKE) $(MFLAGS) depend)
+	-(cd fortran && $(MAKE) $(MFLAGS) depend)
+
+.PHONY: tar
+tar:
+	-rm -f config.cache config.log config.status
+	cd $(DODS_ROOT)/.. && \
+	tar --exclude '*/old' --exclude '*/.#*' --exclude '*/CVS' \
+	    --gzip --create --dereference --file DODS-$(dir).tar.gz \
+	    DODS/src/$(dir)
+
+.PHONY: update-version
+update-version: check-version
+	@echo "Version is: `cat version.h`"
+	if [ ! -d ../$(dir) ]; then \
+	    mv ../nc-dods* ../$(dir);\
+	fi
+	touch $(DODS_ROOT)/VERSION; cat $(DODS_ROOT)/VERSION | \
+	  $(AWK) ' \
+	    BEGIN { found = 0 } \
+	    { if ( $$0 ~ /^$(COMPONENT_NAME):/) \
+	        { print "$(COMPONENT_NAME):", $(version); found = 1 } \
+	      else { print $$0 } } \
+	    END { if ( ! found) { print "$(COMPONENT_NAME):", $(version) } \
+	        }' > $(DODS_ROOT)/VERSION
+
+# Compare the version encoded in this Makefile (set by configure) with the
+# version in version.h. The version make variable is set up near the top of
+# the Makefile.
+.PHONY: check-version
+check-version:
+	@echo "Checking for version.h and Makefile version match-up"
+	@if [ "$(version)" != "`cat version.h`" ]; \
+	then \
+		echo "You must manually re-run configure!"; \
+		exit 1; \
+	else \
+		echo "Yes, they match."; \
+	fi
+
+.PHONY: tags
+tags:
+	$(TAGS) $(TAGS_FLAGS) *.cc *.h lnetcdf/*.c lnetcdf/*.h
+
+.SUFFIXES:      .o .cc .c
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
+
+include dependencies
