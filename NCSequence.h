@@ -27,7 +27,10 @@ extern Sequence * NewSequence(const string &n);
 class NCSequence: public Sequence, public NCAccess {
 private:
     int d_size;           //< The 'dimension size' Used for/by translation
+    int d_start, d_stop, d_stride; //< Array CE info from the URL.
 
+    friend class NCSequenceTest;
+    
 protected:
     void m_duplicate(const NCSequence &bt);
         
@@ -39,6 +42,7 @@ public:
     NCSequence &operator=(const NCSequence &rhs);
     virtual BaseType *ptr_duplicate();
         
+    virtual void store_projection(const string &proj);
     virtual string build_constraint(int outtype, const size_t *start,
         const size_t *edges, const ptrdiff_t *stride) throw(Error);
 
@@ -51,6 +55,9 @@ public:
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.10  2005/01/29 00:20:29  jimg
+ * Checkpoint: CEs ont he command line/ncopen() almost work.
+ *
  * Revision 1.9  2005/01/26 23:25:51  jimg
  * Implemented a fix for Sequence access by row number when talking to a
  * 3.4 or earlier server (which contains a bug in is_end_of_rows()).

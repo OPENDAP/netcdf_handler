@@ -13,12 +13,12 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.8 2005/01/26 23:25:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.9 2005/01/29 00:20:29 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
 
-// #define DODS_DEBUG 1
+#define DODS_DEBUG 1
 
 #include "InternalErr.h"
 #include "debug.h"
@@ -43,6 +43,9 @@ void
 NCSequence::m_duplicate(const NCSequence &rhs)
 {
     d_size = rhs.d_size;
+    d_start = rhs.d_start;
+    d_stop = rhs.d_stop;
+    d_stride = rhs.d_stride;
 
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));
     
@@ -56,7 +59,8 @@ NCSequence::ptr_duplicate()
     return new NCSequence(*this);
 }
 
-NCSequence::NCSequence(const string &n) : Sequence(n)
+NCSequence::NCSequence(const string &n) : Sequence(n), 
+        d_size(0), d_start(-1), d_stop(-1), d_stride(-1)
 {
 }
 
@@ -80,6 +84,57 @@ NCSequence::operator=(const NCSequence &rhs)
     m_duplicate(rhs);
     
     return *this;
+}
+
+void
+NCSequence::store_projection(const string &proj)
+{
+    // Scan the projections looking for one about this variable
+    string::size_type name_pos = proj.find(name());
+    if (name_pos == string::npos)
+        return;
+    
+    // OK, this variable is in there. At name_pos
+    string clause;
+    string::size_type end_clause_pos = proj.find(',', name_pos);
+    if (end_clause_pos == string::npos)
+        clause = proj.substr(name_pos);
+    else 
+        clause = proj.substr(name_pos, end_clause_pos - name_pos);
+
+    // Now extract the indices and store the values.
+    // First, replace syntax with spaces...
+    string::size_type separator = 0;
+    // separator = clause.find_first_of("[]:", separator);
+    while ((separator = clause.find_first_of("[]:", separator)) != string::npos) {
+        clause.replace(separator, 1, " ");
+    }
+    /// now read numbers after name.
+    istringstream iss(clause.c_str());
+    string dummy;
+    int i1, i2, i3;
+    iss >> dummy;
+    if (iss >> i1) {
+        if (iss >> i2) {
+            if (iss >> i3) {
+                // Found start, stride, stop
+                d_start = i1;
+                d_stride = i2;
+                d_stop = i3;
+                return;
+            }
+            // Found start, stop but no stride
+            d_start = i1;
+            d_stride = 1;
+            d_stop = i2;
+            return;
+        }
+        // Found start but no stride or stop
+        d_start = i1;
+        d_stop = i1;
+        d_stride = 1;
+        return;
+    }
 }
 
 /** Build a constraint for a Sequence. Build a CE for then entire Sequence 
@@ -109,11 +164,18 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     long inedges = edges != NULL ? edges[dm] : get_size() - instart;
     long instep = stride != NULL ? stride[dm] : 1;
 
-    // external constraint (from ncopen)
+    // get CE info set in NCArray. The comment there is that this is the CE
+    // from the URL, but I don't think that's correct. Try using the values
+    // set using store_projection().
+#if 1
     int ext_start = get_starting_row_number(); 
     int ext_step = get_row_stride();
     int ext_stop = get_ending_row_number();
-
+#else
+    int ext_start = d_start;
+    int ext_step = d_stride;
+    int ext_stop = d_stop;
+#endif
     string version_info = get_implementation_version();
 
     version_info.replace(version_info.find("/"), 1, " ");
@@ -313,6 +375,9 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.9  2005/01/29 00:20:29  jimg
+// Checkpoint: CEs ont he command line/ncopen() almost work.
+//
 // Revision 1.8  2005/01/26 23:25:51  jimg
 // Implemented a fix for Sequence access by row number when talking to a
 // 3.4 or earlier server (which contains a bug in is_end_of_rows()).

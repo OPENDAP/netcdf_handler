@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.14 2005/01/26 23:25:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.15 2005/01/29 00:20:29 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -29,7 +29,7 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.14 2005/01/26 23:25:51 jimg 
 #include <iostream>
 #include <sstream>
 
-// #define DODS_DEBUG 1
+#define DODS_DEBUG 1
 
 #include "Error.h"
 #include "InternalErr.h"
@@ -221,13 +221,22 @@ NCArray::build_constraint(int outtype, const size_t *start,
         long instart = start != NULL ? start[dm] : 0;
         long inedges = edges != NULL ? edges[dm] : dimension_size(d) - instart;
         long instep = stride != NULL ? stride[dm] : 1;
-    
+ 
         // external constraint (from ncopen)
+        // I don't think this is correct anymore. The constrained DDS is
+        // requested from the server using the CE supplied to ncopen. That 
+        // means the client doesn't need to merge the two CEs. Even though
+        // these methods are set to retrieve the constrained values ('true'),
+        // we will read the values for the whole array if there's not CE that
+        // was set using Array::add_contraint() (which isn't called by any of
+        // this code). 
+#if 0
         int ext_start = dimension_start(d, true); 
         int ext_step = dimension_stride(d, true);
         int ext_stop = dimension_stop(d, true);
-    
+#endif    
         DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
+#if 0
         DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
     
         // create constraint expr. by combining the constraints
@@ -235,6 +244,11 @@ NCArray::build_constraint(int outtype, const size_t *start,
         int Tstep = instep * ext_step;
         int Tstop = (ext_stop < ext_start+(instart+(inedges-1)*instep)*ext_step) 
                     ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
+#endif 
+        int Tstart = instart;
+        int Tstep = instep;
+        int Tstop = (instart+(inedges-1)*instep);
+    
     
         // Check the validity of the array constraints
         if ((instart >= dimension_size(d))
@@ -624,6 +638,9 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.15  2005/01/29 00:20:29  jimg
+// Checkpoint: CEs ont he command line/ncopen() almost work.
+//
 // Revision 1.14  2005/01/26 23:25:51  jimg
 // Implemented a fix for Sequence access by row number when talking to a
 // 3.4 or earlier server (which contains a bug in is_end_of_rows()).
