@@ -18,7 +18,7 @@
 #include "config_nc.h"
 #include "util.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.8 2003/12/08 18:06:37 edavis Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.9 2004/03/08 19:08:33 jimg Exp $"};
 
 #include "NCGrid.h"
 #include "debug.h"
@@ -60,22 +60,11 @@ NCGrid::read(const string &dataset)
     // read array elements
     if (array_var()->send_p() || array_var()->is_in_selection())
 	array_var()->read(dataset);
-#if 0
-    // Switch to this code once the merge with the 3.4 branch is complete in
-    // src/dap. Also below. 09/30/03 jhrg
-    if (array_var()->send_p() || array_var()->is_in_selection())
-	array_var()->read(dataset);
-#endif
 
     // read maps elements
-    for (Pix p = first_map_var(); p; next_map_var(p))
-	if (map_var(p)->send_p() || map_var(p)->is_in_selection())
-	    map_var(p)->read(dataset);
-#if 0
-    for (Pix p = first_map_var(); p; next_map_var(p))
-	if (map_var(p)->send_p() || map_var(p)->is_in_selection())
-	    map_var(p)->read(dataset);
-#endif
+    for (Map_iter p = map_begin(); p != map_end(); ++p)
+	if ((*p)->send_p() || (*p)->is_in_selection())
+	    (*p)->read(dataset);
 
     set_read_p(true);
 
@@ -83,6 +72,12 @@ NCGrid::read(const string &dataset)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.9  2004/03/08 19:08:33  jimg
+// This version of the code uses the Unidata netCDF 3.5.1 version of the
+// netCDF 2 API emulation. This functions call our netCDF 3 API functions
+// which may either interact with a DAP server r call the local netCDF 3
+// functions.
+//
 // Revision 1.8  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //

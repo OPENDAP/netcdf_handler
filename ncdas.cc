@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.8 2004/02/25 00:47:52 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.9 2004/03/08 19:08:33 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,7 +208,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	    return errstat;
 	}
 
-	value = new char [(len + 1) * lnctypelen(datatype)];
+	value = new char [(len + 1) * nctypelen(datatype)];
 
 	if (!value) {
             ErrMsgT("nc_das server: Out of memory!");
@@ -317,9 +317,9 @@ read_variables(DAS &das, const string &filename) throw (Error)
     int xdimid;
     char dimname[MAX_NC_NAME];
     nc_type datatype = NC_CHAR;
-    (void) lncinquire(ncid, (int *)0, (int *)0, (int *)0, &xdimid);
+    nc_inq(ncid, (int *)0, (int *)0, (int *)0, &xdimid);
     if (xdimid != -1){
-	(void) lncdiminq(ncid, xdimid, dimname, (long *)0);
+	nc_inq_dim(ncid, xdimid, dimname, (size_t *)0);
 	char *print_rep = print_attr(datatype, 0, dimname);	
 	attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
 	attr_table_ptr->append_attr("Unlimited_Dimension", 
@@ -345,6 +345,12 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.9  2004/03/08 19:08:33  jimg
+// This version of the code uses the Unidata netCDF 3.5.1 version of the
+// netCDF 2 API emulation. This functions call our netCDF 3 API functions
+// which may either interact with a DAP server r call the local netCDF 3
+// functions.
+//
 // Revision 1.8  2004/02/25 00:47:52  jimg
 // This code will translate Structures, including ones that are nested.
 // Not tested much; needs work.

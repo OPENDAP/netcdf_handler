@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.7 2003/12/08 18:06:37 edavis Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.8 2004/03/08 19:08:33 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -65,21 +65,23 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_
 
     *has_stride = false;
 
-    for (Pix p = first_dim(); p ; next_dim(p), id++) {
-      start = dimension_start(p, true); 
-      stride = dimension_stride(p, true);
-      stop = dimension_stop(p, true);
-      // Check for empty constraint
-      if(start+stop+stride == 0)
-	return -1;
+    for (Dim_iter p = dim_begin(); p != dim_end(); ++p, id++) {
+	start = dimension_start(p, true); 
+	stride = dimension_stride(p, true);
+	stop = dimension_stop(p, true);
+	// Check for empty constraint
+	if (start + stop + stride == 0)
+	    return -1;
 
-      cor[id] = start;
-      step[id] = stride;
-      edg[id] = ((stop - start)/stride) + 1; // count of elements
-      nels *= edg[id];      // total number of values for variable
-      if (stride != 1)
-	*has_stride = true;
+	cor[id] = start;
+	step[id] = stride;
+	edg[id] = ((stop - start)/stride) + 1; // count of elements
+	nels *= edg[id];      // total number of values for variable
+
+	if (stride != 1)
+	    *has_stride = true;
     }
+
     return nels;
 }
 
@@ -159,9 +161,9 @@ NCArray::read(const string &dataset)
     // Correct data types to match with the local machine data types
 
     if ((datatype == NC_FLOAT) 
-	&& (lnctypelen(datatype) != sizeof(dods_float32))) {
+	&& (nctypelen(datatype) != sizeof(dods_float32))) {
 
-        fltbuf = (float *) new char [(nels*lnctypelen(datatype))];
+        fltbuf = (float *) new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
 	  errstat = lnc_get_vars_float(ncid, varid, cor, edg, step, fltbuf);
@@ -186,9 +188,9 @@ NCArray::read(const string &dataset)
         delete [] fltbuf;
     }
     else if ((datatype == NC_DOUBLE) 
-	&& (lnctypelen(datatype) != sizeof(dods_float64))) {
+	&& (nctypelen(datatype) != sizeof(dods_float64))) {
 
-        dblbuf = (double *) new char [(nels*lnctypelen(datatype))];
+        dblbuf = (double *) new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
 	    errstat = lnc_get_vars_double(ncid, varid, cor, edg, step, dblbuf);
@@ -212,9 +214,9 @@ NCArray::read(const string &dataset)
         delete [] dblbuf;
     }
     else if ((datatype == NC_SHORT) 
-	&& (lnctypelen(datatype) != sizeof(dods_int16))) {
+	&& (nctypelen(datatype) != sizeof(dods_int16))) {
 
-        shtbuf = (short *)new char [(nels*lnctypelen(datatype))];
+        shtbuf = (short *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
 	    errstat = lnc_get_vars_short(ncid, varid, cor, edg, step, shtbuf);
@@ -239,9 +241,9 @@ NCArray::read(const string &dataset)
         delete [] shtbuf;
     }
     else if ((datatype == NC_LONG) 
-	&& (lnctypelen(datatype) != sizeof(dods_int32))) {
+	&& (nctypelen(datatype) != sizeof(dods_int32))) {
 
-      lngbuf = (nclong *)new char [(nels*lnctypelen(datatype))];
+      lngbuf = (nclong *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
 	    errstat = lnc_get_vars(ncid, varid, cor, edg, step, lngbuf);
@@ -266,7 +268,7 @@ NCArray::read(const string &dataset)
     }
     else if (datatype == NC_CHAR) {
 
-        chrbuf = (char *)new char [(nels*lnctypelen(datatype))];
+        chrbuf = (char *)new char [(nels*nctypelen(datatype))];
 
 	// read the vlaues in from the local netCDF file
 	if( has_stride)
@@ -298,7 +300,7 @@ NCArray::read(const string &dataset)
     }
     else {
       //default (no type conversion needed and the type Byte)
-      char *convbuf = new char [(nels*lnctypelen(datatype))];
+      char *convbuf = new char [(nels*nctypelen(datatype))];
 
       if( has_stride)
 	errstat = lnc_get_vars(ncid, varid, cor, edg, step, (void *)convbuf);
@@ -322,6 +324,12 @@ NCArray::read(const string &dataset)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.8  2004/03/08 19:08:33  jimg
+// This version of the code uses the Unidata netCDF 3.5.1 version of the
+// netCDF 2 API emulation. This functions call our netCDF 3 API functions
+// which may either interact with a DAP server r call the local netCDF 3
+// functions.
+//
 // Revision 1.7  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //
