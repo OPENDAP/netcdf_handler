@@ -13,10 +13,10 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.6 2003/12/08 18:06:37 edavis Exp $"};
+static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.7 2004/09/08 22:08:22 jimg Exp $"};
 
 #ifdef __GNUG__
-#pragma implementation
+//#pragma implementation
 #endif
 
 #include "InternalErr.h"
@@ -37,6 +37,30 @@ BaseType *
 NCStr::ptr_duplicate()
 {
     return new NCStr(*this);
+}
+
+void
+NCStr::extract_values(void *values, int outtype) throw(Error)
+{
+    char * tbfr = (char *)values;
+    string *cp = 0;
+    string **cpp = &cp;
+    buf2val((void **)cpp);
+
+    for (unsigned int cntr=0; cntr<cp->length() || 
+         (cp->length()==0 && cntr==0); cntr++) {
+        *tbfr = *(cp->c_str()+cntr);
+        tbfr++;
+    }
+        
+    // Now get rid of the C++ string object.
+    delete cp;
+}
+
+nc_type
+NCStr::get_nc_type() throw(InternalErr)
+{
+    return NC_CHAR;
 }
 
 bool
@@ -99,6 +123,12 @@ NCStr::read(const string &dataset)
 }
 
 // $Log: NCStr.cc,v $
+// Revision 1.7  2004/09/08 22:08:22  jimg
+// More Massive changes: Code moved from the files that clone the netCDF
+// function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+// translation functions are now methods. The netCDF type classes now
+// inherit from NCAccess in addition to the DAP type classes.
+//
 // Revision 1.6  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //

@@ -7,10 +7,10 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.6 2003/12/08 18:06:37 edavis Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.7 2004/09/08 22:08:22 jimg Exp $"};
 
 #ifdef __GNUG__
-#pragma implementation
+//#pragma implementation
 #endif
 
 #include "InternalErr.h"
@@ -31,6 +31,12 @@ BaseType *
 NCUInt16::ptr_duplicate(){
 
     return new NCUInt16(*this);
+}
+
+nc_type
+NCUInt16::get_nc_type() throw(InternalErr)
+{
+    return NC_SHORT;
 }
 
 bool
@@ -92,6 +98,12 @@ NCUInt16::read(const string &dataset)
 }
 
 // $Log: NCUInt16.cc,v $
+// Revision 1.7  2004/09/08 22:08:22  jimg
+// More Massive changes: Code moved from the files that clone the netCDF
+// function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+// translation functions are now methods. The netCDF type classes now
+// inherit from NCAccess in addition to the DAP type classes.
+//
 // Revision 1.6  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //

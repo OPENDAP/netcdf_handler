@@ -18,25 +18,34 @@
 
 #ifndef __POWERPC__
 #ifdef __GNUG__
-#pragma interface
+//#pragma interface
 #endif
 #endif
 
 #include "Float64.h"
+#include "NCAccess.h"
+
 extern Float64 * NewFloat64(const string &n);
 
-class NCFloat64: public Float64 {
+class NCFloat64: public Float64, public NCAccess {
 public:
     NCFloat64(const string &n = "");
     virtual ~NCFloat64() {}
 
     virtual BaseType *ptr_duplicate();
+    virtual nc_type get_nc_type() throw(InternalErr);
     
     virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCFloat64.h,v $
+ * Revision 1.6  2004/09/08 22:08:22  jimg
+ * More Massive changes: Code moved from the files that clone the netCDF
+ * function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+ * translation functions are now methods. The netCDF type classes now
+ * inherit from NCAccess in addition to the DAP type classes.
+ *
  * Revision 1.5  2003/12/08 18:06:37  edavis
  * Merge release-3-4 into trunk
  *

@@ -12,15 +12,23 @@
 // ReZa 1/12/95
 
 #ifdef __GNUG__
-#pragma implementation
+//#pragma implementation
 #endif
 
 #include "config_nc.h"
+
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.10 2004/09/08 22:08:22 jimg Exp $"};
+
+#include <sstream>
+
+#include "Error.h"
+#include "InternalErr.h"
 #include "util.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.9 2004/03/08 19:08:33 jimg Exp $"};
-
+#include "Dnetcdf.h"
 #include "NCGrid.h"
+#include "NCArray.h"
+#include "nc_util.h"
 #include "debug.h"
 
 Grid *
@@ -59,19 +67,122 @@ NCGrid::read(const string &dataset)
 
     // read array elements
     if (array_var()->send_p() || array_var()->is_in_selection())
-	array_var()->read(dataset);
+	   array_var()->read(dataset);
 
     // read maps elements
     for (Map_iter p = map_begin(); p != map_end(); ++p)
-	if ((*p)->send_p() || (*p)->is_in_selection())
-	    (*p)->read(dataset);
+    	if ((*p)->send_p() || (*p)->is_in_selection())
+    	    (*p)->read(dataset);
 
     set_read_p(true);
 
     return false;
 }
 
+// This method could almost call the NCArray::build_constraint() method 
+// except that we need the name of the grid and not the name of the array 
+// in the CE. Check back here later to see if that's still the case... 
+// jhrg 09/01/04
+string
+NCGrid::build_constraint(int outtype, const size_t *start,
+            const size_t *edges, const ptrdiff_t *stride) throw(Error)
+{
+    string expr = name();      // CE always starts with the variable's name
+
+    NCArray &ar = dynamic_cast<NCArray&>(*array_var());
+
+    if (!is_convertable(outtype))
+        throw Error(NC_ECHAR, "Character conversion not supported.");
+
+    // Get dimension sizes and strings for constraint hyperslab
+    ostringstream ce;       // Build CE here.
+    int dm = 0;             // Index to start, edge, stride arrays 
+    int Zedge = 0;          // Search for zero size edges (no data)
+
+    // If we found and array...
+    Array::Dim_iter d;
+    for (d = ar.dim_begin(); d != ar.dim_end(); ++d, ++dm) {
+        // Verify stride argument.
+        if (stride != NULL && stride[dm] < 1)
+            throw Error(NC_ESTRIDE, "Stride less than 1 (one).");
+    
+        // Set defaults:
+        // *start         NULL => first corner 
+        // *edges         NULL => everything following start[] 
+        // *stride        NULL => unity strides 
+        long instart = start != NULL ? start[dm] : 0;
+        long inedges = edges != NULL ? edges[dm] : 
+                                       ar.dimension_size(d) - instart;
+        long instep = stride != NULL ? stride[dm] : 1;
+    
+        // external constraint (from ncopen)
+        int ext_start = ar.dimension_start(d, true); 
+        int ext_step = ar.dimension_stride(d, true);
+        int ext_stop = ar.dimension_stop(d, true);
+    
+        DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
+        DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
+    
+        // create constraint expr. by combining the constraints
+        int Tstart = ext_start + instart * ext_step;
+        int Tstep = instep * ext_step;
+        int Tstop = (ext_stop < ext_start+(instart+(inedges-1)*instep)*ext_step) 
+                    ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
+    
+        // Check the validity of the array constraints
+        if ((instart >= ar.dimension_size(d))
+            || (instart < 0)||(inedges < 0))
+            throw Error(NC_EINVALCOORDS, "Invalid coordinates.");      
+    
+        if (instart + inedges > ar.dimension_size(d))
+            throw Error(NC_EEDGE, "Hyperslab size exceeds dimension size.");
+    
+        // Zero edge found, but first check remaining dimensions for error
+        if (inedges == 0) 
+            Zedge = 1; 
+    
+        ce << "[" << Tstart << ":" << Tstep << ":" << Tstop << "]";
+    }
+
+    if (Zedge == 1)
+        throw Error(NC_NOERR, "The constraint would return no data.");
+
+    expr += ce.str();     // Return ce via value-result parameter.
+    return expr;
+}
+
+bool
+NCGrid::is_convertable(int outtype)
+{
+    Type intype = array_var()->type();
+    
+    if (((outtype == Ttext) && (intype != dods_str_c) &&(intype != dods_url_c))
+        || ((outtype != Ttext) && (intype == dods_str_c) &&(outtype != Tvoid))
+        || ((outtype != Ttext)&&(intype == dods_url_c)&&(outtype != Tvoid)))
+        return false;
+    else
+        return true;
+}
+
+void
+NCGrid::extract_values(void *values, int outtype) throw(Error)
+{
+    dynamic_cast<NCAccess*>(array_var())->extract_values(values, outtype);
+}
+
+nc_type
+NCGrid::get_nc_type() throw(InternalErr)
+{
+    return dynamic_cast<NCAccess*>(array_var())->get_nc_type();
+}
+
 // $Log: NCGrid.cc,v $
+// Revision 1.10  2004/09/08 22:08:22  jimg
+// More Massive changes: Code moved from the files that clone the netCDF
+// function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+// translation functions are now methods. The netCDF type classes now
+// inherit from NCAccess in addition to the DAP type classes.
+//
 // Revision 1.9  2004/03/08 19:08:33  jimg
 // This version of the code uses the Unidata netCDF 3.5.1 version of the
 // netCDF 2 API emulation. This functions call our netCDF 3 API functions

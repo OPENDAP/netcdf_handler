@@ -15,23 +15,27 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.8 2004/03/08 19:08:33 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.9 2004/09/08 22:08:21 jimg Exp $"};
 
 #ifdef __GNUG__
-#pragma implementation
+//#pragma implementation
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+
 #include <iostream>
+#include <sstream>
 
 #include "Error.h"
 #include "InternalErr.h"
 
 #include "Dnetcdf.h"
+#include "Dncx.h"
 #include "NCArray.h"
+#include "nc_util.h"
 #include "debug.h"
 
 Array *
@@ -66,25 +70,160 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_
     *has_stride = false;
 
     for (Dim_iter p = dim_begin(); p != dim_end(); ++p, id++) {
-	start = dimension_start(p, true); 
-	stride = dimension_stride(p, true);
-	stop = dimension_stop(p, true);
-	// Check for empty constraint
-	if (start + stop + stride == 0)
-	    return -1;
-
-	cor[id] = start;
-	step[id] = stride;
-	edg[id] = ((stop - start)/stride) + 1; // count of elements
-	nels *= edg[id];      // total number of values for variable
-
-	if (stride != 1)
-	    *has_stride = true;
+    	start = dimension_start(p, true); 
+    	stride = dimension_stride(p, true);
+    	stop = dimension_stop(p, true);
+    	// Check for empty constraint
+    	if (start + stop + stride == 0)
+    	    return -1;
+    
+    	cor[id] = start;
+    	step[id] = stride;
+    	edg[id] = ((stop - start)/stride) + 1; // count of elements
+    	nels *= edg[id];      // total number of values for variable
+    
+    	if (stride != 1)
+    	    *has_stride = true;
     }
-
+    
     return nels;
 }
 
+string
+NCArray::build_constraint(int outtype, const size_t *start,
+            const size_t *edges, const ptrdiff_t *stride) throw(Error)
+{
+     string expr = name();      // CE always starts with the variable's name
+
+    if (!is_convertable(outtype))
+        throw Error(NC_ECHAR, "Character conversion not supported.");
+
+    // Get dimension sizes and strings for constraint hyperslab
+    ostringstream ce;       // Build CE here.
+    int dm = 0;             // Index to start, edge, stride arrays 
+    int Zedge = 0;          // Search for zero size edges (no data)
+
+    // If we found and array...
+    Array::Dim_iter d;
+    for (d = dim_begin(); d != dim_end(); ++d, ++dm) {
+        // Verify stride argument.
+        if (stride != NULL && stride[dm] < 1)
+            throw Error(NC_ESTRIDE, "Stride less than 1 (one).");
+    
+        // Set defaults:
+        // *start         NULL => first corner 
+        // *edges         NULL => everything following start[] 
+        // *stride        NULL => unity strides 
+        long instart = start != NULL ? start[dm] : 0;
+        long inedges = edges != NULL ? edges[dm] : dimension_size(d) - instart;
+        long instep = stride != NULL ? stride[dm] : 1;
+    
+        // external constraint (from ncopen)
+        int ext_start = dimension_start(d, true); 
+        int ext_step = dimension_stride(d, true);
+        int ext_stop = dimension_stop(d, true);
+    
+        DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
+        DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
+    
+        // create constraint expr. by combining the constraints
+        int Tstart = ext_start + instart * ext_step;
+        int Tstep = instep * ext_step;
+        int Tstop = (ext_stop < ext_start+(instart+(inedges-1)*instep)*ext_step) 
+                    ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
+    
+        // Check the validity of the array constraints
+        if ((instart >= dimension_size(d))
+            || (instart < 0)||(inedges < 0))
+            throw Error(NC_EINVALCOORDS, "Invalid coordinates.");      
+    
+        if (instart + inedges > dimension_size(d))
+            throw Error(NC_EEDGE, "Hyperslab size exceeds dimension size.");
+    
+        // Zero edge found, but first check remaining dimensions for error
+        if (inedges == 0) 
+            Zedge = 1; 
+    
+        ce << "[" << Tstart << ":" << Tstep << ":" << Tstop << "]";
+    }
+
+    if (Zedge == 1)
+        throw Error(NC_NOERR, "The constraint would return no data.");
+
+    expr += ce.str();     // Return ce via value-result parameter.
+    return expr;
+}
+
+bool
+NCArray::is_convertable(int outtype)
+{
+    Type intype = var()->type();
+    
+    if (((outtype == Ttext) && (intype != dods_str_c) &&(intype != dods_url_c))
+        || ((outtype != Ttext) && (intype == dods_str_c) &&(outtype != Tvoid))
+        || ((outtype != Ttext)&&(intype == dods_url_c)&&(outtype != Tvoid)))
+        return false;
+    else
+        return true;
+}
+
+void
+NCArray::extract_values(void *values, int outtype) throw(Error)
+{
+    int nels  = length();       // number of elements
+    switch (var()->type()) {
+      case dods_byte_c:
+      case dods_int16_c:
+      case dods_uint16_c:
+      case dods_int32_c:
+      case dods_uint32_c: 
+      case dods_float32_c:
+      case dods_float64_c: {
+        void *tmpbufin = 0;
+        int bytes = buf2val((void **)&tmpbufin); 
+        if (bytes == 0)
+            throw Error(-1, "Could not read any data from remote server.");
+    
+        // Get the netCDF type code for this variable.
+        nc_type typep = dynamic_cast<NCAccess*>(var())->get_nc_type();
+        int rcode = convert_nc_type(typep, outtype, nels, tmpbufin, values);
+        if (rcode != NC_NOERR)
+            throw Error(rcode, "Error copying values between internal buffers [NCArray::extract_values()]");
+            
+        break;
+      } // End of the case where the array template type is a byte, ..., float64
+
+      case dods_str_c:
+      case dods_url_c: {
+        rcode = NC_NOERR;
+        char * tbfr = (char *)values;
+        for (int i = 0; i < nels; i++) {
+            Str *s = dynamic_cast<Str*>(var(i));
+            if (!s)
+                throw InternalErr(__FILE__, __LINE__, "Bad csat to Str.");
+            string *cp = 0;
+            string **cpp = &cp;
+            s->buf2val((void **)cpp);
+     
+            for (unsigned int cntr=0; cntr<cp->length() || 
+                 (cp->length()==0 && cntr==0); cntr++) {
+                *tbfr = *(cp->c_str()+cntr);
+                tbfr++;
+            }
+            
+            // Now get rid of the C++ string object.
+            delete cp;
+         }
+         break;
+      } // End of the case where the array template type is a string or url
+   
+      default:
+        throw Error(NC_EBADTYPE,
+            string("The netCDF Client Library cannot access variables of type: ")
+            + dynamic_cast<BaseType*>(this)->type_name()
+            + " [NCArray::extract_values()]");
+    } // End of the switch
+}
 
 bool
 NCArray::read(const string &dataset)
@@ -323,7 +462,19 @@ NCArray::read(const string &dataset)
     return false;
 }
 
+nc_type
+NCArray::get_nc_type() throw(InternalErr)
+{
+    return dynamic_cast<NCAccess*>(var())->get_nc_type();
+}
+
 // $Log: NCArray.cc,v $
+// Revision 1.9  2004/09/08 22:08:21  jimg
+// More Massive changes: Code moved from the files that clone the netCDF
+// function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+// translation functions are now methods. The netCDF type classes now
+// inherit from NCAccess in addition to the DAP type classes.
+//
 // Revision 1.8  2004/03/08 19:08:33  jimg
 // This version of the code uses the Unidata netCDF 3.5.1 version of the
 // netCDF 2 API emulation. This functions call our netCDF 3 API functions

@@ -18,7 +18,7 @@
 
 #ifndef __POWERPC__
 #ifdef __GNUG__
-#pragma interface
+//#pragma interface
 #endif
 #endif
 
@@ -27,20 +27,30 @@
 #endif
 
 #include "Str.h"
+#include "NCAccess.h"
+
 extern Str * NewStr(const string &n);
 
-class NCStr: public Str {
+class NCStr: public Str, public NCAccess {
 public:
     NCStr(const string &n = "");
     virtual ~NCStr() {}
 
     virtual BaseType *ptr_duplicate();
+    virtual nc_type get_nc_type() throw(InternalErr);
+    virtual void extract_values(void *values, int outtype) throw(Error);
     
     virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCStr.h,v $
+ * Revision 1.6  2004/09/08 22:08:22  jimg
+ * More Massive changes: Code moved from the files that clone the netCDF
+ * function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+ * translation functions are now methods. The netCDF type classes now
+ * inherit from NCAccess in addition to the DAP type classes.
+ *
  * Revision 1.5  2003/12/08 18:06:37  edavis
  * Merge release-3-4 into trunk
  *

@@ -13,10 +13,10 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.5 2004/03/08 19:13:06 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.6 2004/09/08 22:08:22 jimg Exp $"};
 
 #ifdef __GNUG__
-#pragma implementation
+//#pragma implementation
 #endif
 
 #include "InternalErr.h"
@@ -38,7 +38,38 @@ NCUrl::ptr_duplicate()
     return new NCUrl(*this);
 }
 
+void
+NCUrl::extract_values(void *values, int outtype) throw(Error)
+{
+    char * tbfr = (char *)values;
+    string *cp = 0;
+    string **cpp = &cp;
+    buf2val((void **)cpp);
+
+    for (unsigned int cntr=0; cntr<cp->length() || 
+         (cp->length()==0 && cntr==0); cntr++) {
+        *tbfr = *(cp->c_str()+cntr);
+        tbfr++;
+    }
+
+    // Now get rid of the C++ string object.
+    delete cp;
+}
+
+
+nc_type
+NCUrl::get_nc_type() throw(InternalErr)
+{
+    return NC_CHAR;
+}
+
 // $Log: NCUrl.cc,v $
+// Revision 1.6  2004/09/08 22:08:22  jimg
+// More Massive changes: Code moved from the files that clone the netCDF
+// function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+// translation functions are now methods. The netCDF type classes now
+// inherit from NCAccess in addition to the DAP type classes.
+//
 // Revision 1.5  2004/03/08 19:13:06  jimg
 // Removed unnecessary read() method implementation.
 //

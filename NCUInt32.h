@@ -18,25 +18,34 @@
 
 #ifndef __POWERPC__
 #ifdef __GNUG__
-#pragma interface
+//#pragma interface
 #endif
 #endif
 
 #include "UInt32.h"
+#include "NCAccess.h"
+
 extern UInt32 * NewUInt32(const string &n);
 
-class NCUInt32: public UInt32 {
+class NCUInt32: public UInt32, public NCAccess {
 public:
     NCUInt32(const string &n = "");
     virtual ~NCUInt32() {}
 
     virtual BaseType *ptr_duplicate();
+    virtual nc_type get_nc_type() throw(InternalErr);
     
     virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCUInt32.h,v $
+ * Revision 1.6  2004/09/08 22:08:22  jimg
+ * More Massive changes: Code moved from the files that clone the netCDF
+ * function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+ * translation functions are now methods. The netCDF type classes now
+ * inherit from NCAccess in addition to the DAP type classes.
+ *
  * Revision 1.5  2003/12/08 18:06:37  edavis
  * Merge release-3-4 into trunk
  *

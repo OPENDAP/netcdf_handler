@@ -18,14 +18,16 @@
 
 #ifndef __POWERPC__
 #ifdef __GNUG__
-#pragma interface
+//#pragma interface
 #endif
 #endif
 
 #include "Sequence.h"
+#include "NCAccess.h"
+
 extern Sequence * NewSequence(const string &n = "");
 
-class NCSequence: public Sequence {
+class NCSequence: public Sequence, public NCAccess {
 public:
     NCSequence(const string &n = "");
     virtual ~NCSequence();
@@ -37,6 +39,12 @@ public:
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.5  2004/09/08 22:08:22  jimg
+ * More Massive changes: Code moved from the files that clone the netCDF
+ * function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+ * translation functions are now methods. The netCDF type classes now
+ * inherit from NCAccess in addition to the DAP type classes.
+ *
  * Revision 1.4  2003/12/08 18:06:37  edavis
  * Merge release-3-4 into trunk
  *

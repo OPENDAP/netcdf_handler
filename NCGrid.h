@@ -18,13 +18,14 @@
 
 #ifndef __POWERPC__
 #ifdef __GNUG__
-#pragma interface
+//#pragma interface
 #endif
 #endif
 
 #include "Grid.h"
+#include "NCAccess.h"
 
-class NCGrid: public Grid {
+class NCGrid: public Grid, public NCAccess {
 public:
     NCGrid(const string &n = "");
     virtual ~NCGrid();
@@ -32,10 +33,24 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
+
+    virtual string build_constraint(int outtype, const size_t *start,
+        const size_t *edges, const ptrdiff_t *stride) throw(Error);
+
+    virtual bool is_convertable(int outtype);
+    virtual nc_type get_nc_type() throw(InternalErr);
+    
+    virtual void extract_values(void *values, int outtype) throw(Error);
 };
 
 /* 
  * $Log: NCGrid.h,v $
+ * Revision 1.6  2004/09/08 22:08:22  jimg
+ * More Massive changes: Code moved from the files that clone the netCDF
+ * function calls into NCConnect, NCAccess or nc_util.cc. Much of the
+ * translation functions are now methods. The netCDF type classes now
+ * inherit from NCAccess in addition to the DAP type classes.
+ *
  * Revision 1.5  2003/12/08 18:06:37  edavis
  * Merge release-3-4 into trunk
  *

@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.21 2004/07/26 19:10:44 jimg Exp $
+# $Id: Makefile.in,v 1.22 2004/09/08 22:08:21 jimg Exp $
 
 @SET_MAKE@
 
@@ -78,11 +78,11 @@ VPATH = .:lnetcdf
 
 NCSRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc \
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc \
-	NCUInt16.cc NCInt16.cc NCFloat32.cc
+	NCUInt16.cc NCInt16.cc NCFloat32.cc NCAccess.cc
 
 NCOBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
 	NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
-	NCUInt16.o NCInt16.o NCFloat32.o
+	NCUInt16.o NCInt16.o NCFloat32.o NCAccess.o
 
 HANDLER_SRCS = ncdas.cc ncdds.cc nc_handler.cc 
 HANDLER_OBJS = ncdas.o ncdds.o nc_handler.o 
