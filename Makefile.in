@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.14 2003/12/08 18:06:37 edavis Exp $
+# $Id: Makefile.in,v 1.15 2003/12/08 21:34:15 edavis Exp $
 
 @SET_MAKE@
 
@@ -260,8 +260,6 @@ tags:
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
 
 # DO NOT DELETE; depend depends on this line.
-<<<<<<< Makefile.in
-=======
 nc_das.o: nc_das.cc config_nc.h ../../include/DAS.h ../../include/Pix.h \
   ../../include/IteratorAdapter.h ../../include/AttrTable.h \
   ../../include/Error.h ../../include/cgi_util.h ../../include/DDS.h \
@@ -634,4 +632,3 @@ NCFloat32.o: NCFloat32.cc config_nc.h ../../include/InternalErr.h \
   ../../include/AISResources.h ../../include/Regex.h \
   ../../include/Resource.h ../../include/AISExceptions.h \
   ../../include/Connections.h
->>>>>>> 1.10.4.2

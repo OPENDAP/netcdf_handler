@@ -36,7 +36,6 @@
 	of NetCDF 3.5. This is a temporary fix from Yuan Ho (Thanks!)
 	until Reza can get the code completely switched over to 3.5
 
-=======
 2003-09-08  James Gallagher  <jimg@dcz.dods.org>
 
 	* I modified the read() method implementations so that they test
@@ -61,7 +60,6 @@
 	
 	* Win32 build changes (rmorris)
 
->>>>>>> 1.10.2.1
 2003-04-28  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with release-3-3-1.
