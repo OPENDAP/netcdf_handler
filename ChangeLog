@@ -1,7 +1,18 @@
+2001-09-28  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with release 3.2.5. The next merge should use
+	release-3-2-5 -j release-3-2.
+
+2001-09-26  James Gallagher  <jimg@dcz.dods.org>
+
+	* Added version support (Reza).
+
 2001-08-30  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with 3.2.4. The next merge should use -j release-3-2-4 -j
 	release-3-2. 
+
+2001-08-30  James Gallagher  <jimg@dcz.dods.org>
 
 	* Fix for bug #202: The client library now checks for incoming
 	Error objects. (From Reza)
