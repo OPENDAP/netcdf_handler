@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.9 2005/01/29 00:20:29 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.10 2005/02/17 23:44:13 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -86,6 +86,17 @@ NCSequence::operator=(const NCSequence &rhs)
     return *this;
 }
 
+/** Parse projection information passed to the CL using the command line.
+    Unlike NCArray::strore_projection(), this method stores the start,
+    stride and stop info in the Sequence object (NCArray has a special
+    vector of structs to hold the information). This method scans the
+    projection part of the CE for something about this particular variable
+    and ignores the rest. It also does not perform any error trapping on
+    the expression; by the time we get here the CE has already been sent 
+    to the server and that will report an error using its parser.
+    
+    @param proj The complete projection part of the CE passed to the library
+    on the command line. */
 void
 NCSequence::store_projection(const string &proj)
 {
@@ -109,7 +120,9 @@ NCSequence::store_projection(const string &proj)
     while ((separator = clause.find_first_of("[]:", separator)) != string::npos) {
         clause.replace(separator, 1, " ");
     }
-    /// now read numbers after name.
+    // now read numbers after name. This is slightly different than code
+    // that looks similar in NCArray.h. Here the name is left on and is
+    // extracted to 'dummy.' Could be combined with a little work.
     istringstream iss(clause.c_str());
     string dummy;
     int i1, i2, i3;
@@ -164,18 +177,11 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     long inedges = edges != NULL ? edges[dm] : get_size() - instart;
     long instep = stride != NULL ? stride[dm] : 1;
 
-    // get CE info set in NCArray. The comment there is that this is the CE
-    // from the URL, but I don't think that's correct. Try using the values
-    // set using store_projection().
-#if 1
-    int ext_start = get_starting_row_number(); 
-    int ext_step = get_row_stride();
-    int ext_stop = get_ending_row_number();
-#else
+    // The fields d_start, et c., are set in store_projection()
     int ext_start = d_start;
     int ext_step = d_stride;
     int ext_stop = d_stop;
-#endif
+
     string version_info = get_implementation_version();
 
     version_info.replace(version_info.find("/"), 1, " ");
@@ -286,23 +292,9 @@ public:
             a->set_source(d_seq);
 
             size_new_dimension(a, e);
-#if 0
-            // See comment above about limit values
-            int field_limit = d_cp.get_limit(e->name());
-            int seq_limit = d_cp.get_limit(d_seq->name());
-            if (field_limit != 0 && field_limit != seq_limit)
-                a->append_dim(field_limit, e->name());
-            else if (seq_limit != 0)
-                a->append_dim(seq_limit, d_seq->name());
-            else
-                a->append_dim(1, d_seq->name());
-#endif
+
             add_translation_attribute(a);
-#if 0
-            a->get_attr_table().append_attr("translation", "String",
-                                            "\"translated\"");
-#endif
-            // Insert the new variable right after the 
+
             d_new_vars.push_back(a);
         }
     }
@@ -317,6 +309,12 @@ NCSequence::flatten(const ClientParams &cp, const string &parent_name)
     string local_name = (!parent_name.empty()) 
                         ? parent_name + spr + name()
                         : name();
+
+    // Set the size of the NCSequence to the size of the array.
+    // This transfers the information set with the 'limit' keyword
+    // to the NCSequence object (the d_size field).
+    int seq_limit = cp.get_limit(name());
+    d_size = (seq_limit != 0) ? seq_limit : 1;
 
     while (field != field_end) {
         VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
@@ -375,6 +373,13 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.10  2005/02/17 23:44:13  jimg
+// Modifications for processing of command line projections combined
+// with the limit stuff and projection info passed in from the API. I also
+// consolodated some of the code by moving d_source from various
+// classes to NCAccess. This may it so that DODvario() could be simplified
+// as could build_constraint() and store_projection() in NCArray.
+//
 // Revision 1.9  2005/01/29 00:20:29  jimg
 // Checkpoint: CEs ont he command line/ncopen() almost work.
 //

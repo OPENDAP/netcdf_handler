@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.16 2005/02/02 03:35:35 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.17 2005/02/17 23:44:13 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -29,7 +29,7 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.16 2005/02/02 03:35:35 jimg 
 #include <iostream>
 #include <sstream>
 
-// #define DODS_DEBUG 1
+#define DODS_DEBUG 1
 
 #include "Error.h"
 #include "InternalErr.h"
@@ -46,61 +46,53 @@ const string spr = "."; // structure rename
 Array *
 NewArray(const string &n, BaseType *v)
 {
-    DBG(cerr << "Entering NC NewArray" << endl);
+    DBG2(cerr << "Entering NC NewArray" << endl);
     return new NCArray(n, v);
-    DBG(cerr << "Exiting NC NewArray" << endl);
+    DBG2(cerr << "Exiting NC NewArray" << endl);
 }
 
 BaseType *
 NCArray::ptr_duplicate()
 {
-    DBG(cerr << "Entering NCArray::ptr_duplicate()" << endl);
+    DBG2(cerr << "Entering NCArray::ptr_duplicate()" << endl);
     return new NCArray(*this);
-    DBG(cerr << "Exiting NCArray::ptr_duplicate()" << endl);
+    DBG2(cerr << "Exiting NCArray::ptr_duplicate()" << endl);
 }
 
 NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
 {
-    DBG(cerr << "Entering NCArray::NCArray(const string &n, BaseType *v)" << endl);
-    d_source = 0;         // A value of zero indicates no translation.
-    DBG(cerr << "Exiting NCArray::NCArray(const string &n, BaseType *v)" << endl);
+    DBG2(cerr << "Entering NCArray::NCArray(const string &n, BaseType *v)" << endl);
+    // d_source = 0;         // A value of zero indicates no translation.
+    DBG2(cerr << "Exiting NCArray::NCArray(const string &n, BaseType *v)" << endl);
 }
 
 NCArray::NCArray(const NCArray &rhs) : Array(rhs)
 {
-    DBG(cerr << "Entering NCArray::NCArray(const NCArray &rhs)" << endl);
+    DBG2(cerr << "Entering NCArray::NCArray(const NCArray &rhs)" << endl);
     m_duplicate(rhs);
-    DBG(cerr << "Exiting NCArray::NCArray(const NCArray &rhs)" << endl);
+    DBG2(cerr << "Exiting NCArray::NCArray(const NCArray &rhs)" << endl);
 }
 
 NCArray::~NCArray()
 {
-    DBG(cerr << "Entering ~NCArray()" << endl);
-
-    delete d_source;
-
-    DBG(cerr << "Exiting ~NCArray()" << endl);
+    DBG2(cerr << "Entering ~NCArray()" << endl);
+    // delete d_source;
+    DBG2(cerr << "Exiting ~NCArray()" << endl);
 }
 
 void
 NCArray::m_duplicate(const NCArray &nca)
 {
-    DBG(cerr << "Entering NCArray::_duplicate()" << endl);
-
-    if (nca.d_source)
-        d_source = nca.d_source->ptr_duplicate();
-    else
-        d_source = 0;
-    
+    DBG2(cerr << "Entering NCArray::_duplicate()" << endl);
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(nca));
 
-    DBG(cerr << "Exiting NCArray::_duplicate()" << endl);
+    DBG2(cerr << "Exiting NCArray::_duplicate()" << endl);
 }
 
 NCArray &
 NCArray::operator=(const NCArray &rhs)
 {
-    DBG(cerr << "Entering NCArray::operator=(const NCArray &rhs)" << endl);
+    DBG2(cerr << "Entering NCArray::operator=(const NCArray &rhs)" << endl);
     if (this == &rhs)
         return *this;
 
@@ -109,13 +101,14 @@ NCArray::operator=(const NCArray &rhs)
     m_duplicate(rhs);
 
     return *this;
-    DBG(cerr << "Exiting NCArray::operator=(const NCArray &rhs)" << endl);
+    DBG2(cerr << "Exiting NCArray::operator=(const NCArray &rhs)" << endl);
 }
 
 
 // Should this be a private method? jhrg 11/3/04
 long
-NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_stride)
+NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
+                           bool *has_stride)
 {
     int start, stride, stop;
     int id = 0;
@@ -143,11 +136,39 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_
     return nels;
 }
 
+
 void
 NCArray::store_projection(const string &proj)
 {
-    // Scan the projection clauses for one mathing this variable.
+    // Scan the projections looking for one about this variable
+    string::size_type name_pos = proj.find(name());
+    if (name_pos == string::npos)
+        return;
     
+    // OK, this variable is in there. At name_pos
+    string clause;
+    string::size_type end_clause_pos = proj.find(',', name_pos);
+    if (end_clause_pos == string::npos)
+        clause = proj.substr(name_pos);
+    else 
+        clause = proj.substr(name_pos, end_clause_pos - name_pos);
+
+    // For each bracketed group of numbers, get information about a
+    // dimension.
+    string::size_type idx = 0;
+    string::size_type clause_start = clause.find("[", idx);
+    string::size_type clause_end = clause.find("]", idx);
+    while (clause_start != string::npos || clause_end != string::npos) {
+        string dim_proj = clause.substr(clause_start, clause_end - clause_start + 1);
+
+        struct dim_proj_info dpi(dim_proj);
+        cl_proj.push_back(dpi);
+        
+        idx = clause_end + 1;
+        clause_start = clause.find("[", idx);
+        clause_end = clause.find("]", idx);
+    }
+        
 }
 
 string
@@ -161,45 +182,6 @@ NCArray::build_constraint(int outtype, const size_t *start,
 
     // CE always starts with the variable's name
 
-    if (d_source) {
-        // If d_source is non-null then the library must use d_source to 
-        // build the constraint.
-        DBG(cerr << "Source is non-null" << endl);
-        // cerr << d_source->toString() << endl;
-        switch (d_source->type()) {
-            case dods_sequence_c: {
-                Array::Dim_iter d = dim_begin();
-                
-                DBG(cerr << "size: " << dimension_size(d) << endl);
-                DBG(cerr << "pre-start: " << dimension_start(d, true) << endl);
-                DBG(cerr << "pre-stop: " << dimension_stop(d, true) << endl);
-                DBG(cerr << "pre-stride: " << dimension_stride(d, true) << endl);
-                
-                // This transfers the hyper slab info to the Sequence
-                NCSequence *ncq = dynamic_cast<NCSequence*>(d_source);
-                ncq->set_row_number_constraint(dimension_start(d, true),
-                                               dimension_stop(d, true),
-                                               dimension_stride(d, true));
-                ncq->set_size(dimension_size(d));
-                break;
-            }
-            default:
-                // How do we know get_parent() doesn't return null? 
-                // 11/16/04 jhrg
-                throw InternalErr(__FILE__, __LINE__, 
-                    string("Don't know how to process ") 
-                    + d_source->get_parent()->type_name()
-                    + string(" source variables."));
-        }
-        
-        // This calls NCSequence::build_constraint() after the info has 
-        // been transferred.
-        // Copy version info to accommodate a bug in servers upto 3.4
-        NCAccess *nca = dynamic_cast<NCAccess*>(d_source);
-        nca->set_implementation_version(get_implementation_version());
-        return nca->build_constraint(outtype, start, edges, stride);
-    }
-
     string expr = name();
 
     // Get dimension sizes and strings for constraint hyperslab
@@ -207,8 +189,9 @@ NCArray::build_constraint(int outtype, const size_t *start,
     int dm = 0;             // Index to start, edge, stride arrays 
     int Zedge = 0;          // Search for zero size edges (no data)
 
-    // If we found and array...
+    // If we found an array...
     Array::Dim_iter d;
+    vector<dim_proj_info>::iterator cl_iter = cl_proj.begin();
     for (d = dim_begin(); d != dim_end(); ++d, ++dm) {
         // Verify stride argument.
         if (stride != NULL && stride[dm] < 1)
@@ -222,33 +205,30 @@ NCArray::build_constraint(int outtype, const size_t *start,
         long inedges = edges != NULL ? edges[dm] : dimension_size(d) - instart;
         long instep = stride != NULL ? stride[dm] : 1;
  
-        // external constraint (from ncopen)
-        // I don't think this is correct anymore. The constrained DDS is
-        // requested from the server using the CE supplied to ncopen. That 
-        // means the client doesn't need to merge the two CEs. Even though
-        // these methods are set to retrieve the constrained values ('true'),
-        // we will read the values for the whole array if there's not CE that
-        // was set using Array::add_contraint() (which isn't called by any of
-        // this code). 
-#if 0
-        int ext_start = dimension_start(d, true); 
-        int ext_step = dimension_stride(d, true);
-        int ext_stop = dimension_stop(d, true);
-#endif    
+        int ext_start;
+        int ext_step;
+        int ext_stop;
+        if (cl_iter != cl_proj.end()) {
+            ext_start = (*cl_iter).start;
+            ext_step = (*cl_iter).stride;
+            ext_stop = (*cl_iter).stop;
+            ++cl_iter;
+        }
+        else {
+            ext_start = 0;
+            ext_step = 1;
+            ext_stop = dimension_size(d) - 1;
+        }
+
         DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
-#if 0
         DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
     
-        // create constraint expr. by combining the constraints
+        // create constraint expr. by combining the constraint from the
+        // command line with the constraint gleaned from the API call.
         int Tstart = ext_start + instart * ext_step;
         int Tstep = instep * ext_step;
         int Tstop = (ext_stop < ext_start+(instart+(inedges-1)*instep)*ext_step) 
                     ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
-#endif 
-        int Tstart = instart;
-        int Tstep = instep;
-        int Tstop = (instart+(inedges-1)*instep);
-    
     
         // Check the validity of the array constraints
         if ((instart >= dimension_size(d))
@@ -587,12 +567,6 @@ NCArray::get_nc_type() throw(InternalErr)
     return dynamic_cast<NCAccess*>(var())->get_nc_type();
 }
 
-BaseType *
-NCArray::get_source()
-{
-    return d_source;
-}
-
 void
 NCArray::set_source(BaseType *s) throw(InternalErr)
 {
@@ -638,6 +612,13 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.17  2005/02/17 23:44:13  jimg
+// Modifications for processing of command line projections combined
+// with the limit stuff and projection info passed in from the API. I also
+// consolodated some of the code by moving d_source from various
+// classes to NCAccess. This may it so that DODvario() could be simplified
+// as could build_constraint() and store_projection() in NCArray.
+//
 // Revision 1.16  2005/02/02 03:35:35  jimg
 // Removed DODS_DEBUG
 //

@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCInt32.cc,v 1.10 2005/01/26 23:25:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCInt32.cc,v 1.11 2005/02/17 23:44:13 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -35,12 +35,6 @@ NewInt32(const string &n)
 void 
 NCInt32::m_duplicate(const NCInt32 &bt)
 {
-#if 0
-    if (nca.d_source)
-        d_source = nca.d_source->ptr_duplicate();
-    else
-        d_source = 0;
-#endif    
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
 }
 
@@ -146,6 +140,13 @@ NCInt32::read(const string &dataset)
 }
 
 // $Log: NCInt32.cc,v $
+// Revision 1.11  2005/02/17 23:44:13  jimg
+// Modifications for processing of command line projections combined
+// with the limit stuff and projection info passed in from the API. I also
+// consolodated some of the code by moving d_source from various
+// classes to NCAccess. This may it so that DODvario() could be simplified
+// as could build_constraint() and store_projection() in NCArray.
+//
 // Revision 1.10  2005/01/26 23:25:51  jimg
 // Implemented a fix for Sequence access by row number when talking to a
 // 3.4 or earlier server (which contains a bug in is_end_of_rows()).
