@@ -1,3 +1,17 @@
+2001-08-30  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with 3.2.4. The next merge should use -j release-3-2-4 -j
+	release-3-2. 
+
+	* Fix for bug #202: The client library now checks for incoming
+	Error objects. (From Reza)
+
+	* Fix for bug #217: The tests now work; the problem was in the code
+	that runs the tests and/or sets up the test dataset. (From Reza)
+
+	* Fix for bugs #71 and #90: An Error object is now returned when
+	a URL references a dataset that does not exist. (from Reza)
+
 2001-06-19  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with release-3-2 head (tagged release-3-2-3). The next
