@@ -13,16 +13,15 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.5 2004/11/05 17:13:57 jimg Exp $"};
-
-#ifdef __GNUG__
-//#pragma implementation
-#endif
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.6 2004/11/30 22:11:35 jimg Exp $"};
 
 #include "InternalErr.h"
+
 #include "NCStructure.h"
+#include "NCArray.h"
 #include "nc_util.h"
 
+const string spr = "."; // structure rename
 
 Structure *
 NewStructure(const string &n)
@@ -35,11 +34,6 @@ NewStructure(const string &n)
 void
 NCStructure::_duplicate(const NCStructure &rhs)
 {
-    // Perform a deep copy of the variables in d_variables.    
-    VarListCIter i = rhs.d_variables.begin();
-    VarListCIter i_end = rhs.d_variables.end();
-    while (i != i_end)
-        d_variables.push_back((*i++)->ptr_duplicate());
 }
 
 BaseType *
@@ -74,26 +68,34 @@ NCStructure::operator=(const NCStructure &rhs)
     return *this;
 }
 
-void
-NCStructure::variables_to_list(VarList &v)
+VarList
+NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 {
-    ::variables_to_list(var_begin(), var_end(), v);
-#if 0
-    Structure::Vars_iter s = var_begin();
-    Structure::Vars_iter s_end = var_end();
-    while (s != s_end) {
-        v.push_back((*s++)->ptr_duplicate());
-    }
-#endif
-}
+    Constructor::Vars_iter field = var_begin();
+    Constructor::Vars_iter field_end = var_end();
+    VarList new_vars;       // Store new vars here
+    string local_name = (!parent_name.empty()) 
+                        ? parent_name + spr + name()
+                        : name();
 
-bool
-NCStructure::read(const string &)
-{
-  throw InternalErr(__FILE__, __LINE__, "Unimplemented read method called.");
+    while (field != field_end) {
+        VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
+        new_vars.splice(new_vars.end(), embedded_vars);
+        ++field;
+    }
+
+    return new_vars;
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.6  2004/11/30 22:11:35  jimg
+// I replaced the flatten_*() functions with a flatten() method in
+// NCAccess. The default version of this method is in NCAccess and works
+// for the atomic types; constructors must provide a specialization.
+// Then I removed the code that copied the variables from vectors to
+// lists. The translation code in NCConnect was modified to use the
+// new method.
+//
 // Revision 1.5  2004/11/05 17:13:57  jimg
 // Added code to copy the BaseType pointers from the vector container into
 // a list. This will enable more efficient translation software to be

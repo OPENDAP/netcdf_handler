@@ -16,29 +16,17 @@
 #ifndef _ncsequence_h
 #define _ncsequence_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include <list>
 
 #include "Sequence.h"
 #include "NCAccess.h"
+#include "nc_util.h"
 
 extern Sequence * NewSequence(const string &n);
 
 class NCSequence: public Sequence, public NCAccess {
-public:
-    typedef list<BaseType*> VarList;
-    typedef list<BaseType*>::iterator VarListIter;
-    typedef list<BaseType*>::const_iterator VarListCIter;
-
 private:
     int d_size;           //< The 'dimension size' Used for/by translation
-
-    VarList d_variables;
 
 protected:
     void _duplicate(const NCSequence &bt);
@@ -51,21 +39,31 @@ public:
     NCSequence &operator=(const NCSequence &rhs);
     
     virtual BaseType *ptr_duplicate();
-    void variables_to_list(VarList &v);
+    // void variables_to_list(VarList &v);
         
     virtual string build_constraint(int outtype, const size_t *start,
         const size_t *edges, const ptrdiff_t *stride) throw(Error);
-    virtual void extract_values(void *values, int outtype) throw(Error);
 
-    virtual VarList &get_variables_list() { return d_variables; }
     virtual void set_size(int size) { d_size = size; }
     virtual int get_size() { return d_size; };
 
-    virtual bool read(const string &dataset);
+    virtual VarList flatten(const ClientParams &cp, const string &parent_name);
+    // virtual bool read(const string &dataset);
+    
+    virtual BaseType *var_value(size_t row, const string &name);
+    // virtual BaseType *var_value(size_t row, size_t i);
 };
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.8  2004/11/30 22:11:35  jimg
+ * I replaced the flatten_*() functions with a flatten() method in
+ * NCAccess. The default version of this method is in NCAccess and works
+ * for the atomic types; constructors must provide a specialization.
+ * Then I removed the code that copied the variables from vectors to
+ * lists. The translation code in NCConnect was modified to use the
+ * new method.
+ *
  * Revision 1.7  2004/11/05 17:13:57  jimg
  * Added code to copy the BaseType pointers from the vector container into
  * a list. This will enable more efficient translation software to be

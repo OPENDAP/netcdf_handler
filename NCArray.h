@@ -47,17 +47,28 @@ public:
 
     virtual string build_constraint(int outtype, const size_t *start,
             const size_t *edges, const ptrdiff_t *stride) throw(Error);
-            
+#if 1       
     virtual bool is_convertable(int outtype);
+#endif
     virtual nc_type get_nc_type() throw(InternalErr);
     
     virtual void extract_values(void *values, int outtype) throw(Error);
     virtual BaseType *get_source();
     virtual void set_source(BaseType *s) throw(InternalErr);
+    
+    virtual VarList flatten(const ClientParams &cp, const string &parent_name);    
 };
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.9  2004/11/30 22:11:35  jimg
+ * I replaced the flatten_*() functions with a flatten() method in
+ * NCAccess. The default version of this method is in NCAccess and works
+ * for the atomic types; constructors must provide a specialization.
+ * Then I removed the code that copied the variables from vectors to
+ * lists. The translation code in NCConnect was modified to use the
+ * new method.
+ *
  * Revision 1.8  2004/10/28 16:38:19  jimg
  * Added support for error handling to ClientParams. Added use of
  * ClientParams to NCConnect, although that's not complete yet. NCConnect

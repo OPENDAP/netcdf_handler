@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.12 2004/11/05 17:10:14 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.13 2004/11/30 22:11:35 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -40,6 +40,8 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.12 2004/11/05 17:10:14 jimg 
 #include "NCSequence.h"
 #include "nc_util.h"
 #include "debug.h"
+
+const string spr = "."; // structure rename
 
 Array *
 NewArray(const string &n, BaseType *v)
@@ -171,6 +173,8 @@ NCArray::build_constraint(int outtype, const size_t *start,
                 break;
             }
             default:
+                // How do we know get_parent() doesn't return null? 
+                // 11/16/04 jhrg
                 throw InternalErr(__FILE__, __LINE__, 
                     string("Don't know how to process ") 
                     + d_source->get_parent()->type_name()
@@ -238,6 +242,7 @@ NCArray::build_constraint(int outtype, const size_t *start,
     return expr;
 }
 
+#if 1
 // I don't think this is needed; use the version in NCAccess. jhrg 11/3/04
 bool
 NCArray::is_convertable(int outtype)
@@ -251,11 +256,13 @@ NCArray::is_convertable(int outtype)
     else
         return true;
 }
+#endif
 
 void
 NCArray::extract_values(void *values, int outtype) throw(Error)
 {
     int nels  = length();       // number of elements
+    
     switch (var()->type()) {
       case dods_byte_c:
       case dods_int16_c:
@@ -568,7 +575,50 @@ NCArray::set_source(BaseType *s) throw(InternalErr)
     d_source = s->ptr_duplicate();
 }
 
+/** Arrays are really constructor types. To flateen one, flatten the 
+    template variable and then append the array's dimensions to each of
+    the variable returned as a result.
+    
+    @note Four cases: 1. top level array, 2. top level array of structs,
+    3. array inside a struct, 4. struct array inside a struct.
+    
+    @todo Optimize by not doing all that if the contained variable is
+    an atomic type. */
+VarList
+NCArray::flatten(const ClientParams &cp, const string &parent_name)
+{
+    VarList template_vars = dynamic_cast<NCAccess*>(var())->flatten(cp, parent_name);
+
+    // At this point we can delete the original template variable (which 
+    // might be a Structure or Sequence, so there may be several variables
+    // in place of the single template). Deleting the template keeps from
+    // copying it repeatedly in the while-loop.
+    add_var(0);
+    
+    VarListIter tv = template_vars.begin();
+    VarListIter tv_end = template_vars.end();
+    VarList new_vars;
+    while (tv != tv_end) {
+        // Copy this, cast to Array, load the template, push to list
+        Array *ap = dynamic_cast<Array*>(ptr_duplicate());
+        ap->add_var(*tv);
+        ap->set_name((*tv)->name());
+        new_vars.push_back(ap);
+        ++tv;
+    }
+    
+    return new_vars;
+}
+
 // $Log: NCArray.cc,v $
+// Revision 1.13  2004/11/30 22:11:35  jimg
+// I replaced the flatten_*() functions with a flatten() method in
+// NCAccess. The default version of this method is in NCAccess and works
+// for the atomic types; constructors must provide a specialization.
+// Then I removed the code that copied the variables from vectors to
+// lists. The translation code in NCConnect was modified to use the
+// new method.
+//
 // Revision 1.12  2004/11/05 17:10:14  jimg
 // Fiddled with some comments and added DBG() macros to some instrumentation.
 //

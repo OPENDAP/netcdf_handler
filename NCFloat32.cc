@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.8 2004/10/22 21:51:34 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.9 2004/11/30 22:11:35 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -48,47 +48,6 @@ nc_type
 NCFloat32::get_nc_type() throw(InternalErr)
 {
     return NC_FLOAT;
-}
-
-void
-NCFloat32::extract_values(void *values, int outtype) throw(Error)
-{    
-    int nels = 1;               // default value (for scalars)
-    NCSequence *ncq = 0;
-    
-    // If this (apparently) scalar variable is part of a Sequence, then
-    // The netCDF library must think it's an Array. Get the number of 
-    // elements (which is the number of rows in the returned Sequence).
-    if (get_parent()->type() == dods_sequence_c) {
-        ncq = dynamic_cast<NCSequence*>(get_parent());
-        nels = ncq->number_of_rows();
-    }
-    
-    // Allocate storage for the values
-    dods_float32 *tmpbufin = new dods_float32[nels];
-    int bytes = 0;
-
-    if (ncq) {
-        dods_float32 *tptr = tmpbufin;
-        for (int i = 0; i < nels; ++i) {
-            bytes += ncq->var_value(i, name())->buf2val((void **)&tptr);
-            ++tptr;
-        }
-    }
-    else {
-        bytes = buf2val((void **)&tmpbufin);
-    }
-    
-    if (bytes == 0)
-        throw Error(-1, "Could not read any data from remote server.");
-
-    // Get the netCDF type code for this variable.
-    nc_type typep = dynamic_cast<NCAccess*>(this)->get_nc_type();
-
-    int rcode = convert_nc_type(typep, outtype, nels, (void*)tmpbufin, values);
-    if (rcode != NC_NOERR)
-        throw Error(rcode,
-            "Error copying values between internal buffers [NCAccess::extract_values()]");
 }
 
 bool
@@ -150,6 +109,14 @@ NCFloat32::read(const string &dataset)
 }
 
 // $Log: NCFloat32.cc,v $
+// Revision 1.9  2004/11/30 22:11:35  jimg
+// I replaced the flatten_*() functions with a flatten() method in
+// NCAccess. The default version of this method is in NCAccess and works
+// for the atomic types; constructors must provide a specialization.
+// Then I removed the code that copied the variables from vectors to
+// lists. The translation code in NCConnect was modified to use the
+// new method.
+//
 // Revision 1.8  2004/10/22 21:51:34  jimg
 // More massive changes: Translation of Sequences now works so long as the
 // Sequence contains only atomic types.

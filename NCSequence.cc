@@ -13,19 +13,21 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.6 2004/11/05 17:13:57 jimg Exp $"};
-
-#ifdef __GNUG__
-//#pragma implementation
-#endif
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.7 2004/11/30 22:11:35 jimg Exp $"};
 
 #include <sstream>
-
-#include "NCSequence.h"
-#include "nc_util.h"
+#include <algorithm>
 
 #include "InternalErr.h"
 #include "debug.h"
+
+#include "NCSequence.h"
+#include "NCArray.h"
+#include "NCAccess.h"
+#include "ClientParams.h"
+#include "nc_util.h"
+
+const string spr = ".";
 
 Sequence *
 NewSequence(const string &n)
@@ -39,12 +41,6 @@ void
 NCSequence::_duplicate(const NCSequence &rhs)
 {
     d_size = rhs.d_size;
-
-    // Perform a deep copy of the variables in d_variables.    
-    VarListCIter i = rhs.d_variables.begin();
-    VarListCIter i_end = rhs.d_variables.end();
-    while (i != i_end)
-        d_variables.push_back((*i++)->ptr_duplicate());
 }
 
 // public
@@ -79,25 +75,6 @@ NCSequence::operator=(const NCSequence &rhs)
     _duplicate(rhs);
     
     return *this;
-}
-
-void
-NCSequence::variables_to_list(VarList &v)
-{
-    ::variables_to_list(var_begin(), var_end(), v);
-#if 0
-    Sequence::Vars_iter s = var_begin();
-    Sequence::Vars_iter s_end = var_end();
-    while (s != s_end) {
-        v.push_back((*s++)->ptr_duplicate());
-    }
-#endif
-}
-
-bool 
-NCSequence::read(const string &)
-{
-    throw InternalErr(__FILE__, __LINE__, "Unimplemented read method called.");
 }
 
 /** Build a constraint for a Sequence. Build a CE for then entire Sequence 
@@ -159,12 +136,129 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     return expr;
 }
 
-void
-NCSequence::extract_values(void *values, int outtype) throw(Error)
+/** When flattening a Sequence, turn all non-array variables into a single
+    dimension array. Add a dimension to all array variables. */
+class AddDimension : public unary_function<BaseType *, void> {
+    Sequence *d_seq;        /// The Seq that is the real parent of this var.
+    const ClientParams &d_cp;
+    VarList d_new_vars;     /// New vars with add dimension. Accumulate.
+    
+public:
+    AddDimension(Sequence *s, const ClientParams &cp) : d_seq(s), d_cp(cp) {}
+
+    operator VarList() { return d_new_vars; }   // Implicit type conversion.
+ 
+    void operator()(BaseType *e) {
+        if (e->type() == dods_array_c) {
+            // Since the design calls for the first dimension to be the 
+            // sequence, we must creae a new Array, add the new dim and then 
+            // copy the existing dimensions. Shoulda used lists...
+            NCArray *src_array = dynamic_cast<NCArray*>(e);
+            BaseType *btp = src_array->var()->ptr_duplicate();
+            NCArray *a = new NCArray("", btp);
+            a->set_source(d_seq);
+            int limit = d_cp.get_limit(e->name());
+            a->append_dim(max(limit, 1), d_seq->name());
+            Array::Dim_iter i = src_array->dim_begin();
+            while (i != src_array->dim_end()) {
+                a->append_dim(src_array->dimension_size(i), 
+                              src_array->dimension_name(i));
+                ++i;
+            }
+            a->get_attr_table().append_attr("translation", "String",
+                                            "\"translated\"");
+            d_new_vars.push_back(a);
+        }
+        else {
+            BaseType *btp = e->ptr_duplicate();
+            NCArray *a = new NCArray("", btp);
+            a->set_source(d_seq);
+
+            int limit = d_cp.get_limit(e->name());
+            a->append_dim(max(limit, 1), d_seq->name());
+            a->get_attr_table().append_attr("translation", "String",
+                                            "\"translated\"");
+            // Insert the new variable right after the 
+            d_new_vars.push_back(a);
+        }
+    }
+};
+
+VarList
+NCSequence::flatten(const ClientParams &cp, const string &parent_name)
 {
+    Constructor::Vars_iter field = var_begin();
+    Constructor::Vars_iter field_end = var_end();
+    VarList new_vars;       // Store new vars here
+    string local_name = (!parent_name.empty()) 
+                        ? parent_name + spr + name()
+                        : name();
+
+    while (field != field_end) {
+        VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
+        // AddDimension ad(this, cp);
+        VarList ev_added_dim = for_each(embedded_vars.begin(), 
+                                        embedded_vars.end(), 
+                                        AddDimension(this, cp));
+        new_vars.splice(new_vars.end(), ev_added_dim);
+        ++field;
+    }
+
+    return new_vars;
+}
+
+/** @brief Get the BaseType pointer to the named variable of a given row.
+    
+    This version specializes Sequence::var_value() so that if the Sequence 
+    holds Constructor types, it looks inside those ctors for \e name. This 
+    works for the netCDF CL since we assume that the DDS used by the CL
+    was translated. The CL will think that the atomic type is an Array and
+    won't know anything about the nesting imposed by Structures (e.g., the HDF4
+    server uses Structures to represent the hierarchy of the HDF4 file).
+    
+    @param row Read from <i>row</i> in the sequence.
+    @param name Return <i>name</i> from <i>row</i>.
+    @return A BaseType which holds the variable and its value. 
+    @see number_of_rows */
+BaseType *
+NCSequence::var_value(size_t row, const string &name)
+{
+    BaseTypeRow *bt_row_ptr = row_value(row);
+    if (!bt_row_ptr)
+        return 0;
+
+    BaseTypeRow::iterator bt_row_iter = bt_row_ptr->begin();
+    BaseTypeRow::iterator bt_row_end = bt_row_ptr->end();    
+    while (bt_row_iter != bt_row_end) {
+        // This part is specialized for NCSequence. If we've gotten a Sequence
+        // that holds a Structure, for example, the nerCDF CL will not know
+        // about that because the translation process will have flattened the
+        // Structure. So, this code looks inside Constructors that held
+        // by Sequences for the atomic variable it contains. Note that this
+        // is presumes that the netCDF CL only asks for one variable at a 
+        // time.
+        if ((*bt_row_iter)->is_constructor_type()) {
+            BaseType *field = (*bt_row_iter)->var(name);
+            if (field)
+                return field;
+        }
+        else if ((*bt_row_iter)->name() == name)
+            return *bt_row_iter;
+        ++bt_row_iter;
+    }
+    
+    return 0;
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.7  2004/11/30 22:11:35  jimg
+// I replaced the flatten_*() functions with a flatten() method in
+// NCAccess. The default version of this method is in NCAccess and works
+// for the atomic types; constructors must provide a specialization.
+// Then I removed the code that copied the variables from vectors to
+// lists. The translation code in NCConnect was modified to use the
+// new method.
+//
 // Revision 1.6  2004/11/05 17:13:57  jimg
 // Added code to copy the BaseType pointers from the vector container into
 // a list. This will enable more efficient translation software to be

@@ -16,28 +16,21 @@
 #ifndef _ncstructure_h
 #define _ncstructure_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
 
 #include <list>
+
 #include "Structure.h"
+
+#include "ClientParams.h"
 #include "NCAccess.h"
+#include "nc_util.h"
 
 extern Structure * NewStructure(const string &n);
 
 class NCStructure: public Structure, public NCAccess {
-public:
-    typedef list<BaseType*> VarList;
-    typedef list<BaseType*>::iterator VarListIter;
-    typedef list<BaseType*>::const_iterator VarListCIter;
-
 private:
     VarList d_variables;
 
-public:
 protected:
     void _duplicate(const NCStructure &bt);
         
@@ -47,17 +40,21 @@ public:
     virtual ~NCStructure();
 
     NCStructure &operator=(const NCStructure &rhs);
-    
     virtual BaseType *ptr_duplicate();
-    
-    void variables_to_list(VarList &v);
-    virtual VarList &get_variables_list() { return d_variables; }
 
-    virtual bool read(const string &dataset);
+    virtual VarList flatten(const ClientParams &cp, const string &parent_name);
 };
 
 /* 
  * $Log: NCStructure.h,v $
+ * Revision 1.8  2004/11/30 22:11:35  jimg
+ * I replaced the flatten_*() functions with a flatten() method in
+ * NCAccess. The default version of this method is in NCAccess and works
+ * for the atomic types; constructors must provide a specialization.
+ * Then I removed the code that copied the variables from vectors to
+ * lists. The translation code in NCConnect was modified to use the
+ * new method.
+ *
  * Revision 1.7  2004/11/05 17:13:57  jimg
  * Added code to copy the BaseType pointers from the vector container into
  * a list. This will enable more efficient translation software to be

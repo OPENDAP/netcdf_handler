@@ -22,10 +22,6 @@
 #endif
 #endif
 
-#if 0
-#include <limits.h>
-#endif
-
 #include "Str.h"
 #include "NCAccess.h"
 
@@ -45,6 +41,14 @@ public:
 
 /* 
  * $Log: NCStr.h,v $
+ * Revision 1.7  2004/11/30 22:11:35  jimg
+ * I replaced the flatten_*() functions with a flatten() method in
+ * NCAccess. The default version of this method is in NCAccess and works
+ * for the atomic types; constructors must provide a specialization.
+ * Then I removed the code that copied the variables from vectors to
+ * lists. The translation code in NCConnect was modified to use the
+ * new method.
+ *
  * Revision 1.6  2004/09/08 22:08:22  jimg
  * More Massive changes: Code moved from the files that clone the netCDF
  * function calls into NCConnect, NCAccess or nc_util.cc. Much of the

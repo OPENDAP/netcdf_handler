@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.9 2004/11/05 17:02:56 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.10 2004/11/30 22:11:35 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -50,7 +50,7 @@ NCStr::extract_values(void *values, int outtype) throw(Error)
     // If this variable is held by a sequence, we need to treat it specially.
     // Read values from the Sequence and then use this instance to process
     // the values. 
-    if (get_parent()->type() == dods_sequence_c) {
+    if (get_parent() && get_parent()->type() == dods_sequence_c) {
         DBG(cerr << "Extract_values from a Sequence-->Str" << endl);
         ncq = dynamic_cast<NCSequence*>(get_parent());
         nels = ncq->number_of_rows();
@@ -150,6 +150,14 @@ NCStr::read(const string &dataset)
 }
 
 // $Log: NCStr.cc,v $
+// Revision 1.10  2004/11/30 22:11:35  jimg
+// I replaced the flatten_*() functions with a flatten() method in
+// NCAccess. The default version of this method is in NCAccess and works
+// for the atomic types; constructors must provide a specialization.
+// Then I removed the code that copied the variables from vectors to
+// lists. The translation code in NCConnect was modified to use the
+// new method.
+//
 // Revision 1.9  2004/11/05 17:02:56  jimg
 // Wrapped some instrumentation in DBG() macros.
 //
