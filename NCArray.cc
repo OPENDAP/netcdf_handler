@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.19 2005/03/02 17:51:50 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.20 2005/03/04 18:10:49 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -293,7 +293,7 @@ NCArray::extract_values(void *values, int elements, int outtype) throw(Error)
         // Get the netCDF type code for this variable.
         nc_type typep = dynamic_cast<NCAccess*>(var())->get_nc_type();
         int rcode = convert_nc_type(typep, outtype, nels, tmpbufin, values);
-        delete tmpbufin; tmpbufin = 0;
+        delete[] tmpbufin; tmpbufin = 0;
         if (rcode != NC_NOERR)
             throw Error(rcode, "Error copying values between internal buffers [NCArray::extract_values()]");
             
@@ -668,6 +668,11 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.20  2005/03/04 18:10:49  jimg
+// At this point valgrind runs the Unidata tests for both local and remote access
+// and shows no errors or leaks. There are 8 bytes still reachable from an
+// exception, but that's it.
+//
 // Revision 1.19  2005/03/02 17:51:50  jimg
 // Considerable reduction in memory leaks and fixed all errant memory
 // accesses found with nc_test. OPeNDAP error codes and Error object
