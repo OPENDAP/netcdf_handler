@@ -1,3 +1,30 @@
+2003-09-08  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with 3.4.1. The next merge should use -j release-3-4-1 -j
+	release-3-4
+
+	* I modified the read() method implementations so that they test
+	the new in_selection property. If it is true, the methods will
+	read values even if the send_p property is not true. This is so
+	that variables used in the selection part of the CE, or as
+	function arguments, will be read. See bug 657. (jimg)
+
+	* Fixed char vs. byte and long vs. nclong error checks. (reza) 
+
+	* Removed #pragma interface directives for the OS X. (rmorris)
+
+	* Updated the servers to netCDF-3 and fixed error handling between
+	client and server. (reza)
+
+	* Added support for Cray multi-processor (CRAYMPP) interfaces,
+	they use processor element 0 for all non-CrayMPP platforms. The
+	Fortran interface needs them for a clean build. (reza)
+
+	* Fixed unnecessary nc_sync() calls in netCDF code to improve NFS
+	performance. (reza)
+	
+	* Win32 build changes (rmorris)
+
 2003-05-02  James Gallagher  <jimg@dcz.dods.org>
 
 	* Patch to the Fortran/fort-control.c file. This provides fixes
