@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.4 2003/12/08 18:06:37 edavis Exp $"};
+static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.5 2004/03/08 19:13:06 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -38,15 +38,10 @@ NCUrl::ptr_duplicate()
     return new NCUrl(*this);
 }
 
-#if 0
-bool
-NCUrl::read(const string &)
-{
-  throw InternalErr(__FILE__, __LINE__, "Unimplemented read() method called!");
-}
-#endif
-
 // $Log: NCUrl.cc,v $
+// Revision 1.5  2004/03/08 19:13:06  jimg
+// Removed unnecessary read() method implementation.
+//
 // Revision 1.4  2003/12/08 18:06:37  edavis
 // Merge release-3-4 into trunk
 //
