@@ -28,8 +28,13 @@
 extern Array * NewArray(const string &n, BaseType *v);
 
 class NCArray: public Array, public NCAccess {
+    BaseType *d_source;       /// Reference to source var if translated
+
+    void _duplicate(const NCArray &nca);
 public:
     NCArray(const string &n = "", BaseType *v = 0);
+    NCArray(const NCArray &nc_array);
+    NCArray &operator=(const NCArray &rhs);
     virtual ~NCArray();
 
     virtual BaseType *ptr_duplicate();
@@ -46,10 +51,16 @@ public:
     virtual nc_type get_nc_type() throw(InternalErr);
     
     virtual void extract_values(void *values, int outtype) throw(Error);
+    virtual BaseType *get_source();
+    virtual void set_source(BaseType *s) throw(InternalErr);
 };
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.7  2004/10/22 21:51:34  jimg
+ * More massive changes: Translation of Sequences now works so long as the
+ * Sequence contains only atomic types.
+ *
  * Revision 1.6  2004/09/08 22:08:21  jimg
  * More Massive changes: Code moved from the files that clone the netCDF
  * function calls into NCConnect, NCAccess or nc_util.cc. Much of the

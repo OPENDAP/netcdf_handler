@@ -25,9 +25,11 @@
 #include "Sequence.h"
 #include "NCAccess.h"
 
-extern Sequence * NewSequence(const string &n = "");
+extern Sequence * NewSequence(const string &n);
 
 class NCSequence: public Sequence, public NCAccess {
+    int d_size;           //< The 'dimension size' Used for/by translation
+    
 public:
     NCSequence(const string &n = "");
     virtual ~NCSequence();
@@ -35,10 +37,22 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
+    
+    virtual string build_constraint(int outtype, const size_t *start,
+        const size_t *edges, const ptrdiff_t *stride) throw(Error);
+
+    virtual void extract_values(void *values, int outtype) throw(Error);
+
+    virtual void set_size(int size);
+    virtual int get_size();
 };
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.6  2004/10/22 21:51:34  jimg
+ * More massive changes: Translation of Sequences now works so long as the
+ * Sequence contains only atomic types.
+ *
  * Revision 1.5  2004/09/08 22:08:22  jimg
  * More Massive changes: Code moved from the files that clone the netCDF
  * function calls into NCConnect, NCAccess or nc_util.cc. Much of the

@@ -13,15 +13,18 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCByte.cc,v 1.7 2004/09/08 22:08:21 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCByte.cc,v 1.8 2004/10/22 21:51:34 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
 #endif
 
 #include "InternalErr.h"
+
 #include "NCByte.h"
+#include "NCSequence.h"
 #include "Dnetcdf.h"
+#include "nc_util.h"
 
 // This `helper function' creates a pointer to the a NCByte and returns
 // that pointer. It takes the same arguments as the class's ctor. If any of
@@ -58,6 +61,47 @@ nc_type
 NCByte::get_nc_type() throw(InternalErr)
 {
     return NC_BYTE;
+}
+
+void
+NCByte::extract_values(void *values, int outtype) throw(Error)
+{    
+    int nels = 1;               // default value (for scalars)
+    NCSequence *ncq = 0;
+    
+    // If this (apparently) scalar variable is part of a Sequence, then
+    // The netCDF library must think it's an Array. Get the number of 
+    // elements (which is the number of rows in the returned Sequence).
+    if (get_parent()->type() == dods_sequence_c) {
+        ncq = dynamic_cast<NCSequence*>(get_parent());
+        nels = ncq->number_of_rows();
+    }
+    
+    // Allocate storage for the values
+    dods_byte *tmpbufin = new dods_byte[nels];
+    int bytes = 0;
+
+    if (ncq) {
+        dods_byte *tptr = tmpbufin;
+        for (int i = 0; i < nels; ++i) {
+            bytes += ncq->var_value(i, name())->buf2val((void **)&tptr);
+            ++tptr;
+        }
+    }
+    else {
+        bytes = buf2val((void **)&tmpbufin);
+    }
+    
+    if (bytes == 0)
+        throw Error(-1, "Could not read any data from remote server.");
+
+    // Get the netCDF type code for this variable.
+    nc_type typep = dynamic_cast<NCAccess*>(this)->get_nc_type();
+
+    int rcode = convert_nc_type(typep, outtype, nels, (void*)tmpbufin, values);
+    if (rcode != NC_NOERR)
+        throw Error(rcode,
+            "Error copying values between internal buffers [NCAccess::extract_values()]");
 }
 
 bool
@@ -116,6 +160,10 @@ NCByte::read(const string &dataset)
 }
 
 // $Log: NCByte.cc,v $
+// Revision 1.8  2004/10/22 21:51:34  jimg
+// More massive changes: Translation of Sequences now works so long as the
+// Sequence contains only atomic types.
+//
 // Revision 1.7  2004/09/08 22:08:21  jimg
 // More Massive changes: Code moved from the files that clone the netCDF
 // function calls into NCConnect, NCAccess or nc_util.cc. Much of the

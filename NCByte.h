@@ -34,13 +34,19 @@ public:
 
     virtual BaseType *ptr_duplicate();
 
+    virtual bool read(const string &dataset);
+    
     virtual nc_type get_nc_type() throw(InternalErr);
     
-    virtual bool read(const string &dataset);
+    virtual void extract_values(void *values, int outtype) throw(Error);    
 };
 
 /* 
  * $Log: NCByte.h,v $
+ * Revision 1.7  2004/10/22 21:51:34  jimg
+ * More massive changes: Translation of Sequences now works so long as the
+ * Sequence contains only atomic types.
+ *
  * Revision 1.6  2004/09/08 22:08:21  jimg
  * More Massive changes: Code moved from the files that clone the netCDF
  * function calls into NCConnect, NCAccess or nc_util.cc. Much of the

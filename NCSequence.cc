@@ -13,14 +13,18 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.4 2004/09/08 22:08:22 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.5 2004/10/22 21:51:34 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
 #endif
 
-#include "InternalErr.h"
+#include <sstream>
+
 #include "NCSequence.h"
+
+#include "InternalErr.h"
+#include "debug.h"
 
 Sequence *
 NewSequence(const string &n)
@@ -49,10 +53,90 @@ NCSequence::~NCSequence()
 bool 
 NCSequence::read(const string &)
 {
-  throw InternalErr(__FILE__, __LINE__, "Unimplemented read method called.");
+    throw InternalErr(__FILE__, __LINE__, "Unimplemented read method called.");
+}
+
+/** Build a constraint for a Sequence. Build a CE for then entire Sequence 
+    even when the client asks for just one field. A bug in the Sequence CE
+    processing code. */
+string
+NCSequence::build_constraint(int outtype, const size_t *start,
+    const size_t *edges, const ptrdiff_t *stride) throw(Error)
+{
+    string expr = name();      // CE always starts with the variable's name
+
+    // Get dimension sizes and strings for constraint hyperslab
+    ostringstream ce;       // Build CE here.
+    // Note that a Sequence is always a one dimensional thing.
+    int dm = 0;             // Index to start, edge, stride arrays 
+    //int Zedge = 0;          // Search for zero size edges (no data)
+
+    // Verify stride argument.
+    if (stride != NULL && stride[dm] < 1)
+        throw Error(NC_ESTRIDE, "Stride less than 1 (one).");
+
+    // Set defaults:
+    // *start         NULL => first corner 
+    // *edges         NULL => everything following start[] 
+    // *stride        NULL => unity strides 
+    long instart = start != NULL ? start[dm] : 0;
+    long inedges = edges != NULL ? edges[dm] : get_size() - instart;
+    long instep = stride != NULL ? stride[dm] : 1;
+
+    // external constraint (from ncopen)
+    int ext_start = get_starting_row_number(); 
+    int ext_step = get_row_stride();
+    int ext_stop = get_ending_row_number();
+
+    DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
+    DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
+
+    // create constraint expr. by combining the constraints
+    int Tstart = ext_start + instart * ext_step;
+    int Tstep = instep * ext_step;
+    int Tstop = (ext_stop < ext_start+(instart+(inedges-1)*instep)*ext_step) 
+                ? ext_stop : ext_start+(instart+(inedges-1)*instep)*ext_step;
+
+    // Check the validity of the array constraints
+    if ((instart >= get_size())
+        || (instart < 0)||(inedges < 0))
+        throw Error(NC_EINVALCOORDS, "Invalid coordinates.");      
+
+    if (instart + inedges > get_size())
+        throw Error(NC_EEDGE, "Hyperslab size exceeds dimension size.");
+
+    // Zero edge found.
+    if (inedges == 0) 
+        throw Error(NC_NOERR, "The constraint would return no data.");
+
+    ce << "[" << Tstart << ":" << Tstep << ":" << Tstop << "]";
+
+    expr += ce.str();     // Return ce via value-result parameter.
+    return expr;
+}
+
+void
+NCSequence::extract_values(void *values, int outtype) throw(Error)
+{
+}
+
+void
+NCSequence::set_size(int size)
+{
+    d_size = size;
+}
+
+int
+NCSequence::get_size()
+{
+    return d_size;
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.5  2004/10/22 21:51:34  jimg
+// More massive changes: Translation of Sequences now works so long as the
+// Sequence contains only atomic types.
+//
 // Revision 1.4  2004/09/08 22:08:22  jimg
 // More Massive changes: Code moved from the files that clone the netCDF
 // function calls into NCConnect, NCAccess or nc_util.cc. Much of the

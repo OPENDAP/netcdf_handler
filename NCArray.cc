@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.9 2004/09/08 22:08:21 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.10 2004/10/22 21:51:34 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -29,33 +29,87 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.9 2004/09/08 22:08:21 jimg E
 #include <iostream>
 #include <sstream>
 
+// #define DODS_DEBUG 1
+
 #include "Error.h"
 #include "InternalErr.h"
 
 #include "Dnetcdf.h"
 #include "Dncx.h"
 #include "NCArray.h"
+#include "NCSequence.h"
 #include "nc_util.h"
 #include "debug.h"
 
 Array *
 NewArray(const string &n, BaseType *v)
 {
+    DBG(cerr << "Entering NC NewArray" << endl);
     return new NCArray(n, v);
+    DBG(cerr << "Exiting NC NewArray" << endl);
 }
 
 BaseType *
 NCArray::ptr_duplicate()
 {
+    DBG(cerr << "Entering NCArray::ptr_duplicate()" << endl);
     return new NCArray(*this);
+    DBG(cerr << "Exiting NCArray::ptr_duplicate()" << endl);
 }
 
 NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
 {
+    DBG(cerr << "Entering NCArray::NCArray(const string &n, BaseType *v)" << endl);
+    d_source = 0;         // A value of zero indicates no translation.
+    DBG(cerr << "Exiting NCArray::NCArray(const string &n, BaseType *v)" << endl);
+}
+
+NCArray::NCArray(const NCArray &rhs) : Array(rhs)
+{
+    DBG(cerr << "Entering NCArray::NCArray(const NCArray &rhs)" << endl);
+    _duplicate(rhs);
+    DBG(cerr << "Exiting NCArray::NCArray(const NCArray &rhs)" << endl);
 }
 
 NCArray::~NCArray()
 {
+    DBG(cerr << "Entering ~NCArray()" << endl);
+#if 1
+    // FIXME: Memory leak. To fix this, change translation code in NCConnect
+    // so that it builds a parallel DDS instead of hacking up the original.
+    // Maybe do this by implementing translate() methods for each of the 
+    // BaseTypes (using the NCAccess interface).
+    delete d_source;
+#endif
+    DBG(cerr << "Exiting ~NCArray()" << endl);
+}
+
+void
+NCArray::_duplicate(const NCArray &nca)
+{
+    DBG(cerr << "Entering NCArray::_duplicate()" << endl);
+#if 1
+    if (nca.d_source)
+        d_source = nca.d_source->ptr_duplicate();
+    else
+        d_source = 0;
+#endif
+    DBG(cerr << "Exiting NCArray::_duplicate()" << endl);
+}
+
+NCArray &
+NCArray::operator=(const NCArray &rhs)
+{
+    DBG(cerr << "Entering NCArray::operator=(const NCArray &rhs)" << endl);
+    if (this == &rhs)
+        return *this;
+
+    dynamic_cast<Array &>(*this) = rhs;
+
+    _duplicate(rhs);
+
+    return *this;
+    DBG(cerr << "Exiting NCArray::operator=(const NCArray &rhs)" << endl);
 }
 
 // parse constraint expr. and make netcdf coordinate point location.
@@ -93,10 +147,44 @@ string
 NCArray::build_constraint(int outtype, const size_t *start,
             const size_t *edges, const ptrdiff_t *stride) throw(Error)
 {
-     string expr = name();      // CE always starts with the variable's name
-
+    // Test for bad conversion here, before we may call NCSequence (which
+    // cannot run the test).
     if (!is_convertable(outtype))
         throw Error(NC_ECHAR, "Character conversion not supported.");
+
+    // CE always starts with the variable's name
+
+    if (d_source) {
+        // If d_source is non-null then the library must use d_source to 
+        // build the constraint.
+        cerr << "Source is non-null" << endl;
+        // cerr << d_source->toString() << endl;
+        switch (d_source->type()) {
+            case dods_sequence_c: {
+                Array::Dim_iter d = dim_begin();
+                
+                cerr << "size: " << dimension_size(d) << endl;
+                cerr << "pre-start: " << dimension_start(d, true) << endl;
+                cerr << "pre-stop: " << dimension_stop(d, true) << endl;
+                cerr << "pre-stride: " << dimension_stride(d, true) << endl;
+                
+                NCSequence *ncq = dynamic_cast<NCSequence*>(d_source);
+                ncq->set_row_number_constraint(dimension_start(d, true),
+                    dimension_stop(d, true), dimension_stride(d, true));
+                ncq->set_size(dimension_size(d));
+                break;
+            }
+            default:
+                throw InternalErr(__FILE__, __LINE__, 
+                    string("Don't know how to process ") 
+                    + d_source->get_parent()->type_name()
+                    + string(" source variables."));
+        }
+        return dynamic_cast<NCAccess*>(d_source)->build_constraint(outtype,
+            start, edges, stride);
+    }
+
+    string expr = name();
 
     // Get dimension sizes and strings for constraint hyperslab
     ostringstream ce;       // Build CE here.
@@ -195,7 +283,7 @@ NCArray::extract_values(void *values, int outtype) throw(Error)
 
       case dods_str_c:
       case dods_url_c: {
-        rcode = NC_NOERR;
+        // rcode = NC_NOERR;
         char * tbfr = (char *)values;
         for (int i = 0; i < nels; i++) {
             Str *s = dynamic_cast<Str*>(var(i));
@@ -468,7 +556,26 @@ NCArray::get_nc_type() throw(InternalErr)
     return dynamic_cast<NCAccess*>(var())->get_nc_type();
 }
 
+BaseType *
+NCArray::get_source()
+{
+    return d_source;
+}
+
+void
+NCArray::set_source(BaseType *s) throw(InternalErr)
+{
+    if (s->type() == dods_array_c)
+        throw InternalErr(__FILE__, __LINE__, "Array's source is an Array!");
+        
+    d_source = s->ptr_duplicate();
+}
+
 // $Log: NCArray.cc,v $
+// Revision 1.10  2004/10/22 21:51:34  jimg
+// More massive changes: Translation of Sequences now works so long as the
+// Sequence contains only atomic types.
+//
 // Revision 1.9  2004/09/08 22:08:21  jimg
 // More Massive changes: Code moved from the files that clone the netCDF
 // function calls into NCConnect, NCAccess or nc_util.cc. Much of the
