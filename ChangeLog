@@ -1,3 +1,23 @@
+2001-06-19  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with release-3-2 head (tagged release-3-2-3). The next
+	merge should use update -j release-3-2-3 -j release-3-2.
+
+	* Moved most of the code in main() inside the try block (for all
+	three handlers).
+
+	* Cleaned up for switch from nph-* to nph-dods. (ethan)
+
+	* Fixed tar and binary-tar targets. (ethan)
+
+	* Paths are now relative where possible
+
+	* Fixed exception handlers to return correct error codes. (reza)
+
+2000-12-06  James Gallagher  <jimg@dcz.dods.org>
+
+	* Fixed the build (removed nph-nc install, etc.)
+
 2000-01-27  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with revision 3.1.2. The next cvs merge should use update
