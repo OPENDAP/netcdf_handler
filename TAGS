@@ -2037,22 +2037,17 @@ lnetcdf/lrnd.h,158
 #define	M_RNDUP(M_RNDUP14,409
 #define	M_RNDDOWN(M_RNDDOWN15,450
 
-lnetcdf/ncconfig.h,444
-#define _NCCONFIG_H_5,230
-#define HAVE_ST_BLKSIZE 16,503
-#define STDC_HEADERS 25,740
-#define WORDS_BIGENDIAN 29,898
-#define HAVE_FTRUNCATE 38,1128
-#define HAVE_ALLOCA 41,1212
-#define HAVE_ALLOCA_H 44,1311
-#define SIZEOF_SIZE_T 50,1454
-#define SIZEOF_OFF_T 53,1516
-#define uchar 62,1743
-#define SIZEOF_DOUBLE 68,1915
-#define SIZEOF_FLOAT 71,1979
-#define SIZEOF_INT 74,2040
-#define SIZEOF_LONG 77,2100
-#define SIZEOF_SHORT 80,2162
+lnetcdf/ncconfig.h,290
+#define _NCCONFIG_H_5,232
+#define STDC_HEADERS 25,745
+#define WORDS_BIGENDIAN 29,903
+#define SIZEOF_SIZE_T 50,1468
+#define SIZEOF_OFF_T 53,1530
+#define uchar 62,1757
+#define SIZEOF_DOUBLE 68,1929
+#define SIZEOF_FLOAT 71,1993
+#define SIZEOF_INT 74,2054
+#define SIZEOF_LONG 77,2114
 
 lnetcdf/netcdf.h,2468
 #define _NETCDF_36,2022

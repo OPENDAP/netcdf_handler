@@ -1,3 +1,12 @@
+2000-01-27  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with revision 3.1.2. The next cvs merge should use update
+	-j release-3-1-2 -j release-3-1.
+
+	* Removed extraneous files.
+
+	* Fixed the build on little-endian machines.
+
 1999-11-04  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged: botched cvs but the next merge should use -j
