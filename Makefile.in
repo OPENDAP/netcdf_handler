@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.26 2005/01/26 23:25:51 jimg Exp $
+# $Id: Makefile.in,v 1.27 2005/02/02 03:34:20 jimg Exp $
 
 @SET_MAKE@
 
@@ -7,7 +7,7 @@
 # DEFS gets the `-D' defines that describe what a particular system has
 # or doesn't have.
 
-PROG = libnc-dods.a nc_handler
+PROG = libnc-dods.a libnc-server4.a nc_handler ncdump
 DODS_ROOT = @dods_relative@
 
 INCS = -I./lnetcdf @INCS@
@@ -113,7 +113,7 @@ fortran/fort-genatt.o	fortran/fort-v2compat.o  fortran/fort-varsio.o \
 fortran/fort-geninq.o	fortran/fort-var1io.o
 
 # Matlab client can be suppressed by a switch to configure.
-all: libnc-dods.a nc_handler ncdump
+all: $(PROG) nc_module.o
 
 nc_handler: $(HANDLER_OBJS) libnc-dods.a
 	$(CXX) $(LDFLAGS) -o nc_handler $(HANDLER_OBJS) $(NCDODS) $(LIBS)
@@ -121,6 +121,10 @@ nc_handler: $(HANDLER_OBJS) libnc-dods.a
 libnc-dods.a: $(LIBOBJS) $(NCOBJS) 
 	-(cd fortran && $(MAKE) $(MFLAGS) all)
 	$(AR) -cru $@ $(LIBOBJS) $(NCOBJS) 
+	$(RANLIB) $@
+
+libnc-server4.a: $(LIBOBJS) $(NCOBJS) ncdas.o ncdds.o NCRequestHandler.o 
+	$(AR) -cru $@ $^
 	$(RANLIB) $@
 
 .PHONY: fortran
@@ -136,7 +140,7 @@ UNIT_TEST_SRCS = NCConnectTest.cc ClientParamsTest.cc NCStructureTest.cc \
 
 UNIT_TEST_PROGS = NCConnectTest ClientParamsTest NCStructureTest \
 	NCSequenceTest
-	
+
 NCConnectTest: NCConnectTest.o libnc-dods.a
 	$(CXX) -o $@ $(LDFLAGS) $< -lcppunit $(NCOBJ) $(NCDODS) $(LIBS)
 
