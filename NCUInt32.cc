@@ -6,6 +6,9 @@
 //      jhrg,jimg       James Gallagher (jgallagher@gso.uri.edu)
 
 // $Log: NCUInt32.cc,v $
+// Revision 1.2  1999/10/21 13:19:06  reza
+// IMAP and other bug fixed for version3.
+//
 // Revision 1.1  1999/07/28 00:22:45  jimg
 // Added
 //
@@ -25,7 +28,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.1 1999/07/28 00:22:45 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.2 1999/10/21 13:19:06 reza Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -55,19 +58,18 @@ NCUInt32::ptr_duplicate(){
 bool
 NCUInt32::read(const string &dataset, int &error)
 {
-#if 0
+
     int varid;                  /* variable Id */
     nc_type datatype;           /* variable data type */
     long cor[MAX_NC_DIMS];      /* corner coordinates */
     int num_dim;                /* number of dim. in variable */
-    long nels = -1;              /* number of elements in buffer */
-    dods_int32 intg32;
+    dods_uint32 uintg32;
     int id;
 
     if (read_p()) // nothing to do
         return false;
 
-    int ncid = lncopen(dataset, NC_NOWRITE); /* netCDF id */
+    int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
 
     if (ncid == -1) { 
         cerr << "ncopen failed on " << dataset<< endl;
@@ -75,29 +77,12 @@ NCUInt32::read(const string &dataset, int &error)
         return false;
     }
  
-    varid = lncvarid(ncid, name());
+    varid = lncvarid(ncid, name().c_str());
 
     (void)lncvarinq(ncid,varid,(char *)0,&datatype,&num_dim,(int *)0,(int *)0);
 
-    if(nels == -1) {  // No point coordinate, get the first element 
-	for (id = 0; id < num_dim; id++) 
-	    cor[id] = 0;
-    }
-
-    // Int32 currently covers both long and short integers 
-
-    if (datatype == NC_SHORT){
-	short sht;
-
-	(void) lncvarget1 (ncid, varid, cor, &sht);
-	set_read_p(true);
-
-	intg32 = (dods_int32) sht;
-	val2buf( &intg32 );
-
-	(void) lncclose(ncid);  
-	return false;
-    }
+    for (id = 0; id <= num_dim; id++) 
+      cor[id] = 0;
 
     if (datatype == NC_LONG){
 	nclong lng;
@@ -105,13 +90,13 @@ NCUInt32::read(const string &dataset, int &error)
 	(void) lncvarget1 (ncid, varid, cor, &lng);
 	set_read_p(true);
 
-	intg32 = (dods_int32) lng;
-	val2buf( &intg32 );
+	uintg32 = (dods_uint32) lng;
+	val2buf( &uintg32 );
 
 	(void) lncclose(ncid);
-	return false;
+	return true;
     }
-#endif
+
     error = 1;
     return false;
 }

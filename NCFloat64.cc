@@ -40,6 +40,9 @@
 // ReZa 1/12/95
 
 // $Log: NCFloat64.cc,v $
+// Revision 1.2  1999/10/21 13:19:06  reza
+// IMAP and other bug fixed for version3.
+//
 // Revision 1.1  1999/07/28 00:22:43  jimg
 // Added
 //
@@ -92,7 +95,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.1 1999/07/28 00:22:43 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.2 1999/10/21 13:19:06 reza Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -129,7 +132,6 @@ NCFloat64::read(const string &dataset, int &error)
     nc_type datatype;           /* variable data type */
     long cor[MAX_NC_DIMS];      /* corner coordinates */
     int num_dim;                /* number of dim. in variable */
-    long nels = -1;              /* number of elements in buffer */
     dods_float64 flt64;
     int id;
 
@@ -148,11 +150,8 @@ NCFloat64::read(const string &dataset, int &error)
 
     (void)lncvarinq(ncid,varid,(char *)0,&datatype,&num_dim,(int *)0,(int *)0);
 
-    if(nels == -1){  // No point coordinate, get the first element 
-	for (id = 0; id < num_dim; id++) 
+	for (id = 0; id <= num_dim; id++) 
 	    cor[id] = 0;
-    }
-
 
     if (datatype == NC_DOUBLE){
 	double dbl;
@@ -161,10 +160,10 @@ NCFloat64::read(const string &dataset, int &error)
 	set_read_p(true);
 
 	flt64 = (dods_float64) dbl;
-	val2buf( &flt64 );
+	val2buf((void *) &flt64 );
 
 	(void) lncclose(ncid);  
-	return false;
+	return true;
     }
 
     error = 1;

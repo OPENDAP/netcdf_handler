@@ -40,6 +40,9 @@
 // ReZa 1/12/95
 
 // $Log: NCStr.cc,v $
+// Revision 1.2  1999/10/21 13:19:06  reza
+// IMAP and other bug fixed for version3.
+//
 // Revision 1.1  1999/07/28 00:22:44  jimg
 // Added
 //
@@ -92,7 +95,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.1 1999/07/28 00:22:44 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.2 1999/10/21 13:19:06 reza Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -126,7 +129,6 @@ NCStr::read(const string &dataset, int &error)
     nc_type datatype;           /* variable data type */
     long cor[MAX_NC_DIMS];      /* corner coordinates */
     int num_dim;                /* number of dim. in variable */
-    long nels = -1;             /* number of elements in buffer */
     int id;
 
     if (read_p()) //has been done
@@ -144,10 +146,8 @@ NCStr::read(const string &dataset, int &error)
 
     (void)lncvarinq(ncid,varid,(char *)0,&datatype,&num_dim,(int *)0,(int *)0);
 
-    if(nels == -1) {		// No point coordinate, get the first element 
-	for (id = 0; id < num_dim; id++) 
-	    cor[id] = 0;
-    }
+    for (id = 0; id <= num_dim; id++) 
+      cor[id] = 0;
 
     if (datatype == NC_CHAR){
 	char chr[2];
@@ -159,7 +159,7 @@ NCStr::read(const string &dataset, int &error)
 	val2buf(&str);
       
 	(void) lncclose(ncid);  
-	return false;
+	return true;
     }
 
     error = 1;
