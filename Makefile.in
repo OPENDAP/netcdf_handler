@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.9 2002/05/03 00:01:52 jimg Exp $
+# $Id: Makefile.in,v 1.10 2003/01/28 07:08:24 jimg Exp $
 
 @SET_MAKE@
 
@@ -14,6 +14,7 @@ INCS = -I./lnetcdf @INCS@
 DEFS = -DLOCAL @DEFS@
 CPPFLAGS = @CPPFLAGS@ $(DEFS) $(INCS)
 CFLAGS = @CFLAGS@
+CXXFLAGS_DEBUG = -g3 -O0 -Wall -fno-default-inline -fno-defer-pop
 CXXFLAGS = @CXXFLAGS@
 TEST_COV_FLAGS = -ftest-coverage -fprofile-arcs
 TAGS_FLAGS = -i ../dap/TAGS
@@ -26,7 +27,6 @@ LFLAGS=-8
 YFLAGS=-d
 NCDODS = -lnc-dods -ldap++ -lnc-dods -ldap++
 LIBS = @LIBS@
-XTRALIBS = @XTRALIBS@ 
 
 # Set the instalation directories; prefix can be set on the command line
 # during Makefile construction with `./configure --prefix /my/choice'
@@ -110,13 +110,13 @@ fortran/fort-geninq.o	fortran/fort-var1io.o
 all: libnc-dods.a nc_das nc_dds nc_dods ncdump
 
 nc_das:	$(DASOBJS) libnc-dods.a
-	$(CXX) $(LDFLAGS) -o nc_das $(DASOBJS) $(NCDODS) $(LIBS) $(XTRALIBS)
+	$(CXX) $(LDFLAGS) -o nc_das $(DASOBJS) $(NCDODS) $(LIBS)
 
 nc_dds: $(DDSOBJS) libnc-dods.a
-	$(CXX) $(LDFLAGS) -o nc_dds $(DDSOBJS) $(NCDODS) $(LIBS) $(XTRALIBS)
+	$(CXX) $(LDFLAGS) -o nc_dds $(DDSOBJS) $(NCDODS) $(LIBS)
 
 nc_dods: $(SRVOBJS) libnc-dods.a
-	$(CXX) $(LDFLAGS) -o nc_dods $(SRVOBJS) $(NCDODS) $(LIBS) $(XTRALIBS)
+	$(CXX) $(LDFLAGS) -o nc_dods $(SRVOBJS) $(NCDODS) $(LIBS)
 
 libnc-dods.a: $(LIBOBJS) $(NCOBJS) 
 	-(cd fortran && $(MAKE) $(MFLAGS) all)

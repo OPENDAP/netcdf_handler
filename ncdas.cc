@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.4 2001/08/30 23:08:24 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.5 2003/01/28 07:08:24 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,7 +96,7 @@ print_attr(nc_type type, int loc, void *vals)
       case NC_LONG:
 	rep = new char [32];
 	gp.lp = (nclong *) vals; // warning: long int format, int arg (arg 3)
-	sprintf (rep, "%ld",*(gp.lp+loc));
+	sprintf (rep, "%d",*(gp.lp+loc));
 	return rep;
 	break;
 
@@ -253,9 +253,9 @@ read_variables(DAS &das, const string &filename) throw (Error)
 {
     ncopts = 0;
     int ncid = lncopen(filename.c_str(), NC_NOWRITE);
-    int nvars, ngatts, natts;
-    string *error;
-    AttrTable *attr_table_ptr;
+    int nvars, ngatts, natts = 0 ;
+    string *error = NULL ;
+    AttrTable *attr_table_ptr = NULL ;
 
     if (ncid == -1) {
         sprintf (Msgt,"nc_das server: could not open file %s", filename.c_str());
@@ -334,6 +334,15 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.5  2003/01/28 07:08:24  jimg
+// Merged with release-3-2-8.
+//
+// Revision 1.3.4.3  2002/12/27 00:39:09  jimg
+// Replaced %ld with %d for integer argument in sprintf.
+//
+// Revision 1.3.4.2  2002/11/06 22:53:23  pwest
+// Cleaned up some uninitialized memory read warnings from purify
+//
 // Revision 1.4  2001/08/30 23:08:24  jimg
 // Merged with 3.2.4
 //

@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdds.cc,v 1.3 2001/08/30 23:08:24 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdds.cc,v 1.4 2003/01/28 07:08:24 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,8 +108,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 
     for (int v1 = 0; v1 < nvars; ++v1) {
 	if (lncvarinq(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0) == -1){
-	    sprintf (Msgt,"ncdds server: 
-could not get variable name or dimension number for variable %d ",v1);
+	    sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v1);
 	    ErrMsgT(Msgt); //local error messag
 	    *error = (string)"\"" + (string)Msgt + (string)"\"";
 	    return false;
@@ -133,8 +132,7 @@ could not get variable name or dimension number for variable %d ",v1);
 	    int d;
 	    for (d = 0; d < ndims; ++d){
 		if (lncdiminq(ncid, dim_ids[d], dimname, &dim_sz) == -1){
-		    sprintf (Msgt,"ncdds server: could not get dimension size for dimension
-%d in variable %d ",d,v1);
+		    sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v1);
 		    ErrMsgT(Msgt); //server error messag
 		    *error = (string)"\"" + (string)Msgt + (string)"\"";
 		    return false;
@@ -145,8 +143,7 @@ could not get variable name or dimension number for variable %d ",v1);
 		for (int v2 = 0; v2 < nvars; ++v2) { 
 		    if (lncvarinq(ncid,v2,varname2[v2],&nctype,&ndims2,
 				  tmp_dim_ids,(int *)0) == -1){
-			sprintf (Msgt,"ncdds server: could not get variable name or dimension 
-number for variable %d ",v2);
+			sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v2);
 			ErrMsgT(Msgt); 
 			*error = (string)"\"" + (string)Msgt + (string)"\"";
 			return false;
@@ -159,8 +156,7 @@ number for variable %d ",v2);
 		    if ((v1 != v2) && (strcmp(dimname,varname2[v2]) == 0) && 
 			(ndims2 == 1)){
 			if (lncdiminq(ncid,tmp_dim_ids[0],(char *)0, &tmp_sz)== -1){
-			    sprintf (Msgt,"ncdds server: could not get dimension size for 
-dimension %d in variable %d ",d,v2);
+			    sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v2);
 			    ErrMsgT(Msgt);
 			    *error = (string)"\"" + (string)Msgt + (string)"\"";
 			    return false;
@@ -182,8 +178,7 @@ dimension %d in variable %d ",d,v2);
 		if (dim_match != d+1) {
 		    for (int d2 = d+1; d2 < ndims; ++d2){
 			if (lncdiminq(ncid, dim_ids[d2], dimname2, &dim_sz) == -1){
-			    sprintf (Msgt,"ncdds server: could not get dimension size 
-for dimension %d in variable %d (ncdds)",d2,v1);
+			    sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d (ncdds)",d2,v1);
 			    ErrMsgT(Msgt);
 			    *error = (string)"\"" + (string)Msgt + (string)"\"";
 			    return false;
@@ -300,6 +295,13 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdds.cc,v $
+// Revision 1.4  2003/01/28 07:08:24  jimg
+// Merged with release-3-2-8.
+//
+// Revision 1.2.4.2  2002/12/18 23:40:33  pwest
+// gcc3.2 compile corrections, mainly regarding using statements. Also,
+// problems with multi line string literatls.
+//
 // Revision 1.3  2001/08/30 23:08:24  jimg
 // Merged with 3.2.4
 //

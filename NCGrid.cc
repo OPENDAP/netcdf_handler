@@ -16,8 +16,9 @@
 #endif
 
 #include "config_nc.h"
+#include "util.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.4 2002/05/03 00:01:52 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.5 2003/01/28 07:08:24 jimg Exp $"};
 
 #include "NCGrid.h"
 #include "debug.h"
@@ -71,6 +72,13 @@ NCGrid::read(const string &dataset)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.5  2003/01/28 07:08:24  jimg
+// Merged with release-3-2-8.
+//
+// Revision 1.2.4.3  2002/12/18 23:40:33  pwest
+// gcc3.2 compile corrections, mainly regarding using statements. Also,
+// problems with multi line string literatls.
+//
 // Revision 1.4  2002/05/03 00:01:52  jimg
 // Merged with release-3-2-7.
 //

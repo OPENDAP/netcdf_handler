@@ -21,7 +21,6 @@
 #endif
 
 #include "Grid.h"
-extern Grid * NewGrid(const string &n = "");
 
 class NCGrid: public Grid {
 public:
@@ -35,6 +34,13 @@ public:
 
 /* 
  * $Log: NCGrid.h,v $
+ * Revision 1.3  2003/01/28 07:08:24  jimg
+ * Merged with release-3-2-8.
+ *
+ * Revision 1.2.4.1  2002/12/18 23:40:33  pwest
+ * gcc3.2 compile corrections, mainly regarding using statements. Also,
+ * problems with multi line string literatls.
+ *
  * Revision 1.2  2000/10/06 01:22:02  jimg
  * Moved the CVS Log entries to the ends of files.
  * Modified the read() methods to match the new definition in the dap library.
