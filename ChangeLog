@@ -1,3 +1,19 @@
+1999-11-04  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged: botched cvs but the next merge should use -j
+	release-3-1-1 -j release-3-1.
+
+	* Added info about header files.  Also updated some URLs (Ethan).
+
+	* Removed incompatibilities in error handling and added support
+	for scalar types (Reza).
+
+	* Fixed: Reza fixed the IMAP bug.
+
+1999-08-17  James Gallagher  <jimg@dcz.dods.org>
+
+	* This code now supports the netCDF 3.x library.
+
 1999-05-07  James Gallagher  <jimg@dcz.dods.org>
 
 	* String-->string
