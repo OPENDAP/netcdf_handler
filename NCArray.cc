@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.18 2005/02/26 00:43:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.19 2005/03/02 17:51:50 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -285,7 +285,7 @@ NCArray::extract_values(void *values, int elements, int outtype) throw(Error)
       case dods_uint32_c: 
       case dods_float32_c:
       case dods_float64_c: {
-        void *tmpbufin = 0;
+        char *tmpbufin = 0;
         int bytes = buf2val((void **)&tmpbufin); 
         if (bytes == 0)
             throw Error(-1, "Could not read any data from remote server.");
@@ -293,6 +293,7 @@ NCArray::extract_values(void *values, int elements, int outtype) throw(Error)
         // Get the netCDF type code for this variable.
         nc_type typep = dynamic_cast<NCAccess*>(var())->get_nc_type();
         int rcode = convert_nc_type(typep, outtype, nels, tmpbufin, values);
+        delete tmpbufin; tmpbufin = 0;
         if (rcode != NC_NOERR)
             throw Error(rcode, "Error copying values between internal buffers [NCArray::extract_values()]");
             
@@ -660,13 +661,18 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
         ap->add_var(*tv);
         ap->set_name((*tv)->name());
         new_vars.push_back(ap);
-        ++tv;
+        delete *tv; *tv++ = 0;
     }
     
     return new_vars;
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.19  2005/03/02 17:51:50  jimg
+// Considerable reduction in memory leaks and fixed all errant memory
+// accesses found with nc_test. OPeNDAP error codes and Error object
+// message strings are now reported using the nc_strerrror() function!
+//
 // Revision 1.18  2005/02/26 00:43:20  jimg
 // Check point: This version of the CL can now translate strings from the
 // server into char arrays. This is controlled by two things: First a
