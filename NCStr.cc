@@ -13,15 +13,15 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.12 2005/02/17 23:44:13 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.13 2005/02/26 00:43:20 jimg Exp $"};
 
-#ifdef __GNUG__
-//#pragma implementation
-#endif
+// #define DODS_DEBUG 1
 
 #include "InternalErr.h"
 #include "NCStr.h"
 #include "NCSequence.h"
+
+#include "debug.h"
 
 #include "Dnetcdf.h"
 
@@ -71,22 +71,19 @@ NCStr::ptr_duplicate()
 }
 
 void
-NCStr::extract_values(void *values, int outtype) throw(Error)
+NCStr::extract_values(void *values, int elements, int outtype) throw(Error)
 {
-    int nels = 1;                   // default value
-    NCSequence *ncq = 0;
-    
     // If this variable is held by a sequence, we need to treat it specially.
     // Read values from the Sequence and then use this instance to process
     // the values. 
-    if (get_parent() && get_parent()->type() == dods_sequence_c) {
-        DBG(cerr << "Extract_values from a Sequence-->Str" << endl);
-        ncq = dynamic_cast<NCSequence*>(get_parent());
-        nels = ncq->number_of_rows();
-    }
+    NCSequence *ncq = dynamic_cast<NCSequence*>(find_ancestral_sequence(this));
+    int nels = (ncq) ? ncq->number_of_rows() : 1;
 
+    DBG(cerr << "nels: " << nels << endl);
+    
     char * tbfr = (char *)values;
-    for (int i = 0; i < nels; i++) {
+    int i = 0;
+    while (i < nels) {
         string *cp = 0;
         string **cpp = &cp;
         // If the parent of this scalar is a Sequence, use that Sequence
@@ -102,14 +99,51 @@ NCStr::extract_values(void *values, int outtype) throw(Error)
             buf2val((void **)cpp);
         }
         
-        for (unsigned int cntr=0; cntr < cp->length() || 
-             (cp->length()==0 && cntr==0); cntr++) {
-            *tbfr++ = *(cp->c_str() + cntr);
+#ifdef STRING_AS_ARRAY
+        if (get_translated()) {
+            unsigned int c = 0;
+            while (c < STRING_ARRAY_SIZE 
+                   && (c < cp->length()
+                       || (cp->length() == 0 && c == 0))) {
+                *tbfr++ = *(cp->c_str() + c++);
+            }
+            while (c++ < STRING_ARRAY_SIZE) {
+                *tbfr++ = 0;
+            }
         }
-        
+        else {
+#endif
+            for (unsigned int c = 0;
+                 c < cp->length() || (cp->length() == 0 && c == 0);
+                 c++) {
+                 // I think it may be a bug to transfer more than one char since
+                 // the client program has allocated a nels buffer for the data.
+                 // jhrg 2/24/05
+                 *tbfr++ = *(cp->c_str() + c);
+            }
+#ifdef STRING_AS_ARRAY
+        }       // Closes the 'else' above
+#endif
+
+        ++i;
         DBG(cerr << "Value: " << *cp << endl);
         // Now get rid of the C++ string object.
         delete cp;
+    }
+    while (i++ < elements) {
+#ifdef STRING_AS_ARRAY
+        if (get_translated()) {
+            int c = 0;
+            while (c++ < STRING_ARRAY_SIZE) {
+                *tbfr++ = 0;
+            }
+        }
+        else {
+#endif
+            *tbfr++ = 0;
+#ifdef STRING_AS_ARRAY
+        }
+#endif
     }
 }
 
@@ -179,6 +213,16 @@ NCStr::read(const string &dataset)
 }
 
 // $Log: NCStr.cc,v $
+// Revision 1.13  2005/02/26 00:43:20  jimg
+// Check point: This version of the CL can now translate strings from the
+// server into char arrays. This is controlled by two things: First a
+// compile-time directive STRING_AS_ARRAY can be used to remove/include
+// this feature. When included in the code, only Strings associated with
+// variables created by the translation process will be turned into char
+// arrays. Other String variables are assumed to be single character strings
+// (although there may be a bug with the way these are handled, see
+// NCAccess::extract_values()).
+//
 // Revision 1.12  2005/02/17 23:44:13  jimg
 // Modifications for processing of command line projections combined
 // with the limit stuff and projection info passed in from the API. I also

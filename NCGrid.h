@@ -45,11 +45,22 @@ public:
     virtual bool is_convertable(int outtype);
     virtual nc_type get_nc_type() throw(InternalErr);
     
-    virtual void extract_values(void *values, int outtype) throw(Error);
+    virtual void extract_values(void *values, int elements, int outtype)
+        throw(Error);
 };
 
 /* 
  * $Log: NCGrid.h,v $
+ * Revision 1.8  2005/02/26 00:43:20  jimg
+ * Check point: This version of the CL can now translate strings from the
+ * server into char arrays. This is controlled by two things: First a
+ * compile-time directive STRING_AS_ARRAY can be used to remove/include
+ * this feature. When included in the code, only Strings associated with
+ * variables created by the translation process will be turned into char
+ * arrays. Other String variables are assumed to be single character strings
+ * (although there may be a bug with the way these are handled, see
+ * NCAccess::extract_values()).
+ *
  * Revision 1.7  2005/01/26 23:25:51  jimg
  * Implemented a fix for Sequence access by row number when talking to a
  * 3.4 or earlier server (which contains a bug in is_end_of_rows()).

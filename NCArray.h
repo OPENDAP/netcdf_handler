@@ -26,65 +26,11 @@
 
 #include "Array.h"
 #include "NCAccess.h"
+#include "DimProjInfo.h"
 
 extern Array * NewArray(const string &n, BaseType *v);
 
 class NCArray: public Array, public NCAccess {
-//    BaseType *d_source;       /// Reference to source var if translated
-    
-    // Command Line Dimension Projection. This struct holds the projection
-    // information for one dimension, as given on the command line. A vector
-    // of these are used to hold the CE passed to the Client Library on the
-    // command line. They are read and used when building CEs for URLs that 
-    // get data. We cannot store this information in the Array class (at least
-    // not w/o hacking the library) because it's likely the indeces exceed the
-    // limits of the variable. How? Because the CL asks for a Constrained 
-    // DDS using the CE so an array constrained by [2:5] will look like one
-    // that holds only four elements and an index of 5 causes 
-    // Array::add_constraint() to throw an exception. So, the information is
-    // stored here. Look in build_constraint() to see how it is used.
-struct dim_proj_info {
-    int start;
-    int stop;
-    int stride;
-    
-    dim_proj_info() : start(0), stop(0), stride(0) {}
-    dim_proj_info(string clause) {
-        // Extract the indices and store the values.
-        // First, replace syntax with spaces...
-        string::size_type separator = 0;
-        // separator = clause.find_first_of("[]:", separator);
-        while ((separator = clause.find_first_of("[]:", separator)) != string::npos) {
-            clause.replace(separator, 1, " ");
-        }
-        // now read numbers after name.
-        istringstream iss(clause.c_str());
-        // string dummy;
-        int i1, i2, i3;
-        // iss >> dummy;
-        if (iss >> i1) {
-            if (iss >> i2) {
-                if (iss >> i3) {
-                    // Found start, stride, stop
-                    start = i1;
-                    stride = i2;
-                    stop = i3;
-                    return;
-                }
-                // Found start, stop but no stride
-                start = i1;
-                stride = 1;
-                stop = i2;
-                return;
-            }
-            // Found start but no stride or stop
-            start = i1;
-            stop = i1;
-            stride = 1;
-            return;
-        }
-    }
-};
     
     // Assume there's a one-to-one mapping between Array dimensions and 
     // elements in this vector. If there are fewer elements in this vector
@@ -116,7 +62,8 @@ public:
 
     virtual nc_type get_nc_type() throw(InternalErr);
     
-    virtual void extract_values(void *values, int outtype) throw(Error);
+    virtual void extract_values(void *values, int elements, int outtype)
+        throw(Error);
     // virtual BaseType *get_source();
     virtual void set_source(BaseType *s) throw(InternalErr);
     
@@ -125,6 +72,16 @@ public:
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.12  2005/02/26 00:43:20  jimg
+ * Check point: This version of the CL can now translate strings from the
+ * server into char arrays. This is controlled by two things: First a
+ * compile-time directive STRING_AS_ARRAY can be used to remove/include
+ * this feature. When included in the code, only Strings associated with
+ * variables created by the translation process will be turned into char
+ * arrays. Other String variables are assumed to be single character strings
+ * (although there may be a bug with the way these are handled, see
+ * NCAccess::extract_values()).
+ *
  * Revision 1.11  2005/02/17 23:44:13  jimg
  * Modifications for processing of command line projections combined
  * with the limit stuff and projection info passed in from the API. I also

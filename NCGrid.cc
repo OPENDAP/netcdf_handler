@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.12 2005/02/17 23:44:13 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.13 2005/02/26 00:43:20 jimg Exp $"};
 
 #include <sstream>
 
@@ -191,9 +191,9 @@ NCGrid::is_convertable(int outtype)
 }
 
 void
-NCGrid::extract_values(void *values, int outtype) throw(Error)
+NCGrid::extract_values(void *values, int elements, int outtype) throw(Error)
 {
-    dynamic_cast<NCAccess*>(array_var())->extract_values(values, outtype);
+    dynamic_cast<NCAccess*>(array_var())->extract_values(values, elements, outtype);
 }
 
 nc_type
@@ -203,6 +203,16 @@ NCGrid::get_nc_type() throw(InternalErr)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.13  2005/02/26 00:43:20  jimg
+// Check point: This version of the CL can now translate strings from the
+// server into char arrays. This is controlled by two things: First a
+// compile-time directive STRING_AS_ARRAY can be used to remove/include
+// this feature. When included in the code, only Strings associated with
+// variables created by the translation process will be turned into char
+// arrays. Other String variables are assumed to be single character strings
+// (although there may be a bug with the way these are handled, see
+// NCAccess::extract_values()).
+//
 // Revision 1.12  2005/02/17 23:44:13  jimg
 // Modifications for processing of command line projections combined
 // with the limit stuff and projection info passed in from the API. I also

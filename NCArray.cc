@@ -15,11 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.17 2005/02/17 23:44:13 jimg Exp $"};
-
-#ifdef __GNUG__
-//#pragma implementation
-#endif
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.18 2005/02/26 00:43:20 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,8 +24,9 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.17 2005/02/17 23:44:13 jimg 
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
-#define DODS_DEBUG 1
+// #define DODS_DEBUG 1
 
 #include "Error.h"
 #include "InternalErr.h"
@@ -220,8 +217,8 @@ NCArray::build_constraint(int outtype, const size_t *start,
             ext_stop = dimension_size(d) - 1;
         }
 
-        DBG(cerr << instart <<" "<< inedges <<" "<< dm << endl);
-        DBG(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
+        DBG2(cerr << instart <<" "<< inedges <<" "<< dm << endl);
+        DBG2(cerr<< ext_start <<" "<< ext_step <<" " << ext_stop << endl);
     
         // create constraint expr. by combining the constraint from the
         // command line with the constraint gleaned from the API call.
@@ -265,8 +262,18 @@ NCArray::is_convertable(int outtype)
         return true;
 }
 
+/** Note that this method can ignore the elements parameter since it will
+    always be the same size as the nels values (the size of the array). If
+    the code gets to this method the original variable in the data source
+    (the thing actually sent by the server) is an Array so asking for N
+    elements must always return N elements. See NCAccess::extract_values()
+    and NCStr::extract_values() for cases where this is not always true.
+    
+    @param values Destination buffer
+    @param elements Expect this number of elements (i.e., what values can hold)
+    @param outtype The netCDF type the client expects to see. */
 void
-NCArray::extract_values(void *values, int outtype) throw(Error)
+NCArray::extract_values(void *values, int elements, int outtype) throw(Error)
 {
     int nels  = length();       // number of elements
     
@@ -296,10 +303,57 @@ NCArray::extract_values(void *values, int outtype) throw(Error)
       case dods_url_c: {
         // rcode = NC_NOERR;
         char * tbfr = (char *)values;
+        string *sa = new string[nels];
+        string **spa = &sa;
+        buf2val((void **)spa);
+        
+        DBG(cerr << "nels: " << nels << endl);
+        DBG(for (int i = 0; i < nels; ++i) cerr << sa[i] << endl);
+        
+        // If this string is held in a translated variable and STRINGS_AS_ARRAY
+        // is defined, then the netCDF API has told the client this DAP String
+        // is an STRING_ARRAY_SIZE array. Thus the values buffer is 
+        // nels * STRING_ARRAY_SIZE bytes. When transferring information to 
+        // this buffer, the code must not transfer more than STRING_ARRAY_SIZE
+        // bytes and must pad to that size for individual elements that are
+        // shorter. jhrg 2/24/05
+#ifdef STRING_AS_ARRAY
+        if (get_translated()) {
+            for (int i = 0; i < nels; i++) {
+                unsigned int c = 0;
+                while (c < STRING_ARRAY_SIZE 
+                       && (c < sa[i].length()
+                           || (sa[i].length() == 0 && c == 0))) {
+                    *tbfr++ = *(sa[i].c_str() + c++);
+                }
+                while (c++ < STRING_ARRAY_SIZE) {
+                    *tbfr++ = 0;
+                }
+            }
+        }
+        else {
+#endif
+            for (int i = 0; i < nels; i++) {
+                for (unsigned int c = 0;
+                     c < sa[i].length() || (sa[i].length() == 0 && c == 0);
+                     c++) {
+                    // I think it may be a bug to transfer more than one char since
+                    // the client program has allocated a nels buffer for the data.
+                    // jhrg 2/24/05
+                    *tbfr++ = *(sa[i].c_str() + c);
+                }
+            }
+#ifdef STRING_AS_ARRAY
+        }       // Closes the 'else' above
+#endif
+
+        delete[] sa;       
+#if 0
+        // This code works with the 3.4 libdap++
         for (int i = 0; i < nels; i++) {
             Str *s = dynamic_cast<Str*>(var(i));
             if (!s)
-                throw InternalErr(__FILE__, __LINE__, "Bad csat to Str.");
+                throw InternalErr(__FILE__, __LINE__, "Bad cast to Str.");
             string *cp = 0;
             string **cpp = &cp;
             s->buf2val((void **)cpp);
@@ -313,6 +367,7 @@ NCArray::extract_values(void *values, int outtype) throw(Error)
             // Now get rid of the C++ string object.
             delete cp;
          }
+#endif
          break;
       } // End of the case where the array template type is a string or url
    
@@ -612,6 +667,16 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.18  2005/02/26 00:43:20  jimg
+// Check point: This version of the CL can now translate strings from the
+// server into char arrays. This is controlled by two things: First a
+// compile-time directive STRING_AS_ARRAY can be used to remove/include
+// this feature. When included in the code, only Strings associated with
+// variables created by the translation process will be turned into char
+// arrays. Other String variables are assumed to be single character strings
+// (although there may be a bug with the way these are handled, see
+// NCAccess::extract_values()).
+//
 // Revision 1.17  2005/02/17 23:44:13  jimg
 // Modifications for processing of command line projections combined
 // with the limit stuff and projection info passed in from the API. I also

@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.27 2005/02/02 03:34:20 jimg Exp $
+# $Id: Makefile.in,v 1.28 2005/02/26 00:43:20 jimg Exp $
 
 @SET_MAKE@
 
@@ -77,7 +77,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 TAGS = etags
 STRIP = strip
 VPATH = .:lnetcdf
-VALGRIND = @VALGRIND@
+VALGRIND = @VALGRIND@ --tool=memcheck --leak-check=yes --verbose
 
 # testsuite specifics
 RUNTEST = runtest
@@ -136,10 +136,10 @@ ncdump:
 	-(cd ncdump && $(MAKE) $(MFLAGS) all)
 
 UNIT_TEST_SRCS = NCConnectTest.cc ClientParamsTest.cc NCStructureTest.cc \
-	NCSequenceTest.cc
+	NCSequenceTest.cc NCUtilTest.cc
 
 UNIT_TEST_PROGS = NCConnectTest ClientParamsTest NCStructureTest \
-	NCSequenceTest
+	NCSequenceTest NCUtilTest
 
 NCConnectTest: NCConnectTest.o libnc-dods.a
 	$(CXX) -o $@ $(LDFLAGS) $< -lcppunit $(NCOBJ) $(NCDODS) $(LIBS)
@@ -151,6 +151,9 @@ NCStructureTest: NCStructureTest.o libnc-dods.a
 	$(CXX) -o $@ $(LDFLAGS) $< -lcppunit $(NCOBJ) $(NCDODS) $(LIBS)
 
 NCSequenceTest: NCSequenceTest.o libnc-dods.a
+	$(CXX) -o $@ $(LDFLAGS) $< -lcppunit $(NCOBJ) $(NCDODS) $(LIBS)
+
+NCUtilTest: NCUtilTest.o libnc-dods.a
 	$(CXX) -o $@ $(LDFLAGS) $< -lcppunit $(NCOBJ) $(NCDODS) $(LIBS)
 
 run:
@@ -184,8 +187,11 @@ Makefile: Makefile.in
 	    ./configure; \
 	fi
 
-check: ncdump-check
-	-(cd nc_test && $(MAKE) $(MFLAGS) check)
+check: ncdump-check unit-check nc_test
+
+.PHONY: nc_test
+nc_test:
+	(cd nc_test && $(MAKE) $(MFLAGS) check)
 
 # This testsuite specifically tests the translation features of the
 # client library.

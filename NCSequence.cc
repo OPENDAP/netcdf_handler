@@ -13,12 +13,12 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.10 2005/02/17 23:44:13 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.11 2005/02/26 00:43:20 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
 
-#define DODS_DEBUG 1
+// #define DODS_DEBUG 1
 
 #include "InternalErr.h"
 #include "debug.h"
@@ -177,10 +177,12 @@ NCSequence::build_constraint(int outtype, const size_t *start,
     long inedges = edges != NULL ? edges[dm] : get_size() - instart;
     long instep = stride != NULL ? stride[dm] : 1;
 
-    // The fields d_start, et c., are set in store_projection()
-    int ext_start = d_start;
-    int ext_step = d_stride;
-    int ext_stop = d_stop;
+    // The fields d_start, et c., are set in store_projection() using whatever
+    // command line proj was supplied. If none was given, default to 
+    // 0 ... get_size-1
+    int ext_start = (d_start == -1) ? 0 : d_start;
+    int ext_step = (d_stride == -1) ? 1 : d_stride;
+    int ext_stop = (d_stop == -1) ? get_size()-1 : d_stop;
 
     string version_info = get_implementation_version();
 
@@ -283,6 +285,7 @@ public:
             }
             
             add_translation_attribute(a);
+            a->set_translated(true);
             
             d_new_vars.push_back(a);
         }
@@ -294,7 +297,8 @@ public:
             size_new_dimension(a, e);
 
             add_translation_attribute(a);
-
+            a->set_translated(true);
+            
             d_new_vars.push_back(a);
         }
     }
@@ -373,6 +377,16 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.11  2005/02/26 00:43:20  jimg
+// Check point: This version of the CL can now translate strings from the
+// server into char arrays. This is controlled by two things: First a
+// compile-time directive STRING_AS_ARRAY can be used to remove/include
+// this feature. When included in the code, only Strings associated with
+// variables created by the translation process will be turned into char
+// arrays. Other String variables are assumed to be single character strings
+// (although there may be a bug with the way these are handled, see
+// NCAccess::extract_values()).
+//
 // Revision 1.10  2005/02/17 23:44:13  jimg
 // Modifications for processing of command line projections combined
 // with the limit stuff and projection info passed in from the API. I also
