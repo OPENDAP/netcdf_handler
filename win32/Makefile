@@ -22,7 +22,48 @@ DODSLIBS	= libdap++.lib pthreadVCE.lib libxml2.lib libcurl.lib librx.lib libz.li
 SYSLIBS		= ws2_32.lib advapi32.lib
 LINKLIBS	= $(DODSLIBS) $(SYSLIBS)
 
-# Setup compiler includes and defines for libraries and .exe's
+# Setup compiler flags
+STCFLAGS	= /ML				# Single-Threaded Model
+MTCFLAGS	= /MT 				# Multi-Threaded Model
+MDCFLAGS	= /MD				# Multi-Threaded DLL Model
+STDCFLAGS	= /MLd				# Single-Threaded Model, debug version
+MTDCFLAGS	= /MTd 				# Multi-Threaded Model, debug version
+MDDCFLAGS	= /MDd				# Multi-Thread DLL Model, debug version
+CFLAGS		= /nologo /W0 /GR /GX /c
+
+# Setup linker flags for libraries
+STLFLAGS	= -lib /nologo -libpath:$(INSTALLLIBDIR)
+MTLFLAGS	= -lib /nologo -libpath:$(INSTALLLIBDIR)
+MDLFLAGS	= -libpath:$(INSTALLLIBDIR) /dll /def:libnc-dods.def /map /fixed:NO /base:0x07000000
+STDLFLAGS	= -lib /nologo -libpath:$(INSTALLLIBDIR)
+MTDLFLAGS	= -lib /nologo -libpath:$(INSTALLLIBDIR)
+MDDLFLAGS	= -libpath:$(INSTALLLIBDIR) /dll /def:libnc-dods.def /map /debug /fixed:NO /base:0x07000000
+
+# Link libraries for static libraries and dll's
+STLIBS		=
+MTLIBS		=
+MDLIBS		= libdapMD.lib libxml2MD.lib libcurlMD.lib librxMD.lib libzMD.lib libxdrMD.lib pthreadVCE.lib
+STDLIBS		=
+MTDLIBS		=
+MDDLIBS		= llibdapMDD.lib ibxml2MDD.lib libcurlMDD.lib librxMDD.lib libzMDD.lib libxdrMDD.lib pthreadVCE.lib
+
+# Setup linker flags for executables
+ESTLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
+EMTLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
+EMDLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
+ESTDLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
+EMTDLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
+EMDDLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
+
+# Link libraries for exe's
+ESTLLIBS	= libdapST.lib libnc-dodsST.lib libxml2ST.lib libcurlST.lib librxST.lib libzST.lib libxdrST.lib
+EMTLLIBS	= libdapMT.lib libnc-dodsMT.lib libxml2MT.lib libcurlMT.lib librxMT.lib libzMT.lib libxdrMT.lib pthreadVCE.lib
+EMDLLIBS	= libdapMD.lib libnc-dodsMD.lib libxml2MD.lib libcurlMD.lib librxMD.lib libzMD.lib libxdrMD.lib pthreadVCE.lib
+ESTDLLIBS	= libdapSTD.lib libnc-dodsSTD.lib libxml2STD.lib libcurlSTD.lib librxSTD.lib libzSTD.lib libxdrSTD.lib
+EMTDLLIBS	= libdapMTD.lib libnc-dodsMTD.lib libxml2MTD.lib libcurlMTD.lib librxMTD.lib libzMTD.lib libxdrMTD.lib pthreadVCE.lib
+EMDDLLIBS	= libdapMDD.lib libnc-dodsMDD.lib libxml2MDD.lib libcurlMDD.lib librxMDD.lib libzMDD.lib libxdrMDD.lib pthreadVCE.lib
+
+# Setup compiler includes and defines
 INCS		= /I . /I ..\lnetcdf /I ..\fortran /I .. /I ..\GNU \
 		  /I $(INCLUDEDIR) /I $(INCLUDEDIR)\pthreads
 DEFSLIB		= /D WIN32 /D LOCAL /D _LIB /D _WINDOWS

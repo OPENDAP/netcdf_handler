@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.16 2004/01/26 23:30:35 jimg Exp $
+# $Id: Makefile.in,v 1.17 2004/02/19 19:42:55 jimg Exp $
 
 @SET_MAKE@
 
@@ -7,7 +7,7 @@
 # DEFS gets the `-D' defines that describe what a particular system has
 # or doesn't have.
 
-PROG = libnc-dods.a nc_das nc_dds nc_dods
+PROG = libnc-dods.a nc_handler
 DODS_ROOT = @dods_relative@
 
 INCS = -I./lnetcdf @INCS@
@@ -187,7 +187,6 @@ distclean:
 depend: 
 	@depend@ -m Makefile.in -- $(CPPFLAGS) -- $(HANDLER_SRCS) $(LIBSRCS)
 	-(cd ncdump && $(MAKE) $(MFLAGS) depend)
-	-(cd fortran && $(MAKE) $(MFLAGS) depend)
 	-(cd nc_test && $(MAKE) $(MFLAGS) depend)
 
 .PHONY: tar
