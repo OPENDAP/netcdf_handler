@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.18 2004/02/25 00:47:52 jimg Exp $
+# $Id: Makefile.in,v 1.19 2004/03/01 22:30:58 jimg Exp $
 
 @SET_MAKE@
 
@@ -172,7 +172,7 @@ install: libnc-dods.a nc_handler
 
 clean:	
 	-rm -f *.o *.sum *.log *~ core
-	-rm -f $(PROG) libnc-dods.a
+	-rm -f $(PROG) NCConnectTest libnc-dods.a
 	-(cd ncdump && $(MAKE) $(MFLAGS) clean)
 	-(cd fortran && $(MAKE) $(MFLAGS) clean)
 	-(cd nc_test && $(MAKE) $(MFLAGS) clean)
