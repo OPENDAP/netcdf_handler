@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.7 2001/09/28 17:18:41 jimg Exp $
+# $Id: Makefile.in,v 1.8 2001/10/14 01:49:10 jimg Exp $
 
 @SET_MAKE@
 
@@ -216,16 +216,19 @@ binary-tar:
 	cd $(DODS_ROOT).. && ( \
 	$(TAR) --gzip --create --dereference \
             --file DODS-nc-library-$(version)-$(host).tar.gz \
+            DODS/readme/README DODS/readme/README-nc-library \
             DODS/lib/libnc-dods.a \
             DODS/include/netcdf.h \
             DODS/include/netcdf.inc ; \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-server-$(version)-$(host).tar.gz \
+            DODS/readme/README DODS/readme/README-nc-server \
             DODS/etc/nc_das \
             DODS/etc/nc_dds \
             DODS/etc/nc_dods ; \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-client-$(version)-$(host).tar.gz \
+            DODS/readme/README DODS/readme/README-nc-client \
             DODS/bin/dncdump \
             DODS/bin/dncview \
             DODS/bin/Ncview  )
@@ -275,182 +278,195 @@ tags:
 nc_das.o: nc_das.cc config_nc.h ../../include/DAS.h \
  ../../include/AttrTable.h ../../include/Error.h \
  ../../include/cgi_util.h ../../include/Connect.h ../../include/DDS.h \
- ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/util.h \
+ ../../include/BaseType.h ../../include/InternalErr.h \
+ ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
+ ../../include/util.h ../../include/Byte.h \
+ ../../include/dods-datatypes.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h ../../include/DODSFilter.h
+ncdas.o: ncdas.cc config_nc.h ../../include/cgi_util.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
+ ../../include/InternalErr.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
  ../../include/Byte.h ../../include/dods-datatypes.h \
  ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
  ../../include/UInt32.h ../../include/Float32.h \
  ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h \
- ../../include/DODSFilter.h
-ncdas.o: ncdas.cc config_nc.h ../../include/cgi_util.h \
- ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
- ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
- ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
- ../../include/debug.h ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
- ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
- ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h Dnetcdf.h lnetcdf.h \
- NCConnect.h ../../include/Connections.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h Dnetcdf.h lnetcdf.h NCConnect.h \
+ ../../include/Connections.h
 nc_dds.o: nc_dds.cc config_nc.h ../../include/DDS.h \
- ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/cgi_util.h \
+ ../../include/BaseType.h ../../include/InternalErr.h \
+ ../../include/Error.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/cgi_util.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
- ../../include/Error.h ../../include/util.h ../../include/Byte.h \
+ ../../include/util.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/Int16.h \
  ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
  ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h \
- ../../include/DODSFilter.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h ../../include/DODSFilter.h
 ncdds.o: ncdds.cc config_nc.h Dnetcdf.h lnetcdf.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
  ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
- ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
- ../../include/debug.h ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/InternalErr.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/dods-datatypes.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h NCInt32.h NCUInt32.h NCUInt16.h NCInt16.h \
- NCFloat64.h NCFloat32.h NCByte.h NCArray.h NCGrid.h NCStr.h \
- ../../include/cgi_util.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ NCInt32.h NCUInt32.h NCUInt16.h NCInt16.h NCFloat64.h NCFloat32.h \
+ NCByte.h NCArray.h NCGrid.h NCStr.h ../../include/cgi_util.h
 nc_dods.o: nc_dods.cc config_nc.h ../../include/cgi_util.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
  ../../include/Error.h ../../include/DDS.h ../../include/BaseType.h \
- ../../include/Clause.h ../../include/expr.h ../../include/RValue.h \
- ../../include/debug.h ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/InternalErr.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/dods-datatypes.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h \
- ../../include/DODSFilter.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h ../../include/DODSFilter.h
 NCConnect.o: NCConnect.cc config_nc.h ../../include/Connect.h \
  ../../include/DAS.h ../../include/AttrTable.h ../../include/Error.h \
- ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/DDS.h ../../include/BaseType.h \
+ ../../include/InternalErr.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/dods-datatypes.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/debug.h
 inst.o: inst.cc config_nc.h ../../include/Connect.h \
  ../../include/DAS.h ../../include/AttrTable.h ../../include/Error.h \
- ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/DDS.h ../../include/BaseType.h \
+ ../../include/InternalErr.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/dods-datatypes.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h ../../include/Connections.cc \
- ../../include/config_dap.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ ../../include/Connections.cc ../../include/config_dap.h \
+ ../../include/debug.h
 NCArray.o: NCArray.cc config_nc.h ../../include/Error.h \
  ../../include/InternalErr.h Dnetcdf.h lnetcdf.h \
  ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
  ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/dods-datatypes.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h NCArray.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ NCArray.h ../../include/debug.h
 NCByte.o: NCByte.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCByte.h ../../include/Byte.h \
  ../../include/dods-datatypes.h ../../include/BaseType.h Dnetcdf.h \
  lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
  ../../include/AttrTable.h ../../include/DDS.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Int16.h ../../include/UInt16.h \
- ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
  ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h
 NCFloat64.o: NCFloat64.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCFloat64.h ../../include/Float64.h \
  ../../include/dods-datatypes.h ../../include/BaseType.h Dnetcdf.h \
  lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
  ../../include/AttrTable.h ../../include/DDS.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Str.h \
- ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
- ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/Int16.h ../../include/UInt16.h \
+ ../../include/Int32.h ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Str.h ../../include/dods-limits.h ../../include/Url.h \
+ ../../include/Array.h ../../include/Vector.h ../../include/List.h \
+ ../../include/Structure.h ../../include/Constructor.h \
  ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
  ../../include/Connections.h
 NCGrid.o: NCGrid.cc config_nc.h NCGrid.h ../../include/Grid.h \
- ../../include/BaseType.h
+ ../../include/BaseType.h ../../include/InternalErr.h \
+ ../../include/Error.h ../../include/Constructor.h \
+ ../../include/debug.h
 NCUInt32.o: NCUInt32.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h Dnetcdf.h lnetcdf.h ../../include/Connect.h \
  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
  ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/util.h \
- ../../include/Byte.h ../../include/dods-datatypes.h \
- ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
- ../../include/UInt32.h ../../include/Float32.h \
- ../../include/Float64.h ../../include/Str.h \
+ ../../include/RValue.h ../../include/util.h ../../include/Byte.h \
+ ../../include/dods-datatypes.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h NCUInt32.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ NCUInt32.h
 NCInt32.o: NCInt32.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h Dnetcdf.h lnetcdf.h ../../include/Connect.h \
  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
  ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/util.h \
- ../../include/Byte.h ../../include/dods-datatypes.h \
- ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
- ../../include/UInt32.h ../../include/Float32.h \
- ../../include/Float64.h ../../include/Str.h \
+ ../../include/RValue.h ../../include/util.h ../../include/Byte.h \
+ ../../include/dods-datatypes.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h NCInt32.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ NCInt32.h
 NCList.o: NCList.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCList.h ../../include/List.h \
  ../../include/dods-limits.h ../../include/Vector.h \
  ../../include/BaseType.h ../../include/DDS.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h
+ ../../include/expr.h ../../include/RValue.h
 NCSequence.o: NCSequence.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCSequence.h ../../include/Sequence.h \
- ../../include/BaseType.h
+ ../../include/BaseType.h ../../include/Constructor.h
 NCStr.o: NCStr.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCStr.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/BaseType.h Dnetcdf.h \
  lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
  ../../include/AttrTable.h ../../include/DDS.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Byte.h \
- ../../include/dods-datatypes.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float32.h ../../include/Float64.h ../../include/Url.h \
- ../../include/Array.h ../../include/Vector.h ../../include/List.h \
- ../../include/Structure.h ../../include/Sequence.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/dods-datatypes.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Constructor.h ../../include/Sequence.h \
  ../../include/Grid.h NCConnect.h ../../include/Connections.h
 NCStructure.o: NCStructure.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCStructure.h ../../include/Structure.h \
- ../../include/BaseType.h ../../include/DDS.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h
+ ../../include/BaseType.h ../../include/Constructor.h \
+ ../../include/DDS.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h
 NCUrl.o: NCUrl.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCUrl.h ../../include/Url.h \
  ../../include/dods-limits.h ../../include/BaseType.h \
@@ -459,38 +475,38 @@ NCUInt16.o: NCUInt16.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h Dnetcdf.h lnetcdf.h ../../include/Connect.h \
  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
  ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/util.h \
- ../../include/Byte.h ../../include/dods-datatypes.h \
- ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
- ../../include/UInt32.h ../../include/Float32.h \
- ../../include/Float64.h ../../include/Str.h \
+ ../../include/RValue.h ../../include/util.h ../../include/Byte.h \
+ ../../include/dods-datatypes.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h NCUInt16.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ NCUInt16.h
 NCInt16.o: NCInt16.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h Dnetcdf.h lnetcdf.h ../../include/Connect.h \
  ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
  ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
- ../../include/RValue.h ../../include/debug.h ../../include/util.h \
- ../../include/Byte.h ../../include/dods-datatypes.h \
- ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
- ../../include/UInt32.h ../../include/Float32.h \
- ../../include/Float64.h ../../include/Str.h \
+ ../../include/RValue.h ../../include/util.h ../../include/Byte.h \
+ ../../include/dods-datatypes.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
  ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
  ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
- ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
- ../../include/Connections.h NCInt16.h
+ ../../include/Constructor.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h \
+ NCInt16.h
 NCFloat32.o: NCFloat32.cc config_nc.h ../../include/InternalErr.h \
  ../../include/Error.h NCFloat32.h ../../include/Float32.h \
  ../../include/dods-datatypes.h ../../include/BaseType.h Dnetcdf.h \
  lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
  ../../include/AttrTable.h ../../include/DDS.h ../../include/Clause.h \
- ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
- ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
- ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
- ../../include/Float64.h ../../include/Str.h \
- ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
- ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/util.h \
+ ../../include/Byte.h ../../include/Int16.h ../../include/UInt16.h \
+ ../../include/Int32.h ../../include/UInt32.h ../../include/Float64.h \
+ ../../include/Str.h ../../include/dods-limits.h ../../include/Url.h \
+ ../../include/Array.h ../../include/Vector.h ../../include/List.h \
+ ../../include/Structure.h ../../include/Constructor.h \
  ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
  ../../include/Connections.h

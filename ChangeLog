@@ -1,3 +1,11 @@
+2001-10-13  James Gallagher  <jimg@dcz.dods.org>
+
+	* Merged with release-3-2-6.
+
+	* Minor fixes to configure.
+
+	* Updated INSTALL & README.
+
 2001-09-28  James Gallagher  <jimg@dcz.dods.org>
 
 	* Merged with release 3.2.5. The next merge should use
