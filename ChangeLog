@@ -1,3 +1,19 @@
+2004-02-24  James Gallagher  <jimg@comet.dods.org>
+
+	* Replaced the old version of ncdump with the version found in the
+	3.5.1 distribution of netCDF from Unidata. Over time I'll migrate
+	the entire code base to 3.5.1. This version of ncdump uses the
+	netCDF 3.x interface which is where translation is currently
+	supported. It will take a little extra time to back port it to the
+	netCDF 2.x interface.
+
+	* Check in of Reza's translation code. This version of the OPeNDAP
+	netCDF CL can read from data sources that have Structures. Future
+	versions will read Grids w/o the extra map vectors (i.e., the
+	duplicates held outside the Grid) and Sequences (using a scheme
+	Reza N and Joe W developed where an unconstrained Sequence has a
+	default constraint of 100 elements).
+
 2004-02-18  James Gallagher  <jimg@comet.dods.org>
 
 	* Merged release-3-4-2FCS.
