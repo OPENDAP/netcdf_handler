@@ -1,8 +1,13 @@
 
 # Setup directories for intermediate files and built components
 OBJDIR		= .\objects
+SRCDIR		= ..
+INSTALLBINDIR	= ..\..\..\bin
+INSTALLETCDIR	= ..\..\..\etc
 INSTALLLIBDIR	= ..\..\..\lib
-INSTALLEXEDIR	= ..\..\..\bin
+INSTALLDLLDIR	= ..\..\..\dll
+INSTALLINCDIR	= ..\..\..\include
+
 INCLUDEDIR	= ..\..\..\include
 
 # Setup basic compiler flags for all .obj's
@@ -42,10 +47,10 @@ MDDLFLAGS	= -libpath:$(INSTALLLIBDIR) /dll /def:libnc-dods.def /map /debug /fixe
 # Link libraries for static libraries and dll's
 STLIBS		=
 MTLIBS		=
-MDLIBS		= libdapMD.lib libxml2MD.lib libcurlMD.lib librxMD.lib libzMD.lib libxdrMD.lib pthreadVCE.lib
+MDLIBS		= libdapMD.lib libxml2MD.lib libcurlMD.lib libzMD.lib libxdrMD.lib pthreadVCE.lib
 STDLIBS		=
 MTDLIBS		=
-MDDLIBS		= llibdapMDD.lib ibxml2MDD.lib libcurlMDD.lib librxMDD.lib libzMDD.lib libxdrMDD.lib pthreadVCE.lib
+MDDLIBS		= llibdapMDD.lib ibxml2MDD.lib libcurlMDD.lib libzMDD.lib libxdrMDD.lib pthreadVCE.lib
 
 # Setup linker flags for executables
 ESTLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
@@ -56,28 +61,18 @@ EMTDLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
 EMDDLFLAGS	= /nologo /libpath:$(INSTALLLIBDIR)
 
 # Link libraries for exe's
-ESTLLIBS	= libdapST.lib libnc-dodsST.lib libxml2ST.lib libcurlST.lib librxST.lib libzST.lib libxdrST.lib
-EMTLLIBS	= libdapMT.lib libnc-dodsMT.lib libxml2MT.lib libcurlMT.lib librxMT.lib libzMT.lib libxdrMT.lib pthreadVCE.lib
-EMDLLIBS	= libdapMD.lib libnc-dodsMD.lib libxml2MD.lib libcurlMD.lib librxMD.lib libzMD.lib libxdrMD.lib pthreadVCE.lib
-ESTDLLIBS	= libdapSTD.lib libnc-dodsSTD.lib libxml2STD.lib libcurlSTD.lib librxSTD.lib libzSTD.lib libxdrSTD.lib
-EMTDLLIBS	= libdapMTD.lib libnc-dodsMTD.lib libxml2MTD.lib libcurlMTD.lib librxMTD.lib libzMTD.lib libxdrMTD.lib pthreadVCE.lib
-EMDDLLIBS	= libdapMDD.lib libnc-dodsMDD.lib libxml2MDD.lib libcurlMDD.lib librxMDD.lib libzMDD.lib libxdrMDD.lib pthreadVCE.lib
+ESTLLIBS	= libdapST.lib libnc-dodsST.lib libxml2ST.lib libcurlST.lib libzST.lib libxdrST.lib
+EMTLLIBS	= libdapMT.lib libnc-dodsMT.lib libxml2MT.lib libcurlMT.lib libzMT.lib libxdrMT.lib pthreadVCE.lib
+EMDLLIBS	= libdapMD.lib libnc-dodsMD.lib libxml2MD.lib libcurlMD.lib libzMD.lib libxdrMD.lib pthreadVCE.lib
+ESTDLLIBS	= libdapSTD.lib libnc-dodsSTD.lib libxml2STD.lib libcurlSTD.lib libzSTD.lib libxdrSTD.lib
+EMTDLLIBS	= libdapMTD.lib libnc-dodsMTD.lib libxml2MTD.lib libcurlMTD.lib libzMTD.lib libxdrMTD.lib pthreadVCE.lib
+EMDDLLIBS	= libdapMDD.lib libnc-dodsMDD.lib libxml2MDD.lib libcurlMDD.lib libzMDD.lib libxdrMDD.lib pthreadVCE.lib
 
 # Setup compiler includes and defines
-INCS		= /I . /I ..\lnetcdf /I ..\fortran /I .. /I ..\GNU \
+INCS		= /I . /I ..\lnetcdf /I ..\fortran /I .. /I $(INCLUDEDIR)\GNU \
 		  /I $(INCLUDEDIR) /I $(INCLUDEDIR)\pthreads
-DEFSLIB		= /D WIN32 /D LOCAL /D _LIB /D _WINDOWS
-DEFSEXE		= /D WIN32 /D LOCAL /D _CONSOLE
-CPPLIBFLAGS	= $(DEFSLIB) $(INCS)
-CPPEXEFLAGS	= $(DEFSEXE) $(INCS)
-
-# Combine compiler flags
-LIBOBJFLAGS	= $(CFLAGS) $(CPPLIBFLAGS)
-EXEOBJFLAGS	= $(CFLAGS) $(CPPEXEFLAGS)
-
-# Define the targets
-LIBRARY		= $(OBJDIR)\libnc-dods.lib
-EXECUTABLE	= $(OBJDIR)\dncdump.exe
+DEFS		= /D WIN32 /D WIN32_LEAN_AND_MEAN /D LOCAL
+CPPFLAGS	= $(DEFS) $(INCS)
 
 TARGETS		= $(LIBRARY) $(EXECUTABLE)
 
@@ -85,18 +80,17 @@ TARGETS		= $(LIBRARY) $(EXECUTABLE)
 .SUFFIXES :
 .SUFFIXES :	.obj .c .cc
 
-# Rules for library objects
-{..\lnetcdf}.c{$(OBJDIR)}.obj:
-	@$(CC) $(LIBOBJFLAGS) /Fo$@ /Tc $<
+{$(SRCDIR)\lnetcdf}.c{$(OBJDIR)}.obj:
+	@$(CC) $(CFLAGS) $(CPPFLAGS) /Fo$@ /Tc $<
 
-{..\fortran}.c{$(OBJDIR)}.obj:
-	@$(CC) /D PowerStationFortran $(LIBOBJFLAGS) /Fo$@ /Tc $<
+{$(SRCDIR)\fortran}.c{$(OBJDIR)}.obj:
+	@$(CC) $(CFLAGS) $(CPPFLAGS) /D PowerStationFortran /Fo$@ /Tc $<
 
-{..\ncdump}.cc{$(OBJDIR)}.obj:
-	@$(CC) $(LIBOBJFLAGS) /Fo$@ /Tp $<
+{$(SRCDIR)\ncdump}.cc{$(OBJDIR)}.obj:
+	@$(CC) $(CFLAGS) $(CPPFLAGS) /Fo$@ /Tp $<
 
-{..}.cc{$(OBJDIR)}.obj:
-	@$(CC) $(LIBOBJFLAGS) /Fo$@ /Tp $<
+{$(SRCDIR)}.cc{$(OBJDIR)}.obj:
+	@$(CC) $(CFLAGS) $(CPPFLAGS) /Fo$@ /Tp $<
 
 NCOBJ = $(OBJDIR)\NCArray.obj \
 	$(OBJDIR)\NCByte.obj \
@@ -157,19 +151,38 @@ EXEOBJS = $(OBJDIR)\ncdump.obj \
 	$(OBJDIR)\vardata.obj \
 	$(OBJDIR)\dumplib.obj
 
-all: setup $(TARGETS)
+# Convenience dependancies
+libnc-dodsST.lib: $(OBJDIR)\libnc-dodsST.lib
+libnc-dodsMT.lib: $(OBJDIR)\libnc-dodsMT.lib
+libnc-dodsMD.dll: $(OBJDIR)\libnc-dodsMD.dll
+libnc-dodsSTD.lib: $(OBJDIR)\libnc-dodsSTD.lib
+libnc-dodsMTD.lib: $(OBJDIR)\libnc-dodsMTD.lib
+libnc-dodsMDD.dll: $(OBJDIR)\libnc-dodsMDD.dll
 
-$(LIBRARY): $(LIBOBJS) $(NCOBJS) $(FOBJS)
-	$(LINK) $(LLIBFLAGS) /out:$@ $(LIBOBJS) $(NCOBJS) $(FOBJS)
+dncdump: $(OBJDIR)\dncdump.exe
+	@echo "built dncdump"
 
-$(EXECUTABLE): $(EXEOBJS)
-	$(LINK) $(LEXEFLAGS) /out:$(EXECUTABLE) $(EXEOBJS) $(LINKLIBS) $(LIBRARY)
+# Link the library
+$(OBJDIR)\libnc-dodsST.lib: $(LIBOBJS) $(NCOBJS) $(FOBJS)
+	@$(LINK) $(LFLAGS) /out:$@ $(LIBOBJS) $(NCOBJS) $(FOBJS) $(LIBS) 
 
-install:
-	copy $(LIBRARY) $(INSTALLLIBDIR)
-	copy $(EXECUTABLE) $(INSTALLEXEDIR)
-	copy ..\lnetcdf\netcdf.h $(INCLUDEDIR)
-	copy ..\fortran\netcdf.inc $(INCLUDEDIR)
+$(OBJDIR)\libnc-dodsMT.lib: $(LIBOBJS) $(NCOBJS) $(FOBJS)
+	@$(LINK) $(LFLAGS) /out:$@ $(LIBOBJS) $(NCOBJS) $(FOBJS) $(LIBS) 
+
+$(OBJDIR)\libnc-dodsMD.dll: $(LIBOBJS) $(NCOBJS) $(FOBJS)
+	@$(LINK) $(LFLAGS) /out:$@ $(LIBOBJS) $(NCOBJS) $(FOBJS) $(LIBS)
+
+$(OBJDIR)\libnc-dodsSTD.lib: $(LIBOBJS) $(NCOBJS) $(FOBJS)
+	@$(LINK) $(LFLAGS) /out:$@  $(LIBOBJS) $(NCOBJS) $(FOBJS) $(LIBS) 
+
+$(OBJDIR)\libnc-dodsMTD.lib: $(LIBOBJS) $(NCOBJS) $(FOBJS)
+	@$(LINK) $(LFLAGS) /out:$@ $(LIBOBJS) $(NCOBJS) $(FOBJS) $(LIBS) 
+
+$(OBJDIR)\libnc-dodsMDD.dll: $(LIBOBJS) $(NCOBJS) $(FOBJS)
+	@$(LINK) $(LFLAGS) /out:$@ $(LIBOBJS) $(NCOBJS) $(FOBJS) $(LIBS) 
+
+$(OBJDIR)\dncdump.exe: $(EXEOBJS)
+	@$(LINK) $(LFLAGS) /libpath:$(OBJDIR) /out:$@ $(EXEOBJS) $(LIBS)
 
 # Dods Netcdf Objects
 $(OBJDIR)\NCArray.obj		: ..\NCArray.cc
@@ -236,8 +249,40 @@ $(OBJDIR)\dumplib.obj		: ..\ncdump\dumplib.cc
 # rmdir and del are a safe bet.
 setup:
 	@-mkdir $(OBJDIR)
-	@-mkdir $(INSTALLEXEDIR)
+	@-mkdir $(INSTALLBINDIR)
+	@-mkdir $(INSTALLETCDIR)
 	@-mkdir $(INSTALLLIBDIR)
+	@-mkdir $(INSTALLDLLDIR)
+	@-mkdir $(INSTALLINCDIR)
+
+# Install
+install: installST installMT installSTD installMTD
+#install: installST installMT installMD installSTD installMTD installMDD
+# We use the Multi-threaded versions of executables by default here
+	@copy $(OBJDIR)\MT\dncdump.exe $(INSTALLBINDIR)
+	@copy ..\lnetcdf\netcdf.h $(INSTALLINCDIR)
+	@copy ..\fortran\netcdf.inc $(INSTALLINCDIR)
+
+installST:
+	@copy $(OBJDIR)\ST\libnc-dodsST.lib $(INSTALLLIBDIR)
+
+installMT:
+	@copy $(OBJDIR)\MT\libnc-dodsMT.lib $(INSTALLLIBDIR)
+
+installMD:
+	@copy $(OBJDIR)\MD\libnc-dodsMD.lib $(INSTALLLIBDIR)
+	@copy $(OBJDIR)\MD\libnc-dodsMD.dll $(INSTALLDLLDIR)
+
+installSTD:
+	@copy $(OBJDIR)\STD\libnc-dodsSTD.lib $(INSTALLLIBDIR)
+
+installMTD:
+	@copy $(OBJDIR)\MTD\libnc-dodsMTD.lib $(INSTALLLIBDIR)
+
+installMDD:
+	@copy $(OBJDIR)\MDD\libnc-dodsMDD.lib $(INSTALLLIBDIR)
+	@copy $(OBJDIR)\MDD\libnc-dodsMDD.dll $(INSTALLDLLDIR)
+>>>>>>> 1.2.4.9
 
 clean:
 	@-del $(OBJDIR)\*.obj
