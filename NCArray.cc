@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.10 2004/10/22 21:51:34 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.11 2004/10/28 16:38:19 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -74,13 +74,9 @@ NCArray::NCArray(const NCArray &rhs) : Array(rhs)
 NCArray::~NCArray()
 {
     DBG(cerr << "Entering ~NCArray()" << endl);
-#if 1
-    // FIXME: Memory leak. To fix this, change translation code in NCConnect
-    // so that it builds a parallel DDS instead of hacking up the original.
-    // Maybe do this by implementing translate() methods for each of the 
-    // BaseTypes (using the NCAccess interface).
+
     delete d_source;
-#endif
+
     DBG(cerr << "Exiting ~NCArray()" << endl);
 }
 
@@ -88,12 +84,12 @@ void
 NCArray::_duplicate(const NCArray &nca)
 {
     DBG(cerr << "Entering NCArray::_duplicate()" << endl);
-#if 1
+
     if (nca.d_source)
         d_source = nca.d_source->ptr_duplicate();
     else
         d_source = 0;
-#endif
+
     DBG(cerr << "Exiting NCArray::_duplicate()" << endl);
 }
 
@@ -572,6 +568,13 @@ NCArray::set_source(BaseType *s) throw(InternalErr)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.11  2004/10/28 16:38:19  jimg
+// Added support for error handling to ClientParams. Added use of
+// ClientParams to NCConnect, although that's not complete yet. NCConnect
+// now has an instance of ClientParams. The instance is first built and
+// then passed into NCConnect's ctor which stores a const reference to the CP
+// object.
+//
 // Revision 1.10  2004/10/22 21:51:34  jimg
 // More massive changes: Translation of Sequences now works so long as the
 // Sequence contains only atomic types.

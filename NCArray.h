@@ -31,6 +31,7 @@ class NCArray: public Array, public NCAccess {
     BaseType *d_source;       /// Reference to source var if translated
 
     void _duplicate(const NCArray &nca);
+    
 public:
     NCArray(const string &n = "", BaseType *v = 0);
     NCArray(const NCArray &nc_array);
@@ -57,6 +58,13 @@ public:
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.8  2004/10/28 16:38:19  jimg
+ * Added support for error handling to ClientParams. Added use of
+ * ClientParams to NCConnect, although that's not complete yet. NCConnect
+ * now has an instance of ClientParams. The instance is first built and
+ * then passed into NCConnect's ctor which stores a const reference to the CP
+ * object.
+ *
  * Revision 1.7  2004/10/22 21:51:34  jimg
  * More massive changes: Translation of Sequences now works so long as the
  * Sequence contains only atomic types.
