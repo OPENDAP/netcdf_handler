@@ -13,7 +13,94 @@
 //
 // ReZa 3/26/99
 
+#include "config_nc.h"
+
+static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.4 2000/10/06 01:22:02 jimg Exp $"};
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "InternalErr.h"
+#include "NCFloat32.h"
+#include "Dnetcdf.h"
+
+Float32 *
+NewFloat32(const string &n)
+{
+    return new NCFloat32(n);
+}
+
+NCFloat32::NCFloat32(const string &n) : Float32(n)
+{
+}
+
+BaseType *
+NCFloat32::ptr_duplicate()
+{
+    return new NCFloat32(*this); // Copy ctor calls duplicate to do the work
+}
+ 
+bool
+NCFloat32::read(const string &dataset)
+{
+  int varid;                  /* variable Id */
+  nc_type datatype;           /* variable data type */
+  long cor[MAX_NC_DIMS];      /* corner coordinates */
+  int num_dim;                /* number of dim. in variable */
+  dods_float32 flt32;
+  int id;
+
+  if (read_p()) // nothing to do here
+    return false;
+
+  int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
+  if (ncid == -1)
+    throw Error(no_such_file, "Could not open the dataset's file.");
+ 
+  varid = lncvarid(ncid, name().c_str());
+
+  if (lncvarinq(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+		(int *)0) == -1)
+    throw Error(unknown_error, 
+		string("Could not read information about the variable `") 
+		+ name() + string("'."));
+
+  for (id = 0; id <= num_dim; id++) 
+    cor[id] = 0;
+
+  if (datatype == NC_FLOAT) 
+    {
+      float flt;
+
+      if (lncvarget1 (ncid, varid, cor, &flt) == -1)
+	throw Error(no_such_variable, 
+		    string("Could not read the variable `") + name() 
+		    + string("'."));
+
+      set_read_p(true);
+
+      flt32 = (dods_float32) flt;
+      val2buf( &flt32 );
+
+      if (lncclose(ncid) == -1)
+	throw InternalErr(__FILE__, __LINE__, 
+			  "Could not close the dataset!");
+    }
+  else
+    throw InternalErr(__FILE__, __LINE__,
+		      "Entered NCByte::read() with non-byte variable!");
+
+  return false;
+}
+
 // $Log: NCFloat32.cc,v $
+// Revision 1.4  2000/10/06 01:22:02  jimg
+// Moved the CVS Log entries to the ends of files.
+// Modified the read() methods to match the new definition in the dap library.
+// Added exception handlers in various places to catch exceptions thrown
+// by the dap library.
+//
 // Revision 1.3  1999/11/05 05:15:05  jimg
 // Result of merge woth 3-1-0
 //
@@ -37,87 +124,5 @@
 //
 // Revision 1.1  1999/03/30 21:12:06  reza
 // Added the new types
-//
-//
-//
-
-#include "config_nc.h"
-
-static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.3 1999/11/05 05:15:05 jimg Exp $"};
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
-
-#include <assert.h>
-
-#include "NCFloat32.h"
-#include "Dnetcdf.h"
-
-Float32 *
-NewFloat32(const string &n)
-{
-    return new NCFloat32(n);
-}
-
-NCFloat32::NCFloat32(const string &n) : Float32(n)
-{
-}
-
-BaseType *
-NCFloat32::ptr_duplicate()
-{
-    return new NCFloat32(*this); // Copy ctor calls duplicate to do the work
-}
- 
-bool
-NCFloat32::read(const string &dataset, int &error)
-{
-
-    int varid;                  /* variable Id */
-    nc_type datatype;           /* variable data type */
-    long cor[MAX_NC_DIMS];      /* corner coordinates */
-    int num_dim;                /* number of dim. in variable */
-    dods_float32 flt32;
-    int id;
-
-    if (read_p()) // nothing to do here
-        return false;
-
-    int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
-
-    if (ncid == -1) { 
-        cerr << "ncopen failed on " << dataset<< endl;
-	error = 1;
-        return false;
-    }
- 
-    varid = lncvarid(ncid, name().c_str());
-
-    (void)lncvarinq(ncid,varid,(char *)0,&datatype,&num_dim,(int *)0,(int *)0);
-
-
-    for (id = 0; id <= num_dim; id++) 
-      cor[id] = 0;
-
-    if (datatype == NC_FLOAT) {
-	float flt;
-
-	(void) lncvarget1 (ncid, varid, cor, &flt);
-	set_read_p(true);
-
-	flt32 = (dods_float32) flt;
-	val2buf( &flt32 );
-
-	(void) lncclose(ncid);  
-	return true;
-    }
-
-
-    error = 1;
-    return false;
-}
-
-
 
 

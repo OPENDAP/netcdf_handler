@@ -13,7 +13,310 @@
 //
 // ReZa 1/12/95
 
+#include "config_nc.h"
+
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.3 2000/10/06 01:22:02 jimg Exp $"};
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <iostream.h>
+
+#include "Error.h"
+#include "InternalErr.h"
+
+#include "Dnetcdf.h"
+#include "NCArray.h"
+
+Array *
+NewArray(const string &n, BaseType *v)
+{
+    return new NCArray(n, v);
+}
+
+BaseType *
+NCArray::ptr_duplicate()
+{
+    return new NCArray(*this);
+}
+
+NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
+{
+}
+
+NCArray::~NCArray()
+{
+}
+
+// parse constraint expr. and make netcdf coordinate point location.
+// return number of elements to read. 
+long
+NCArray::format_constraint(long *cor, long *step, long *edg, bool *has_stride)
+{
+    int start, stride, stop;
+    int id = 0;
+    long nels = 1;
+
+    *has_stride = false;
+
+    for (Pix p = first_dim(); p ; next_dim(p), id++) {
+      start = dimension_start(p, true); 
+      stride = dimension_stride(p, true);
+      stop = dimension_stop(p, true);
+      // Check for empty constraint
+      if(start+stop+stride == 0)
+	return -1;
+
+      cor[id] = start;
+      step[id] = stride;
+      edg[id] = ((stop - start)/stride) + 1; // count of elements
+      nels *= edg[id];      // total number of values for variable
+      if (stride != 1)
+	*has_stride = true;
+    }
+    return nels;
+}
+
+
+bool
+NCArray::read(const string &dataset)
+{
+    int varid;                  /* variable Id */
+    nc_type datatype;           /* variable data type */
+    long cor[MAX_NC_DIMS];      /* corner coordinates */
+    long edg[MAX_NC_DIMS];      /* edges of hypercube */
+    long step[MAX_NC_DIMS];     /* stride of hypercube */
+    int vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
+    int num_dim;                /* number of dim. in variable */
+    long nels;                  /* number of elements in buffer */
+    long vdim_siz;
+    // pointers to buffers for incoming data
+    double *dblbuf;
+    float *fltbuf;
+    short *shtbuf;
+    nclong *lngbuf;
+    char *chrbuf;
+    // type conversion pointers
+    dods_int16 *intg16;
+    dods_int32 *intg32;
+    dods_float32 *flt32;
+    dods_float64 *flt64;
+    // misc.
+    int id;
+    bool has_stride;
+
+    if (read_p())  // Nothing to do
+        return false;
+
+    int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
+
+    if (ncid == -1)
+      throw Error(no_such_file, "Could not open the dataset's file.");
+
+    varid = lncvarid(ncid, name().c_str());
+
+    int status = lncvarinq(ncid, varid, (char *)0, &datatype, &num_dim,
+			   vdims, (int *)0);
+    if (status == -1)
+      throw Error(unknown_error, 
+		  string("Could not read information about the variable `") 
+		  + name() + string("'."));
+
+    nels = format_constraint(cor, step, edg, &has_stride);
+
+    // without constraint (read everything)
+    if ( nels == -1 ){
+        nels = 1;
+	has_stride = false;
+        for (id = 0; id < num_dim; id++) {
+            cor[id] = 0;
+            (void) lncdiminq(ncid, vdims[id], (char *)0, &vdim_siz);
+            edg[id] = vdim_siz;
+            nels *= vdim_siz;      /* total number of values for variable */
+        }
+    }
+
+    // Correct data types to match with the local machine data types
+
+    if ((datatype == NC_FLOAT) 
+	&& (lnctypelen(datatype) != sizeof(dods_float32))) {
+
+        fltbuf = (float *) new char [(nels*lnctypelen(datatype))];
+
+	if( has_stride)
+	    status = lncvargets (ncid, varid, cor, edg, step, (void *)fltbuf);
+	else
+	    status = lncvarget (ncid, varid, cor, edg, (void *)fltbuf);
+
+	if (status == -1)
+	  throw Error(no_such_variable, 
+		      string("Could not read the variable `") + name() 
+		      + string("'."));
+
+	flt32 = new dods_float32 [nels]; 
+
+        for (id = 0; id < nels; id++) 
+            *(flt32+id) = (dods_float32) *(fltbuf+id);
+
+	set_read_p(true);  
+        val2buf((void *)flt32);
+
+	// clean up
+        delete [] flt32;
+        delete [] fltbuf;
+    }
+    else if ((datatype == NC_DOUBLE) 
+	&& (lnctypelen(datatype) != sizeof(dods_float64))) {
+
+        dblbuf = (double *) new char [(nels*lnctypelen(datatype))];
+
+	if( has_stride)
+	    status = lncvargets (ncid, varid, cor, edg, step, (void *) dblbuf);
+	else
+	    status = lncvarget (ncid, varid, cor, edg, (void *) dblbuf);
+
+	if (status == -1)
+	  throw Error(no_such_variable, 
+		      string("Could not read the variable `") + name() 
+		      + string("'."));
+
+	flt64 = new dods_float64 [nels]; 
+
+        for (id = 0; id < nels; id++) 
+            *(flt64+id) = (dods_float64) *(dblbuf+id);
+
+	set_read_p(true);  
+        val2buf((void *)flt64);
+
+	// clean up
+        delete [] flt64;
+        delete [] dblbuf;
+    }
+    else if ((datatype == NC_SHORT) 
+	&& (lnctypelen(datatype) != sizeof(dods_int16))) {
+
+        shtbuf = (short *)new char [(nels*lnctypelen(datatype))];
+
+	if( has_stride)
+	    status = lncvargets (ncid, varid, cor, edg, step, (void *) shtbuf);
+	else 
+	    status = lncvarget (ncid, varid, cor, edg, (void *) shtbuf);
+	
+	if (status == -1)
+	  throw Error(no_such_variable, 
+		      string("Could not read the variable `") + name() 
+		      + string("'."));
+
+	intg16 = new dods_int16 [nels];
+
+        for (id = 0; id < nels; id++) 
+            *(intg16+id) = (dods_int16) *(shtbuf+id);
+
+	set_read_p(true);  
+        val2buf((void *)intg16);
+
+	// clean up
+        delete [] intg16;
+        delete [] shtbuf;
+    }
+    else if ((datatype == NC_LONG) 
+	&& (lnctypelen(datatype) != sizeof(dods_int32))) {
+
+        lngbuf = (nclong *)new char [(nels*lnctypelen(datatype))];
+
+	if( has_stride)
+	    status = lncvargets (ncid, varid, cor, edg, step, (void *) lngbuf);
+	else
+	    status = lncvarget (ncid, varid, cor, edg, (void *) lngbuf);
+
+	if (status == -1)
+	  throw Error(no_such_variable, 
+		      string("Could not read the variable `") + name() 
+		      + string("'."));
+
+	intg32 = new dods_int32 [nels];
+
+        for (id = 0; id < nels; id++) 
+            *(intg32+id) = (dods_int32) *(lngbuf+id);
+
+	set_read_p(true);  
+        val2buf((void *) intg32);
+
+	// clean up
+        delete [] intg32;
+        delete [] lngbuf;
+    }
+    else if (datatype == NC_CHAR) {
+
+        chrbuf = (char *)new char [(nels*lnctypelen(datatype))];
+
+	// read the vlaues in from the local netCDF file
+	if( has_stride)
+	    status = lncvargets (ncid, varid, cor, edg, step, (void *) chrbuf);
+	else
+	    status = lncvarget (ncid, varid, cor, edg, (void *) chrbuf);
+
+	if (status == -1)
+	  throw Error(no_such_variable, 
+		      string("Could not read the variable `") + name() 
+		      + string("'."));
+
+	string *strg = new string [nels]; // array of strings
+	char buf[2] = " "; // one char and EOS
+
+	// put the char values in the string array
+	for (id = 0; id < nels; id++){	  
+	    strncpy(buf, (chrbuf+id), 1);
+	    strg[id] = (string) buf;
+	}
+
+	// reading is done (dont need to read each individual array value)
+	set_read_p(true);  
+	// put values in the buffers
+	val2buf(strg);
+
+	// clean up
+	delete [] strg;
+	delete [] chrbuf;
+    }
+    else {
+      //default (no type conversion needed)
+      char *convbuf = new char [(nels*lnctypelen(datatype))];
+
+      if( has_stride)
+	status = lncvargets (ncid, varid, cor, edg, step, (void *)convbuf);
+      else
+	status = lncvarget (ncid, varid, cor, edg, (void *)convbuf);
+
+      if (status == -1)
+	  throw Error(no_such_variable, 
+		      string("Could not read the variable `") + name() 
+		      + string("'."));
+
+      set_read_p(true);  
+      val2buf((void *)convbuf);
+
+      delete [] convbuf;
+    }
+
+    if (lncclose(ncid) == -1)
+      throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+
+    return false;
+}
+
 // $Log: NCArray.cc,v $
+// Revision 1.3  2000/10/06 01:22:02  jimg
+// Moved the CVS Log entries to the ends of files.
+// Modified the read() methods to match the new definition in the dap library.
+// Added exception handlers in various places to catch exceptions thrown
+// by the dap library.
+//
 // Revision 1.2  1999/11/05 05:15:05  jimg
 // Result of merge woth 3-1-0
 //
@@ -86,347 +389,3 @@
 //
 // Revision 1.1  1995/02/10  04:57:11  reza
 // Added read and read_val functions.
-//
-//
-
-#include "config_nc.h"
-
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.2 1999/11/05 05:15:05 jimg Exp $"};
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <iostream.h>
-
-#include <assert.h>
-
-#include "config_dap.h"
-
-#include "Dnetcdf.h"
-#include "NCArray.h"
-
-Array *
-NewArray(const string &n, BaseType *v)
-{
-    return new NCArray(n, v);
-}
-
-BaseType *
-NCArray::ptr_duplicate()
-{
-    return new NCArray(*this);
-}
-
-NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
-{
-}
-
-NCArray::~NCArray()
-{
-}
-
-// parse constraint expr. and make netcdf coordinate point location.
-// return number of elements to read. 
-long
-NCArray::format_constraint(long *cor, long *step, long *edg, bool *has_stride)
-{
-    int start, stride, stop;
-    int id = 0;
-    long nels = 1;
-
-    *has_stride = false;
-
-    for (Pix p = first_dim(); p ; next_dim(p), id++) {
-      start = dimension_start(p, true); 
-      stride = dimension_stride(p, true);
-      stop = dimension_stop(p, true);
-      // Check for empty constraint
-      if(start+stop+stride == 0)
-	return -1;
-
-      cor[id] = start;
-      step[id] = stride;
-      edg[id] = ((stop - start)/stride) + 1; // count of elements
-      nels *= edg[id];      // total number of values for variable
-      if (stride != 1)
-	*has_stride = true;
-    }
-    return nels;
-}
-
-
-bool
-NCArray::read(const string &dataset, int &error)
-{
-    int varid;                  /* variable Id */
-    nc_type datatype;           /* variable data type */
-    long cor[MAX_NC_DIMS];      /* corner coordinates */
-    long edg[MAX_NC_DIMS];      /* edges of hypercube */
-    long step[MAX_NC_DIMS];     /* stride of hypercube */
-    int vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
-    int num_dim;                /* number of dim. in variable */
-    long nels;                  /* number of elements in buffer */
-    long vdim_siz;
-    // pointers to buffers for incoming data
-    double *dblbuf;
-    float *fltbuf;
-    short *shtbuf;
-    nclong *lngbuf;
-    char *chrbuf;
-    // type conversion pointers
-    dods_int16 *intg16;
-    dods_int32 *intg32;
-    dods_float32 *flt32;
-    dods_float64 *flt64;
-    // misc.
-    int id;
-    bool has_stride;
-
-    if (read_p())  // Nothing to do
-        return false;
-
-    int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
-
-    if (ncid == -1) {
-	error = 1;
-	return false;
-    }
-
-    varid = lncvarid(ncid, name().c_str());
-
-    int status = lncvarinq(ncid, varid, (char *)0, &datatype, &num_dim,
-			   vdims, (int *)0);
-    if (status == -1) {
-	error = 1;
-	return false;
-    }
-
-    nels = format_constraint(cor, step, edg, &has_stride);
-
-    //without constraint (read everything)
-    if ( nels == -1 ){
-        nels = 1;
-	has_stride = false;
-        for (id = 0; id < num_dim; id++) {
-            cor[id] = 0;
-            (void) lncdiminq(ncid, vdims[id], (char *)0, &vdim_siz);
-            edg[id] = vdim_siz;
-            nels *= vdim_siz;      /* total number of values for variable */
-        }
-    }
-
-    // Correct data types to match with the local machine data types
-
-    if ((datatype == NC_FLOAT) 
-	&& (lnctypelen(datatype) != sizeof(dods_float32))) {
-
-        fltbuf = (float *) new char [(nels*lnctypelen(datatype))];
-
-	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *)fltbuf);
-	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *)fltbuf);
-
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-	flt32 = new dods_float32 [nels]; 
-
-        for (id = 0; id < nels; id++) 
-            *(flt32+id) = (dods_float32) *(fltbuf+id);
-
-	set_read_p(true);  
-        val2buf((void *)flt32);
-
-	// clean up
-        delete [] flt32;
-        delete [] fltbuf;
-        status = lncclose(ncid);  
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-        return false;
-    }
-
-    if ((datatype == NC_DOUBLE) 
-	&& (lnctypelen(datatype) != sizeof(dods_float64))) {
-
-        dblbuf = (double *) new char [(nels*lnctypelen(datatype))];
-
-	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) dblbuf);
-	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *) dblbuf);
-
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-	flt64 = new dods_float64 [nels]; 
-
-        for (id = 0; id < nels; id++) 
-            *(flt64+id) = (dods_float64) *(dblbuf+id);
-
-	set_read_p(true);  
-        val2buf((void *)flt64);
-
-	// clean up
-        delete [] flt64;
-        delete [] dblbuf;
-        status = lncclose(ncid);  
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-        return false;
-    }
-
-
-    if ((datatype == NC_SHORT) 
-	&& (lnctypelen(datatype) != sizeof(dods_int16))) {
-
-        shtbuf = (short *)new char [(nels*lnctypelen(datatype))];
-
-	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) shtbuf);
-	else 
-	    status = lncvarget (ncid, varid, cor, edg, (void *) shtbuf);
-	
-	if (status == -1) {
-	  error = 1;
-	  return false;
-	}
-
-	intg16 = new dods_int16 [nels];
-
-        for (id = 0; id < nels; id++) 
-            *(intg16+id) = (dods_int16) *(shtbuf+id);
-
-	set_read_p(true);  
-        val2buf((void *)intg16);
-
-	// clean up
-        delete [] intg16;
-        delete [] shtbuf;
-        status = lncclose(ncid);  
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-        return false;
-    }
-    
-    if ((datatype == NC_LONG) 
-	&& (lnctypelen(datatype) != sizeof(dods_int32))) {
-
-        lngbuf = (nclong *)new char [(nels*lnctypelen(datatype))];
-
-	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) lngbuf);
-	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *) lngbuf);
-
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-	intg32 = new dods_int32 [nels];
-
-        for (id = 0; id < nels; id++) 
-            *(intg32+id) = (dods_int32) *(lngbuf+id);
-
-	set_read_p(true);  
-        val2buf((void *) intg32);
-
-	// clean up
-        delete [] intg32;
-        delete [] lngbuf;
-        status = lncclose(ncid);  
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-        return false;
-    }
-
-    if (datatype == NC_CHAR) {
-
-        chrbuf = (char *)new char [(nels*lnctypelen(datatype))];
-
-	// read the vlaues in from the local netCDF file
-	if( has_stride)
-	    status = lncvargets (ncid, varid, cor, edg, step, (void *) chrbuf);
-	else
-	    status = lncvarget (ncid, varid, cor, edg, (void *) chrbuf);
-
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-	string *strg = new string [nels]; // array of strings
-	char buf[2] = " "; // one char and EOS
-
-	// put the char values in the string array
-	for (id = 0; id < nels; id++){	  
-	    strncpy(buf, (chrbuf+id), 1);
-	    strg[id] = (string) buf;
-	}
-
-	// reading is done (dont need to read each individual array value)
-	set_read_p(true);  
-	// put values in the buffers
-	val2buf(strg);
-
-	// clean up
-	delete [] strg;
-	delete [] chrbuf;
-        status = lncclose(ncid);  
-	if (status == -1) {
-	    error = 1;
-	    return false;
-	}
-
-        return false;
-    }
-
-    //default (no type conversion needed)
-    char *convbuf = new char [(nels*lnctypelen(datatype))];
-
-    if( has_stride)
-	status = lncvargets (ncid, varid, cor, edg, step, (void *)convbuf);
-    else
-	status = lncvarget (ncid, varid, cor, edg, (void *)convbuf);
-
-    if (status == -1) {
-	error = 1;
-	return false;
-    }
-
-    set_read_p(true);  
-    val2buf((void *)convbuf);
-
-    delete [] convbuf;
-    status = lncclose(ncid);  
-    if (status == -1) {
-	error = 1;
-	return false;
-    }
-
-    return false;
-}
-

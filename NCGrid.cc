@@ -1,37 +1,9 @@
 
-/*
-  Copyright 1995 The University of Rhode Island and The Massachusetts
-  Institute of Technology
-
-  Portions of this software were developed by the Graduate School of
-  Oceanography (GSO) at the University of Rhode Island (URI) in collaboration
-  with The Massachusetts Institute of Technology (MIT).
-
-  Access and use of this software shall impose the following obligations and
-  understandings on the user. The user is granted the right, without any fee
-  or cost, to use, copy, modify, alter, enhance and distribute this software,
-  and any derivative works thereof, and its supporting documentation for any
-  purpose whatsoever, provided that this entire notice appears in all copies
-  of the software, derivative works and supporting documentation.  Further,
-  the user agrees to credit URI/MIT in any publications that result from the
-  use of this software or in any product that includes this software. The
-  names URI, MIT and/or GSO, however, may not be used in any advertising or
-  publicity to endorse or promote any products or commercial entity unless
-  specific written permission is obtained from URI/MIT. The user also
-  understands that URI/MIT is not obligated to provide the user with any
-  support, consulting, training or assistance of any kind with regard to the
-  use, operation and performance of this software nor to provide the user
-  with any updates, revisions, new versions or "bug fixes".
-
-  THIS SOFTWARE IS PROVIDED BY URI/MIT "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-  EVENT SHALL URI/MIT BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
-  DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
-  PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS
-  ACTION, ARISING OUT OF OR IN CONNECTION WITH THE ACCESS, USE OR PERFORMANCE
-  OF THIS SOFTWARE.
-*/
+// (c) COPYRIGHT URI/MIT 1994-1996
+// Please read the full copyright statement in the file COPYRIGHT.
+//
+// Authors:
+//      reza            Reza Nekovei (reza@intcomm.net)
 
 // netCDF sub-class implementation for NCByte,...NCGrid.
 // The files are patterned after the subcalssing examples 
@@ -39,7 +11,65 @@
 //
 // ReZa 1/12/95
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "config_nc.h"
+
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.2 2000/10/06 01:22:02 jimg Exp $"};
+
+#include "NCGrid.h"
+
+Grid *
+NewGrid(const string &n)
+{
+    return new NCGrid(n);
+}
+
+// protected
+
+BaseType *
+NCGrid::ptr_duplicate()
+{
+    return new NCGrid(*this);
+}
+
+// public
+
+NCGrid::NCGrid(const string &n) : Grid(n)
+{
+}
+
+NCGrid::~NCGrid()
+{
+}
+
+bool
+NCGrid::read(const string &dataset)
+{
+    if (read_p()) // nothing to do
+        return false;
+
+    // read array elements
+    array_var()->read(dataset);
+
+    // read maps elements
+    for (Pix p = first_map_var(); p; next_map_var(p))
+      map_var(p)->read(dataset);
+
+    set_read_p(true);
+
+    return false;
+}
+
 // $Log: NCGrid.cc,v $
+// Revision 1.2  2000/10/06 01:22:02  jimg
+// Moved the CVS Log entries to the ends of files.
+// Modified the read() methods to match the new definition in the dap library.
+// Added exception handlers in various places to catch exceptions thrown
+// by the dap library.
+//
 // Revision 1.1  1999/07/28 00:22:43  jimg
 // Added
 //
@@ -84,59 +114,3 @@
 //
 // Revision 1.1  1995/02/10  04:57:30  reza
 // Added read and read_val functions.
-//
-//
-
-#include "config_nc.h"
-
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.1 1999/07/28 00:22:43 jimg Exp $"};
-
-#include "NCGrid.h"
-
-Grid *
-NewGrid(const string &n)
-{
-    return new NCGrid(n);
-}
-
-// protected
-
-BaseType *
-NCGrid::ptr_duplicate()
-{
-    return new NCGrid(*this);
-}
-
-// public
-
-NCGrid::NCGrid(const string &n) : Grid(n)
-{
-}
-
-NCGrid::~NCGrid()
-{
-}
-
-bool
-NCGrid::read(const string &dataset, int &error)
-{
-    bool status;
-
-    if (read_p()) // nothing to do
-        return false;
-
-    // read array elements
-    if (!(status = array_var()->read(dataset, error))) 
-        return status;
-
-    // read maps elements
-    for (Pix p = first_map_var(); p; next_map_var(p))
-	if(!(status = map_var(p)->read(dataset, error)))
-            break;
-
-    if( status ) 
-	set_read_p(true);
-
-    return status;
-}
-

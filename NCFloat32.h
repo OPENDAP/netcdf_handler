@@ -13,21 +13,8 @@
 //
 // ReZa 3/25/99
 
-// $Log: NCFloat32.h,v $
-// Revision 1.1  1999/07/28 00:22:43  jimg
-// Added
-//
-// Revision 1.3  1999/05/07 23:45:32  jimg
-// String --> string fixes
-//
-// Revision 1.2  1999/04/09 17:11:56  jimg
-// Fixed comments and copyright statement
-//
-// Revision 1.1  1999/03/30 21:12:07  reza
-// Added the new types
-
-#ifndef _NCFloat32_h
-#define _NCFloat32_h 1
+#ifndef _ncfloat32_h
+#define _ncfloat32_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -43,10 +30,27 @@ public:
 
     virtual BaseType *ptr_duplicate();
     
-    virtual bool read(const string &dataset, int &error);
+    virtual bool read(const string &dataset);
 };
 
-
+// $Log: NCFloat32.h,v $
+// Revision 1.2  2000/10/06 01:22:02  jimg
+// Moved the CVS Log entries to the ends of files.
+// Modified the read() methods to match the new definition in the dap library.
+// Added exception handlers in various places to catch exceptions thrown
+// by the dap library.
+//
+// Revision 1.1  1999/07/28 00:22:43  jimg
+// Added
+//
+// Revision 1.3  1999/05/07 23:45:32  jimg
+// String --> string fixes
+//
+// Revision 1.2  1999/04/09 17:11:56  jimg
+// Fixed comments and copyright statement
+//
+// Revision 1.1  1999/03/30 21:12:07  reza
+// Added the new types
 
 #endif
 

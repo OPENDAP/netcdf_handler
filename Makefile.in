@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.3 2000/04/11 23:15:38 jimg Exp $
+# $Id: Makefile.in,v 1.4 2000/10/06 01:22:02 jimg Exp $
 
 @SET_MAKE@
 
@@ -27,7 +27,7 @@ LFLAGS=-8
 YFLAGS=-d
 NCDODS = -lnc-dods -ldap++ -lnc-dods -ldap++
 LIBS = @LIBS@
-GUILIBS = @GUILIBS@
+# GUILIBS = @GUILIBS@
 XTRALIBS = @XTRALIBS@ 
 
 # Set the instalation directories; prefix can be set on the command line

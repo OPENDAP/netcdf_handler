@@ -2,7 +2,7 @@
 // -*- C++ -*-
 
 // (c) COPYRIGHT URI/MIT 1994-1996
-// Please read the full copyright statement in the file COPYRIGH.  
+// Please read the full copyright statement in the file COPYRIGHT.  
 //
 // Authors:
 //      reza            Reza Nekovei (reza@intcomm.net)
@@ -13,21 +13,8 @@
 //
 // ReZa 1/12/95
 
-/* 
- * $Log: NCUInt32.h,v $
- * Revision 1.1  1999/07/28 00:22:45  jimg
- * Added
- *
- * Revision 1.2  1999/05/07 23:45:32  jimg
- * String --> string fixes
- *
- * Revision 1.1  1997/01/24 20:10:36  jimg
- * Added
- *
- */
-
-#ifndef _NCUInt32_h
-#define _NCUInt32_h 1
+#ifndef _ncuint32_h
+#define _ncuint32_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -43,8 +30,27 @@ public:
 
     virtual BaseType *ptr_duplicate();
     
-    virtual bool read(const string &dataset, int &error);
+    virtual bool read(const string &dataset);
 };
+
+/* 
+ * $Log: NCUInt32.h,v $
+ * Revision 1.2  2000/10/06 01:22:03  jimg
+ * Moved the CVS Log entries to the ends of files.
+ * Modified the read() methods to match the new definition in the dap library.
+ * Added exception handlers in various places to catch exceptions thrown
+ * by the dap library.
+ *
+ * Revision 1.1  1999/07/28 00:22:45  jimg
+ * Added
+ *
+ * Revision 1.2  1999/05/07 23:45:32  jimg
+ * String --> string fixes
+ *
+ * Revision 1.1  1997/01/24 20:10:36  jimg
+ * Added
+ *
+ */
 
 #endif
 

@@ -1,442 +1,444 @@
 
-Dattr.cc,947
-static char rcsid[120,4907
-static char rcsid[] not_used 120,4907
-get_das_table(131,5110
-correct_att_type(145,5342
-nc_put_att_text(217,7676
-nc_put_att_schar(238,8158
-nc_put_att_uchar(257,8648
-nc_put_att_short(276,9142
-nc_put_att_int(295,9626
-nc_put_att_long(314,10104
-nc_put_att_float(334,10586
-nc_put_att_double(353,11070
-nc_put_att(373,11558
-ncattput(393,12031
-nc_rename_att(414,12555
-ncattrename(431,12979
-nc_del_att(450,13458
-ncattdel(467,13846
-nc_inq_attname(486,14286
-ncattname(522,15314
-nc_inq_attid(562,16459
-nc_inq_att(598,17412
-nc_inq_attlen(675,19615
-nc_inq_atttype(731,21382
-ncattinq(786,22729
-nc_copy_att(871,25125
-ncattcopy(939,27012
-ncattget(1015,29104
-nc_get_att_text(1052,30057
-nc_get_att_schar(1097,31211
-nc_get_att_uchar(1142,32383
-nc_get_att_short(1187,33554
-nc_get_att_int(1232,34718
-nc_get_att_long(1277,35874
-nc_get_att_float(1322,37038
-nc_get_att_double(1367,38202
-nc_get_att(1412,39374
+Dattr.cc,926
+static char rcsid[15,330
+static char rcsid[] not_used 15,330
+get_das_table(26,529
+correct_att_type(40,761
+nc_put_att_text(112,3095
+nc_put_att_schar(133,3577
+nc_put_att_uchar(152,4067
+nc_put_att_short(171,4561
+nc_put_att_int(190,5045
+nc_put_att_long(209,5523
+nc_put_att_float(229,6005
+nc_put_att_double(248,6489
+nc_put_att(268,6977
+ncattput(288,7450
+nc_rename_att(309,7974
+ncattrename(326,8398
+nc_del_att(345,8877
+ncattdel(362,9265
+nc_inq_attname(381,9705
+ncattname(417,10733
+nc_inq_attid(457,11878
+nc_inq_att(493,12831
+nc_inq_attlen(570,15034
+nc_inq_atttype(626,16801
+ncattinq(681,18148
+nc_copy_att(766,20544
+ncattcopy(836,22452
+ncattget(914,24565
+nc_get_att_text(951,25518
+nc_get_att_schar(996,26672
+nc_get_att_uchar(1041,27844
+nc_get_att_short(1086,29015
+nc_get_att_int(1131,30179
+nc_get_att_long(1176,31335
+nc_get_att_float(1221,32499
+nc_get_att_double(1266,33663
+nc_get_att(1311,34835
 
-Ddim.cc,280
-static char rcsid[87,3670
-static char rcsid[] not_used 87,3670
-nc_def_dim(94,3807
-ncdimdef(112,4189
-nc_inq_dimid(131,4651
-ncdimid(161,5245
-nc_inq_dim(190,5853
-nc_inq_dimname(217,6485
-nc_inq_dimlen(241,7024
-ncdiminq(265,7550
-nc_rename_dim(299,8310
-ncdimrename(317,8682
+Ddim.cc,273
+static char rcsid[15,331
+static char rcsid[] not_used 15,331
+nc_def_dim(20,443
+ncdimdef(38,825
+nc_inq_dimid(57,1287
+ncdimid(87,1881
+nc_inq_dim(116,2489
+nc_inq_dimname(143,3121
+nc_inq_dimlen(167,3660
+ncdiminq(191,4186
+nc_rename_dim(225,4946
+ncdimrename(243,5318
 
-Dnc.cc,867
-static char rcsid[62,2950
-static char rcsid[] not_used 62,2950
-extern char *cdf_routine_name;81,3392
-extern int ncopts;82,3423
-extern int ncerr;83,3442
-char *cdf_routine_name;85,3466
-int ncopts 86,3490
-int ncerr;87,3515
-int rcode;90,3534
-Connections<NCConnect *> *conns 92,3546
-nc__create(96,3589
-nc_create(126,4188
-nccreate(133,4316
-nc__open(163,4869
-nc_open(271,7408
-ncopen(278,7529
-nc_close(429,11101
-ncclose(460,11617
-nc_inq(490,12114
-nc_inq_ndims(520,12759
-nc_inq_nvars(541,13155
-nc_inq_natts(562,13549
-nc_inq_unlimdim(583,13944
-ncinquire(604,14354
-nc_sync(637,15053
-ncsync(655,15365
-nc_abort(676,15759
-ncabort(694,16096
-ncnobuf(719,16497
-nc_redef(734,16721
-ncredef(752,17037
-nc__enddef(772,17435
-nc_enddef(793,17905
-ncendef(811,18251
-nc_set_fill(831,18585
-ncsetfill(849,18962
-nc_inq_libvers(870,19400
-nc_strerror(879,19531
+Dnc.cc,860
+static char rcsid[22,777
+static char rcsid[] not_used 22,777
+extern char *cdf_routine_name;41,1215
+extern int ncopts;42,1246
+extern int ncerr;43,1265
+char *cdf_routine_name;45,1289
+int ncopts 46,1313
+int ncerr;47,1338
+int rcode;50,1357
+Connections<NCConnect *> *conns 52,1369
+nc__create(56,1412
+nc_create(86,2011
+nccreate(93,2139
+nc__open(123,2692
+nc_open(233,5174
+ncopen(241,5301
+nc_close(396,8914
+ncclose(427,9430
+nc_inq(457,9927
+nc_inq_ndims(487,10572
+nc_inq_nvars(508,10968
+nc_inq_natts(529,11362
+nc_inq_unlimdim(550,11757
+ncinquire(571,12167
+nc_sync(604,12866
+ncsync(622,13178
+nc_abort(643,13572
+ncabort(661,13909
+ncnobuf(686,14310
+nc_redef(701,14534
+ncredef(719,14850
+nc__enddef(739,15248
+nc_enddef(760,15718
+ncendef(778,16064
+nc_set_fill(798,16398
+ncsetfill(819,16860
+nc_inq_libvers(840,17298
+nc_strerror(849,17429
 
 Dncx.cc,308
-#define  SHORT_MAX 14,250
-#define  SHORT_MIN 15,279
-#define USHORT_MAX 16,308
-# define FLT_MAX 20,442
-putn_into_uchar(27,544
-putn_into_schar(85,1839
-putn_into_short(143,3149
-putn_into_int(198,4357
-putn_into_long(250,5496
-putn_into_float(300,6529
-putn_into_double(352,7655
-putn_into_text(398,8613
+#define  SHORT_MAX 13,245
+#define  SHORT_MIN 14,274
+#define USHORT_MAX 15,303
+# define FLT_MAX 19,437
+putn_into_uchar(26,539
+putn_into_schar(84,1834
+putn_into_short(142,3144
+putn_into_int(197,4352
+putn_into_long(249,5491
+putn_into_float(299,6524
+putn_into_double(351,7650
+putn_into_text(397,8608
 
-Dputget.cc,3310
-static char rcsid[157,6097
-static char rcsid[] not_used 157,6097
-#define        Tvoid 167,6305
-#define        Ttext 168,6328
-#define        Tuchar 169,6351
-#define        Tschar 170,6375
-#define        Tshort 171,6399
-#define        Tint 172,6423
-#define        Tlong 173,6445
-#define        Tfloat 174,6468
-#define        Tdouble 175,6492
-Dtypelen(181,6602
-type_conv(206,7287
-HyperGet(277,8936
-DODvario(303,9786
-GenRead(642,18329
-ncvarputg(785,22559
-ncvarputs(806,23124
-nc_get_rec(826,23664
-ncrecget(845,24122
-nc_inq_rec(864,24571
-ncrecinq(883,25063
-ncvarput1(922,25947
-ncvarput(941,26425
-nc_put_rec(960,26924
-ncrecput(977,27282
-nctypelen(995,27733
-nc_put_var1_text(1001,27795
-nc_put_var1_uchar(1016,28175
-nc_put_var1_schar(1031,28566
-nc_put_var1_short(1047,28956
-nc_put_var1_int(1062,29336
-nc_put_var1_long(1077,29713
-nc_put_var1_float(1092,30094
-nc_put_var1_double(1107,30478
-nc_put_var1(1122,30865
-nc_put_vara_text(1136,31228
-nc_put_vara_uchar(1151,31637
-nc_put_vara_schar(1166,32056
-nc_put_vara_short(1181,32473
-nc_put_vara_int(1196,32884
-nc_put_vara_long(1211,33289
-nc_put_vara_float(1227,33699
-nc_put_vara_double(1242,34110
-nc_put_vara(1257,34525
-nc_put_var_text(1272,34923
-nc_put_var_uchar(1286,35265
-nc_put_var_schar(1300,35618
-nc_put_var_short(1314,35969
-nc_put_var_int(1328,36314
-nc_put_var_long(1342,36653
-nc_put_var_float(1356,36995
-nc_put_var_double(1370,37340
-nc_put_varm_text(1385,37689
-nc_put_varm_uchar(1403,38181
-nc_put_varm_schar(1421,38684
-nc_put_varm_short(1439,39186
-nc_put_varm_int(1457,39682
-nc_put_varm_long(1475,40171
-nc_put_varm_float(1493,40663
-nc_put_varm_double(1512,41159
-nc_put_varm 1531,41658
-nc_put_vars_text 1552,42171
-nc_put_vars_uchar 1565,42461
-nc_put_vars_schar 1578,42762
-nc_put_vars_short 1591,43061
-nc_put_vars_int 1603,43353
-nc_put_vars_long 1616,43640
-nc_put_vars_float 1629,43930
-nc_put_vars_double 1642,44223
-nc_put_vars 1654,44518
-nc_get_var1_text(1668,44799
-nc_get_var1_uchar(1694,45397
-nc_get_var1_schar(1720,46005
-nc_get_var1_short(1746,46612
-nc_get_var1_int(1772,47213
-nc_get_var1_long(1798,47806
-nc_get_var1_float(1824,48403
-nc_get_var1_double(1850,49003
-nc_get_var1(1876,49607
-nc_get_vara_text(1903,50193
-nc_get_vara_uchar(1919,50655
-nc_get_vara_schar(1935,51127
-nc_get_vara_short(1951,51597
-nc_get_vara_int(1967,52061
-nc_get_vara_long(1983,52517
-nc_get_vara_float(1999,52977
-nc_get_vara_double(2016,53443
-nc_get_vara(2032,53911
-nc_get_var_text(2050,54363
-nc_get_var_uchar(2064,54738
-nc_get_var_schar(2078,55125
-nc_get_var_short(2092,55510
-nc_get_var_int(2106,55889
-nc_get_var_long(2120,56260
-nc_get_var_float(2134,56635
-nc_get_var_double(2148,57014
-nc_get_varm_text(2163,57400
-nc_get_varm_uchar(2183,57962
-nc_get_varm_schar(2203,58536
-nc_get_varm_short(2223,59109
-nc_get_varm_int(2243,59676
-nc_get_varm_long(2263,60235
-nc_get_varm_float(2283,60798
-nc_get_varm_double(2305,61316
-nc_get_varm 2325,61886
-nc_get_vars_text 2348,62468
-nc_get_vars_uchar 2362,62753
-nc_get_vars_schar 2375,63048
-nc_get_vars_short 2388,63341
-nc_get_vars_int 2400,63627
-nc_get_vars_long 2413,63908
-nc_get_vars_float 2426,64192
-nc_get_vars_double 2439,64479
-nc_get_vars 2453,64770
-ncvarget1(2467,65073
-ncvarget(2489,65582
-ncvargets(2516,66218
-ncvargetg(2551,67140
+Dputget.cc,3276
+static char rcsid[18,416
+static char rcsid[] not_used 18,416
+#define        Tvoid 28,620
+#define        Ttext 29,643
+#define        Tuchar 30,666
+#define        Tschar 31,690
+#define        Tshort 32,714
+#define        Tint 33,738
+#define        Tlong 34,760
+#define        Tfloat 35,783
+#define        Tdouble 36,807
+Dtypelen(42,917
+type_conv(67,1602
+HyperGet(138,3251
+DODvario(164,4101
+GenRead(506,12572
+ncvarputg(649,16802
+ncvarputs(670,17367
+nc_get_rec(690,17907
+ncrecget(709,18365
+nc_inq_rec(728,18814
+ncrecinq(747,19306
+ncvarput1(786,20190
+ncvarput(805,20668
+nc_put_rec(824,21167
+ncrecput(841,21525
+nctypelen(859,21976
+nc_put_var1_text(865,22038
+nc_put_var1_uchar(880,22418
+nc_put_var1_schar(895,22809
+nc_put_var1_short(911,23199
+nc_put_var1_int(926,23579
+nc_put_var1_long(941,23956
+nc_put_var1_float(956,24337
+nc_put_var1_double(971,24721
+nc_put_var1(986,25108
+nc_put_vara_text(1000,25471
+nc_put_vara_uchar(1015,25880
+nc_put_vara_schar(1030,26299
+nc_put_vara_short(1045,26716
+nc_put_vara_int(1060,27127
+nc_put_vara_long(1075,27532
+nc_put_vara_float(1091,27942
+nc_put_vara_double(1106,28353
+nc_put_vara(1121,28768
+nc_put_var_text(1136,29166
+nc_put_var_uchar(1150,29508
+nc_put_var_schar(1164,29861
+nc_put_var_short(1178,30212
+nc_put_var_int(1192,30557
+nc_put_var_long(1206,30896
+nc_put_var_float(1220,31238
+nc_put_var_double(1234,31583
+nc_put_varm_text(1249,31932
+nc_put_varm_uchar(1267,32424
+nc_put_varm_schar(1285,32927
+nc_put_varm_short(1303,33429
+nc_put_varm_int(1321,33925
+nc_put_varm_long(1339,34414
+nc_put_varm_float(1357,34906
+nc_put_varm_double(1376,35402
+nc_put_varm 1395,35901
+nc_put_vars_text 1416,36414
+nc_put_vars_uchar 1429,36704
+nc_put_vars_schar 1442,37005
+nc_put_vars_short 1455,37304
+nc_put_vars_int 1467,37596
+nc_put_vars_long 1480,37883
+nc_put_vars_float 1493,38173
+nc_put_vars_double 1506,38466
+nc_put_vars 1518,38761
+nc_get_var1_text(1532,39042
+nc_get_var1_uchar(1558,39640
+nc_get_var1_schar(1584,40248
+nc_get_var1_short(1610,40855
+nc_get_var1_int(1636,41456
+nc_get_var1_long(1662,42049
+nc_get_var1_float(1688,42646
+nc_get_var1_double(1714,43246
+nc_get_var1(1740,43850
+nc_get_vara_text(1767,44436
+nc_get_vara_uchar(1783,44898
+nc_get_vara_schar(1799,45370
+nc_get_vara_short(1815,45840
+nc_get_vara_int(1831,46304
+nc_get_vara_long(1847,46760
+nc_get_vara_float(1863,47220
+nc_get_vara_double(1880,47686
+nc_get_vara(1896,48154
+nc_get_var_text(1913,48605
+nc_get_var_uchar(1928,48981
+nc_get_var_schar(1942,49368
+nc_get_var_short(1956,49753
+nc_get_var_int(1970,50132
+nc_get_var_long(1984,50503
+nc_get_var_float(1998,50878
+nc_get_var_double(2012,51257
+nc_get_varm_text(2027,51643
+nc_get_varm_uchar(2047,52205
+nc_get_varm_schar(2067,52779
+nc_get_varm_short(2087,53352
+nc_get_varm_int(2107,53919
+nc_get_varm_long(2127,54478
+nc_get_varm_float(2147,55041
+nc_get_varm_double(2167,55607
+nc_get_varm 2187,56177
+nc_get_vars_text 2210,56759
+nc_get_vars_uchar 2224,57044
+nc_get_vars_schar 2237,57339
+nc_get_vars_short 2250,57632
+nc_get_vars_int 2262,57918
+nc_get_vars_long 2275,58199
+nc_get_vars_float 2288,58483
+nc_get_vars_double 2301,58770
+nc_get_vars 2315,59061
+ncvarget1(2329,59364
+ncvarget(2351,59873
+ncvargets(2378,60509
+ncvargetg(2413,61431
 
-Dvar.cc,451
-static char rcsid[114,4419
-static char rcsid[] not_used 114,4419
-nc_def_var(124,4615
-ncvardef(143,5051
-nc_inq_varid(163,5570
-ncvarid(196,6270
-nc_rename_var(230,7001
-ncvarrename(248,7371
-var_info(269,7883
-num_attr(378,9979
-nc_inq_var(394,10331
-nc_inq_varname(432,11321
-nc_inq_vartype(461,12024
-nc_inq_varndims(491,12694
-nc_inq_vardimid(520,13366
-nc_inq_varnatts(549,14037
-ncvarinq(579,14819
-ncvarcopy(621,15933
-nc_copy_var(747,19177
+Dvar.cc,435
+static char rcsid[14,274
+static char rcsid[] not_used 14,274
+nc_def_var(22,445
+ncvardef(41,881
+nc_inq_varid(61,1400
+ncvarid(94,2100
+nc_rename_var(128,2831
+ncvarrename(146,3201
+var_info(167,3713
+num_attr(276,5809
+nc_inq_var(292,6161
+nc_inq_varname(330,7151
+nc_inq_vartype(359,7854
+nc_inq_varndims(389,8524
+nc_inq_vardimid(421,9281
+nc_inq_varnatts(450,9952
+ncvarinq(480,10734
+ncvarcopy(522,11848
+nc_copy_var(648,15092
 
-NCArray.cc,233
-static char rcsid[91,2891
-static char rcsid[] not_used 91,2891
-NewArray(111,3229
-NCArray::ptr_duplicate(117,3314
-NCArray::NCArray(122,3375
-NCArray::~NCArray(126,3441
-NCArray::format_constraint(133,3579
-NCArray::read(161,4266
+NCArray.cc,221
+static char rcsid[18,377
+static char rcsid[] not_used 18,377
+NewArray(37,710
+NCArray::ptr_duplicate(43,795
+NCArray::NCArray(48,856
+NCArray::~NCArray(52,922
+NCArray::format_constraint(59,1060
+NCArray::read(87,1747
 
-NCByte.cc,165
-static char rcsid[101,4096
-static char rcsid[] not_used 101,4096
-NewByte(130,5094
-NCByte::NCByte(135,5150
-NCByte::ptr_duplicate(140,5208
-NCByte::read(146,5272
+NCByte.cc,157
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewByte(42,1339
+NCByte::NCByte(47,1395
+NCByte::ptr_duplicate(52,1453
+NCByte::read(58,1517
 
-NCConnect.cc,596
-static char rcsid[132,5448
-static char rcsid[] not_used 132,5448
-NCConnect::init_list(146,5681
-NCConnect::NCConnect(155,5773
-NCConnect::~NCConnect(170,6074
-NCConnect::ncid(177,6220
-NCConnect::ndims(186,6362
-NCConnect::nvars(196,6513
-NCConnect::recdim(208,6722
-NCConnect::dim_size(220,6935
-NCConnect::dim_name(232,7186
-NCConnect::das_loc(244,7414
-NCConnect::set_recdim(256,7664
-NCConnect::parse_das_loc(278,8194
-NCConnect::parse_grid_dims(318,9603
-NCConnect::parse_array_dims(364,10808
-NCConnect::parse_dims(423,12133
-NCConnect::request_Cdds(442,12474
-NCConnect::Cdds(459,12775
+NCConnect.cc,578
+static char rcsid[14,297
+static char rcsid[] not_used 14,297
+NCConnect::init_list(28,526
+NCConnect::NCConnect(37,618
+NCConnect::~NCConnect(52,919
+NCConnect::ncid(59,1065
+NCConnect::ndims(68,1207
+NCConnect::nvars(78,1358
+NCConnect::recdim(90,1567
+NCConnect::dim_size(102,1780
+NCConnect::dim_name(114,2031
+NCConnect::das_loc(126,2259
+NCConnect::set_recdim(138,2509
+NCConnect::parse_das_loc(160,3039
+NCConnect::parse_grid_dims(200,4448
+NCConnect::parse_array_dims(246,5653
+NCConnect::parse_dims(305,6978
+NCConnect::request_Cdds(324,7319
+NCConnect::Cdds(341,7620
 
-NCFloat32.cc,172
-static char rcsid[43,968
-static char rcsid[] not_used 43,968
-NewFloat32(55,1186
-NCFloat32::NCFloat32(60,1248
-NCFloat32::ptr_duplicate(65,1315
-NCFloat32::read(71,1430
+NCFloat32.cc,168
+static char rcsid[18,377
+static char rcsid[] not_used 18,377
+NewFloat32(29,595
+NCFloat32::NCFloat32(34,657
+NCFloat32::ptr_duplicate(39,724
+NCFloat32::read(45,839
 
-NCFloat64.cc,180
-static char rcsid[101,4088
-static char rcsid[] not_used 101,4088
-NewFloat64(115,4390
-NCFloat64::NCFloat64(120,4452
-NCFloat64::ptr_duplicate(125,4519
-NCFloat64::read(131,4634
+NCFloat64.cc,168
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewFloat64(27,578
+NCFloat64::NCFloat64(32,640
+NCFloat64::ptr_duplicate(37,707
+NCFloat64::read(43,822
 
-NCGrid.cc,188
-static char rcsid[92,3835
-static char rcsid[] not_used 92,3835
-NewGrid(97,3951
-NCGrid::ptr_duplicate(105,4032
-NCGrid::NCGrid(112,4102
-NCGrid::~NCGrid(116,4149
-NCGrid::read(121,4177
+NCGrid.cc,177
+static char rcsid[20,407
+static char rcsid[] not_used 20,407
+NewGrid(25,523
+NCGrid::ptr_duplicate(33,604
+NCGrid::NCGrid(40,674
+NCGrid::~NCGrid(44,721
+NCGrid::read(49,749
 
-NCInt16.cc,164
-static char rcsid[65,2654
-static char rcsid[] not_used 65,2654
-NewInt16(77,2866
-NCInt16::NCInt16(82,2924
-NCInt16::ptr_duplicate(87,2985
-NCInt16::read(93,3051
+NCInt16.cc,158
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewInt16(27,572
+NCInt16::NCInt16(32,630
+NCInt16::ptr_duplicate(37,691
+NCInt16::read(43,757
 
-NCInt32.cc,170
-static char rcsid[100,4098
-static char rcsid[] not_used 100,4098
-NewInt32(112,4310
-NCInt32::NCInt32(117,4368
-NCInt32::ptr_duplicate(122,4429
-NCInt32::read(128,4495
+NCInt32.cc,158
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewInt32(27,572
+NCInt32::NCInt32(32,630
+NCInt32::ptr_duplicate(37,691
+NCInt32::read(43,757
 
-NCList.cc,188
-static char rcsid[86,3613
-static char rcsid[] not_used 86,3613
-NewList(95,3776
-NCList::ptr_duplicate(101,3859
-NCList::NCList(106,3918
-NCList::~NCList(110,3981
-NCList::read(115,4010
+NCList.cc,177
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewList(26,548
+NCList::ptr_duplicate(32,631
+NCList::NCList(37,690
+NCList::~NCList(41,753
+NCList::read(46,782
 
-NCSequence.cc,216
-static char rcsid[89,3696
-static char rcsid[] not_used 89,3696
-NewSequence(98,3869
-NCSequence::ptr_duplicate(106,3958
-NCSequence::NCSequence(113,4036
-NCSequence::~NCSequence(117,4095
-NCSequence::read(122,4132
+NCSequence.cc,205
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewSequence(26,560
+NCSequence::ptr_duplicate(34,649
+NCSequence::NCSequence(41,727
+NCSequence::~NCSequence(45,786
+NCSequence::read(50,823
 
-NCStr.cc,160
-static char rcsid[101,4063
-static char rcsid[] not_used 101,4063
-NewStr(113,4269
-NCStr::NCStr(118,4323
-NCStr::ptr_duplicate(123,4378
-NCStr::read(129,4440
+NCStr.cc,148
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewStr(27,566
+NCStr::NCStr(32,620
+NCStr::ptr_duplicate(37,675
+NCStr::read(43,737
 
-NCStructure.cc,223
-static char rcsid[86,3618
-static char rcsid[] not_used 86,3618
-NewStructure(95,3794
-NCStructure::ptr_duplicate(101,3871
-NCStructure::NCStructure(106,3940
-NCStructure::~NCStructure(110,4002
-NCStructure::read(115,4040
+NCStructure.cc,212
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewStructure(26,563
+NCStructure::ptr_duplicate(32,640
+NCStructure::NCStructure(37,709
+NCStructure::~NCStructure(41,771
+NCStructure::read(46,809
 
-NCUInt16.cc,165
-static char rcsid[31,690
-static char rcsid[] not_used 31,690
-NewUInt16(43,905
-NCUInt16::NCUInt16(48,965
-NCUInt16::ptr_duplicate(53,1029
-NCUInt16::read(59,1097
+NCUInt16.cc,163
+static char rcsid[10,190
+static char rcsid[] not_used 10,190
+NewUInt16(21,405
+NCUInt16::NCUInt16(26,465
+NCUInt16::ptr_duplicate(31,529
+NCUInt16::read(37,597
 
-NCUInt32.cc,167
-static char rcsid[34,875
-static char rcsid[] not_used 34,875
-NewUInt32(46,1090
-NCUInt32::NCUInt32(51,1150
-NCUInt32::ptr_duplicate(56,1214
-NCUInt32::read(62,1282
+NCUInt32.cc,163
+static char rcsid[10,203
+static char rcsid[] not_used 10,203
+NewUInt32(21,418
+NCUInt32::NCUInt32(26,478
+NCUInt32::ptr_duplicate(31,542
+NCUInt32::read(37,610
 
-NCUrl.cc,157
-static char rcsid[90,3747
-static char rcsid[] not_used 90,3747
-NewUrl(99,3907
-NCUrl::NCUrl(104,3961
-NCUrl::ptr_duplicate(109,4016
-NCUrl::read(115,4078
+NCUrl.cc,148
+static char rcsid[16,360
+static char rcsid[] not_used 16,360
+NewUrl(26,545
+NCUrl::NCUrl(31,599
+NCUrl::ptr_duplicate(36,654
+NCUrl::read(42,716
 
-client.cc,54
-test_open(83,3236
-test_close(93,3375
-main(100,3453
+client.cc,50
+test_open(24,468
+test_close(34,607
+main(41,685
 
-inst.cc,65
-static char rcsid[78,3260
-static char rcsid[] not_used 78,3260
+inst.cc,63
+static char rcsid[17,430
+static char rcsid[] not_used 17,430
 
-nc_das.cc,42
-static char rcsid[95,4123
-main(107,4387
+nc_das.cc,48
+static char not_used rcsid[18,573
+main(30,846
 
-nc_dds.cc,43
-static char rcsid[105,4343
-main(117,4609
+nc_dds.cc,48
+static char not_used rcsid[18,560
+main(30,835
 
-nc_dods.cc,43
-static char rcsid[120,4884
-main(134,5172
+nc_dods.cc,48
+static char not_used rcsid[16,443
+main(30,740
 
-ncdas.cc,373
-static char rcsid[136,5679
-static const char STRING[153,6017
-static const char BYTE[154,6054
-static const char INT32[155,6087
-static const char INT16[156,6122
-static const char FLOAT64[157,6157
-static const char FLOAT32[158,6196
-static char Msgt[162,6256
-print_attr(173,6593
-print_type(263,8576
-read_attributes(299,9251
-read_variables(366,11347
-main(433,13453
+ncdas.cc,370
+static char not_used rcsid[22,745
+static const char STRING[39,1088
+static const char BYTE[40,1125
+static const char INT32[41,1158
+static const char INT16[42,1193
+static const char FLOAT64[43,1228
+static const char FLOAT32[44,1267
+static char Msgt[48,1327
+print_attr(59,1664
+print_type(149,3647
+read_attributes(185,4322
+read_variables(252,6418
+main(319,8524
 
-ncdds.cc,137
-static char rcsid[106,4317
-static char Msgt[133,4825
-Get_bt(140,4955
-read_class(174,5660
-read_descriptors(330,10235
-main(361,11060
+ncdds.cc,139
+static char not_used rcsid[20,553
+static char Msgt[47,1070
+Get_bt(54,1200
+read_class(88,1905
+read_descriptors(244,6480
+main(275,7305
 
-Dncx.h,0
+Dncx.h,24
+#define _dncx_h 11,162
 
-Dnetcdf.h,114
-extern Connections<NCConnect *>  *conns;61,1881
-extern char *cdf_routine_name;65,1999
-extern int rcode;66,2030
+Dnetcdf.h,136
+#define _dnetcdf_h 7,98
+extern Connections<NCConnect *>  *conns;18,353
+extern char *cdf_routine_name;22,471
+extern int rcode;23,502
 
 Dv2i.h,254
 # define NDIMS_DECL9,172
@@ -449,67 +451,67 @@ nvdims(27,575
 # define A_FREE(A_FREE42,859
 # define A_INIT(A_INIT45,911
 
-NCArray.h,28
-#define _NCArray_h 42,1264
+NCArray.h,27
+#define _ncarray_h 17,371
 
-NCByte.h,27
-#define _NCByte_h 48,1437
+NCByte.h,26
+#define _ncbyte_h 17,370
 
-NCConnect.h,30
-#define _nc_connect_h60,2031
+NCConnect.h,29
+#define _ncconnect_h 14,304
 
 NCFloat32.h,29
-#define _NCFloat32_h 30,682
+#define _ncfloat32_h 17,374
 
-NCFloat64.h,30
-#define _NCFloat64_h 48,1443
+NCFloat64.h,29
+#define _ncfloat64_h 17,373
 
-NCGrid.h,27
-#define _NCGrid_h 47,1317
+NCGrid.h,26
+#define _ncgrid_h 17,370
 
 NCInt16.h,27
-#define _NCInt16_h 30,600
+#define _ncint16_h 17,372
 
-NCInt32.h,28
-#define _NCInt32_h 46,1318
+NCInt32.h,27
+#define _ncint32_h 17,374
 
-NCList.h,27
-#define _NCList_h 46,1316
+NCList.h,26
+#define _nclist_h 17,370
 
-NCSequence.h,31
-#define _NCSequence_h 46,1324
+NCSequence.h,30
+#define _ncsequence_h 17,374
 
-NCStr.h,26
-#define _NCStr_h 46,1314
+NCStr.h,25
+#define _ncstr_h 17,369
 
-NCStructure.h,32
-#define _NCStructure_h 46,1326
+NCStructure.h,31
+#define _ncstructure_h 17,375
 
 NCUInt16.h,28
-#define _NCUInt16_h 31,607
+#define _ncuint16_h 17,375
 
 NCUInt32.h,28
-#define _NCUInt32_h 30,589
+#define _ncuint32_h 17,374
 
-NCUrl.h,26
-#define _NCUrl_h 46,1314
+NCUrl.h,25
+#define _ncurl_h 17,369
 
-config_nc.h,441
-#define _CONFIG_NC_H_4,162
-#define HAVE_VPRINTF 39,1008
-#define STDC_HEADERS 51,1343
-#define HAVE_STRERROR 68,1974
-#define HAVE_STRTOL 71,2046
-#define HAVE_FCNTL_H 74,2122
-#define HAVE_LIMITS_H 77,2200
-#define HAVE_UNISTD_H 80,2279
-#define SIZEOF_CHAR 86,2404
-#define SIZEOF_DOUBLE 89,2467
-#define SIZEOF_FLOAT 92,2531
-#define SIZEOF_INT 95,2592
-#define SIZEOF_LONG 98,2652
-#define not_used 103,2786
-#define not_used 105,2834
+config_nc.h,436
+#define _config_nc_h4,161
+#define HAVE_VPRINTF 13,391
+#define STDC_HEADERS 25,726
+#define HAVE_STRERROR 42,1357
+#define HAVE_STRTOL 45,1429
+#define HAVE_FCNTL_H 48,1505
+#define HAVE_LIMITS_H 51,1583
+#define HAVE_UNISTD_H 54,1662
+#define SIZEOF_CHAR 60,1787
+#define SIZEOF_DOUBLE 63,1850
+#define SIZEOF_FLOAT 66,1914
+#define SIZEOF_INT 69,1975
+#define SIZEOF_LONG 72,2035
+#define not_used 77,2169
+#define not_used 79,2217
 
 lnetcdf.h,59
 #define _LNETCDF_4,23
@@ -1747,57 +1749,57 @@ ncx_put_NC(1151,21967
 lnc_get_NC(1231,23407
 
 lnetcdf/lv2i.c,1140
-# define NDIMS_DECL15,380
-# define A_DECL(A_DECL16,400
-# define A_FREE(A_FREE19,491
-# define A_INIT(A_INIT21,514
-nvdims(33,778
-#define NDIMS_DECL	46,989
-# define A_DECL(A_DECL48,1051
-# define A_FREE(A_FREE51,1128
-# define A_INIT(A_INIT54,1173
-int ncerr 74,1415
-int ncopts 81,1568
-const char *cdf_routine_name;87,1676
-lnc_advise(102,1828
-NCadvise(142,2761
-nc_advise(159,3225
-lnccreate(171,3434
-lncopen(185,3663
-lncredef(199,3884
-lncendef(212,4056
-lncclose(225,4228
-lncinquire(239,4402
-lncsync(271,4828
-lncabort(285,4999
-lncdimdef(298,5170
-lncdimid(316,5438
-lncdiminq(330,5662
-lncdimrename(355,5986
-lncvardef(372,6232
-lncvarid(392,6552
-lncvarinq(409,6791
-lncvarput1(441,7229
-lncvarget1(465,7611
-lncvarput(489,7985
-lncvarget(517,8472
-lncvarputs(545,8953
-lncvargets(582,9664
-lncvarputg(619,10369
-lncvargetg(661,11204
-lncvarrename(703,12032
-lncattput(720,12278
-lncattinq(740,12593
-lncattget(765,12931
-lncattcopy(783,13189
-lncattname(802,13493
-lncattrename(820,13756
-lncattdel(838,14033
-lnctypelen(861,14429
-lncsetfill(884,14830
-lncrecinq(901,15079
-lncrecget(934,15564
-lncrecput(951,15804
+# define NDIMS_DECL15,376
+# define A_DECL(A_DECL16,396
+# define A_FREE(A_FREE19,487
+# define A_INIT(A_INIT21,510
+nvdims(33,774
+#define NDIMS_DECL	46,985
+# define A_DECL(A_DECL48,1047
+# define A_FREE(A_FREE51,1124
+# define A_INIT(A_INIT54,1169
+int ncerr 74,1411
+int ncopts 81,1564
+const char *cdf_routine_name;87,1672
+lnc_advise(102,1824
+NCadvise(142,2757
+nc_advise(159,3221
+lnccreate(171,3430
+lncopen(185,3659
+lncredef(199,3880
+lncendef(212,4052
+lncclose(225,4224
+lncinquire(239,4398
+lncsync(271,4824
+lncabort(285,4995
+lncdimdef(298,5166
+lncdimid(316,5434
+lncdiminq(330,5658
+lncdimrename(355,5982
+lncvardef(372,6228
+lncvarid(392,6548
+lncvarinq(409,6787
+lncvarput1(441,7225
+lncvarget1(465,7607
+lncvarput(489,7981
+lncvarget(517,8468
+lncvarputs(545,8949
+lncvargets(582,9660
+lncvarputg(619,10365
+lncvargetg(661,11200
+lncvarrename(703,12028
+lncattput(720,12274
+lncattinq(740,12589
+lncattget(765,12927
+lncattcopy(783,13185
+lncattname(802,13489
+lncattrename(820,13752
+lncattdel(838,14029
+lnctypelen(861,14425
+lncsetfill(884,14826
+lncrecinq(901,15075
+lncrecget(934,15560
+lncrecput(951,15800
 
 lnetcdf/lvar.c,538
 free_NC_var(21,375
@@ -2037,17 +2039,16 @@ lnetcdf/lrnd.h,158
 #define	M_RNDUP(M_RNDUP14,409
 #define	M_RNDDOWN(M_RNDDOWN15,450
 
-lnetcdf/ncconfig.h,290
+lnetcdf/ncconfig.h,258
 #define _NCCONFIG_H_5,232
 #define STDC_HEADERS 25,745
-#define WORDS_BIGENDIAN 29,903
-#define SIZEOF_SIZE_T 50,1468
-#define SIZEOF_OFF_T 53,1530
-#define uchar 62,1757
-#define SIZEOF_DOUBLE 68,1929
-#define SIZEOF_FLOAT 71,1993
-#define SIZEOF_INT 74,2054
-#define SIZEOF_LONG 77,2114
+#define SIZEOF_SIZE_T 50,1471
+#define SIZEOF_OFF_T 53,1533
+#define uchar 62,1760
+#define SIZEOF_DOUBLE 68,1932
+#define SIZEOF_FLOAT 71,1996
+#define SIZEOF_INT 74,2057
+#define SIZEOF_LONG 77,2117
 
 lnetcdf/netcdf.h,2468
 #define _NETCDF_36,2022

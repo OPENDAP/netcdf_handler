@@ -1,23 +1,58 @@
 
 // -*- C++ -*-
 
+// (c) COPYRIGHT URI/MIT 1994-1996
+// Please read the full copyright statement in the file COPYRIGHT.
+//
+// Authors:
+//      reza            Reza Nekovei (reza@intcomm.net)
+
 // netCDF sub-class implementation for NCByte,...NCGrid.
 // The files are patterned after the subcalssing examples 
 // Test<type>.c,h files.
 //
 // ReZa 1/12/95
 
-/* $Log: NCArray.h,v $
-/* Revision 1.1  1999/07/28 00:22:42  jimg
-/* Added
-/*
-/* Revision 1.5  1999/05/07 23:45:31  jimg
-/* String --> string fixes
-/*
-/* Revision 1.4  1996/09/17 17:06:17  jimg
-/* Merge the release-2-0 tagged files (which were off on a branch) back into
-/* the trunk revision.
-/*
+#ifndef _ncarray_h
+#define _ncarray_h 1
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "Array.h"
+extern Array * NewArray(const string &n = "", BaseType *v = 0);
+
+class NCArray: public Array {
+public:
+    NCArray(const string &n = "", BaseType *v = 0);
+    virtual ~NCArray();
+
+    virtual BaseType *ptr_duplicate();
+
+    virtual bool read(const string &dataset);
+    long format_constraint(long *cor, long *step, long *edg, 
+			   bool *has_stride);
+};
+
+/* 
+ * $Log: NCArray.h,v $
+ * Revision 1.2  2000/10/06 01:22:02  jimg
+ * Moved the CVS Log entries to the ends of files.
+ * Modified the read() methods to match the new definition in the dap library.
+ * Added exception handlers in various places to catch exceptions thrown
+ * by the dap library.
+ *
+ * Revision 1.1  1999/07/28 00:22:42  jimg
+ * Added
+ *
+ * Revision 1.5  1999/05/07 23:45:31  jimg
+ * String --> string fixes
+ *
+ * Revision 1.4  1996/09/17 17:06:17  jimg
+ * Merge the release-2-0 tagged files (which were off on a branch) back into
+ * the trunk revision.
+ *
  * Revision 1.3.4.2  1996/07/10 21:43:55  jimg
  * Changes for version 2.06. These fixed lingering problems from the migration
  * from version 1.x to version 2.x.
@@ -37,30 +72,6 @@
  * Revision 1.1  1995/02/10  04:57:15  reza
  * Added read and read_val functions.
  */
-
-#ifndef _NCArray_h
-#define _NCArray_h 1
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-#include "Array.h"
-extern Array * NewArray(const string &n = "", BaseType *v = 0);
-
-class NCArray: public Array {
-public:
-    NCArray(const string &n = "", BaseType *v = 0);
-    virtual ~NCArray();
-
-    virtual BaseType *ptr_duplicate();
-
-    virtual bool read(const string &dataset, int &error);
-    long format_constraint(long *cor, long *step, long *edg, bool *has_stride);
-
-//    virtual bool read(String dataset, String var_name, String constraint);
-//    virtual bool read_val(void *stuff);
-};
 
 #endif
 

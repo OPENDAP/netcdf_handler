@@ -1,36 +1,9 @@
-/*
-  Copyright 1995 The University of Rhode Island and The Massachusetts
-  Institute of Technology
 
-  Portions of this software were developed by the Graduate School of
-  Oceanography (GSO) at the University of Rhode Island (URI) in collaboration
-  with The Massachusetts Institute of Technology (MIT).
-
-  Access and use of this software shall impose the following obligations and
-  understandings on the user. The user is granted the right, without any fee
-  or cost, to use, copy, modify, alter, enhance and distribute this software,
-  and any derivative works thereof, and its supporting documentation for any
-  purpose whatsoever, provided that this entire notice appears in all copies
-  of the software, derivative works and supporting documentation.  Further,
-  the user agrees to credit URI/MIT in any publications that result from the
-  use of this software or in any product that includes this software. The
-  names URI, MIT and/or GSO, however, may not be used in any advertising or
-  publicity to endorse or promote any products or commercial entity unless
-  specific written permission is obtained from URI/MIT. The user also
-  understands that URI/MIT is not obligated to provide the user with any
-  support, consulting, training or assistance of any kind with regard to the
-  use, operation and performance of this software nor to provide the user
-  with any updates, revisions, new versions or "bug fixes".
-
-  THIS SOFTWARE IS PROVIDED BY URI/MIT "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-  EVENT SHALL URI/MIT BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
-  DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
-  PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS
-  ACTION, ARISING OUT OF OR IN CONNECTION WITH THE ACCESS, USE OR PERFORMANCE
-  OF THIS SOFTWARE.
-*/
+// (c) COPYRIGHT URI/MIT 1994-1996
+// Please read the full copyright statement in the file COPYRIGHT.
+//
+// Authors:
+//      reza            Reza Nekovei (reza@intcomm.net)
 
 // This file contains functions which read the variables and their description
 // from a netcdf file and build the in-memeory DDS. These functions form the
@@ -42,68 +15,9 @@
 //
 // ReZa 10/20/94
 
-// $Log: ncdds.cc,v $
-// Revision 1.1  1999/07/28 00:22:47  jimg
-// Added
-//
-// Revision 1.15.2.1  1999/05/27 17:43:23  reza
-// Fixed bugs in string changes
-//
-// Revision 1.15  1999/05/08 00:38:21  jimg
-// Fixes for the String --> string changes
-//
-// Revision 1.14  1999/05/07 23:45:33  jimg
-// String --> string fixes
-//
-// Revision 1.13  1999/04/08 13:45:52  reza
-// Added support for more data types.
-//
-// Revision 1.12  1999/03/30 05:20:56  reza
-// Added support for the new data types (Int16, UInt16, and Float32).
-//
-// Revision 1.11  1998/03/20 00:31:07  jimg
-// Changed calls to the set_mime_*() to match the new parameters
-//
-// Revision 1.10  1997/03/10 16:24:23  reza
-// Added error object and upgraded to DODS core release 2.12.
-//
-// Revision 1.9  1996/09/17 17:07:07  jimg
-// Merge the release-2-0 tagged files (which were off on a branch) back into
-// the trunk revision.
-//
-// Revision 1.8.2.2  1996/07/10 21:44:45  jimg
-// Changes for version 2.06. These fixed lingering problems from the migration
-// from version 1.x to version 2.x.
-// Removed some (but not all) warning generated with gcc's -Wall option.
-//
-// Revision 1.8.2.1  1996/06/25 22:05:08  jimg
-// Version 2.0 from Reza.
-//
-// Revision 1.7  1995/07/09  21:34:02  jimg
-// Added copyright notice.
-//
-// Revision 1.6  1995/06/23  15:35:24  jimg
-// Added netio.h.
-// Fixed some misc problems which may have come about do to the modifications in
-// nc_das.cc and nc_dds.cc (they went from CGIs to simple UNIX filters).
-//
-// Revision 1.5  1995/02/10  04:47:35  reza
-// Updated to use type subclasses, NCArray, NCByte, NCInt32, NCGrid....
-//
-// Revision 1.4  1995/01/31  20:21:34  reza
-//  Modified for new type subclassed DAP implementation.
-//
-// Revision 1.3  1994/12/22  04:51:44  reza
-// Updated to use DODS new named dimension capability.
-//
-// Revision 1.2  1994/11/03  05:22:02  reza
-// Added variable names to variable types Grid and Array.
-//
-// Revision 1.1  1994/10/28  14:34:03  reza
-// First version
-//
+#include "config_nc.h"
 
-static char rcsid[]={"$Id: ncdds.cc,v 1.1 1999/07/28 00:22:47 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdds.cc,v 1.2 2000/10/06 01:22:03 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -370,3 +284,69 @@ main(int argc, char *argv[])
 
 #endif
 
+// $Log: ncdds.cc,v $
+// Revision 1.2  2000/10/06 01:22:03  jimg
+// Moved the CVS Log entries to the ends of files.
+// Modified the read() methods to match the new definition in the dap library.
+// Added exception handlers in various places to catch exceptions thrown
+// by the dap library.
+//
+// Revision 1.1  1999/07/28 00:22:47  jimg
+// Added
+//
+// Revision 1.15.2.1  1999/05/27 17:43:23  reza
+// Fixed bugs in string changes
+//
+// Revision 1.15  1999/05/08 00:38:21  jimg
+// Fixes for the String --> string changes
+//
+// Revision 1.14  1999/05/07 23:45:33  jimg
+// String --> string fixes
+//
+// Revision 1.13  1999/04/08 13:45:52  reza
+// Added support for more data types.
+//
+// Revision 1.12  1999/03/30 05:20:56  reza
+// Added support for the new data types (Int16, UInt16, and Float32).
+//
+// Revision 1.11  1998/03/20 00:31:07  jimg
+// Changed calls to the set_mime_*() to match the new parameters
+//
+// Revision 1.10  1997/03/10 16:24:23  reza
+// Added error object and upgraded to DODS core release 2.12.
+//
+// Revision 1.9  1996/09/17 17:07:07  jimg
+// Merge the release-2-0 tagged files (which were off on a branch) back into
+// the trunk revision.
+//
+// Revision 1.8.2.2  1996/07/10 21:44:45  jimg
+// Changes for version 2.06. These fixed lingering problems from the migration
+// from version 1.x to version 2.x.
+// Removed some (but not all) warning generated with gcc's -Wall option.
+//
+// Revision 1.8.2.1  1996/06/25 22:05:08  jimg
+// Version 2.0 from Reza.
+//
+// Revision 1.7  1995/07/09  21:34:02  jimg
+// Added copyright notice.
+//
+// Revision 1.6  1995/06/23  15:35:24  jimg
+// Added netio.h.
+// Fixed some misc problems which may have come about do to the modifications in
+// nc_das.cc and nc_dds.cc (they went from CGIs to simple UNIX filters).
+//
+// Revision 1.5  1995/02/10  04:47:35  reza
+// Updated to use type subclasses, NCArray, NCByte, NCInt32, NCGrid....
+//
+// Revision 1.4  1995/01/31  20:21:34  reza
+//  Modified for new type subclassed DAP implementation.
+//
+// Revision 1.3  1994/12/22  04:51:44  reza
+// Updated to use DODS new named dimension capability.
+//
+// Revision 1.2  1994/11/03  05:22:02  reza
+// Added variable names to variable types Grid and Array.
+//
+// Revision 1.1  1994/10/28  14:34:03  reza
+// First version
+//

@@ -1,36 +1,9 @@
-/*
-  Copyright 1995 The University of Rhode Island and The Massachusetts
-  Institute of Technology
 
-  Portions of this software were developed by the Graduate School of
-  Oceanography (GSO) at the University of Rhode Island (URI) in collaboration
-  with The Massachusetts Institute of Technology (MIT).
-
-  Access and use of this software shall impose the following obligations and
-  understandings on the user. The user is granted the right, without any fee
-  or cost, to use, copy, modify, alter, enhance and distribute this software,
-  and any derivative works thereof, and its supporting documentation for any
-  purpose whatsoever, provided that this entire notice appears in all copies
-  of the software, derivative works and supporting documentation.  Further,
-  the user agrees to credit URI/MIT in any publications that result from the
-  use of this software or in any product that includes this software. The
-  names URI, MIT and/or GSO, however, may not be used in any advertising or
-  publicity to endorse or promote any products or commercial entity unless
-  specific written permission is obtained from URI/MIT. The user also
-  understands that URI/MIT is not obligated to provide the user with any
-  support, consulting, training or assistance of any kind with regard to the
-  use, operation and performance of this software nor to provide the user
-  with any updates, revisions, new versions or "bug fixes".
-
-  THIS SOFTWARE IS PROVIDED BY URI/MIT "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-  EVENT SHALL URI/MIT BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
-  DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
-  PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS
-  ACTION, ARISING OUT OF OR IN CONNECTION WITH THE ACCESS, USE OR PERFORMANCE
-  OF THIS SOFTWARE.
-*/
+// (c) COPYRIGHT URI/MIT 1994-1996
+// Please read the full copyright statement in the file COPYRIGHT.
+//
+// Authors:
+//      reza            Reza Nekovei (reza@intcomm.net)
 
 // This file contains functions which read the variables and their attributes
 // from a netcdf file and build the in-memeory DAS. These functions form the
@@ -44,99 +17,9 @@
 //
 // jhrg 9/23/94
 
-// $Log: ncdas.cc,v $
-// Revision 1.2  1999/11/05 05:15:07  jimg
-// Result of merge woth 3-1-0
-//
-// Revision 1.1.2.1  1999/10/29 05:05:23  jimg
-// Reza's fixes plus the configure & Makefile update
-//
-// Revision 1.1  1999/07/28 00:22:47  jimg
-// Added
-//
-// Revision 1.21  1999/05/08 00:38:20  jimg
-// Fixes for the String --> string changes
-//
-// Revision 1.20  1999/05/07 23:45:33  jimg
-// String --> string fixes
-//
-// Revision 1.19  1999/03/30 05:20:56  reza
-// Added support for the new data types (Int16, UInt16, and Float32).
-//
-// Revision 1.18  1997/03/10 16:24:22  reza
-// Added error object and upgraded to DODS core release 2.12.
-//
-// Revision 1.17  1996/09/17 17:07:05  jimg
-// Merge the release-2-0 tagged files (which were off on a branch) back into
-// the trunk revision.
-//
-// Revision 1.16.2.2  1996/07/10 21:44:44  jimg
-// Changes for version 2.06. These fixed lingering problems from the migration
-// from version 1.x to version 2.x.
-// Removed some (but not all) warning generated with gcc's -Wall option.
-//
-// Revision 1.16.2.1  1996/06/25 22:05:07  jimg
-// Version 2.0 from Reza.
-//
-// Revision 1.15  1995/07/09  21:34:01  jimg
-// Added copyright notice.
-//
-// Revision 1.14  1995/06/29  20:29:50  jimg
-// Added delete [] of the return value from print_attr(). This patched a
-// reported memory leak (reported from dbnew).
-//
-// Revision 1.13  1995/06/28  20:22:42  jimg
-// Replaced malloc calls with calls to new (and calls to free with calls to
-// delete).
-//
-// Revision 1.12  1995/06/27  20:48:52  jimg
-// Changed the scope of print_type() and print_attr() to static.
-// Fixed an off-by-one error in read_attribtes() when working with NC_CHAR
-// attributes (which we represent as strings).
-//
-// Revision 1.11  1995/06/23  15:35:23  jimg
-// Added netio.h.
-// Fixed some misc problems which may have come about do to the modifications
-// in nc_das.cc and nc_dds.cc (they went from CGIs to simple UNIX filters).
-//
-// Revision 1.10  1995/03/16  16:38:35  reza
-// Updated byte transfer. Bytes are no longer transmitted in binary but in
-// an ASCII string (0-255).
-//
-// Revision 1.9  1995/02/10  04:47:37  reza
-// Updated to use type subclasses, NCArray, NCByte, NCInt32, NCGrid....
-//
-// Revision 1.8  1994/12/22  04:46:20  reza
-// Updated to use DODS new attribute array capability.
-//
-// Revision 1.7  1994/11/03  05:18:27  reza
-// Modified the redundant trailing type-code and illegal (in das parser)
-// single quotation marks used for byte type.
-//
-// Revision 1.6  1994/10/28  15:14:15  reza
-// Changed some comments
-//
-// Revision 1.5  1994/10/06  17:53:07  jimg
-// Some reformatting of code for emacs, ...
-// Fixed Makefile.in so that two targets are built: client and server.
-// Fixed cast away of const in ncdas.cc.
-//
-// Revision 1.4  1994/10/06  16:29:54  jimg
-// Fixed printed representation of Strings read from a netcdf file -- they
-// now are correctly enclosed in double quotes.
-//
-// Revision 1.3  1994/10/06  15:52:10  reza
-// Changed error messeges
-//
-// Revision 1.2  1994/10/05  18:00:17  jimg
-// Modified so that types (as represented by the DAS) are now handled
-// correctly.
-//
-// Revision 1.1  1994/09/27  23:19:37  jimg
-// First version of the netcdf software which used libdas++.a.
-//
+#include "config_nc.h"
 
-static char rcsid[]={"$Id: ncdas.cc,v 1.2 1999/11/05 05:15:07 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.3 2000/10/06 01:22:03 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -444,3 +327,101 @@ main(int argc, char *argv[])
 }
 
 #endif
+
+// $Log: ncdas.cc,v $
+// Revision 1.3  2000/10/06 01:22:03  jimg
+// Moved the CVS Log entries to the ends of files.
+// Modified the read() methods to match the new definition in the dap library.
+// Added exception handlers in various places to catch exceptions thrown
+// by the dap library.
+//
+// Revision 1.2  1999/11/05 05:15:07  jimg
+// Result of merge woth 3-1-0
+//
+// Revision 1.1.2.1  1999/10/29 05:05:23  jimg
+// Reza's fixes plus the configure & Makefile update
+//
+// Revision 1.1  1999/07/28 00:22:47  jimg
+// Added
+//
+// Revision 1.21  1999/05/08 00:38:20  jimg
+// Fixes for the String --> string changes
+//
+// Revision 1.20  1999/05/07 23:45:33  jimg
+// String --> string fixes
+//
+// Revision 1.19  1999/03/30 05:20:56  reza
+// Added support for the new data types (Int16, UInt16, and Float32).
+//
+// Revision 1.18  1997/03/10 16:24:22  reza
+// Added error object and upgraded to DODS core release 2.12.
+//
+// Revision 1.17  1996/09/17 17:07:05  jimg
+// Merge the release-2-0 tagged files (which were off on a branch) back into
+// the trunk revision.
+//
+// Revision 1.16.2.2  1996/07/10 21:44:44  jimg
+// Changes for version 2.06. These fixed lingering problems from the migration
+// from version 1.x to version 2.x.
+// Removed some (but not all) warning generated with gcc's -Wall option.
+//
+// Revision 1.16.2.1  1996/06/25 22:05:07  jimg
+// Version 2.0 from Reza.
+//
+// Revision 1.15  1995/07/09  21:34:01  jimg
+// Added copyright notice.
+//
+// Revision 1.14  1995/06/29  20:29:50  jimg
+// Added delete [] of the return value from print_attr(). This patched a
+// reported memory leak (reported from dbnew).
+//
+// Revision 1.13  1995/06/28  20:22:42  jimg
+// Replaced malloc calls with calls to new (and calls to free with calls to
+// delete).
+//
+// Revision 1.12  1995/06/27  20:48:52  jimg
+// Changed the scope of print_type() and print_attr() to static.
+// Fixed an off-by-one error in read_attribtes() when working with NC_CHAR
+// attributes (which we represent as strings).
+//
+// Revision 1.11  1995/06/23  15:35:23  jimg
+// Added netio.h.
+// Fixed some misc problems which may have come about do to the modifications
+// in nc_das.cc and nc_dds.cc (they went from CGIs to simple UNIX filters).
+//
+// Revision 1.10  1995/03/16  16:38:35  reza
+// Updated byte transfer. Bytes are no longer transmitted in binary but in
+// an ASCII string (0-255).
+//
+// Revision 1.9  1995/02/10  04:47:37  reza
+// Updated to use type subclasses, NCArray, NCByte, NCInt32, NCGrid....
+//
+// Revision 1.8  1994/12/22  04:46:20  reza
+// Updated to use DODS new attribute array capability.
+//
+// Revision 1.7  1994/11/03  05:18:27  reza
+// Modified the redundant trailing type-code and illegal (in das parser)
+// single quotation marks used for byte type.
+//
+// Revision 1.6  1994/10/28  15:14:15  reza
+// Changed some comments
+//
+// Revision 1.5  1994/10/06  17:53:07  jimg
+// Some reformatting of code for emacs, ...
+// Fixed Makefile.in so that two targets are built: client and server.
+// Fixed cast away of const in ncdas.cc.
+//
+// Revision 1.4  1994/10/06  16:29:54  jimg
+// Fixed printed representation of Strings read from a netcdf file -- they
+// now are correctly enclosed in double quotes.
+//
+// Revision 1.3  1994/10/06  15:52:10  reza
+// Changed error messeges
+//
+// Revision 1.2  1994/10/05  18:00:17  jimg
+// Modified so that types (as represented by the DAS) are now handled
+// correctly.
+//
+// Revision 1.1  1994/09/27  23:19:37  jimg
+// First version of the netcdf software which used libdas++.a.
+//
