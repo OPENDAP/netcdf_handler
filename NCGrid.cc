@@ -17,9 +17,10 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.2 2000/10/06 01:22:02 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.3 2001/09/28 17:18:41 jimg Exp $"};
 
 #include "NCGrid.h"
+#include "debug.h"
 
 Grid *
 NewGrid(const string &n)
@@ -48,8 +49,12 @@ NCGrid::~NCGrid()
 bool
 NCGrid::read(const string &dataset)
 {
+    DBG(cerr << "In NCGrid::read" << endl);
+
     if (read_p()) // nothing to do
         return false;
+
+    DBG(cerr << "In NCGrid, reading components for " << name() << endl);
 
     // read array elements
     array_var()->read(dataset);
@@ -64,6 +69,13 @@ NCGrid::read(const string &dataset)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.3  2001/09/28 17:18:41  jimg
+// Merged with 3.2.5.
+// CVS  Committing in .
+//
+// Revision 1.2.4.1  2001/09/27 05:59:00  jimg
+// Added debug.h and some instrumentation.
+//
 // Revision 1.2  2000/10/06 01:22:02  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.

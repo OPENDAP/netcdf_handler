@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.6 2001/08/30 23:08:23 jimg Exp $
+# $Id: Makefile.in,v 1.7 2001/09/28 17:18:41 jimg Exp $
 
 @SET_MAKE@
 
@@ -133,7 +133,7 @@ ncdump:
 
 # Standard targets with some customization for das-test and dds-test
 
-configure: configure.in
+configure: configure.in $(DODS_ROOT)etc/aclocal.m4
 	autoconf --localdir=$(DODS_ROOT)etc
 
 Makefile: Makefile.in configure
@@ -213,22 +213,22 @@ tar:
 #
 .PHONY: binary-tar
 binary-tar:
-	cd $(DODS_ROOT).. && \
+	cd $(DODS_ROOT).. && ( \
 	$(TAR) --gzip --create --dereference \
             --file DODS-nc-library-$(version)-$(host).tar.gz \
             DODS/lib/libnc-dods.a \
             DODS/include/netcdf.h \
-            DODS/include/netcdf.inc && \
+            DODS/include/netcdf.inc ; \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-server-$(version)-$(host).tar.gz \
             DODS/etc/nc_das \
             DODS/etc/nc_dds \
-            DODS/etc/nc_dods && \
+            DODS/etc/nc_dods ; \
         $(TAR) --gzip --create --dereference \
             --file DODS-nc-client-$(version)-$(host).tar.gz \
             DODS/bin/dncdump \
             DODS/bin/dncview \
-            DODS/bin/Ncview
+            DODS/bin/Ncview  )
 
 .PHONY: update-version
 update-version: check-version

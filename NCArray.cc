@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.3 2000/10/06 01:22:02 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.4 2001/09/28 17:18:41 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -32,6 +32,7 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.3 2000/10/06 01:22:02 jimg E
 
 #include "Dnetcdf.h"
 #include "NCArray.h"
+#include "debug.h"
 
 Array *
 NewArray(const string &n, BaseType *v)
@@ -110,8 +111,12 @@ NCArray::read(const string &dataset)
     int id;
     bool has_stride;
 
+    DBG(cerr << "In NCArray::read" << endl);
+
     if (read_p())  // Nothing to do
         return false;
+
+    DBG(cerr << "In NCArray, opening the dataset, reading " << name() << endl);
 
     int ncid = lncopen(dataset.c_str(), NC_NOWRITE); /* netCDF id */
 
@@ -311,6 +316,13 @@ NCArray::read(const string &dataset)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.4  2001/09/28 17:18:41  jimg
+// Merged with 3.2.5.
+// CVS  Committing in .
+//
+// Revision 1.3.4.1  2001/09/27 06:00:01  jimg
+// Added debug.h and instrumentation.
+//
 // Revision 1.3  2000/10/06 01:22:02  jimg
 // Moved the CVS Log entries to the ends of files.
 // Modified the read() methods to match the new definition in the dap library.
