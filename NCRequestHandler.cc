@@ -70,7 +70,7 @@ NCRequestHandler::nc_build_dds( DODSDataHandlerInterface &dhi )
     DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
 
     read_descriptors( *dds, dhi.container->get_real_name() );
-    DODSConstraintFuncs::post_append( dhi ) ;
+    dds->parse_constraint( dhi.container->get_constraint() );
 
 #if 0
     read_descriptors(dds, df.get_dataset_name());
@@ -92,6 +92,16 @@ NCRequestHandler::nc_build_dds( DODSDataHandlerInterface &dhi )
 bool
 NCRequestHandler::nc_build_data( DODSDataHandlerInterface &dhi )
 {
+    DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
+
+    dds->filename( dhi.container->get_real_name() );
+    read_descriptors( *dds, dhi.container->get_real_name() ); 
+    dhi.post_constraint = dhi.container->get_constraint();
+
+#if 0
+    df.read_ancillary_dds(dds);
+    df.send_data(dds, stdout);
+#endif
 #if 0
     DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
 #endif
