@@ -6,6 +6,12 @@
 //      Reza       Reza Nekovei (rnekovei@ieee.org)
 
 // $Log: NCUInt16.cc,v $
+// Revision 1.3  1999/11/05 05:15:05  jimg
+// Result of merge woth 3-1-0
+//
+// Revision 1.1.2.1  1999/10/29 05:05:21  jimg
+// Reza's fixes plus the configure & Makefile update
+//
 // Revision 1.2  1999/10/21 13:19:06  reza
 // IMAP and other bug fixed for version3.
 //
@@ -25,7 +31,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.2 1999/10/21 13:19:06 reza Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.3 1999/11/05 05:15:05 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation

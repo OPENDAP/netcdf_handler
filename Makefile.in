@@ -1,5 +1,5 @@
 
-# $Id: Makefile.in,v 1.1 1999/07/28 00:22:42 jimg Exp $
+# $Id: Makefile.in,v 1.2 1999/11/05 05:15:05 jimg Exp $
 
 @SET_MAKE@
 
@@ -46,10 +46,13 @@ INSTALLMAN = man
 SHELL = /bin/sh
 srcdir = @srcdir@
 version = @VERSION@
-dir = nc-dods-@VERSION@
+basedir = nc3-dods
+dir = $(basedir)-$(version)
 
 COMPONENT_NAME = DODS netCDF Server
 AWK = @AWK@
+TAR = @TAR@
+PERL = @PERL@
 
 # testsuite specifics
 RUNTEST= runtest
@@ -58,7 +61,6 @@ RUNTESTFLAGS= #--all --verbose
 # names of key programs
 
 LN_S = @LN_S@
-AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 YACC = @YACC@
@@ -93,11 +95,9 @@ LIBSRCS = $(NETSRC) Ddim.cc Dattr.cc Dvar.cc Dnc.cc Dputget.cc \
 LIBOBJS = $(NETOBJ) Ddim.o Dattr.o Dvar.o Dnc.o Dputget.o Dncx.o
 
 NCHDRS = lnetcdf.h
-# XDRFILE	= @XDRFILE@
 
 NCOBJS = lattr.o ldim.o lerror.o llibvers.o lnc.o lncio.o \
-	 lncx.o lputget.o lstring.o lt_nc.o lv1hpg.o lv2i.o lvar.o 
-# 	 l@XDRFILE@.o
+	 lncx.o lputget.o lstring.o lv1hpg.o lv2i.o lvar.o 
 
 # Matlab client can be suppressed by a switch to configure.
 all: libnc-dods.a nc_das nc_dds nc_dods ncdump
@@ -112,7 +112,7 @@ nc_dods: $(SRVOBJS) libnc-dods.a
 	$(CXX) $(LDFLAGS) -o nc_dods $(SRVOBJS) $(LIBS)
 
 libnc-dods.a: $(LIBOBJS) $(NCOBJS) fortran
-	$(AR) -cru $@ $?
+	$(AR) -cru $@ $(LIBOBJS) $(NCOBJS)
 	$(RANLIB) $@
 
 .PHONY: fortran
@@ -125,8 +125,16 @@ ncdump:
 
 # Standard targets with some customization for das-test and dds-test
 
-Makefile: ${srcdir}/Makefile.in
-	${SHELL} config.status
+configure: configure.in
+	autoconf --localdir=$(DODS_ROOT)/etc
+
+Makefile: Makefile.in
+	if [ -x ./config.status ]; \
+	then \
+	    ${SHELL} ./config.status; \
+	else \
+	    ./configure; \
+	fi
 
 check:
 	-(cd nc_test && $(MAKE) $(MFLAGS) check)
@@ -150,6 +158,7 @@ collect-coverage-data:
 install: libnc-dods.a fortran nc_das nc_dds nc_dods
 	$(INSTALL_DATA) libnc-dods.a $(libdir)
 	$(RANLIB) $(libdir)/libnc-dods.a
+	$(INSTALL_DATA) lnetcdf/netcdf.h $(includedir)
 	$(INSTALL_PROGRAM) -s nc_das $(etcdir)
 	$(INSTALL_PROGRAM) -s nc_dds $(etcdir)
 	$(INSTALL_PROGRAM) -s nc_dods $(etcdir)
@@ -165,6 +174,7 @@ clean:
 	-rm -f $(PROG) libnc-dods.a
 	-(cd ncdump && $(MAKE) $(MFLAGS) clean)
 	-(cd fortran && $(MAKE) $(MFLAGS) clean)
+	-(cd nc_test && $(MAKE) $(MFLAGS) clean)
 
 distclean:
 	-rm -f *.o *.sum *.log *~ core
@@ -173,37 +183,58 @@ distclean:
 	-rm -f site.exp
 	-(cd ncdump && $(MAKE) $(MFLAGS) distclean)
 	-(cd fortran && $(MAKE) $(MFLAGS) distclean)
+	-(cd nc_test && $(MAKE) $(MFLAGS) distclean)
 
 .PHONY: depend
 depend: 
-	> dependencies
-	@depend@ -m dependencies \
-	-- $(CPPFLAGS) -I@GPP_INC@ -- \
-	$(SSRCS) $(CSRCS)
+	@depend@ -m Makefile.in -- $(CPPFLAGS) -- $(SSRCS) $(CSRCS)
 	-(cd ncdump && $(MAKE) $(MFLAGS) depend)
 	-(cd fortran && $(MAKE) $(MFLAGS) depend)
+	-(cd nc_test && $(MAKE) $(MFLAGS) depend)
 
 .PHONY: tar
 tar:
 	-rm -f config.cache config.log config.status
 	cd $(DODS_ROOT)/.. && \
-	tar --exclude '*/old' --exclude '*/.#*' --exclude '*/CVS' \
+	$(TAR) --exclude '*/old' --exclude '*/.#*' --exclude '*/CVS' \
+	    --exclude '*/.snprj*' --exclude '*/.flc*' \
 	    --gzip --create --dereference --file DODS-$(dir).tar.gz \
 	    DODS/src/$(dir)
+
+# Creates tar files for binary distributions.
+#
+.PHONY: binary-tar
+binary-tar:
+	cd $(DODS_ROOT)/.. && \
+	$(TAR) --gzip --create --dereference \
+            --file DODS-$(host)-nc-library-$(version).tar.gz \
+            DODS/lib/libnc-dods.a \
+            DODS/include/netcdf.h && \
+        $(TAR) --gzip --create --dereference \
+            --file DODS-$(host)-nc-server-$(version).tar.gz \
+            DODS/etc/nph-nc \
+            DODS/etc/nc_das \
+            DODS/etc/nc_dds \
+            DODS/etc/nc_dods && \
+        $(TAR) --gzip --create --dereference \
+            --file DODS-$(host)-nc-client-$(version).tar.gz \
+            DODS/bin/dncdump \
+            DODS/bin/dncview \
+            DODS/bin/Ncview
 
 .PHONY: update-version
 update-version: check-version
 	@echo "Version is: `cat version.h`"
 	if [ ! -d ../$(dir) ]; then \
-	    mv ../nc-dods* ../$(dir);\
+	    mv ../$(basedir)* ../$(dir);\
 	fi
 	touch $(DODS_ROOT)/VERSION; cat $(DODS_ROOT)/VERSION | \
 	  $(AWK) ' \
 	    BEGIN { found = 0 } \
 	    { if ( $$0 ~ /^$(COMPONENT_NAME):/) \
-	        { print "$(COMPONENT_NAME):", $(version); found = 1 } \
+	        { print "$(COMPONENT_NAME): $(version)"; found = 1 } \
 	      else { print $$0 } } \
-	    END { if ( ! found) { print "$(COMPONENT_NAME):", $(version) } \
+	    END { if ( ! found) { print "$(COMPONENT_NAME): $(version)" } \
 	        }' > $(DODS_ROOT)/VERSION
 
 # Compare the version encoded in this Makefile (set by configure) with the
@@ -232,4 +263,216 @@ tags:
 .cc.o:
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
 
-include dependencies
+# DO NOT DELETE; depend depends on this line.
+nc_das.o: nc_das.cc ../../include/DAS.h ../../include/SLList.h \
+ ../../include/AttrTable.h ../../include/config_dap.h \
+ ../../include/cgi_util.h ../../include/Connect.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h \
+ ../../include/DODSFilter.h
+ncdas.o: ncdas.cc ../../include/cgi_util.h ../../include/config_dap.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/DDS.h ../../include/BaseType.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
+ ../../include/Error.h ../../include/util.h ../../include/Byte.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h Dnetcdf.h lnetcdf.h \
+ NCConnect.h ../../include/Connections.h
+nc_dds.o: nc_dds.cc ../../include/DDS.h ../../include/config_dap.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/cgi_util.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/Error.h ../../include/util.h ../../include/Byte.h \
+ ../../include/Int16.h ../../include/UInt16.h ../../include/Int32.h \
+ ../../include/UInt32.h ../../include/Float32.h \
+ ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h \
+ ../../include/DODSFilter.h
+ncdds.o: ncdds.cc Dnetcdf.h lnetcdf.h ../../include/Connect.h \
+ ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h NCInt32.h NCUInt32.h NCUInt16.h NCInt16.h \
+ NCFloat64.h NCFloat32.h NCByte.h NCArray.h NCGrid.h NCStr.h \
+ ../../include/cgi_util.h
+nc_dods.o: nc_dods.cc ../../include/cgi_util.h \
+ ../../include/config_dap.h ../../include/Connect.h \
+ ../../include/DAS.h ../../include/AttrTable.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h \
+ ../../include/DODSFilter.h
+NCConnect.o: NCConnect.cc config_nc.h ../../include/Connect.h \
+ ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h
+inst.o: inst.cc config_nc.h ../../include/Connect.h \
+ ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h ../../include/Connections.cc
+NCArray.o: NCArray.cc config_nc.h ../../include/config_dap.h Dnetcdf.h \
+ lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
+ ../../include/AttrTable.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h NCArray.h
+NCByte.o: NCByte.cc config_nc.h NCByte.h ../../include/Byte.h \
+ ../../include/BaseType.h ../../include/config_dap.h Dnetcdf.h \
+ lnetcdf.h ../../include/Connect.h ../../include/DAS.h \
+ ../../include/AttrTable.h ../../include/DDS.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/debug.h \
+ ../../include/Error.h ../../include/util.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h
+NCFloat64.o: NCFloat64.cc config_nc.h NCFloat64.h \
+ ../../include/Float64.h ../../include/BaseType.h \
+ ../../include/config_dap.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/DDS.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h
+NCGrid.o: NCGrid.cc config_nc.h NCGrid.h ../../include/Grid.h \
+ ../../include/BaseType.h ../../include/config_dap.h
+NCUInt32.o: NCUInt32.cc config_nc.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h NCUInt32.h
+NCInt32.o: NCInt32.cc config_nc.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h NCInt32.h
+NCList.o: NCList.cc config_nc.h NCList.h ../../include/List.h \
+ ../../include/dods-limits.h ../../include/Vector.h \
+ ../../include/BaseType.h ../../include/config_dap.h \
+ ../../include/DDS.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h
+NCSequence.o: NCSequence.cc config_nc.h NCSequence.h \
+ ../../include/Sequence.h ../../include/BaseType.h \
+ ../../include/config_dap.h
+NCStr.o: NCStr.cc config_nc.h NCStr.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/BaseType.h \
+ ../../include/config_dap.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/DDS.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Url.h \
+ ../../include/Array.h ../../include/Vector.h ../../include/List.h \
+ ../../include/Structure.h ../../include/Sequence.h \
+ ../../include/Grid.h NCConnect.h ../../include/Connections.h
+NCStructure.o: NCStructure.cc config_nc.h NCStructure.h \
+ ../../include/Structure.h ../../include/BaseType.h \
+ ../../include/config_dap.h ../../include/DDS.h ../../include/Clause.h \
+ ../../include/expr.h ../../include/RValue.h ../../include/debug.h
+NCUrl.o: NCUrl.cc config_nc.h NCUrl.h ../../include/Url.h \
+ ../../include/dods-limits.h ../../include/BaseType.h \
+ ../../include/config_dap.h ../../include/Str.h
+NCUInt16.o: NCUInt16.cc config_nc.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h NCUInt16.h
+NCInt16.o: NCInt16.cc config_nc.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/config_dap.h ../../include/DDS.h \
+ ../../include/BaseType.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float32.h ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h NCInt16.h
+NCFloat32.o: NCFloat32.cc config_nc.h NCFloat32.h \
+ ../../include/Float32.h ../../include/BaseType.h \
+ ../../include/config_dap.h Dnetcdf.h lnetcdf.h \
+ ../../include/Connect.h ../../include/DAS.h ../../include/AttrTable.h \
+ ../../include/DDS.h ../../include/Clause.h ../../include/expr.h \
+ ../../include/RValue.h ../../include/debug.h ../../include/Error.h \
+ ../../include/util.h ../../include/Byte.h ../../include/Int16.h \
+ ../../include/UInt16.h ../../include/Int32.h ../../include/UInt32.h \
+ ../../include/Float64.h ../../include/Str.h \
+ ../../include/dods-limits.h ../../include/Url.h ../../include/Array.h \
+ ../../include/Vector.h ../../include/List.h ../../include/Structure.h \
+ ../../include/Sequence.h ../../include/Grid.h NCConnect.h \
+ ../../include/Connections.h

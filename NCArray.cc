@@ -14,6 +14,12 @@
 // ReZa 1/12/95
 
 // $Log: NCArray.cc,v $
+// Revision 1.2  1999/11/05 05:15:05  jimg
+// Result of merge woth 3-1-0
+//
+// Revision 1.1.2.1  1999/10/29 05:05:20  jimg
+// Reza's fixes plus the configure & Makefile update
+//
 // Revision 1.1  1999/07/28 00:22:42  jimg
 // Added
 //
@@ -85,7 +91,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.1 1999/07/28 00:22:42 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.2 1999/11/05 05:15:05 jimg Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -399,12 +405,12 @@ NCArray::read(const string &dataset, int &error)
     }
 
     //default (no type conversion needed)
-    void *convbuf = new char [(nels*lnctypelen(datatype))];
+    char *convbuf = new char [(nels*lnctypelen(datatype))];
 
     if( has_stride)
-	status = lncvargets (ncid, varid, cor, edg, step, convbuf);
+	status = lncvargets (ncid, varid, cor, edg, step, (void *)convbuf);
     else
-	status = lncvarget (ncid, varid, cor, edg, convbuf);
+	status = lncvarget (ncid, varid, cor, edg, (void *)convbuf);
 
     if (status == -1) {
 	error = 1;
@@ -412,7 +418,7 @@ NCArray::read(const string &dataset, int &error)
     }
 
     set_read_p(true);  
-    val2buf(convbuf);
+    val2buf((void *)convbuf);
 
     delete [] convbuf;
     status = lncclose(ncid);  

@@ -45,6 +45,12 @@
 // jhrg 9/23/94
 
 // $Log: ncdas.cc,v $
+// Revision 1.2  1999/11/05 05:15:07  jimg
+// Result of merge woth 3-1-0
+//
+// Revision 1.1.2.1  1999/10/29 05:05:23  jimg
+// Reza's fixes plus the configure & Makefile update
+//
 // Revision 1.1  1999/07/28 00:22:47  jimg
 // Added
 //
@@ -130,7 +136,7 @@
 // First version of the netcdf software which used libdas++.a.
 //
 
-static char rcsid[]={"$Id: ncdas.cc,v 1.1 1999/07/28 00:22:47 jimg Exp $"};
+static char rcsid[]={"$Id: ncdas.cc,v 1.2 1999/11/05 05:15:07 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -298,7 +304,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
     char attrname[MAX_NC_NAME];
     nc_type datatype;
     int len;
-    void *value;
+    char *value;
 
     for (int a = 0; a < natts; ++a) {
 	if (lncattname(ncid, v, a, attrname) == -1) {
@@ -316,7 +322,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	    return false;
 	}
 
-	value = (void *) new char [(len + 1) * lnctypelen(datatype)];
+	value = new char [(len + 1) * lnctypelen(datatype)];
 
 	if (!value) {
             ErrMsgT("nc_das server: Out of memory!");
@@ -324,7 +330,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	    (void) lncclose(ncid);
 	    return false;
 	}
-	if (lncattget(ncid, v, attrname, value) == -1) {
+	if (lncattget(ncid, v, attrname, (void *)value) == -1) {
             ErrMsgT("nc_das server: could not read attribute value");
 	    *(error) =  (string)"\"nc_das: Could not read attribute value \"";
    	    return false;
@@ -334,13 +340,13 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	// represents strings as arrays of char, but we represent them as X
 	// strings. So... Add the null and set the length to 1
 	if (datatype == NC_CHAR) { 
-	    *((char *)value + len) = '\0';
+	    *(value + len) = '\0';
 	    len = 1;
 	}
 
 	// add all the attributes in the array
 	for (int loc=0; loc < len ; loc++) {
-	    char *print_rep = print_attr(datatype, loc, value);	
+	    char *print_rep = print_attr(datatype, loc, (void *)value);	
 	    at->append_attr(attrname, print_type(datatype), print_rep);
 	    delete [] print_rep;
 	}
