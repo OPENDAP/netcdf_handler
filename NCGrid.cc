@@ -18,7 +18,7 @@
 #include "config_nc.h"
 #include "util.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.7 2003/09/30 22:33:52 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.8 2003/12/08 18:06:37 edavis Exp $"};
 
 #include "NCGrid.h"
 #include "debug.h"
@@ -58,7 +58,7 @@ NCGrid::read(const string &dataset)
     DBG(cerr << "In NCGrid, reading components for " << name() << endl);
 
     // read array elements
-    if (array_var()->send_p())
+    if (array_var()->send_p() || array_var()->is_in_selection())
 	array_var()->read(dataset);
 #if 0
     // Switch to this code once the merge with the 3.4 branch is complete in
@@ -69,7 +69,7 @@ NCGrid::read(const string &dataset)
 
     // read maps elements
     for (Pix p = first_map_var(); p; next_map_var(p))
-	if (map_var(p)->send_p())
+	if (map_var(p)->send_p() || map_var(p)->is_in_selection())
 	    map_var(p)->read(dataset);
 #if 0
     for (Pix p = first_map_var(); p; next_map_var(p))
@@ -83,6 +83,9 @@ NCGrid::read(const string &dataset)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.8  2003/12/08 18:06:37  edavis
+// Merge release-3-4 into trunk
+//
 // Revision 1.7  2003/09/30 22:33:52  jimg
 // I've removed calls to the new BaseType::is_in_selection() method. This method
 // is only present on the 3.4 branch at this time. Once we're ready to merge

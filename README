@@ -1,5 +1,5 @@
 
-$Id: README,v 1.4 2003/09/25 23:09:36 jimg Exp $
+$Id: README,v 1.5 2003/12/08 18:06:37 edavis Exp $
 
 For information about building the DODS netCDF 3 source code, see the INSTALL
 file.

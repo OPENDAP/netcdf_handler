@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.6 2003/09/25 23:09:36 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.7 2003/12/08 18:06:37 edavis Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -322,6 +322,9 @@ NCArray::read(const string &dataset)
 }
 
 // $Log: NCArray.cc,v $
+// Revision 1.7  2003/12/08 18:06:37  edavis
+// Merge release-3-4 into trunk
+//
 // Revision 1.6  2003/09/25 23:09:36  jimg
 // Meerged from 3.4.1.
 //

@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.5 2003/09/25 23:09:36 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.6 2003/12/08 18:06:37 edavis Exp $"};
 
 #ifdef __GNUG__
 #pragma implementation
@@ -100,6 +100,9 @@ NCFloat32::read(const string &dataset)
 }
 
 // $Log: NCFloat32.cc,v $
+// Revision 1.6  2003/12/08 18:06:37  edavis
+// Merge release-3-4 into trunk
+//
 // Revision 1.5  2003/09/25 23:09:36  jimg
 // Meerged from 3.4.1.
 //

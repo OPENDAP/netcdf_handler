@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.6 2003/09/25 23:09:36 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.7 2003/12/08 18:06:37 edavis Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -345,6 +345,9 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.7  2003/12/08 18:06:37  edavis
+// Merge release-3-4 into trunk
+//
 // Revision 1.6  2003/09/25 23:09:36  jimg
 // Meerged from 3.4.1.
 //
