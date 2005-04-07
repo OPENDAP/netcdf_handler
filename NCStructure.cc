@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.9 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.10 2005/04/07 23:35:36 jimg Exp $"};
 
 #include <algorithm>
 
@@ -87,7 +87,7 @@ public:
         a->get_attr_table().find("translation", &at, &aiter);
         if (a->get_attr_table().attr_end() == aiter) {
             a->get_attr_table().append_attr("translation", "String",
-                                            "\"translated\"");
+                                            "\"flatten\"");
         }
     }
 };
@@ -113,6 +113,9 @@ NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.10  2005/04/07 23:35:36  jimg
+// Changed the value of the translation attribute from "translated" to "flatten".
+//
 // Revision 1.9  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

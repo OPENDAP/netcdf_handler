@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.14 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.15 2005/04/07 23:35:36 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -249,7 +249,7 @@ public:
         a->get_attr_table().find("translation", &at, &aiter);
         if (a->get_attr_table().attr_end() == aiter)
             a->get_attr_table().append_attr("translation", "String",
-                                            "\"translated\"");
+                                            "\"flatten\"");
     }
     
     void size_new_dimension(NCArray *a, BaseType *e) {
@@ -389,6 +389,9 @@ NCSequence::var_value(size_t row, const string &name)
 }
 
 // $Log: NCSequence.cc,v $
+// Revision 1.15  2005/04/07 23:35:36  jimg
+// Changed the value of the translation attribute from "translated" to "flatten".
+//
 // Revision 1.14  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //
