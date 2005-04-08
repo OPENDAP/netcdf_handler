@@ -28,10 +28,6 @@
 #include "NCAccess.h"
 #include "DimProjInfo.h"
 
-#if 0
-extern Array * NewArray(const string &n, BaseType *v);
-#endif
-
 class NCArray: public Array, public NCAccess {
     
     // Assume there's a one-to-one mapping between Array dimensions and 
@@ -74,6 +70,10 @@ public:
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.14  2005/04/08 17:08:47  jimg
+ * Removed old 'virtual ctor' functions which have now been replaced by the
+ * factory class code in libdap++.
+ *
  * Revision 1.13  2005/03/31 00:04:51  jimg
  * Modified to use the factory class in libdap++ 3.5.
  *

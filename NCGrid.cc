@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.14 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.15 2005/04/08 17:08:47 jimg Exp $"};
 
 #include <sstream>
 
@@ -30,14 +30,6 @@ static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.14 2005/03/31 00:04:51 jimg E
 #include "NCArray.h"
 #include "nc_util.h"
 #include "debug.h"
-
-#if 0
-Grid *
-NewGrid(const string &n)
-{
-    return new NCGrid(n);
-}
-#endif
 
 // protected
 
@@ -205,6 +197,10 @@ NCGrid::get_nc_type() throw(InternalErr)
 }
 
 // $Log: NCGrid.cc,v $
+// Revision 1.15  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.14  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.12 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.13 2005/04/08 17:08:47 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -27,14 +27,6 @@ static char rcsid[] not_used ={"$Id: NCFloat32.cc,v 1.12 2005/03/31 00:04:51 jim
 #include "NCFloat32.h"
 #include "nc_util.h"
 #include "Dnetcdf.h"
-
-#if 0
-Float32 *
-NewFloat32(const string &n)
-{
-    return new NCFloat32(n);
-}
-#endif
 
 void 
 NCFloat32::m_duplicate(const NCFloat32 &bt)
@@ -139,6 +131,10 @@ NCFloat32::read(const string &dataset)
 }
 
 // $Log: NCFloat32.cc,v $
+// Revision 1.13  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.12  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

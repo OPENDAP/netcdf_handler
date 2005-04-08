@@ -7,7 +7,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.13 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.14 2005/04/08 17:08:47 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -19,14 +19,6 @@ static char rcsid[] not_used ={"$Id: NCUInt32.cc,v 1.13 2005/03/31 00:04:51 jimg
 #include "nc_util.h"
 #include "NCSequence.h"
 #include "NCUInt32.h"
-
-#if 0
-UInt32 *
-NewUInt32(const string &n)
-{
-    return new NCUInt32(n);
-}
-#endif
 
 void 
 NCUInt32::m_duplicate(const NCUInt32 &bt)
@@ -132,6 +124,10 @@ NCUInt32::read(const string &dataset)
 }
 
 // $Log: NCUInt32.cc,v $
+// Revision 1.14  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.13  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

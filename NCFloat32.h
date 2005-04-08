@@ -25,10 +25,6 @@
 #include "Float32.h"
 #include "NCAccess.h"
 
-#if 0
-extern Float32 * NewFloat32(const string &n);
-#endif
-
 class NCFloat32: public Float32, public NCAccess {
 protected:
     void m_duplicate(const NCFloat32 &bt);
@@ -47,6 +43,10 @@ public:
 };
 
 // $Log: NCFloat32.h,v $
+// Revision 1.11  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.10  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

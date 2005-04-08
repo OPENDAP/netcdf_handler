@@ -25,10 +25,6 @@
 #include "Url.h"
 #include "NCAccess.h"
 
-#if 0
-extern Url * NewUrl(const string &n = "");
-#endif
-
 class NCUrl: public Url, public NCAccess {
 protected:
     void m_duplicate(const NCUrl &bt);
@@ -47,6 +43,10 @@ public:
 
 /* 
  * $Log: NCUrl.h,v $
+ * Revision 1.9  2005/04/08 17:08:47  jimg
+ * Removed old 'virtual ctor' functions which have now been replaced by the
+ * factory class code in libdap++.
+ *
  * Revision 1.8  2005/03/31 00:04:51  jimg
  * Modified to use the factory class in libdap++ 3.5.
  *

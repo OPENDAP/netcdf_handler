@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.10 2005/04/07 23:35:36 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.11 2005/04/08 17:08:47 jimg Exp $"};
 
 #include <algorithm>
 
@@ -24,14 +24,6 @@ static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.10 2005/04/07 23:35:36 j
 #include "nc_util.h"
 
 const string spr = "."; // structure rename
-
-#if 0
-Structure *
-NewStructure(const string &n)
-{
-    return new NCStructure(n);
-}
-#endif
 
 // protected
 
@@ -113,6 +105,10 @@ NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 }
 
 // $Log: NCStructure.cc,v $
+// Revision 1.11  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.10  2005/04/07 23:35:36  jimg
 // Changed the value of the translation attribute from "translated" to "flatten".
 //

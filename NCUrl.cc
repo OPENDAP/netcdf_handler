@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.9 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.10 2005/04/08 17:08:47 jimg Exp $"};
 
 #ifdef __GNUG__
 //#pragma implementation
@@ -21,14 +21,6 @@ static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.9 2005/03/31 00:04:51 jimg Exp
 
 #include "InternalErr.h"
 #include "NCUrl.h"
-
-#if 0
-Url *
-NewUrl(const string &n)
-{
-    return new NCUrl(n);
-}
-#endif
 
 void 
 NCUrl::m_duplicate(const NCUrl &bt)
@@ -96,6 +88,10 @@ NCUrl::get_nc_type() throw(InternalErr)
 }
 
 // $Log: NCUrl.cc,v $
+// Revision 1.10  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.9  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

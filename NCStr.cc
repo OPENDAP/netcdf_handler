@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.14 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.15 2005/04/08 17:08:47 jimg Exp $"};
 
 // #define DODS_DEBUG 1
 
@@ -24,14 +24,6 @@ static char rcsid[] not_used ={"$Id: NCStr.cc,v 1.14 2005/03/31 00:04:51 jimg Ex
 #include "debug.h"
 
 #include "Dnetcdf.h"
-
-#if 0
-Str *
-NewStr(const string &n)
-{
-    return new NCStr(n);
-}
-#endif
 
 void 
 NCStr::m_duplicate(const NCStr &bt)
@@ -215,6 +207,10 @@ NCStr::read(const string &dataset)
 }
 
 // $Log: NCStr.cc,v $
+// Revision 1.15  2005/04/08 17:08:47  jimg
+// Removed old 'virtual ctor' functions which have now been replaced by the
+// factory class code in libdap++.
+//
 // Revision 1.14  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

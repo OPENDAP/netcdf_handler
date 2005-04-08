@@ -22,10 +22,6 @@
 #include "NCAccess.h"
 #include "nc_util.h"
 
-#if 0
-extern Sequence * NewSequence(const string &n);
-#endif
-
 class NCSequence: public Sequence, public NCAccess {
 private:
     int d_size;           //< The 'dimension size' Used for/by translation
@@ -57,6 +53,10 @@ public:
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.12  2005/04/08 17:08:47  jimg
+ * Removed old 'virtual ctor' functions which have now been replaced by the
+ * factory class code in libdap++.
+ *
  * Revision 1.11  2005/03/31 00:04:51  jimg
  * Modified to use the factory class in libdap++ 3.5.
  *
