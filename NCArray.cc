@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.23 2005/04/08 17:08:47 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.24 2005/04/11 18:38:20 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -659,7 +659,23 @@ NCArray::flatten(const ClientParams &cp, const string &parent_name)
     return new_vars;
 }
 
+BaseType *
+NCArray::find_child_sequence()
+{
+    if (var()->type() == dods_sequence_c)
+        return var();
+    else
+        return 0;
+}
+
+
 // $Log: NCArray.cc,v $
+// Revision 1.24  2005/04/11 18:38:20  jimg
+// Fixed a problem with NCSequence where nested sequences were not flagged
+// but instead were translated. The extract_values software cannot process a
+// nested sequence yet. Now the code inserts an attribute that notes that a
+// nested sequence has been elided.
+//
 // Revision 1.23  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

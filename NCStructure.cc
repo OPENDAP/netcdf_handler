@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.11 2005/04/08 17:08:47 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.12 2005/04/11 18:38:20 jimg Exp $"};
 
 #include <algorithm>
 
@@ -98,13 +98,53 @@ NCStructure::flatten(const ClientParams &cp, const string &parent_name)
         VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
         for_each(embedded_vars.begin(), embedded_vars.end(), AddAttribute());
         new_vars.splice(new_vars.end(), embedded_vars);
+        
+        // This mirrors code in NCConnect::translate_dds() _except_ that
+        // here the code moves the attribute up one level while in NCConnect
+        // the code moves the attribute into the global attribute table.
+        string trans = (*field)->get_attr_table().get_attr("translation");
+        if (!trans.empty())
+            get_attr_table().append_attr("translation", "String", trans);
+        
         ++field;
     }
 
     return new_vars;
 }
 
+BaseType *
+NCStructure::find_child_sequence()
+{
+    Constructor::Vars_iter field = var_begin();
+    Constructor::Vars_iter field_end = var_end();
+
+    while (field != field_end) {
+        if ((*field)->type() == dods_sequence_c)
+            return (*field);
+        
+        // Depth-first search; see find_child_sequence(BaseType *parent)
+        NCAccess *fld = dynamic_cast<NCAccess*>(*field);
+        if (!fld)
+            throw InternalErr(__FILE__, __LINE__, "Not an NCAccess!");
+            
+        BaseType *btp = fld->find_child_sequence();
+        if (btp)
+            return btp;
+            
+        ++field;
+    }
+    
+    return 0;
+}
+
+
 // $Log: NCStructure.cc,v $
+// Revision 1.12  2005/04/11 18:38:20  jimg
+// Fixed a problem with NCSequence where nested sequences were not flagged
+// but instead were translated. The extract_values software cannot process a
+// nested sequence yet. Now the code inserts an attribute that notes that a
+// nested sequence has been elided.
+//
 // Revision 1.11  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

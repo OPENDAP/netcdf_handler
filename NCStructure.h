@@ -41,10 +41,19 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual VarList flatten(const ClientParams &cp, const string &parent_name);
+
+    /// Does this variable contain a Sequence?
+    virtual BaseType *find_child_sequence();
 };
 
 /* 
  * $Log: NCStructure.h,v $
+ * Revision 1.12  2005/04/11 18:38:20  jimg
+ * Fixed a problem with NCSequence where nested sequences were not flagged
+ * but instead were translated. The extract_values software cannot process a
+ * nested sequence yet. Now the code inserts an attribute that notes that a
+ * nested sequence has been elided.
+ *
  * Revision 1.11  2005/04/08 17:08:47  jimg
  * Removed old 'virtual ctor' functions which have now been replaced by the
  * factory class code in libdap++.

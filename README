@@ -1,5 +1,5 @@
 
-$Id: README,v 1.5 2003/12/08 18:06:37 edavis Exp $
+$Id: README,v 1.6 2005/04/11 18:38:20 jimg Exp $
 
 For information about building the DODS netCDF 3 source code, see the INSTALL
 file.
@@ -31,9 +31,9 @@ script and a set of three server programs (Data Attribute Server, Data
 Structure Server, and Data Server) to make your existing data files available
 to anyone who has access to a program rebuilt with DODS components.
 
-For more information about DODS, see the URL
+For more information about OPeNDAP and DODS, see the URL
 
-    http://unidata.ucar.edu/packages/dods/
+    http://www.opendap.org/
 
 nc-dods is a client-server implementation of the Unidata netCDF API, based on
 the Distributed Oceanographic Data System. nc-dods contains a new
@@ -171,3 +171,14 @@ how to install servers to take advantage of those features.
 
 Good Luck :-)
 Reza Nekovei, URI
+
+NETCDF CLIENT-LIBRARY DESIGN INFORMATION
+
+Compile time constants
+
+URL parameters; pointer to wiki desing page.
+
+Files and their function
+
+Narrative
+

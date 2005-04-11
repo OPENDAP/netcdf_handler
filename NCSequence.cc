@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.15 2005/04/07 23:35:36 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.16 2005/04/11 18:38:20 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -31,14 +31,6 @@ static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.15 2005/04/07 23:35:36 ji
 
 const string spr = ".";
 
-#if 0
-Sequence *
-NewSequence(const string &n)
-{
-    return new NCSequence(n);
-}
-#endif
-
 // protected
 
 void
@@ -50,7 +42,6 @@ NCSequence::m_duplicate(const NCSequence &rhs)
     d_stride = rhs.d_stride;
 
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));
-    
 }
 
 // public
@@ -330,16 +321,30 @@ NCSequence::flatten(const ClientParams &cp, const string &parent_name)
     d_size = (seq_limit != 0) ? seq_limit : 1;
 
     while (field != field_end) {
-        VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
+        // Special case for embedded Sequences: not supported yet.
+        // Really need to test for a sequence at any level... 4/8/05 jhrg
+        BaseType *ncs;                  // Really a NCSequence
+        if ((*field)->type() == dods_sequence_c 
+            || (ncs = dynamic_cast<NCAccess*>(*field)->find_child_sequence())) {
+            string attribute = "\"Elided inner Sequence named '";
+            attribute += (ncs) ? ncs->name() : (*field)->name();
+            attribute += "'\"";
+            get_attr_table().append_attr("translation", "String", attribute);
+            
+            ++field;
+        }
+        else {
+            VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
 
-        // Note that AddDimension also deletes the BaseType objects in
-        // embedded_vars.
-        VarList ev_added_dim = for_each(embedded_vars.begin(), 
+            // Note that AddDimension also deletes the BaseType objects in
+            // embedded_vars.
+            VarList ev_added_dim = for_each(embedded_vars.begin(), 
                                         embedded_vars.end(), 
                                         AddDimension(this, cp));
 
-        new_vars.splice(new_vars.end(), ev_added_dim);
-        ++field;
+            new_vars.splice(new_vars.end(), ev_added_dim);
+            ++field;
+        }
     }
 
     return new_vars;
@@ -388,7 +393,38 @@ NCSequence::var_value(size_t row, const string &name)
     return 0;
 }
 
+BaseType *
+NCSequence::find_child_sequence()
+{
+    Constructor::Vars_iter field = var_begin();
+    Constructor::Vars_iter field_end = var_end();
+
+    while (field != field_end) {
+        if ((*field)->type() == dods_sequence_c)
+            return (*field);
+        
+        // Depth-first search; see find_child_sequence(BaseType *parent)
+        NCAccess *fld = dynamic_cast<NCAccess*>(*field);
+        if (!fld)
+            throw InternalErr(__FILE__, __LINE__, "Not an NCAccess!");
+            
+        BaseType *btp = fld->find_child_sequence();
+        if (btp)
+            return btp;
+            
+        ++field;
+    }
+    
+    return 0;
+}
+
 // $Log: NCSequence.cc,v $
+// Revision 1.16  2005/04/11 18:38:20  jimg
+// Fixed a problem with NCSequence where nested sequences were not flagged
+// but instead were translated. The extract_values software cannot process a
+// nested sequence yet. Now the code inserts an attribute that notes that a
+// nested sequence has been elided.
+//
 // Revision 1.15  2005/04/07 23:35:36  jimg
 // Changed the value of the translation attribute from "translated" to "flatten".
 //
