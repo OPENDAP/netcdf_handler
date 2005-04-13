@@ -1,5 +1,5 @@
 
-$Id: README,v 1.6 2005/04/11 18:38:20 jimg Exp $
+$Id: README,v 1.7 2005/04/13 20:13:47 jimg Exp $
 
 For information about building the DODS netCDF 3 source code, see the INSTALL
 file.
@@ -176,9 +176,192 @@ NETCDF CLIENT-LIBRARY DESIGN INFORMATION
 
 Compile time constants
 
-URL parameters; pointer to wiki desing page.
+DEFAULT_BASETYPE_FACTORY
+
+With version 3.5 of libdap++, the creation of variable is controled by a
+factory class. The default factory is name BaseTypeFactory; the netCDF CL
+uses a factory named NCTypeFactory to instamtiate NCByte, et cetera. However,
+some functions of the libdap++ library which take a pointer to a
+BaseTypeFactory can still be called without passing this pointer is the
+symbol DEFAULT_BASETYPE_FACTORY is defined. The 3.5 version of libdap++ is
+built this way and defining this symbol while building this code is
+recommended.
+
+STRING_AS_ARRAY
+
+If the compile-time constant STRING_AS_ARRAY is defined, then OPeNDAP
+strings will be translated into netCDF character arrays. This symbol is
+defined as 1 in nc_util.h, thus is is the default behavior. Also by default
+the size of the string arrays is set to 128 characters using the symbol
+STRING_ARRAY_SIZE, also defined in nc_util.h.
+
+Both DEFAULT_BASETYPE_FACTORY and STRING_AS_ARRAY only need to be defined
+when building the library; there's no need to define them when compiling
+software that uses the library or when linking to the library.
+
+How to use the enhanced features of the library
+
+For most data sources, there's no need to do anything differently with this
+version of the library. Previous versions could not process data sources
+which contained Structures or Sequences. For data sources with Structures,
+those are flattened by the 3.5 version of the library. A Structure like:
+      
+      Structure {
+	  Float32 lat;
+	  Float32 lon;
+      } point;
+
+will be represented by the netCDF CL as 
+
+      Float32 point.lat;
+      Float32 point.lon;
+
+Note that the dot (.) is part of the name of two new variables.
+
+For Sequences the flattening operation is a little more complex because a
+Sequence represents a series of values. Suppose 'point' above was a Sequence
+and not a Structure:
+
+      Sequence {
+	  Float32 lat;
+	  Float32 lon;
+      } point;
+
+then it might* be represented:
+
+      Float32 point.lat[point=100];
+      Float32 point.lon[point=100];
+
+In this case the two fields lat and lon have been transformed in to arrays.
+Each of the arrays holds the set of instances that make up the Sequence
+values for 'point'. 
+
+*This _might_ be the representation because there maybe more of less than 100
+element s in the Sequence point. This value is controled using a 'URL
+parameter' that will be discussed inthe next section.
+
+One limitation of version 3.5 of the netCDF CL is that it cannot handle
+'nested Sequences.' That is, if a Sequence holds another Sequence, directly
+or indirectly, the inner Sequence(s) will be elided. If this happens a Global
+attribute will be added to the data source noting that this has happened and
+giving the name of the variable(s) that was/were removed.
+
+Also note that any variable that is the result of a translation operation will
+have an additional 'translation' attribute that names the translation
+algorithm applied to that variable. In version 3.5 of the library, only the
+'flatten' algorithm is supported.
+
+Using the new features of the library
+
+The library will translate Sequences into one-element arrays by default. Not
+very useful, but also not expensive in terms of memory. The change the
+default to another value using the URL parameter 'limit' with a numeric value
+like 100. The syntax of the URL parameters is '[limit=<<value>>]'. To affect
+a change in the size of a particular variable use '[limit-<<name>>=<<value>>]'.
+
+There's currently no way to alter the behavior of the string translation. All
+String variables in OPeNDAP data sources are translated into 128 character
+arrays whos dimension is named <<varname>>-chars.
+
+In all cases the new array's dimensions are named and are part of the data
+source's dimensions accessible through the netCDF CL API.
+
+NetCDF places a soft limit on the number of dimensions at 100. Because there
+are potentially many more than the 100 dimensions in a translated file, this
+limit has been increased to 1024. Several other constants defined by the
+netCDF library have been changed, here's a list along with their new values:
+
+    NC_MAX_DIMS     1024     /* max dimensions per file */
+    NC_MAX_ATTRS    4096     /* max global or per variable attributes */
+    NC_MAX_VARS     4096     /* max variables per file */
+    NC_MAX_NAME     1024      /* max length of a name */
+
+These are defined in the netcdf.h header that comes with the netCDF CL.
+Because of this change, you should probably recompile you program using the
+new header. In the past it was possible to relink a program that had already
+been compiled. That is still possible, but many OPeNDAP data sources,
+especially those serving data stored in HDF-EOS files, will exceed the
+default limits of the original netCDF library (whose values are compiled into
+your program). Your program will probably exhibit strange behavior when
+looking at those data sources unless you recompile with our netCDF CL header.
 
 Files and their function
 
-Narrative
+Basic operation of the netCDF CL
+
+The library works by replacing the functionality of the netCDF API's read
+functions with versions that are capable of reading from DAP-compatible
+servers. The ncopen() function call has been replaced with a version which
+creates an instance of NCConnect; NCConnect holds information about the
+remote data source that enables the remaining functions to return information
+using minimal interactions with the remote server.
+
+See the figure/file netCDF_CL_containers
+
+The class NCConnect subclasses the libdap++ class Connect. The new behavior
+introduced by NCConnect reads a constrained DDS from the target data source
+and then passes that DDS through a translation process. The netCDF maintains
+a container Connections which holds an array of MAX_CONNECTIONS (see
+Connections.h). Each NCConnect instance is added to the Connections array and
+is indexed using the cdfid (the cdfid is returned to the netCDF application
+by ncopen)).
+
+NCConnect does some other things in addition to reading the constrained DDS
+and generating the translated DDS. Look at NCConnect::init_remote_source().
+
+Note that all data sources are translated. If there's no change in the
+representation of the data source, the translated DDS is a copy of the
+constrained DDS. A decent optimization would be to eliminate the translation
+step in cases where it's not needed.
+
+The class ClientParams is used to parse the 'URL parameters' passed to teh CL
+as a prefix to the URL.
+
+The nc_util.cc file contains utility functions. The most important of these
+are DODvario() and GenRead(). DODvario() reads the values for a single
+variable. It uses capabilities added to the type classes (NCByte, ...,
+NCGrid). GenRead calls DODvario and then performs some data rearragement to
+optimize accesses (i.e., I don't really follow what GenRead does, but it
+works and, the important point, DODvario is the only place where data values
+are read from a remote server).
+
+How DODvario() works
+
+First DODvario() uses NCConnect::get_variable(varid) to get the variable
+(referenced using a BaseType*) from the translated DDS. If the variable was
+translated (determined using the NCAccess::get_source() method) the server
+version and projection part of the CE are stored in the variable (using two
+of the methods in NCAccess). Note: the NC type classes inherit from both
+NCAccess and the libdap++ type classes, See figure/file netCDF_CL.ps.
+Once the server version and projection CE are stored in the source variable,
+the NCAccess::build_constraint() method is used to build an appropriate
+constraint.
+
+If the variable was not the product of translation (i.e.,
+NCAccess::get_source() returned null indicating there's no 'source variable'
+for the current variable), the same methods are called, but using the
+variable (BaseType*) straing from the translated DDS.  
+
+How this works: If a variable appears to be a array in the translated DDS, it
+might really be an array (because it was just copied from the constrained DDS
+because no translation was required), a string, a structure of arrays or a
+sequence. Each of thype can specialize NCAccess::build_constraint() so that
+the projection CE information is used to build a correct CE to send to the
+server. Look at NCArray::build_constraint() and
+NCSequence::build_constraint() to see how this works. Also not that the
+server version has to be passed because of a bug in Sequence range requests
+in the 3.4 and earlier servers.
+
+DODvario() then builds the complete CE by concatenating the selction part of
+the CE with the projection CE returned from build_constraint(). This is then
+used to request data.
+
+When the data values come back they are stored in a new DDS (a DataDDS
+really) and this DDS is not translated. Instead the name of the variable
+(which will include dots if it was translated) is used to find the BaseType*
+which references the variable holding the returned values. Once found the
+NCAccess::extract_values() method is used to mve the values from the
+BaseType* into the void *values formal parameter (a formal parameter of
+DODvario). Each of the type classes can specialize extract_values().
+
 
