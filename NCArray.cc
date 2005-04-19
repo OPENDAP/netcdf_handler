@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.24 2005/04/11 18:38:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.25 2005/04/19 23:16:18 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,19 +26,25 @@ static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.24 2005/04/11 18:38:20 jimg 
 #include <sstream>
 #include <algorithm>
 
+#include <netcdf.h>
+
 // #define DODS_DEBUG 1
 
 #include "Error.h"
 #include "InternalErr.h"
 
+#include "NCArray.h"
+
+#if 0
 #include "Dnetcdf.h"
 #include "Dncx.h"
-#include "NCArray.h"
 #include "NCSequence.h"
 #include "nc_util.h"
+#endif
+
 #include "debug.h"
 
-const string spr = "."; // structure rename
+// const string spr = "."; // structure rename
 
 BaseType *
 NCArray::ptr_duplicate()
@@ -59,20 +65,28 @@ NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
 
 NCArray::NCArray(const NCArray &rhs) : Array(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCArray::~NCArray()
 {
     DBG(cerr << "delete d_source " << d_source << endl);
+#if 0
     delete d_source; d_source = 0;
+#endif
 }
 
+#if 0
 void
 NCArray::m_duplicate(const NCArray &nca)
 {
+#if 0
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(nca));
+#endif
 }
+#endif
 
 NCArray &
 NCArray::operator=(const NCArray &rhs)
@@ -82,7 +96,9 @@ NCArray::operator=(const NCArray &rhs)
 
     dynamic_cast<Array &>(*this) = rhs;
 
+#if 0
     m_duplicate(rhs);
+#endif
 
     return *this;
 }
@@ -120,6 +136,7 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
 }
 
 
+#if 0
 void
 NCArray::store_projection(const string &proj)
 {
@@ -365,6 +382,7 @@ NCArray::extract_values(void *values, int elements, int outtype) throw(Error)
             + " [NCArray::extract_values()]");
     } // End of the switch
 }
+#endif
 
 bool
 NCArray::read(const string &dataset)
@@ -382,7 +400,7 @@ NCArray::read(const string &dataset)
     double *dblbuf;
     float *fltbuf;
     short *shtbuf;
-    nclong *lngbuf;
+    long int *lngbuf;
     char *chrbuf;
     // type conversion pointers
     dods_int16 *intg16;
@@ -400,23 +418,22 @@ NCArray::read(const string &dataset)
 
     DBG(cerr << "In NCArray, opening the dataset, reading " << name() << endl);
 
-    int ncid, errstat;
-
-    errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    int ncid;
+    int errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR)
-      throw Error(errstat, "Could not open the dataset's file.");
+	throw Error(errstat, "Could not open the dataset's file.");
  
-    errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
-      throw Error(errstat, "Could not get variable ID.");
+	throw Error(errstat, "Could not get variable ID.");
 
-    errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdims,
-			(int *)0);
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdims,
+			 (int *)0);
     if (errstat != NC_NOERR)
-    throw Error(errstat, 
-		string("Could not read information about the variable `") 
-		+ name() + string("'."));
+	throw Error(errstat, 
+		    string("Could not read information about the variable `") 
+		    + name() + string("'."));
 
     nels = format_constraint(cor, step, edg, &has_stride);
 
@@ -427,11 +444,11 @@ NCArray::read(const string &dataset)
         for (id = 0; id < num_dim; id++) {
             cor[id] = 0;
 
-            errstat = lnc_inq_dim(ncid, vdims[id], (char *)0, &vdim_siz);
+            errstat = nc_inq_dim(ncid, vdims[id], (char *)0, &vdim_siz);
 	    if (errstat != NC_NOERR)
-	      throw Error(errstat, 
-			  string("Could not inquire dimension information for variable `") 
-			  + name() + string("'."));
+		throw Error(errstat, 
+			    string("Could not inquire dimension information for variable `") 
+			    + name() + string("'."));
 
             edg[id] = vdim_siz;
             nels *= vdim_siz;      /* total number of values for variable */
@@ -440,110 +457,120 @@ NCArray::read(const string &dataset)
 
     // Correct data types to match with the local machine data types
 
-    if ((datatype == NC_FLOAT) 
-	&& (nctypelen(datatype) != sizeof(dods_float32))) {
-
+    if (datatype == NC_FLOAT) {
         fltbuf = (float *) new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
-	  errstat = lnc_get_vars_float(ncid, varid, cor, edg, step, fltbuf);
+	    errstat = nc_get_vars_float(ncid, varid, cor, edg, step, fltbuf);
 	else
-	  errstat = lnc_get_vara_float(ncid, varid, cor, edg, fltbuf);
+	    errstat = nc_get_vara_float(ncid, varid, cor, edg, fltbuf);
 
 	if (errstat != NC_NOERR)
-	  throw Error(errstat, 
-		      string("Could not read the variable `") + name() 
-		      + string("'."));
+	    throw Error(errstat, 
+			string("Could not read the variable `") + name() 
+			+ string("'."));
+
+	if (nctypelen(datatype) != sizeof(dods_float32)) {
 
 	flt32 = new dods_float32 [nels]; 
 
         for (id = 0; id < nels; id++) 
             *(flt32+id) = (dods_float32) *(fltbuf+id);
 
-	set_read_p(true);  
         val2buf((void *)flt32);
-
-	// clean up
         delete [] flt32;
+	}
+	else {
+        val2buf((void *)fltbuf);
+	}
+
+	set_read_p(true);  
         delete [] fltbuf;
     }
-    else if ((datatype == NC_DOUBLE) 
-	&& (nctypelen(datatype) != sizeof(dods_float64))) {
+    else if (datatype == NC_DOUBLE) {
 
         dblbuf = (double *) new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
-	    errstat = lnc_get_vars_double(ncid, varid, cor, edg, step, dblbuf);
+	    errstat = nc_get_vars_double(ncid, varid, cor, edg, step, dblbuf);
 	else
-	    errstat = lnc_get_vara_double(ncid, varid, cor, edg, dblbuf);
+	    errstat = nc_get_vara_double(ncid, varid, cor, edg, dblbuf);
 
 	if (errstat != NC_NOERR)
-	  throw Error(errstat,string("Could not read the variable `") + name() 
-		      + string("'."));
+	    throw Error(errstat,string("Could not read the variable `") + name() 
+			+ string("'."));
 
+	if (nctypelen(datatype) != sizeof(dods_float64)) {
 	flt64 = new dods_float64 [nels]; 
 
         for (id = 0; id < nels; id++) 
             *(flt64+id) = (dods_float64) *(dblbuf+id);
 
-	set_read_p(true);  
         val2buf((void *)flt64);
-
-	// clean up
         delete [] flt64;
+	}
+	else {
+        val2buf((void *)dblbuf);
+	}
+
+	set_read_p(true);  
         delete [] dblbuf;
     }
-    else if ((datatype == NC_SHORT) 
-	&& (nctypelen(datatype) != sizeof(dods_int16))) {
+    else if (datatype == NC_SHORT) {
 
         shtbuf = (short *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
-	    errstat = lnc_get_vars_short(ncid, varid, cor, edg, step, shtbuf);
+	    errstat = nc_get_vars_short(ncid, varid, cor, edg, step, shtbuf);
 	else 
-	    errstat = lnc_get_vara_short(ncid, varid, cor, edg, shtbuf);
+	    errstat = nc_get_vara_short(ncid, varid, cor, edg, shtbuf);
 	
 	if (errstat != NC_NOERR)
-	  throw Error(errstat, 
-		      string("Could not read the variable `") + name() 
-		      + string("'."));
+	    throw Error(errstat, 
+			string("Could not read the variable `") + name() 
+			+ string("'."));
 
+	if (nctypelen(datatype) != sizeof(dods_int16)) {
 	intg16 = new dods_int16 [nels];
 
         for (id = 0; id < nels; id++) 
             *(intg16+id) = (dods_int16) *(shtbuf+id);
 
-	set_read_p(true);  
         val2buf((void *)intg16);
-
-	// clean up
         delete [] intg16;
+	}
+	else {
+        val2buf((void *)shtbuf);
+	}
+	set_read_p(true);  
         delete [] shtbuf;
     }
-    else if ((datatype == NC_LONG) 
-	&& (nctypelen(datatype) != sizeof(dods_int32))) {
-
-      lngbuf = (nclong *)new char [(nels*nctypelen(datatype))];
+    else if (datatype == NC_LONG) {
+	lngbuf = (long int *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
-	    errstat = lnc_get_vars(ncid, varid, cor, edg, step, lngbuf);
+	    errstat = nc_get_vars_long(ncid, varid, cor, edg, step, lngbuf);
 	else
-	    errstat = lnc_get_vara(ncid, varid, cor, edg, lngbuf);
+	    errstat = nc_get_vara_long(ncid, varid, cor, edg, lngbuf);
 
 	if (errstat != NC_NOERR)
-	  throw Error(errstat,string("Could not read the variable `") + name() 
-		      + string("'."));
+	    throw Error(errstat, string("Could not read the variable `")
+			+ name() + string("'."));
 
-	intg32 = new dods_int32 [nels];
+	if (nctypelen(datatype) != sizeof(dods_int32)) {
+	    intg32 = new dods_int32 [nels];
 
-        for (id = 0; id < nels; id++) 
-            *(intg32+id) = (dods_int32) *(lngbuf+id);
+	    for (id = 0; id < nels; id++) 
+		*(intg32+id) = (dods_int32) *(lngbuf+id);
+
+	    val2buf((void *) intg32);
+	    delete [] intg32;
+	}
+	else {
+	    val2buf((void*)lngbuf);
+	}
 
 	set_read_p(true);  
-        val2buf((void *) intg32);
-
-	// clean up
-        delete [] intg32;
         delete [] lngbuf;
     }
     else if (datatype == NC_CHAR) {
@@ -552,13 +579,13 @@ NCArray::read(const string &dataset)
 
 	// read the vlaues in from the local netCDF file
 	if( has_stride)
-	    errstat = lnc_get_vars_text(ncid, varid, cor, edg, step,chrbuf);
+	    errstat = nc_get_vars_text(ncid, varid, cor, edg, step,chrbuf);
 	else
-	    errstat = lnc_get_vara_text(ncid, varid, cor, edg, chrbuf);
+	    errstat = nc_get_vara_text(ncid, varid, cor, edg, chrbuf);
 
 	if (errstat != NC_NOERR)
-	  throw Error(errstat,string("Could not read the variable `") + name() 
-		      + string("'."));
+	    throw Error(errstat,string("Could not read the variable `") + name() 
+			+ string("'."));
 
 	string *strg = new string [nels]; // array of strings
 	char buf[2] = " "; // one char and EOS
@@ -578,31 +605,34 @@ NCArray::read(const string &dataset)
 	delete [] strg;
 	delete [] chrbuf;
     }
+#if 0
     else {
-      //default (no type conversion needed and the type Byte)
-      char *convbuf = new char [(nels*nctypelen(datatype))];
+	//default (no type conversion needed and the type Byte)
+	char *convbuf = new char [(nels*nctypelen(datatype))];
 
-      if( has_stride)
-	errstat = lnc_get_vars(ncid, varid, cor, edg, step, (void *)convbuf);
-      else
-	errstat = lnc_get_vara(ncid, varid, cor, edg, (void *)convbuf);
+	if( has_stride)
+	    errstat = nc_get_vars(ncid, varid, cor, edg, step, (void *)convbuf);
+	else
+	    errstat = nc_get_vara(ncid, varid, cor, edg, (void *)convbuf);
  
-      if (errstat != NC_NOERR)
-	  throw Error(errstat,string("Could not read the variable `") + name() 
-		      + string("'."));
+	if (errstat != NC_NOERR)
+	    throw Error(errstat,string("Could not read the variable `") + name() 
+			+ string("'."));
 
-      set_read_p(true);  
-      val2buf((void *)convbuf);
+	set_read_p(true);  
+	val2buf((void *)convbuf);
 
-      delete [] convbuf;
+	delete [] convbuf;
     }
+#endif
 
-    if (lnc_close(ncid) != NC_NOERR)
-      throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+    if (nc_close(ncid) != NC_NOERR)
+	throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
     return false;
 }
 
+#if 0
 nc_type
 NCArray::get_nc_type() throw(InternalErr)
 {
@@ -667,9 +697,13 @@ NCArray::find_child_sequence()
     else
         return 0;
 }
+#endif
 
 
 // $Log: NCArray.cc,v $
+// Revision 1.25  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.24  2005/04/11 18:38:20  jimg
 // Fixed a problem with NCSequence where nested sequences were not flagged
 // but instead were translated. The extract_values software cannot process a

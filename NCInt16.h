@@ -16,18 +16,16 @@
 #ifndef _ncint16_h
 #define _ncint16_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include "Int16.h"
+#if 0
 #include "NCAccess.h"
+#endif
 
-class NCInt16: public Int16, public NCAccess {
+class NCInt16: public Int16 {
+#if 0
 protected:
     void m_duplicate(const NCInt16 &bt);
+#endif
         
 public:
     NCInt16(const string &n = "");
@@ -37,13 +35,18 @@ public:
     NCInt16 &operator=(const NCInt16 &rhs);
     virtual BaseType *ptr_duplicate();
 
+#if 0
     virtual nc_type get_nc_type() throw(InternalErr);
+#endif
 
     virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCInt16.h,v $
+ * Revision 1.12  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.11  2005/04/08 17:08:47  jimg
  * Removed old 'virtual ctor' functions which have now been replaced by the
  * factory class code in libdap++.

@@ -16,18 +16,16 @@
 #ifndef _ncgrid_h
 #define _ncgrid_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include "Grid.h"
+#if 0
 #include "NCAccess.h"
+#endif
 
-class NCGrid: public Grid, public NCAccess {
+class NCGrid: public Grid {
+#if 0
 protected:
     void m_duplicate(const NCGrid &bt);
+#endif
 
 public:
     NCGrid(const string &n = "");
@@ -39,6 +37,7 @@ public:
 
     virtual bool read(const string &dataset);
 
+#if 0
     virtual string build_constraint(int outtype, const size_t *start,
         const size_t *edges, const ptrdiff_t *stride) throw(Error);
 
@@ -47,10 +46,14 @@ public:
     
     virtual void extract_values(void *values, int elements, int outtype)
         throw(Error);
+#endif
 };
 
 /* 
  * $Log: NCGrid.h,v $
+ * Revision 1.9  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.8  2005/02/26 00:43:20  jimg
  * Check point: This version of the CL can now translate strings from the
  * server into char arrays. This is controlled by two things: First a

@@ -16,18 +16,16 @@
 #ifndef _ncstr_h
 #define _ncstr_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include "Str.h"
+#if 0
 #include "NCAccess.h"
+#endif
 
-class NCStr: public Str, public NCAccess {
+class NCStr: public Str {
+#if 0
 protected:
     void m_duplicate(const NCStr &bt);
+#endif
      
 public:
     NCStr(const string &n = "");
@@ -37,15 +35,20 @@ public:
     NCStr &operator=(const NCStr &rhs);
 
     virtual BaseType *ptr_duplicate();
+#if 0
     virtual nc_type get_nc_type() throw(InternalErr);
     virtual void extract_values(void *values, int elements, int outtype)
         throw(Error);
+#endif
     
     virtual bool read(const string &dataset);
 };
 
 /* 
  * $Log: NCStr.h,v $
+ * Revision 1.12  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.11  2005/04/08 17:08:47  jimg
  * Removed old 'virtual ctor' functions which have now been replaced by the
  * factory class code in libdap++.

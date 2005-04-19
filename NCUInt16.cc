@@ -7,25 +7,25 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.13 2005/04/08 17:08:47 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCUInt16.cc,v 1.14 2005/04/19 23:16:18 jimg Exp $"};
 
-#ifdef __GNUG__
-//#pragma implementation
-#endif
-
+#include <netcdf.h>
 #include "InternalErr.h"
 
+#if 0
 #include "Dnetcdf.h"
 #include "nc_util.h"
 #include "NCSequence.h"
+#endif
 #include "NCUInt16.h"
 
+#if 0
 void 
 NCUInt16::m_duplicate(const NCUInt16 &bt)
 {
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
 }
-
+#endif
 
 NCUInt16::NCUInt16(const string &n) : UInt16(n)
 {
@@ -33,7 +33,9 @@ NCUInt16::NCUInt16(const string &n) : UInt16(n)
 
 NCUInt16::NCUInt16(const NCUInt16 &rhs) : UInt16(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCUInt16::~NCUInt16()
@@ -48,7 +50,9 @@ NCUInt16::operator=(const NCUInt16 &rhs)
 
     dynamic_cast<NCUInt16&>(*this) = rhs;
 
+#if 0
     m_duplicate(rhs);
+#endif
 
     return *this;
 }
@@ -60,11 +64,13 @@ NCUInt16::ptr_duplicate(){
     return new NCUInt16(*this);
 }
 
+#if 0
 nc_type
 NCUInt16::get_nc_type() throw(InternalErr)
 {
     return NC_SHORT;
 }
+#endif
 
 bool
 NCUInt16::read(const string &dataset)
@@ -81,15 +87,15 @@ NCUInt16::read(const string &dataset)
 
   int ncid, errstat;
 
-  errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+  errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
   if (errstat != NC_NOERR)
     throw Error(errstat, "Could not open the dataset's file.");
  
-  errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+  errstat = nc_inq_varid(ncid, name().c_str(), &varid);
   if (errstat != NC_NOERR)
     throw Error(errstat, "Could not get variable ID.");
 
-  errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+  errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
 			(int *)0);
   if (errstat != NC_NOERR)
     throw Error(errstat, 
@@ -103,7 +109,7 @@ NCUInt16::read(const string &dataset)
     {
       short sht;
 
-      errstat = lnc_get_var1_short(ncid, varid, cor, &sht);
+      errstat = nc_get_var1_short(ncid, varid, cor, &sht);
       if(errstat != NC_NOERR)
 	throw Error(errstat, string("Could not read the variable `") + name() 
 		    + string("'."));
@@ -113,7 +119,7 @@ NCUInt16::read(const string &dataset)
       uintg16 = (dods_uint16) sht;
       val2buf( &uintg16 );
 
-      if (lnc_close(ncid) != NC_NOERR)
+      if (nc_close(ncid) != NC_NOERR)
 	throw InternalErr(__FILE__, __LINE__, 
 			  "Could not close the dataset!");
     }
@@ -125,6 +131,9 @@ NCUInt16::read(const string &dataset)
 }
 
 // $Log: NCUInt16.cc,v $
+// Revision 1.14  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.13  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

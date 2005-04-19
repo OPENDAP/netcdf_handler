@@ -13,18 +13,18 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCByte.cc,v 1.12 2005/03/31 00:04:51 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCByte.cc,v 1.13 2005/04/19 23:16:18 jimg Exp $"};
 
-#ifdef __GNUG__
-//#pragma implementation
-#endif
+#include <netcdf.h>
 
 #include "InternalErr.h"
 
 #include "NCByte.h"
+#if 0
 #include "NCSequence.h"
 #include "Dnetcdf.h"
 #include "nc_util.h"
+#endif
 
 // This `helper function' creates a pointer to the a NCByte and returns
 // that pointer. It takes the same arguments as the class's ctor. If any of
@@ -49,11 +49,13 @@ NewByte(const string &n)
 }
 #endif
 
+#if 0
 void 
 NCByte::m_duplicate(const NCByte &bt)
 {
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
 }
+#endif
 
 NCByte::NCByte(const string &n) : Byte(n)
 {
@@ -61,7 +63,9 @@ NCByte::NCByte(const string &n) : Byte(n)
 
 NCByte::NCByte(const NCByte &rhs) : Byte(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCByte::~NCByte()
@@ -76,7 +80,9 @@ NCByte::operator=(const NCByte &rhs)
 
     dynamic_cast<NCByte&>(*this) = rhs;
 
+#if 0
     m_duplicate(rhs);
+#endif
 
     return *this;
 }
@@ -87,11 +93,13 @@ NCByte::ptr_duplicate()
     return new NCByte(*this);
 }
 
+#if 0
 nc_type
 NCByte::get_nc_type() throw(InternalErr)
 {
     return NC_BYTE;
 }
+#endif
 
 bool
 NCByte::read(const string &dataset)
@@ -107,16 +115,16 @@ NCByte::read(const string &dataset)
 
     int ncid, errstat;
 
-    errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR)
       throw Error(errstat, "Could not open the dataset's file.");
 
-    errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
       throw Error(errstat, "Could not get variable ID.");
 
-    errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
 			(int *)0);
     if (errstat != NC_NOERR)
       throw Error(errstat,string("Could not read information about the variable `") 
@@ -128,7 +136,7 @@ NCByte::read(const string &dataset)
     if (datatype == NC_BYTE) {
 
       dods_byte Dbyte;
-      errstat = lnc_get_var1(ncid, varid, cor, &Dbyte);
+      errstat = nc_get_var1_uchar(ncid, varid, cor, &Dbyte);
       if (errstat != NC_NOERR)
 	throw Error(errstat, string("Could not read the variable `") + name() 
 		    + string("'."));
@@ -137,7 +145,7 @@ NCByte::read(const string &dataset)
           
 	val2buf( &Dbyte );
 
-	if (lnc_close(ncid) != NC_NOERR)
+	if (nc_close(ncid) != NC_NOERR)
 	  throw InternalErr(__FILE__, __LINE__, 
 			    "Could not close the dataset!");
     }
@@ -149,6 +157,9 @@ NCByte::read(const string &dataset)
 }
 
 // $Log: NCByte.cc,v $
+// Revision 1.13  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.12  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

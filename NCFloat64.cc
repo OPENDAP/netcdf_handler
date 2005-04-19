@@ -13,24 +13,25 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.13 2005/04/08 17:08:47 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCFloat64.cc,v 1.14 2005/04/19 23:16:18 jimg Exp $"};
 
-#ifdef __GNUG__
-//#pragma implementation
-#endif
-
+#include <netcdf.h>
 #include "InternalErr.h"
 
-#include "NCSequence.h"
 #include "NCFloat64.h"
+#if 0
+#include "NCSequence.h"
 #include "nc_util.h"
 #include "Dnetcdf.h"
+#endif
 
+#if 0
 void 
 NCFloat64::m_duplicate(const NCFloat64 &bt)
 {
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
 }
+#endif
 
 NCFloat64::NCFloat64(const string &n) : Float64(n)
 {
@@ -38,7 +39,9 @@ NCFloat64::NCFloat64(const string &n) : Float64(n)
 
 NCFloat64::NCFloat64(const NCFloat64 &rhs) : Float64(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCFloat64::~NCFloat64()
@@ -53,7 +56,9 @@ NCFloat64::operator=(const NCFloat64 &rhs)
 
     dynamic_cast<NCFloat64&>(*this) = rhs;
 
+#if 0
     m_duplicate(rhs);
+#endif
 
     return *this;
 }
@@ -64,11 +69,13 @@ NCFloat64::ptr_duplicate()
     return new NCFloat64(*this); // Copy ctor calls duplicate to do the work
 }
  
+#if 0
 nc_type
 NCFloat64::get_nc_type() throw(InternalErr)
 {
     return NC_DOUBLE;
 }
+#endif
 
 bool
 NCFloat64::read(const string &dataset)
@@ -85,16 +92,16 @@ NCFloat64::read(const string &dataset)
         return false;
 
     int ncid, errstat;
-    errstat = lnc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR)
       throw Error(errstat, "Could not open the dataset's file.");
 
-    errstat = lnc_inq_varid(ncid, name().c_str(), &varid);
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
       throw Error(errstat, "Could not get variable ID.");
 
-    errstat = lnc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
 			  (int *)0);
     if (errstat != NC_NOERR)
       throw Error(errstat, 
@@ -107,7 +114,7 @@ NCFloat64::read(const string &dataset)
     if (datatype == NC_DOUBLE){
 	double dbl;
 
-	errstat = lnc_get_var1_double(ncid, varid, cor, &dbl);
+	errstat = nc_get_var1_double(ncid, varid, cor, &dbl);
 	if (errstat != NC_NOERR)
 	  throw Error(errstat, 
 		      string("Could not read the variable `") + name() 
@@ -118,7 +125,7 @@ NCFloat64::read(const string &dataset)
 	flt64 = (dods_float64) dbl;
 	val2buf((void *) &flt64 );
 
-	if (lnc_close(ncid) != NC_NOERR)
+	if (nc_close(ncid) != NC_NOERR)
 	  throw InternalErr(__FILE__, __LINE__, 
 			    "Could not close the dataset!");
     }
@@ -130,6 +137,9 @@ NCFloat64::read(const string &dataset)
 }
 
 // $Log: NCFloat64.cc,v $
+// Revision 1.14  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.13  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

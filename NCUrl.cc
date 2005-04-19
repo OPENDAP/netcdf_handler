@@ -13,21 +13,18 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.10 2005/04/08 17:08:47 jimg Exp $"};
-
-#ifdef __GNUG__
-//#pragma implementation
-#endif
+static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.11 2005/04/19 23:16:18 jimg Exp $"};
 
 #include "InternalErr.h"
 #include "NCUrl.h"
 
+#if 0
 void 
 NCUrl::m_duplicate(const NCUrl &bt)
 {
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
 }
-
+#endif
 
 NCUrl::NCUrl(const string &n) : Url(n)
 {
@@ -35,7 +32,9 @@ NCUrl::NCUrl(const string &n) : Url(n)
 
 NCUrl::NCUrl(const NCUrl &rhs) : Url(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCUrl::~NCUrl()
@@ -50,7 +49,9 @@ NCUrl::operator=(const NCUrl &rhs)
 
     dynamic_cast<NCUrl&>(*this) = rhs;
 
+#if 0
     m_duplicate(rhs);
+#endif
 
     return *this;
 }
@@ -62,6 +63,7 @@ NCUrl::ptr_duplicate()
     return new NCUrl(*this);
 }
 
+#if 0
 void
 NCUrl::extract_values(void *values, int outtype) throw(Error)
 {
@@ -86,8 +88,12 @@ NCUrl::get_nc_type() throw(InternalErr)
 {
     return NC_CHAR;
 }
+#endif
 
 // $Log: NCUrl.cc,v $
+// Revision 1.11  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.10  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

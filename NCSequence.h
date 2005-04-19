@@ -19,11 +19,14 @@
 #include <list>
 
 #include "Sequence.h"
+#if 0
 #include "NCAccess.h"
 #include "nc_util.h"
+#endif
 
-class NCSequence: public Sequence, public NCAccess {
+class NCSequence: public Sequence {
 private:
+#if 0
     int d_size;           //< The 'dimension size' Used for/by translation
     int d_start, d_stop, d_stride; //< Array CE info from the URL.
 
@@ -31,6 +34,7 @@ private:
     
 protected:
     void m_duplicate(const NCSequence &bt);
+#endif
         
 public:
     NCSequence(const string &n = "");
@@ -40,6 +44,7 @@ public:
     NCSequence &operator=(const NCSequence &rhs);
     virtual BaseType *ptr_duplicate();
         
+#if 0
     virtual void store_projection(const string &proj);
     virtual string build_constraint(int outtype, const size_t *start,
         const size_t *edges, const ptrdiff_t *stride) throw(Error);
@@ -52,10 +57,14 @@ public:
 
     /// Does this variable contain a Sequence?
     virtual BaseType *find_child_sequence();    
+#endif
 };
 
 /* 
  * $Log: NCSequence.h,v $
+ * Revision 1.14  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.13  2005/04/11 18:38:20  jimg
  * Fixed a problem with NCSequence where nested sequences were not flagged
  * but instead were translated. The extract_values software cannot process a

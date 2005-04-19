@@ -17,7 +17,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdds.cc,v 1.7 2005/03/31 00:04:51 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdds.cc,v 1.8 2005/04/19 23:16:18 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +28,10 @@ static char not_used rcsid[]={"$Id: ncdds.cc,v 1.7 2005/03/31 00:04:51 jimg Exp 
 #include <iostream>
 #include <string>
 
+#include <netcdf.h>
+#if 0
 #include "Dnetcdf.h"
+#endif
 #include "DDS.h"
 #include "NCInt32.h"
 #include "NCUInt32.h"
@@ -41,6 +44,7 @@ static char not_used rcsid[]={"$Id: ncdds.cc,v 1.7 2005/03/31 00:04:51 jimg Exp 
 #include "NCGrid.h"
 #include "NCStr.h"
 #include "cgi_util.h"
+#include "util.h"
 
 // Used by ErrMsgT
 
@@ -108,7 +112,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
     //add all the variables in this file to DDS table 
 
     for (int v1 = 0; v1 < nvars; ++v1) {
-      errstat = lnc_inq_var(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0);
+      errstat = nc_inq_var(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0);
       if (errstat != NC_NOERR){
 	sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v1);
 	    ErrMsgT(Msgt); //local error messag
@@ -133,7 +137,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	    // match all the dimensions of this variable to other variables
 	    int d;
 	    for (d = 0; d < ndims; ++d){
-	      errstat = lnc_inq_dim(ncid, dim_ids[d], dimname, &dim_sz);
+	      errstat = nc_inq_dim(ncid, dim_ids[d], dimname, &dim_sz);
 	      if (errstat != NC_NOERR){
 		sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v1);
 		ErrMsgT(Msgt); //server error messag
@@ -144,7 +148,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	      (void) strcpy(dim_nms[d],dimname);
 	
 	      for (int v2 = 0; v2 < nvars; ++v2) { 
-		errstat = lnc_inq_var(ncid,v2,varname2[v2],&nctype,&ndims2,tmp_dim_ids,(int *)0);
+		errstat = nc_inq_var(ncid,v2,varname2[v2],&nctype,&ndims2,tmp_dim_ids,(int *)0);
 		    if (errstat != NC_NOERR) {
 			sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v2);
 			ErrMsgT(Msgt); 
@@ -159,7 +163,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 		    if ((v1 != v2) && (strcmp(dimname,varname2[v2]) == 0) && 
 			(ndims2 == 1)){
 
-		      errstat = lnc_inq_dim(ncid,tmp_dim_ids[0],(char *)0, &tmp_sz);
+		      errstat = nc_inq_dim(ncid,tmp_dim_ids[0],(char *)0, &tmp_sz);
 		      if (errstat != NC_NOERR){
 			sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v2);
 			ErrMsgT(Msgt);
@@ -182,7 +186,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 		// dimensions in the variable.
 		if (dim_match != d+1) {
 		    for (int d2 = d+1; d2 < ndims; ++d2){
-		      errstat = lnc_inq_dim(ncid, dim_ids[d2], dimname2, &dim_sz);
+		      errstat = nc_inq_dim(ncid, dim_ids[d2], dimname2, &dim_sz);
 		      if (errstat != NC_NOERR){
 			sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d (ncdds)",d2,v1);
 			    ErrMsgT(Msgt);
@@ -250,7 +254,7 @@ read_descriptors(DDS &dds_table, const string &filename) throw (Error)
   int ncid, errstat;
   int nvars; 
   
-    errstat = lnc_open(filename.c_str(), NC_NOWRITE, &ncid);
+    errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
     if (errstat != NC_NOERR) {
      //local error
       sprintf (Msgt,"netCDF server: Could not open file %s ", filename.c_str());
@@ -262,7 +266,7 @@ read_descriptors(DDS &dds_table, const string &filename) throw (Error)
   
     // how many variables? 
 
-    errstat = lnc_inq_nvars(ncid, &nvars);
+    errstat = nc_inq_nvars(ncid, &nvars);
     if (errstat != NC_NOERR) {
       ErrMsgT("Could not inquire about netcdf file (ncdds)");
       string msg = (string)"Could not inquire about netcdf file: " 
@@ -307,6 +311,9 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdds.cc,v $
+// Revision 1.8  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.7  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //

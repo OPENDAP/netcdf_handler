@@ -16,18 +16,16 @@
 #ifndef _ncbyte_h
 #define _ncbyte_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include "Byte.h"
+#if 0
 #include "NCAccess.h"
+#endif
 
-class NCByte: public Byte, public NCAccess {
+class NCByte: public Byte {
+#if 0
 protected:
     void m_duplicate(const NCByte &bt);
+#endif
    
 public:
     NCByte(const string &n = "");
@@ -39,12 +37,17 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
+#if 0
     
     virtual nc_type get_nc_type() throw(InternalErr);
+#endif
 };
 
 /* 
  * $Log: NCByte.h,v $
+ * Revision 1.12  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.11  2005/04/08 17:08:47  jimg
  * Removed old 'virtual ctor' functions which have now been replaced by the
  * factory class code in libdap++.

@@ -16,19 +16,16 @@
 #ifndef _ncarray_h
 #define _ncarray_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include <sstream>
 
 #include "Array.h"
+#if 0
 #include "NCAccess.h"
 #include "DimProjInfo.h"
+#endif
 
-class NCArray: public Array, public NCAccess {
+class NCArray: public Array {
+#if 0
     
     // Assume there's a one-to-one mapping between Array dimensions and 
     // elements in this vector. If there are fewer elements in this vector
@@ -38,6 +35,7 @@ class NCArray: public Array, public NCAccess {
     vector<dim_proj_info> cl_proj;
     
     void m_duplicate(const NCArray &nca);
+#endif
     
 public:
     NCArray(const string &n = "", BaseType *v = 0);
@@ -52,6 +50,7 @@ public:
     virtual long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, 
 			bool *has_stride);
 
+#if 0
     virtual string build_constraint(int outtype, const size_t *start,
             const size_t *edges, const ptrdiff_t *stride) throw(Error);
 
@@ -69,10 +68,14 @@ public:
 
     /// Does this variable contain a Sequence?
     virtual BaseType *find_child_sequence();
+#endif
 };
 
 /* 
  * $Log: NCArray.h,v $
+ * Revision 1.16  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.15  2005/04/11 18:38:20  jimg
  * Fixed a problem with NCSequence where nested sequences were not flagged
  * but instead were translated. The extract_values software cannot process a

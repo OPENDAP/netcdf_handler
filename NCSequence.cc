@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.16 2005/04/11 18:38:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.17 2005/04/19 23:16:18 jimg Exp $"};
 
 #include <sstream>
 #include <algorithm>
@@ -24,11 +24,14 @@ static char rcsid[] not_used ={"$Id: NCSequence.cc,v 1.16 2005/04/11 18:38:20 ji
 #include "debug.h"
 
 #include "NCSequence.h"
+#if 0
 #include "NCArray.h"
 #include "NCAccess.h"
 #include "ClientParams.h"
 #include "nc_util.h"
+#endif
 
+#if 0
 const string spr = ".";
 
 // protected
@@ -36,13 +39,16 @@ const string spr = ".";
 void
 NCSequence::m_duplicate(const NCSequence &rhs)
 {
+#if 0
     d_size = rhs.d_size;
     d_start = rhs.d_start;
     d_stop = rhs.d_stop;
     d_stride = rhs.d_stride;
+#endif
 
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));
 }
+#endif
 
 // public
 
@@ -52,14 +58,18 @@ NCSequence::ptr_duplicate()
     return new NCSequence(*this);
 }
 
-NCSequence::NCSequence(const string &n) : Sequence(n), 
+NCSequence::NCSequence(const string &n) : Sequence(n)// , 
+#if 0
         d_size(0), d_start(-1), d_stop(-1), d_stride(-1)
+#endif
 {
 }
 
 NCSequence::NCSequence(const NCSequence &rhs) : Sequence(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCSequence::~NCSequence()
@@ -74,11 +84,14 @@ NCSequence::operator=(const NCSequence &rhs)
 
     dynamic_cast<Sequence &>(*this) = rhs; // run Sequence assignment
         
+#if 0
     m_duplicate(rhs);
+#endif
     
     return *this;
 }
 
+#if 0
 /** Parse projection information passed to the CL using the command line.
     Unlike NCArray::strore_projection(), this method stores the start,
     stride and stop info in the Sequence object (NCArray has a special
@@ -376,7 +389,7 @@ NCSequence::var_value(size_t row, const string &name)
         // This part is specialized for NCSequence. If we've gotten a Sequence
         // that holds a Structure, for example, the nerCDF CL will not know
         // about that because the translation process will have flattened the
-        // Structure. So, this code looks inside Constructors that held
+        // Structure. So, this code looks inside Constructors that are held
         // by Sequences for the atomic variable it contains. Note that this
         // is presumes that the netCDF CL only asks for one variable at a 
         // time.
@@ -417,8 +430,12 @@ NCSequence::find_child_sequence()
     
     return 0;
 }
+#endif
 
 // $Log: NCSequence.cc,v $
+// Revision 1.17  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.16  2005/04/11 18:38:20  jimg
 // Fixed a problem with NCSequence where nested sequences were not flagged
 // but instead were translated. The extract_values software cannot process a

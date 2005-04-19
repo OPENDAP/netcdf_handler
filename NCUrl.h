@@ -16,18 +16,16 @@
 #ifndef _ncurl_h
 #define _ncurl_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include "Url.h"
+#if 0
 #include "NCAccess.h"
+#endif
 
-class NCUrl: public Url, public NCAccess {
+class NCUrl: public Url {
+#if 0
 protected:
     void m_duplicate(const NCUrl &bt);
+#endif
         
 public:
     NCUrl(const string &n = "");
@@ -37,12 +35,17 @@ public:
     NCUrl &operator=(const NCUrl &rhs);
     virtual BaseType *ptr_duplicate();
 
+#if 0
     virtual nc_type get_nc_type() throw(InternalErr);
     virtual void extract_values(void *values, int outtype) throw(Error);
+#endif
 };
 
 /* 
  * $Log: NCUrl.h,v $
+ * Revision 1.10  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.9  2005/04/08 17:08:47  jimg
  * Removed old 'virtual ctor' functions which have now been replaced by the
  * factory class code in libdap++.

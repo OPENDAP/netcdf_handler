@@ -11,33 +11,35 @@
 //
 // ReZa 1/12/95
 
-#ifdef __GNUG__
-//#pragma implementation
-#endif
-
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.15 2005/04/08 17:08:47 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.16 2005/04/19 23:16:18 jimg Exp $"};
 
 #include <sstream>
+
+#include <netcdf.h>
 
 #include "Error.h"
 #include "InternalErr.h"
 #include "util.h"
 
-#include "Dnetcdf.h"
 #include "NCGrid.h"
+#if 0
+#include "Dnetcdf.h"
 #include "NCArray.h"
 #include "nc_util.h"
+#endif
 #include "debug.h"
 
 // protected
 
+#if 0
 void 
 NCGrid::m_duplicate(const NCGrid &bt)
 {
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
 }
+#endif
 
 BaseType *
 NCGrid::ptr_duplicate()
@@ -53,7 +55,9 @@ NCGrid::NCGrid(const string &n) : Grid(n)
 
 NCGrid::NCGrid(const NCGrid &rhs) : Grid(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 
@@ -69,7 +73,9 @@ NCGrid::operator=(const NCGrid &rhs)
 
     dynamic_cast<NCGrid&>(*this) = rhs;
 
+#if 0
     m_duplicate(rhs);
+#endif
 
     return *this;
 }
@@ -99,6 +105,7 @@ NCGrid::read(const string &dataset)
     return false;
 }
 
+#if 0
 // This method could almost call the NCArray::build_constraint() method 
 // except that we need the name of the grid and not the name of the array 
 // in the CE. Check back here later to see if that's still the case... 
@@ -195,8 +202,12 @@ NCGrid::get_nc_type() throw(InternalErr)
 {
     return dynamic_cast<NCAccess*>(array_var())->get_nc_type();
 }
+#endif
 
 // $Log: NCGrid.cc,v $
+// Revision 1.16  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.15  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

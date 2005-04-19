@@ -21,16 +21,20 @@
 
 #include "Structure.h"
 
+#if 0
 #include "ClientParams.h"
 #include "NCAccess.h"
 #include "nc_util.h"
+#endif
 
-class NCStructure: public Structure, public NCAccess {
+class NCStructure: public Structure {
+#if 0
 private:
     VarList d_variables;
 
 protected:
     void m_duplicate(const NCStructure &bt);
+#endif
         
 public:
     NCStructure(const string &n = "");
@@ -40,14 +44,19 @@ public:
     NCStructure &operator=(const NCStructure &rhs);
     virtual BaseType *ptr_duplicate();
 
+#if 0
     virtual VarList flatten(const ClientParams &cp, const string &parent_name);
 
     /// Does this variable contain a Sequence?
     virtual BaseType *find_child_sequence();
+#endif
 };
 
 /* 
  * $Log: NCStructure.h,v $
+ * Revision 1.13  2005/04/19 23:16:18  jimg
+ * Removed client side parts; the client library is now in libnc-dap.
+ *
  * Revision 1.12  2005/04/11 18:38:20  jimg
  * Fixed a problem with NCSequence where nested sequences were not flagged
  * but instead were translated. The extract_values software cannot process a

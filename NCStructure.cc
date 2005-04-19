@@ -13,16 +13,20 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.12 2005/04/11 18:38:20 jimg Exp $"};
+static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.13 2005/04/19 23:16:18 jimg Exp $"};
 
 #include <algorithm>
 
+#include <netcdf.h>
 #include "InternalErr.h"
 
 #include "NCStructure.h"
+#if 0
 #include "NCArray.h"
 #include "nc_util.h"
+#endif
 
+#if 0
 const string spr = "."; // structure rename
 
 // protected
@@ -32,6 +36,7 @@ NCStructure::m_duplicate(const NCStructure &rhs)
 {
     dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));      
 }
+#endif
 
 BaseType *
 NCStructure::ptr_duplicate()
@@ -45,7 +50,9 @@ NCStructure::NCStructure(const string &n) : Structure(n)
 
 NCStructure::NCStructure(const NCStructure &rhs) : Structure(rhs)
 {
+#if 0
     m_duplicate(rhs);
+#endif
 }
 
 NCStructure::~NCStructure()
@@ -60,7 +67,9 @@ NCStructure::operator=(const NCStructure &rhs)
 
     dynamic_cast<Structure&>(*this) = rhs; // run Structure assignment
         
+#if 0
     m_duplicate(rhs);
+#endif
     
     return *this;
 }
@@ -84,6 +93,7 @@ public:
     }
 };
 
+#if 0
 VarList
 NCStructure::flatten(const ClientParams &cp, const string &parent_name)
 {
@@ -136,9 +146,13 @@ NCStructure::find_child_sequence()
     
     return 0;
 }
+#endif
 
 
 // $Log: NCStructure.cc,v $
+// Revision 1.13  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.12  2005/04/11 18:38:20  jimg
 // Fixed a problem with NCSequence where nested sequences were not flagged
 // but instead were translated. The extract_values software cannot process a

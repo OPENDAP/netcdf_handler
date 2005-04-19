@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.9 2004/03/08 19:08:33 jimg Exp $"};
+static char not_used rcsid[]={"$Id: ncdas.cc,v 1.10 2005/04/19 23:16:18 jimg Exp $"};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,8 +30,13 @@ static char not_used rcsid[]={"$Id: ncdas.cc,v 1.9 2004/03/08 19:08:33 jimg Exp 
 #include <iostream>
 #include <string>
 
+#include <netcdf.h>
+
 #include "cgi_util.h"
+#include "util.h"
+#if 0
 #include "Dnetcdf.h"
+#endif
 #include "DAS.h"
 
 // These are used as the return values for print_type().
@@ -172,6 +177,41 @@ print_type(nc_type datatype)
     }
 }
 
+// Code borrowed from the netcdf 2 interface compat code. Replace this with a
+// direct block of statements and look at maybe using stringstreams to
+// generate the print representations. 4/19/05 jhrg
+static int
+dap_get_att(int ncid, int varid, const char *name, void *value)
+{
+    int status;
+    nc_type attrp;
+
+    status = nc_inq_atttype(ncid, varid, name, &attrp);
+    if(status != NC_NOERR)
+	return status;
+
+    switch (attrp) {
+      case NC_BYTE:
+	return nc_get_att_schar(ncid, varid, name, (signed char *)value);
+      case NC_CHAR:
+	return nc_get_att_text(ncid, varid, name, (char *)value);
+      case NC_SHORT:
+	return nc_get_att_short(ncid, varid, name, (short *)value);
+      case NC_INT:
+#if (SIZEOF_INT >= X_SIZEOF_INT)
+	return nc_get_att_int(ncid, varid, name, (int *)value);
+#elif SIZEOF_LONG == X_SIZEOF_INT
+	return nc_get_att_long(ncid, varid, name, (long *)value);
+#endif
+      case NC_FLOAT:
+	return nc_get_att_float(ncid, varid, name, (float *)value);
+      case NC_DOUBLE:
+	return nc_get_att_double(ncid, varid, name, (double *)value);
+      default:
+	return NC_EBADTYPE;
+    }
+}
+
 // Given the netcdf file id, variable id, number of attributes for the
 // variable, and an attribute table pointer, read the attributes and store
 // their names and values in the attribute table.
@@ -191,14 +231,14 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
     char *value;
 
     for (int a = 0; a < natts; ++a) {
-        errstat = lnc_inq_attname(ncid, v, a, attrname);
+        errstat = nc_inq_attname(ncid, v, a, attrname);
         if (errstat != NC_NOERR) {
             sprintf (Msgt,"nc_das server: could not get the name for attribute %d",a);
 	    ErrMsgT(Msgt); //local error messag
 	    *error = (string)"\"" + (string)Msgt + (string)"\"";
 	    return errstat;
 	}
-	errstat = lnc_inq_att(ncid, v, attrname, &datatype, &len);
+	errstat = nc_inq_att(ncid, v, attrname, &datatype, &len);
 	if (errstat != NC_NOERR) {
       	    sprintf(Msgt,
 		    "nc_das server: could not gettype or length for attribute %s",
@@ -213,10 +253,10 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	if (!value) {
             ErrMsgT("nc_das server: Out of memory!");
 	    *(error) =  (string)"\"nc_das: Out of memory! \"";
-	    (void) lnc_close(ncid);
+	    (void) nc_close(ncid);
 	    return ENOMEM;
 	}
-	errstat = lnc_get_att(ncid, v, attrname, (void *)value);
+	errstat = dap_get_att(ncid, v, attrname, (void *)value);
 	if (errstat != NC_NOERR) {
             ErrMsgT("nc_das server: could not read attribute value");
 	    *(error) =  (string)"\"nc_das: Could not read attribute value \"";
@@ -261,7 +301,7 @@ read_variables(DAS &das, const string &filename) throw (Error)
     string *error = NULL ;
     AttrTable *attr_table_ptr = NULL ;
 
-    errstat = lnc_open(filename.c_str(), NC_NOWRITE, &ncid);
+    errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
 
     if (errstat != NC_NOERR) {
         sprintf (Msgt,"nc_das server: could not open file %s", filename.c_str());
@@ -271,7 +311,7 @@ read_variables(DAS &das, const string &filename) throw (Error)
     }
 
     // how many variables? how many global attributes? 
-    errstat = lnc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
+    errstat = nc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
 
     if (errstat != NC_NOERR) {
         ErrMsgT("nc_das: Could not inquires about netcdf file");
@@ -283,7 +323,7 @@ read_variables(DAS &das, const string &filename) throw (Error)
     // for each variable
     char varname[MAX_NC_NAME];
     for (int v = 0; v < nvars; ++v) {
-        errstat = lnc_inq_var(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, &natts);
+        errstat = nc_inq_var(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, &natts);
 	if (errstat != NC_NOERR) {
             sprintf (Msgt, "nc_das server: could not get information for variable %d",v);
             ErrMsgT(Msgt); //local error message 
@@ -345,6 +385,9 @@ main(int argc, char *argv[])
 #endif
 
 // $Log: ncdas.cc,v $
+// Revision 1.10  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.9  2004/03/08 19:08:33  jimg
 // This version of the code uses the Unidata netCDF 3.5.1 version of the
 // netCDF 2 API emulation. This functions call our netCDF 3 API functions

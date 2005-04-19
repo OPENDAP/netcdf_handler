@@ -16,18 +16,16 @@
 #ifndef _ncfloat32_h
 #define _ncfloat32_h 1
 
-#ifndef __POWERPC__
-#ifdef __GNUG__
-//#pragma interface
-#endif
-#endif
-
 #include "Float32.h"
+#if 0
 #include "NCAccess.h"
+#endif
 
-class NCFloat32: public Float32, public NCAccess {
+class NCFloat32: public Float32 {
+#if 0
 protected:
     void m_duplicate(const NCFloat32 &bt);
+#endif
 
 public:
     NCFloat32(const string &n = "");
@@ -37,12 +35,17 @@ public:
     NCFloat32 &operator=(const NCFloat32 &rhs);
     virtual BaseType *ptr_duplicate();
 
+#if 0
     virtual nc_type get_nc_type() throw(InternalErr);
+#endif
 
     virtual bool read(const string &dataset);
 };
 
 // $Log: NCFloat32.h,v $
+// Revision 1.12  2005/04/19 23:16:18  jimg
+// Removed client side parts; the client library is now in libnc-dap.
+//
 // Revision 1.11  2005/04/08 17:08:47  jimg
 // Removed old 'virtual ctor' functions which have now been replaced by the
 // factory class code in libdap++.

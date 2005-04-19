@@ -1,123 +1,172 @@
-/* config_nc.h.in.  Generated automatically from configure.in by autoheader.  */
-#ifndef _config_nc_h
-#define _config_nc_h
+/* config_nc.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to empty if the keyword does not work.  */
-#undef const
+#ifndef config_nc_h
+#define config_nc_h
 
-/* Define if you don't have vprintf but do have _doprnt.  */
+/* dbyte */
+#undef DBYTE
+
+/* dfloat32 */
+#undef DFLOAT32
+
+/* dfloat64 */
+#undef DFLOAT64
+
+/* dint16 */
+#undef DINT16
+
+/* int32 */
+#undef DINT32
+
+/* Set instrumentation to level 1 (see debug.h) */
+#undef DODS_DEBUG
+
+/* Set instrumentation to level 2 */
+#undef DODS_DEBUG2
+
+/* The relative path to the root of the DODS source tree */
+#undef DODS_RELATIVE
+
+/* The full path to the root of the DODS source tree */
+#undef DODS_ROOT
+
+/* The server version string */
+#undef DODS_SERVER_VERSION
+
+/* uint16 */
+#undef DUINT16
+
+/* uint32 */
+#undef DUINT32
+
+/* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
 
-/* Define if you have the vprintf function.  */
-#undef HAVE_VPRINTF
-
-/* Define to `long' if <sys/types.h> doesn't define.  */
-#undef off_t
-
-/* Define if you need to in order for stat and other things to work.  */
-#undef _POSIX_SOURCE
-
-/* Define to `unsigned' if <sys/types.h> doesn't define.  */
-#undef size_t
-
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
-
-/* If defined, enable memory leak detection through libdbnew.a. Make sure to */
-/* link with that library. */
-#undef TRACE_NEW
-
-/* If defined, the DBG() macro defined in debug.h is activated. This macro */
-/* is used for nominal program instrumentation */
-#undef DEBUG
-
-/* If defined, the DBG2() macro defined in debug.h is activated. This macro */
-/* is used for detailed program instrumentation. Anything that prints half a */
-/* page or more of stuff every time it is executed should be inside DBG2(), */
-/* not DBG(). */
-#undef DEBUG2
-
-/* Define if you have the strerror function.  */
-#undef HAVE_STRERROR
-
-/* Define if you have the strtol function.  */
-#undef HAVE_STRTOL
-
-/* Define if you have the <fcntl.h> header file.  */
+/* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
-/* Define if you have the <limits.h> header file.  */
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
-/* Define if you have the <unistd.h> header file.  */
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Used by the NetCDF library */
-#undef OLD_FILLVALUES
+/* Define to 1 if you have the `vprintf' function. */
+#undef HAVE_VPRINTF
 
-/* The number of bytes in a char.  */
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The size of a `char', as computed by sizeof. */
 #undef SIZEOF_CHAR
 
-/* The number of bytes in a double.  */
+/* The size of a `double', as computed by sizeof. */
 #undef SIZEOF_DOUBLE
 
-/* The number of bytes in a float.  */
+/* The size of a `float', as computed by sizeof. */
 #undef SIZEOF_FLOAT
 
-/* The number of bytes in a int.  */
+/* The size of a `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
-/* The number of bytes in a long.  */
+/* The size of a `long', as computed by sizeof. */
 #undef SIZEOF_LONG
 
-/* GNU gcc/g++ provides a way to mark variables, etc. as unused */
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
 
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
+/* xdr float32 */
+#undef XDR_FLOAT32
+
+/* xdr float64 */
+#undef XDR_FLOAT64
+
+/* xdr int16 */
+#undef XDR_INT16
+
+/* xdr int32 */
+#undef XDR_INT32
+
+/* xdr uint16 */
+#undef XDR_UINT16
+
+/* xdr uint32 */
+#undef XDR_UINT32
+
+/* Define to 1 if type `char' is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
+# undef __CHAR_UNSIGNED__
+#endif
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef off_t
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef ptrdiff_t
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef ssize_t
+
+/* Define to `unsigned char' if <sys/types.h> does not define. */
+#undef uchar
+
+/* Shorthand for gcc's 'unused attribute' feature */
 #if defined(__GNUG__) || defined(__GNUC__)
 #define not_used __attribute__ ((unused))
 #else
 #define not_used 
-#endif
+#endif /* __GNUG__ || __GNUC__ */
 
-#undef DODS_SERVER_VERSION
-
-/* 
- * $Log: config_nc.h.in,v $
- * Revision 1.4  2003/12/08 18:06:37  edavis
- * Merge release-3-4 into trunk
- *
- * Revision 1.3  2001/09/28 17:18:41  jimg
- * Merged with 3.2.5.
- * CVS  Committing in .
- *
- * Revision 1.2.4.1  2001/09/17 06:11:20  reza
- * Added version support.
- *
- * Revision 1.2  2000/10/06 01:22:03  jimg
- * Moved the CVS Log entries to the ends of files.
- * Modified the read() methods to match the new definition in the dap library.
- * Added exception handlers in various places to catch exceptions thrown
- * by the dap library.
- *
- * Revision 1.1  1999/07/28 00:22:46  jimg
- * Added
- *
- * Revision 1.5  1999/05/07 23:45:33  jimg
- * String --> string fixes
- *
- * Revision 1.4  1996/12/18 17:27:47  jimg
- * Removed OLD_FILLVALUES.
- *
- * Revision 1.3  1996/11/13 22:02:43  jimg
- * Fixed SIZEOF macros.
- *
- * Revision 1.2  1996/08/23 15:23:48  jimg
- * Added __unused__ macro. This can be used to mark identifiers as unused
- * without the long syntax required by gcc/g++.
- *
- * Revision 1.1  1995/10/30 20:30:43  jimg
- * Added.
- */
-
-#endif /* _config_nc_h */
-
-
+#endif /* config_nc_h */
