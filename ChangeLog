@@ -1,6 +1,8 @@
 2005-05-23  James Gallagher  <jimg@zoey.opendap.org>
 
-	* .cdtproject, .project, Makefile.am, Makefile.in, acinclude.m4, config.guess, config.sub, configure.ac, depcomp, install-sh, missing, mkinstalldirs:
+	* .cdtproject, .project, Makefile.am, Makefile.in, acinclude.m4,
+	config.guess, config.sub, configure.ac, depcomp, install-sh,
+	missing, mkinstalldirs: 
 	Added files missing from CVS and updated some of the build files. The
 	make dist and distcheck targets now work.
 
