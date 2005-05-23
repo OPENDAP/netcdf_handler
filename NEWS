@@ -1,4 +1,15 @@
 
+$Id: NEWS,v 1.3 2005/05/23 22:09:41 jimg Exp $
+
+Updated for version 3.5.0
+
+Removed the libnc-dods software. The OPeNDAP-netCDF client library is now
+in a separate CVS module named libnc-dap. 
+
+This software now uses automake and a modern autoconf. 
+
+---------------------------------------------------------------------------
+
 01/27/03 jhrg
 
 This code now builds with gcc 3.2 in addition to VC++ and gcc 2.95.3.

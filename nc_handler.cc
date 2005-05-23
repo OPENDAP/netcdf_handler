@@ -25,7 +25,7 @@
  
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.4 2005/03/31 00:04:51 jimg Exp $"};
+static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.5 2005/05/23 22:09:41 jimg Exp $"};
 
 #include <iostream>
 #include <string>
@@ -43,7 +43,7 @@ static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.4 2005/03/31 00:04:51 jimg
 extern void read_variables(DAS &das, const string &filename) throw (Error);
 extern void read_descriptors(DDS &dds, const string &filename)  throw (Error);
 
-const string cgi_version = DODS_SERVER_VERSION;
+const string cgi_version = PACKAGE_VERSION;
 
 int 
 main(int argc, char *argv[])
@@ -124,6 +124,9 @@ main(int argc, char *argv[])
 }
 
 // $Log: nc_handler.cc,v $
+// Revision 1.5  2005/05/23 22:09:41  jimg
+// Rearrangement for automake.
+//
 // Revision 1.4  2005/03/31 00:04:51  jimg
 // Modified to use the factory class in libdap++ 3.5.
 //
