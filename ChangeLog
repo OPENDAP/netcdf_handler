@@ -1,3 +1,16 @@
+2005-05-23  James Gallagher  <jimg@zoey.opendap.org>
+
+	* .cdtproject, .project, Makefile.am, Makefile.in, acinclude.m4, config.guess, config.sub, configure.ac, depcomp, install-sh, missing, mkinstalldirs:
+	Added files missing from CVS and updated some of the build files. The
+	make dist and distcheck targets now work.
+
+	* version.h: Removed
+
+	* Makefile.in, NEWS, TODO, config_nc.h.in, configure, nc_handler.cc:
+	Rearrangement for automake.
+
+	* configure.in: Removed
+
 2004-07-09  James Gallagher  <jimg@comet.dods.org>
 
 	* Merged with release-3-4-7FCS
