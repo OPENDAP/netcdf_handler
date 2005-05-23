@@ -18,7 +18,7 @@
 #
 # 5/17/2005 jhrg
 #
-# $Id: Makefile.in,v 1.36 2005/05/23 22:09:41 jimg Exp $
+# $Id: Makefile.in,v 1.37 2005/05/23 22:51:47 jimg Exp $
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -96,6 +96,11 @@ NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc \
 	NCUInt16.cc NCInt16.cc NCFloat32.cc NCTypeFactory.cc
 
 
+NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h \
+    NCArray.h NCGrid.h NCSequence.h NCUInt16.h NCByte.h NCInt16.h \
+    NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
+
+
 NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
 	NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
 	NCUInt16.o NCInt16.o NCFloat32.o NCTypeFactory.o
@@ -104,11 +109,13 @@ NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
 HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc 
 HANDLER_OBJ = ncdas.o ncdds.o nc_handler.o 
 
-nc_dap_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC)
+nc_dap_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
 nc_dap_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
 
-EXTRA_DIST = 
+EXTRA_DIST = SECURITY
+
+DISTCLEANFILES = *~
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -123,7 +130,8 @@ am__objects_1 = NCArray.$(OBJEXT) NCByte.$(OBJEXT) NCFloat64.$(OBJEXT) \
 	NCUrl.$(OBJEXT) NCUInt16.$(OBJEXT) NCInt16.$(OBJEXT) \
 	NCFloat32.$(OBJEXT) NCTypeFactory.$(OBJEXT)
 am__objects_2 = ncdas.$(OBJEXT) ncdds.$(OBJEXT) nc_handler.$(OBJEXT)
-am_nc_dap_OBJECTS = $(am__objects_1) $(am__objects_2)
+am__objects_3 =
+am_nc_dap_OBJECTS = $(am__objects_1) $(am__objects_2) $(am__objects_3)
 nc_dap_OBJECTS = $(am_nc_dap_OBJECTS)
 nc_dap_LDADD = $(LDADD)
 nc_dap_LDFLAGS =
@@ -150,11 +158,15 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(nc_dap_SOURCES)
 DIST_COMMON = README ChangeLog INSTALL Makefile.am Makefile.in NEWS \
-	TODO acinclude.m4 aclocal.m4 config.guess config.sub \
-	config_nc.h.in configure configure.ac depcomp install-sh \
-	missing mkinstalldirs
+	acinclude.m4 aclocal.m4 config.guess config.sub config_nc.h.in \
+	configure configure.ac depcomp install-sh missing mkinstalldirs
 SOURCES = $(nc_dap_SOURCES)
 
 all: config_nc.h
@@ -419,6 +431,7 @@ clean-generic:
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
