@@ -3,11 +3,11 @@
 #
 # 5/17/2005 jhrg
 #
-# $Id: Makefile.am,v 1.1 2005/05/23 22:51:47 jimg Exp $
+# $Id: Makefile.am,v 1.2 2005/05/25 23:48:28 jimg Exp $
 
 AUTOMAKE_OPTIONS = foreign check-news
 
-sbin_PROGRAMS = nc_dap
+sbin_PROGRAMS = nc_handler
 
 NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc \
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc \
@@ -24,10 +24,16 @@ NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
 HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc 
 HANDLER_OBJ = ncdas.o ncdds.o nc_handler.o 
 
-nc_dap_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
+nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
-nc_dap_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
+nc_handler_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
 
 EXTRA_DIST = SECURITY
 
 DISTCLEANFILES = *~
+
+# configure: configure.ac Makefile.am acinclude.m4
+#		autoreconf
+#		
+# Makefile.in: configure.ac Makefile.am acinclude.m4
+#		autoreconf

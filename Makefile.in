@@ -18,7 +18,7 @@
 #
 # 5/17/2005 jhrg
 #
-# $Id: Makefile.in,v 1.37 2005/05/23 22:51:47 jimg Exp $
+# $Id: Makefile.in,v 1.38 2005/05/25 23:48:28 jimg Exp $
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -89,7 +89,7 @@ install_sh = @install_sh@
 
 AUTOMAKE_OPTIONS = foreign check-news
 
-sbin_PROGRAMS = nc_dap
+sbin_PROGRAMS = nc_handler
 
 NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc \
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc \
@@ -109,9 +109,9 @@ NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
 HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc 
 HANDLER_OBJ = ncdas.o ncdds.o nc_handler.o 
 
-nc_dap_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
+nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
-nc_dap_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
+nc_handler_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
 
 EXTRA_DIST = SECURITY
 
@@ -121,7 +121,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config_nc.h
 CONFIG_CLEAN_FILES =
-sbin_PROGRAMS = nc_dap$(EXEEXT)
+sbin_PROGRAMS = nc_handler$(EXEEXT)
 PROGRAMS = $(sbin_PROGRAMS)
 
 am__objects_1 = NCArray.$(OBJEXT) NCByte.$(OBJEXT) NCFloat64.$(OBJEXT) \
@@ -131,10 +131,11 @@ am__objects_1 = NCArray.$(OBJEXT) NCByte.$(OBJEXT) NCFloat64.$(OBJEXT) \
 	NCFloat32.$(OBJEXT) NCTypeFactory.$(OBJEXT)
 am__objects_2 = ncdas.$(OBJEXT) ncdds.$(OBJEXT) nc_handler.$(OBJEXT)
 am__objects_3 =
-am_nc_dap_OBJECTS = $(am__objects_1) $(am__objects_2) $(am__objects_3)
-nc_dap_OBJECTS = $(am_nc_dap_OBJECTS)
-nc_dap_LDADD = $(LDADD)
-nc_dap_LDFLAGS =
+am_nc_handler_OBJECTS = $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3)
+nc_handler_OBJECTS = $(am_nc_handler_OBJECTS)
+nc_handler_LDADD = $(LDADD)
+nc_handler_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I.
@@ -163,11 +164,11 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(nc_dap_SOURCES)
+DIST_SOURCES = $(nc_handler_SOURCES)
 DIST_COMMON = README ChangeLog INSTALL Makefile.am Makefile.in NEWS \
 	acinclude.m4 aclocal.m4 config.guess config.sub config_nc.h.in \
 	configure configure.ac depcomp install-sh missing mkinstalldirs
-SOURCES = $(nc_dap_SOURCES)
+SOURCES = $(nc_handler_SOURCES)
 
 all: config_nc.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -231,9 +232,9 @@ uninstall-sbinPROGRAMS:
 
 clean-sbinPROGRAMS:
 	-test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
-nc_dap$(EXEEXT): $(nc_dap_OBJECTS) $(nc_dap_DEPENDENCIES) 
-	@rm -f nc_dap$(EXEEXT)
-	$(CXXLINK) $(nc_dap_LDFLAGS) $(nc_dap_OBJECTS) $(nc_dap_LDADD) $(LIBS)
+nc_handler$(EXEEXT): $(nc_handler_OBJECTS) $(nc_handler_DEPENDENCIES) 
+	@rm -f nc_handler$(EXEEXT)
+	$(CXXLINK) $(nc_handler_LDFLAGS) $(nc_handler_OBJECTS) $(nc_handler_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -486,6 +487,12 @@ uninstall-am: uninstall-info-am uninstall-sbinPROGRAMS
 	mostlyclean-generic tags uninstall uninstall-am \
 	uninstall-info-am uninstall-sbinPROGRAMS
 
+
+# configure: configure.ac Makefile.am acinclude.m4
+#		autoreconf
+#		
+# Makefile.in: configure.ac Makefile.am acinclude.m4
+#		autoreconf
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
