@@ -1,2 +1,0 @@
-directory ../:../../dap
-show directories

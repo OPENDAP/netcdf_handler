@@ -17,23 +17,18 @@ NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h \
     NCArray.h NCGrid.h NCSequence.h NCUInt16.h NCByte.h NCInt16.h \
     NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
 
-NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
-	NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
-	NCUInt16.o NCInt16.o NCFloat32.o NCTypeFactory.o
+# NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
+#	NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
+#	NCUInt16.o NCInt16.o NCFloat32.o NCTypeFactory.o
 
 HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc 
 HANDLER_OBJ = ncdas.o ncdds.o nc_handler.o 
 
 nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
-nc_handler_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
+# nc_handler_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
 
-EXTRA_DIST = SECURITY
+EXTRA_DIST = SECURITY COPYRIGHT
 
 DISTCLEANFILES = *~
 
-# configure: configure.ac Makefile.am acinclude.m4
-#		autoreconf
-#		
-# Makefile.in: configure.ac Makefile.am acinclude.m4
-#		autoreconf

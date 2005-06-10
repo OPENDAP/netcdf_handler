@@ -1,7 +1,0 @@
-# This DDS with atomic varaibles only is for testing
-# the vector --> list method and related translation software.
-
-Dataset {
-	Byte b1;
-	Int32 i2;
-} d1;

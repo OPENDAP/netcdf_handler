@@ -18,7 +18,7 @@
 #
 # 5/17/2005 jhrg
 #
-# $Id: Makefile.in,v 1.38 2005/05/25 23:48:28 jimg Exp $
+# $Id: Makefile.am,v 1.2 2005/05/25 23:48:28 jimg Exp $
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -101,19 +101,18 @@ NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h \
     NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
 
 
-NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
-	NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
-	NCUInt16.o NCInt16.o NCFloat32.o NCTypeFactory.o
 
-
+# NCTYPE_OBJ = NCArray.o NCByte.o NCFloat64.o NCGrid.o NCInt32.o \
+#	NCSequence.o NCStr.o NCStructure.o NCUrl.o NCUInt32.o \
+#	NCUInt16.o NCInt16.o NCFloat32.o NCTypeFactory.o
 HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc 
 HANDLER_OBJ = ncdas.o ncdds.o nc_handler.o 
 
 nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
-nc_handler_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
 
-EXTRA_DIST = SECURITY
+# nc_handler_DEPENDENCIES = $(NCTYPE_OBJ) $(HANDLER_OBJ)
+EXTRA_DIST = SECURITY COPYRIGHT
 
 DISTCLEANFILES = *~
 subdir = .
@@ -135,6 +134,7 @@ am_nc_handler_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3)
 nc_handler_OBJECTS = $(am_nc_handler_OBJECTS)
 nc_handler_LDADD = $(LDADD)
+nc_handler_DEPENDENCIES =
 nc_handler_LDFLAGS =
 
 DEFS = @DEFS@
@@ -487,12 +487,6 @@ uninstall-am: uninstall-info-am uninstall-sbinPROGRAMS
 	mostlyclean-generic tags uninstall uninstall-am \
 	uninstall-info-am uninstall-sbinPROGRAMS
 
-
-# configure: configure.ac Makefile.am acinclude.m4
-#		autoreconf
-#		
-# Makefile.in: configure.ac Makefile.am acinclude.m4
-#		autoreconf
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
