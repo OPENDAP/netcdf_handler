@@ -1,5 +1,5 @@
 #if 0
-    $Id: nfconfig.inc,v 1.3 2003/05/02 16:30:30 jimg Exp $ 
+    $Id$ 
 #endif
 
 

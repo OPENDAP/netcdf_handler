@@ -19,7 +19,7 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: ncdas.cc,v 1.10 2005/04/19 23:16:18 jimg Exp $"};
+static char not_used rcsid[]={"$Id$"};
 
 #include <stdio.h>
 #include <stdlib.h>

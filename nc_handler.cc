@@ -25,7 +25,7 @@
  
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id: nc_handler.cc,v 1.5 2005/05/23 22:09:41 jimg Exp $"};
+static char not_used rcsid[]={"$Id$"};
 
 #include <iostream>
 #include <string>

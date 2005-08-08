@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCStructure.cc,v 1.13 2005/04/19 23:16:18 jimg Exp $"};
+static char rcsid[] not_used ={"$Id$"};
 
 #include <algorithm>
 

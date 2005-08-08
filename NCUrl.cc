@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCUrl.cc,v 1.11 2005/04/19 23:16:18 jimg Exp $"};
+static char rcsid[] not_used ={"$Id$"};
 
 #include "InternalErr.h"
 #include "NCUrl.h"

@@ -13,7 +13,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCGrid.cc,v 1.16 2005/04/19 23:16:18 jimg Exp $"};
+static char rcsid[] not_used ={"$Id$"};
 
 #include <sstream>
 

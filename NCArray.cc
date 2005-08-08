@@ -15,7 +15,7 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id: NCArray.cc,v 1.25 2005/04/19 23:16:18 jimg Exp $"};
+static char rcsid[] not_used ={"$Id$"};
 
 #include <stdio.h>
 #include <stdlib.h>

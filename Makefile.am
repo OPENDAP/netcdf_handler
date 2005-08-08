@@ -3,7 +3,7 @@
 #
 # 5/17/2005 jhrg
 #
-# $Id: Makefile.am,v 1.2 2005/05/25 23:48:28 jimg Exp $
+# $Id$
 
 AUTOMAKE_OPTIONS = foreign check-news
 
