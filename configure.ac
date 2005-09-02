@@ -1,29 +1,18 @@
-#                                               -*- Autoconf -*-
+# -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.57)
-AC_INIT([netcdf-handler], [3.5.0], [support@unidata.ucar.edu])
+AC_PREREQ(2.59)
+AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AC_CONFIG_AUX_DIR([conf])
 
 AM_INIT_AUTOMAKE
 
-AC_CONFIG_SRCDIR([NCArray.cc])
-AM_CONFIG_HEADER([config_nc.h])
-
-dnl flags for the compilers and linkers - set these before locating the
-dnl actual tools since some of the AC_PROG macros set these `flag variables'
-dnl to default values otherwise.
-
-AC_CANONICAL_HOST
-AC_SUBST(host)
+AC_CONFIG_SRCDIR([NCStr.h])
+AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lib':
-# AC_CHECK_LIB([ib], [main])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -67,22 +56,6 @@ then
 fi
 
 OPENDAP_DEBUG_OPTION
-
-dnl autoheader macros; tack some text at the top and bottom of config_dap.h.in
-AH_TOP([#ifndef _config_nc_h
-#define _config_nc_h])
-
-AH_BOTTOM([/* Shorthand for gcc's unused attribute feature */
-#if defined(__GNUG__) || defined(__GNUC__)
-#define not_used __attribute__ ((unused))
-#else
-#define not_used 
-#endif /* __GNUG__ || __GNUC__ */
-
-#endif /* _config_nc_h */])
-
-dnl INCS is non-standard...
-dnl AC_SUBST(INCS)
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
