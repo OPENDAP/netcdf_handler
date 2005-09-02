@@ -7,6 +7,8 @@
 
 AUTOMAKE_OPTIONS = foreign check-news
 
+ACLOCAL_AMFLAGS = -I conf
+
 sbin_PROGRAMS = dap_nc_handler
 
 NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc	\
