@@ -13,7 +13,7 @@
 # Much shortened version; specific to the netcdf handler for the OPeNDAP
 # data servers. jhrg 5/23/05
 
-# $Id$
+# $Id: acinclude.m4,v 1.1 2005/05/23 22:51:47 jimg Exp $
 
 AC_DEFUN([OPENDAP_DEBUG_OPTION], [dnl
     AC_ARG_ENABLE(debug, 
