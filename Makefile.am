@@ -23,6 +23,8 @@ HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc
 
 dap_nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
+noinst_HEADERS = config_nc.h
+
 EXTRA_DIST = SECURITY COPYRIGHT
 
 DISTCLEANFILES = *~
