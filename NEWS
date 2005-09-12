@@ -3,6 +3,8 @@ $Id$
 
 Updated for version 3.5.0
 
+The handler now works with the new dap server configuration.
+
 Removed the libnc-dods software. The OPeNDAP-netCDF client library is now
 in a separate CVS module named libnc-dap. 
 
