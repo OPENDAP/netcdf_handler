@@ -123,14 +123,21 @@ AC_CHECK_NETCDF(
    ]
 )
 
-dnl if test "$NC_PATH"
-dnl then
-dnl     AC_MSG_RESULT([$NC_PATH])
-dnl     LDFLAGS="$LDFLAGS -L${NC_PATH}/lib"
-dnl     LIBS="$LIBS -lnetcdf"
-dnl     CPPFLAGS="$CPPFLAGS -I${NC_PATH}/include"
-dnl fi
+dnl Simple test for BES. A better test would look something like the libdap
+dnl macro written by Patrice. This will get us going...
+if test -n "`bes-config --version 2>/dev/null`"
+then
+    AM_CONDITIONAL([OPENDAPSERVER], [true])
+    BES_CPPFLAGS="`bes-config --cflags`"
+    AC_SUBST([BES_CPPFLAGS])
+    BES_LDFLAGS="`bes-config --libs`"
+    AC_SUBST([BES_LDFLAGS])
+else
+    AM_CONDITIONAL([OPENDAPSERVER], [false])
+fi
 
+dnl AM_CONDITIONAL([OPENDAPSERVER], [test ])
+AM_CONDITIONAL([OPENDAPSERVER], [true])
 
 OPENDAP_DEBUG_OPTION
 
