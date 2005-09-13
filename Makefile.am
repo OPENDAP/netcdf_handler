@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS = foreign check-news
 
 ACLOCAL_AMFLAGS = -I conf
 
-sbin_PROGRAMS = dap_nc_handler
+bin_PROGRAMS = dap_nc_handler
 
 NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc	\
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc	\
@@ -25,7 +25,7 @@ dap_nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
 noinst_HEADERS = config_nc.h
 
-EXTRA_DIST = SECURITY COPYRIGHT
+EXTRA_DIST = COPYRIGHT
 
 DISTCLEANFILES = *~
 
