@@ -96,7 +96,12 @@ NCRequestHandler::nc_build_data( DODSDataHandlerInterface &dhi )
 
     dds->filename( dhi.container->get_real_name() );
     read_descriptors( *dds, dhi.container->get_real_name() ); 
+#if 0
+    // There's no post_constraint field in the struct
+    // DODSDataHandlerInterface (See the header in bes/dispatch. I'm not sure
+    // what this does anyway. jhrg 9/13/05
     dhi.post_constraint = dhi.container->get_constraint();
+#endif
 
 #if 0
     df.read_ancillary_dds(dds);

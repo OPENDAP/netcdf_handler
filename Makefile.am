@@ -33,14 +33,19 @@ SERVER_SRC = ncdas.cc ncdds.cc NCRequestHandler.cc nc_module.cc
 
 SERVER_HDR = NCRequestHandler.h
 
-MODS = ../bes/server/OPeNDAPServerHandler.o ../bes/server/ServerApp.o ../bes/command/opendap_commands.o ../bes/dispatch/dods_module.o
-AUTH_MOD = ../bes/dispatch/test_authenticator.o
-SERVER_LIBS = -L../bes/command -lopendap_command -L../bes/dispatch -ldispatch -L../bes/ppt -lppt
+MODULE_DIR = $(BES_MODULE_DIR)
+MODULES = $(MODULE_DIR)/OPeNDAPServerHandler.o $(MODULE_DIR)/ServerApp.o \
+	$(MODULE_DIR)/opendap_commands.o $(MODULE_DIR)/dods_module.o \
+	$(MODULE_DIR)/test_authenticator.o
+
+#SERVER_LIBS = -L../bes/command -lopendap_command -L../bes/dispatch -ldispatch -L../bes/ppt -lppt
 
 opendapserver_CPPFLAGS = $(BES_CPPFLAGS)
 opendapserver_SOURCES = $(NCTYPE_SRC) $(SERVER_SRC) $(NCTYPE_HDR) $(SERVER_HDR)
 opendapserver_LDFLAGS = $(BES_LDFLAGS) 
-opendapserver_LDADD = $(MODS) $(AUTH_MOD) $(SERVER_LIBS)
+opendapserver_LDADD = $(MODULES) 
+
+# $(AUTH_MOD)  $(SERVER_LIBS)
 
 EXTRA_PROGRAMS = opendapserver
 

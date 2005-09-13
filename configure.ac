@@ -132,6 +132,8 @@ then
     AC_SUBST([BES_CPPFLAGS])
     BES_LDFLAGS="`bes-config --libs`"
     AC_SUBST([BES_LDFLAGS])
+    BES_MODULE_DIR="`bes-config --prefix`/lib/bes"
+    AC_SUBST([BES_MODULE_DIR])
 else
     AM_CONDITIONAL([OPENDAPSERVER], [false])
 fi
