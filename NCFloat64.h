@@ -40,15 +40,8 @@
 #define _ncfloat64_h 1
 
 #include "Float64.h"
-#if 0
-#include "NCAccess.h"
-#endif
 
 class NCFloat64: public Float64 {
-#if 0
-protected:
-    void m_duplicate(const NCFloat64 &bt);
-#endif
 
 public:
     NCFloat64(const string &n = "");
@@ -57,10 +50,6 @@ public:
 
     NCFloat64 &operator=(const NCFloat64 &rhs);
     virtual BaseType *ptr_duplicate();
-
-#if 0
-    virtual nc_type get_nc_type() throw(InternalErr);
-#endif
 
     virtual bool read(const string &dataset);
 };

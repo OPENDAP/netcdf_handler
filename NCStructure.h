@@ -44,20 +44,7 @@
 
 #include "Structure.h"
 
-#if 0
-#include "ClientParams.h"
-#include "NCAccess.h"
-#include "nc_util.h"
-#endif
-
 class NCStructure: public Structure {
-#if 0
-private:
-    VarList d_variables;
-
-protected:
-    void m_duplicate(const NCStructure &bt);
-#endif
         
 public:
     NCStructure(const string &n = "");
@@ -66,13 +53,6 @@ public:
 
     NCStructure &operator=(const NCStructure &rhs);
     virtual BaseType *ptr_duplicate();
-
-#if 0
-    virtual VarList flatten(const ClientParams &cp, const string &parent_name);
-
-    /// Does this variable contain a Sequence?
-    virtual BaseType *find_child_sequence();
-#endif
 };
 
 /* 

@@ -41,24 +41,8 @@
 #include <sstream>
 
 #include "Array.h"
-#if 0
-#include "NCAccess.h"
-#include "DimProjInfo.h"
-#endif
 
 class NCArray: public Array {
-#if 0
-    
-    // Assume there's a one-to-one mapping between Array dimensions and 
-    // elements in this vector. If there are fewer elements in this vector
-    // than dimensions in the Array, assume the 'later' dimensions are not
-    // constrained at all, even though that is an invalid CE and should 
-    // cause the server to return an Error.
-    vector<dim_proj_info> cl_proj;
-    
-    void m_duplicate(const NCArray &nca);
-#endif
-    
 public:
     NCArray(const string &n = "", BaseType *v = 0);
     NCArray(const NCArray &nc_array);
@@ -71,26 +55,6 @@ public:
     
     virtual long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, 
 			bool *has_stride);
-
-#if 0
-    virtual string build_constraint(int outtype, const size_t *start,
-            const size_t *edges, const ptrdiff_t *stride) throw(Error);
-
-    virtual void store_projection(const string &proj);            
-    virtual bool is_convertable(int outtype);
-
-    virtual nc_type get_nc_type() throw(InternalErr);
-    
-    virtual void extract_values(void *values, int elements, int outtype)
-        throw(Error);
-    // virtual BaseType *get_source();
-    virtual void set_source(BaseType *s) throw(InternalErr);
-    
-    virtual VarList flatten(const ClientParams &cp, const string &parent_name);    
-
-    /// Does this variable contain a Sequence?
-    virtual BaseType *find_child_sequence();
-#endif
 };
 
 /* 

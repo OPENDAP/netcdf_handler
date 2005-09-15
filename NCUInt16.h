@@ -40,15 +40,8 @@
 #define _ncuint16_h 1
 
 #include "UInt16.h"
-#if 0
-#include "NCAccess.h"
-#endif
 
 class NCUInt16: public UInt16 {
-#if 0
-protected:
-    void m_duplicate(const NCUInt16 &bt);
-#endif
         
 public:
     NCUInt16(const string &n = "");
@@ -57,10 +50,6 @@ public:
 
     NCUInt16 &operator=(const NCUInt16 &rhs);
     virtual BaseType *ptr_duplicate();
-
-#if 0
-    virtual nc_type get_nc_type() throw(InternalErr);
-#endif
 
     virtual bool read(const string &dataset);
 };

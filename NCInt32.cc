@@ -43,20 +43,8 @@ static char rcsid[] not_used ={"$Id$"};
 #include <netcdf.h>
 #include "InternalErr.h"
 
-#if 0
-#include "Dnetcdf.h"
-#include "nc_util.h"
-#include "NCSequence.h"
-#endif
 #include "NCInt32.h"
 
-#if 0
-void 
-NCInt32::m_duplicate(const NCInt32 &bt)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
-}
-#endif
 
 NCInt32::NCInt32(const string &n) : Int32(n)
 {
@@ -64,9 +52,6 @@ NCInt32::NCInt32(const string &n) : Int32(n)
 
 NCInt32::NCInt32(const NCInt32 &rhs) : Int32(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCInt32::~NCInt32()
@@ -81,9 +66,6 @@ NCInt32::operator=(const NCInt32 &rhs)
 
     dynamic_cast<NCInt32&>(*this) = rhs;
 
-#if 0
-    m_duplicate(rhs);
-#endif
 
     return *this;
 }
@@ -95,72 +77,7 @@ NCInt32::ptr_duplicate(){
     return new NCInt32(*this);
 }
 
-#if 0
-nc_type
-NCInt32::get_nc_type() throw(InternalErr)
-{
-    return NC_LONG;
-}
-#endif
 
-bool
-NCInt32::read(const string &dataset)
-{
-  int varid;                  /* variable Id */
-  nc_type datatype;           /* variable data type */
-  size_t cor[MAX_NC_DIMS];      /* corner coordinates */
-  int num_dim;                /* number of dim. in variable */
-  dods_int32 intg32;
-  int id;
-
-  if (read_p()) // nothing to do
-    return false;
-
-  int ncid, errstat;
-
-  errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
-
-  if (errstat != NC_NOERR)
-    throw Error(errstat, "Could not open the dataset's file.");
- 
-  errstat = nc_inq_varid(ncid, name().c_str(), &varid);
-  if (errstat != NC_NOERR)
-    throw Error(errstat, "Could not get variable ID.");
-
-  errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
-			(int *)0);
-  if (errstat != NC_NOERR)
-    throw Error(errstat, 
-		string("Could not read information about the variable `") 
-		+ name() + string("'."));
-
-  for (id = 0; id <= num_dim; id++) 
-    cor[id] = 0;
-
-  if (datatype == NC_LONG)
-    {
-      long int lng;
-      errstat = nc_get_var1_long(ncid, varid, cor, &lng);
-
-      if (errstat != NC_NOERR)
-	throw Error(errstat, string("Could not read the variable `") + name() 
-		    + string("'."));
-
-      set_read_p(true);
-
-      intg32 = (dods_int32) lng;
-      val2buf( &intg32 );
-
-      if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__, 
-			  "Could not close the dataset!");
-    }
-  else 
-    throw InternalErr(__FILE__, __LINE__,
-		      "Entered NCInt32::read() with non-long variable!");
-
-  return false;
-}
 
 // $Log: NCInt32.cc,v $
 // Revision 1.14  2005/04/19 23:16:18  jimg

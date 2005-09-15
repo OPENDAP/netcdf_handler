@@ -43,23 +43,12 @@ static char rcsid[] not_used ={"$Id$"};
 #include "InternalErr.h"
 #include "NCUrl.h"
 
-#if 0
-void 
-NCUrl::m_duplicate(const NCUrl &bt)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
-}
-#endif
-
 NCUrl::NCUrl(const string &n) : Url(n)
 {
 }
 
 NCUrl::NCUrl(const NCUrl &rhs) : Url(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCUrl::~NCUrl()
@@ -74,10 +63,6 @@ NCUrl::operator=(const NCUrl &rhs)
 
     dynamic_cast<NCUrl&>(*this) = rhs;
 
-#if 0
-    m_duplicate(rhs);
-#endif
-
     return *this;
 }
 
@@ -87,33 +72,6 @@ NCUrl::ptr_duplicate()
 {
     return new NCUrl(*this);
 }
-
-#if 0
-void
-NCUrl::extract_values(void *values, int outtype) throw(Error)
-{
-    char * tbfr = (char *)values;
-    string *cp = 0;
-    string **cpp = &cp;
-    buf2val((void **)cpp);
-
-    for (unsigned int cntr=0; cntr<cp->length() || 
-         (cp->length()==0 && cntr==0); cntr++) {
-        *tbfr = *(cp->c_str()+cntr);
-        tbfr++;
-    }
-
-    // Now get rid of the C++ string object.
-    delete cp;
-}
-
-
-nc_type
-NCUrl::get_nc_type() throw(InternalErr)
-{
-    return NC_CHAR;
-}
-#endif
 
 // $Log: NCUrl.cc,v $
 // Revision 1.11  2005/04/19 23:16:18  jimg

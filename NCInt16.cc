@@ -43,20 +43,8 @@ static char rcsid[] not_used ={"$Id$"};
 #include <netcdf.h>
 #include "InternalErr.h"
 
-#if 0
-#include "Dnetcdf.h"
-#include "nc_util.h"
-#include "NCSequence.h"
-#endif
 #include "NCInt16.h"
 
-#if 0
-void 
-NCInt16::m_duplicate(const NCInt16 &bt)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
-}
-#endif
 
 NCInt16::NCInt16(const string &n) : Int16(n)
 {
@@ -64,9 +52,6 @@ NCInt16::NCInt16(const string &n) : Int16(n)
 
 NCInt16::NCInt16(const NCInt16 &rhs) : Int16(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCInt16::~NCInt16()
@@ -81,9 +66,6 @@ NCInt16::operator=(const NCInt16 &rhs)
 
     dynamic_cast<NCInt16&>(*this) = rhs;
 
-#if 0
-    m_duplicate(rhs);
-#endif
 
     return *this;
 }
@@ -95,13 +77,6 @@ NCInt16::ptr_duplicate(){
     return new NCInt16(*this);
 }
 
-#if 0
-nc_type
-NCInt16::get_nc_type() throw(InternalErr)
-{
-    return NC_SHORT;
-}
-#endif
 
 bool
 NCInt16::read(const string &dataset)

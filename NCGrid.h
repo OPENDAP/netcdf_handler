@@ -40,15 +40,8 @@
 #define _ncgrid_h 1
 
 #include "Grid.h"
-#if 0
-#include "NCAccess.h"
-#endif
 
 class NCGrid: public Grid {
-#if 0
-protected:
-    void m_duplicate(const NCGrid &bt);
-#endif
 
 public:
     NCGrid(const string &n = "");
@@ -59,17 +52,6 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
-
-#if 0
-    virtual string build_constraint(int outtype, const size_t *start,
-        const size_t *edges, const ptrdiff_t *stride) throw(Error);
-
-    virtual bool is_convertable(int outtype);
-    virtual nc_type get_nc_type() throw(InternalErr);
-    
-    virtual void extract_values(void *values, int elements, int outtype)
-        throw(Error);
-#endif
 };
 
 /* 

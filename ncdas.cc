@@ -59,9 +59,6 @@ static char not_used rcsid[]={"$Id$"};
 
 #include "cgi_util.h"
 #include "util.h"
-#if 0
-#include "Dnetcdf.h"
-#endif
 #include "DAS.h"
 
 // These are used as the return values for print_type().

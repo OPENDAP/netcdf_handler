@@ -46,22 +46,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include "InternalErr.h"
 
 #include "NCStructure.h"
-#if 0
-#include "NCArray.h"
-#include "nc_util.h"
-#endif
 
-#if 0
-const string spr = "."; // structure rename
-
-// protected
-
-void
-NCStructure::m_duplicate(const NCStructure &rhs)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(rhs));      
-}
-#endif
 
 BaseType *
 NCStructure::ptr_duplicate()
@@ -75,9 +60,6 @@ NCStructure::NCStructure(const string &n) : Structure(n)
 
 NCStructure::NCStructure(const NCStructure &rhs) : Structure(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCStructure::~NCStructure()
@@ -92,9 +74,6 @@ NCStructure::operator=(const NCStructure &rhs)
 
     dynamic_cast<Structure&>(*this) = rhs; // run Structure assignment
         
-#if 0
-    m_duplicate(rhs);
-#endif
     
     return *this;
 }
@@ -118,60 +97,6 @@ public:
     }
 };
 
-#if 0
-VarList
-NCStructure::flatten(const ClientParams &cp, const string &parent_name)
-{
-    Constructor::Vars_iter field = var_begin();
-    Constructor::Vars_iter field_end = var_end();
-    VarList new_vars;       // Store new vars here
-    string local_name = (!parent_name.empty()) 
-                        ? parent_name + spr + name()
-                        : name();
-
-    while (field != field_end) {
-        VarList embedded_vars = dynamic_cast<NCAccess*>(*field)->flatten(cp, local_name);
-        for_each(embedded_vars.begin(), embedded_vars.end(), AddAttribute());
-        new_vars.splice(new_vars.end(), embedded_vars);
-        
-        // This mirrors code in NCConnect::translate_dds() _except_ that
-        // here the code moves the attribute up one level while in NCConnect
-        // the code moves the attribute into the global attribute table.
-        string trans = (*field)->get_attr_table().get_attr("translation");
-        if (!trans.empty())
-            get_attr_table().append_attr("translation", "String", trans);
-        
-        ++field;
-    }
-
-    return new_vars;
-}
-
-BaseType *
-NCStructure::find_child_sequence()
-{
-    Constructor::Vars_iter field = var_begin();
-    Constructor::Vars_iter field_end = var_end();
-
-    while (field != field_end) {
-        if ((*field)->type() == dods_sequence_c)
-            return (*field);
-        
-        // Depth-first search; see find_child_sequence(BaseType *parent)
-        NCAccess *fld = dynamic_cast<NCAccess*>(*field);
-        if (!fld)
-            throw InternalErr(__FILE__, __LINE__, "Not an NCAccess!");
-            
-        BaseType *btp = fld->find_child_sequence();
-        if (btp)
-            return btp;
-            
-        ++field;
-    }
-    
-    return 0;
-}
-#endif
 
 
 // $Log: NCStructure.cc,v $

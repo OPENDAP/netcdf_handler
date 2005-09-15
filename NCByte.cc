@@ -45,11 +45,6 @@ static char rcsid[] not_used ={"$Id$"};
 #include "InternalErr.h"
 
 #include "NCByte.h"
-#if 0
-#include "NCSequence.h"
-#include "Dnetcdf.h"
-#include "nc_util.h"
-#endif
 
 // This `helper function' creates a pointer to the a NCByte and returns
 // that pointer. It takes the same arguments as the class's ctor. If any of
@@ -66,21 +61,7 @@ static char rcsid[] not_used ={"$Id$"};
 // The declarations for these fuctions (in util.h) should *not* need
 // changing. 
 
-#if 0
-Byte *
-NewByte(const string &n)
-{
-    return new NCByte(n);
-}
-#endif
 
-#if 0
-void 
-NCByte::m_duplicate(const NCByte &bt)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
-}
-#endif
 
 NCByte::NCByte(const string &n) : Byte(n)
 {
@@ -88,9 +69,6 @@ NCByte::NCByte(const string &n) : Byte(n)
 
 NCByte::NCByte(const NCByte &rhs) : Byte(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCByte::~NCByte()
@@ -105,9 +83,6 @@ NCByte::operator=(const NCByte &rhs)
 
     dynamic_cast<NCByte&>(*this) = rhs;
 
-#if 0
-    m_duplicate(rhs);
-#endif
 
     return *this;
 }
@@ -118,13 +93,6 @@ NCByte::ptr_duplicate()
     return new NCByte(*this);
 }
 
-#if 0
-nc_type
-NCByte::get_nc_type() throw(InternalErr)
-{
-    return NC_BYTE;
-}
-#endif
 
 bool
 NCByte::read(const string &dataset)

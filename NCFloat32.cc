@@ -47,19 +47,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include "InternalErr.h"
 
 #include "NCFloat32.h"
-#if 0
-#include "NCSequence.h"
-#include "nc_util.h"
-#include "Dnetcdf.h"
-#endif
 
-#if 0
-void 
-NCFloat32::m_duplicate(const NCFloat32 &bt)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
-}
-#endif
 
 NCFloat32::NCFloat32(const string &n) : Float32(n)
 {
@@ -67,9 +55,6 @@ NCFloat32::NCFloat32(const string &n) : Float32(n)
 
 NCFloat32::NCFloat32(const NCFloat32 &rhs) : Float32(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCFloat32::~NCFloat32()
@@ -84,9 +69,6 @@ NCFloat32::operator=(const NCFloat32 &rhs)
 
     dynamic_cast<NCFloat32&>(*this) = rhs;
 
-#if 0
-    m_duplicate(rhs);
-#endif
 
     return *this;
 }
@@ -97,13 +79,6 @@ NCFloat32::ptr_duplicate()
     return new NCFloat32(*this); // Copy ctor calls duplicate to do the work
 }
 
-#if 0
-nc_type
-NCFloat32::get_nc_type() throw(InternalErr)
-{
-    return NC_FLOAT;
-}
-#endif
 
 bool
 NCFloat32::read(const string &dataset)

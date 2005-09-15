@@ -45,21 +45,9 @@ static char rcsid[] not_used ={"$Id$"};
 
 #include "InternalErr.h"
 #include "NCStr.h"
-#if 0
-#include "NCSequence.h"
-#endif
 
 #include "debug.h"
 
-#if 0
-#include "Dnetcdf.h"
-
-void 
-NCStr::m_duplicate(const NCStr &bt)
-{
-    dynamic_cast<NCAccess&>(*this).clone(dynamic_cast<const NCAccess&>(bt));
-}
-#endif
 
 
 NCStr::NCStr(const string &n) : Str(n)
@@ -68,9 +56,6 @@ NCStr::NCStr(const string &n) : Str(n)
 
 NCStr::NCStr(const NCStr &rhs) : Str(rhs)
 {
-#if 0
-    m_duplicate(rhs);
-#endif
 }
 
 NCStr::~NCStr()
@@ -85,9 +70,6 @@ NCStr::operator=(const NCStr &rhs)
 
     dynamic_cast<NCStr&>(*this) = rhs;
 
-#if 0
-    m_duplicate(rhs);
-#endif
 
     return *this;
 }
@@ -97,91 +79,6 @@ NCStr::ptr_duplicate()
 {
     return new NCStr(*this);
 }
-#if 0
-
-void
-NCStr::extract_values(void *values, int elements, int outtype) throw(Error)
-{
-    // If this variable is held by a sequence, we need to treat it specially.
-    // Read values from the Sequence and then use this instance to process
-    // the values. 
-    NCSequence *ncq = dynamic_cast<NCSequence*>(find_ancestral_sequence(this));
-    int nels = (ncq) ? ncq->number_of_rows() : 1;
-
-    DBG(cerr << "nels: " << nels << endl);
-    
-    char * tbfr = (char *)values;
-    int i = 0;
-    while (i < nels) {
-        string *cp = 0;
-        string **cpp = &cp;
-        // If the parent of this scalar is a Sequence, use that Sequence
-        // to read values.
-        if (ncq) {
-            // replace name() with index. 9/10/2004
-            NCStr *s = dynamic_cast<NCStr*>(ncq->var_value(i, name()));
-            if (!s)
-                throw InternalErr(__FILE__, __LINE__, "Bad csat to NCStr.");
-            s->buf2val((void **)cpp);
-        }
-        else {     
-            buf2val((void **)cpp);
-        }
-        
-#ifdef STRING_AS_ARRAY
-        if (get_translated()) {
-            unsigned int c = 0;
-            while (c < STRING_ARRAY_SIZE 
-                   && (c < cp->length()
-                       || (cp->length() == 0 && c == 0))) {
-                *tbfr++ = *(cp->c_str() + c++);
-            }
-            while (c++ < STRING_ARRAY_SIZE) {
-                *tbfr++ = 0;
-            }
-        }
-        else {
-#endif
-            for (unsigned int c = 0;
-                 c < cp->length() || (cp->length() == 0 && c == 0);
-                 c++) {
-                 // I think it may be a bug to transfer more than one char since
-                 // the client program has allocated a nels buffer for the data.
-                 // jhrg 2/24/05
-                 *tbfr++ = *(cp->c_str() + c);
-            }
-#ifdef STRING_AS_ARRAY
-        }       // Closes the 'else' above
-#endif
-
-        ++i;
-        DBG(cerr << "Value: " << *cp << endl);
-        // Now get rid of the C++ string object.
-        delete cp;
-    }
-    while (i++ < elements) {
-#ifdef STRING_AS_ARRAY
-        if (get_translated()) {
-            int c = 0;
-            while (c++ < STRING_ARRAY_SIZE) {
-                *tbfr++ = 0;
-            }
-        }
-        else {
-#endif
-            *tbfr++ = 0;
-#ifdef STRING_AS_ARRAY
-        }
-#endif
-    }
-}
-
-nc_type
-NCStr::get_nc_type() throw(InternalErr)
-{
-    return NC_CHAR;
-}
-#endif
 
 bool
 NCStr::read(const string &dataset)

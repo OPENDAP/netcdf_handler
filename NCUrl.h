@@ -39,15 +39,8 @@
 #define _ncurl_h 1
 
 #include "Url.h"
-#if 0
-#include "NCAccess.h"
-#endif
 
 class NCUrl: public Url {
-#if 0
-protected:
-    void m_duplicate(const NCUrl &bt);
-#endif
         
 public:
     NCUrl(const string &n = "");
@@ -56,11 +49,6 @@ public:
 
     NCUrl &operator=(const NCUrl &rhs);
     virtual BaseType *ptr_duplicate();
-
-#if 0
-    virtual nc_type get_nc_type() throw(InternalErr);
-    virtual void extract_values(void *values, int outtype) throw(Error);
-#endif
 };
 
 /* 

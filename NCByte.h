@@ -40,15 +40,8 @@
 #define _ncbyte_h 1
 
 #include "Byte.h"
-#if 0
-#include "NCAccess.h"
-#endif
 
 class NCByte: public Byte {
-#if 0
-protected:
-    void m_duplicate(const NCByte &bt);
-#endif
    
 public:
     NCByte(const string &n = "");
@@ -60,10 +53,6 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read(const string &dataset);
-#if 0
-    
-    virtual nc_type get_nc_type() throw(InternalErr);
-#endif
 };
 
 /* 

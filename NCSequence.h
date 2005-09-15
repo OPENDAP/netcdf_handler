@@ -42,22 +42,9 @@
 #include <list>
 
 #include "Sequence.h"
-#if 0
-#include "NCAccess.h"
-#include "nc_util.h"
-#endif
 
 class NCSequence: public Sequence {
 private:
-#if 0
-    int d_size;           //< The 'dimension size' Used for/by translation
-    int d_start, d_stop, d_stride; //< Array CE info from the URL.
-
-    friend class NCSequenceTest;
-    
-protected:
-    void m_duplicate(const NCSequence &bt);
-#endif
         
 public:
     NCSequence(const string &n = "");
@@ -66,21 +53,6 @@ public:
 
     NCSequence &operator=(const NCSequence &rhs);
     virtual BaseType *ptr_duplicate();
-        
-#if 0
-    virtual void store_projection(const string &proj);
-    virtual string build_constraint(int outtype, const size_t *start,
-        const size_t *edges, const ptrdiff_t *stride) throw(Error);
-
-    virtual void set_size(int size) { d_size = size; }
-    virtual int get_size() { return d_size; };
-
-    virtual VarList flatten(const ClientParams &cp, const string &parent_name);
-    virtual BaseType *var_value(size_t row, const string &name);
-
-    /// Does this variable contain a Sequence?
-    virtual BaseType *find_child_sequence();    
-#endif
 };
 
 /* 
