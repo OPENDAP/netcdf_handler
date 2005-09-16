@@ -41,7 +41,7 @@ using std::endl ;
 #include "DODSInfo.h"
 #include "TheDODSKeys.h"
 #include "DODSResponseException.h"
-
+#include "OPeNDAPDataNames.h"
 
 extern void read_variables(DAS &das, const string &filename) throw (Error);
 extern void read_descriptors(DDS &dds, const string &filename)  throw (Error);
@@ -67,8 +67,6 @@ NCRequestHandler::nc_build_das( DODSDataHandlerInterface &dhi )
 
     read_variables( *das, dhi.container->get_real_name() );
 
-    
-
     return true ;
 }
 
@@ -78,9 +76,7 @@ NCRequestHandler::nc_build_dds( DODSDataHandlerInterface &dhi )
     DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
 
     read_descriptors( *dds, dhi.container->get_real_name() );
-    dds->parse_constraint( dhi.container->get_constraint() );
-
-
+    dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
     return true ;
 }
@@ -92,7 +88,7 @@ NCRequestHandler::nc_build_data( DODSDataHandlerInterface &dhi )
 
     dds->filename( dhi.container->get_real_name() );
     read_descriptors( *dds, dhi.container->get_real_name() ); 
-
+    dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
     return true ;
 }
@@ -101,8 +97,7 @@ bool
 NCRequestHandler::nc_build_help( DODSDataHandlerInterface &dhi )
 {
     DODSInfo *info = (DODSInfo *)dhi.response_handler->get_response_object() ;
-    info->add_data( (string)"No help for netCDF handler.\n" ) ;
-
+    info->add_data( (string)"No help currently available for netCDF handler.\n" ) ;
 
     return true ;
 }
