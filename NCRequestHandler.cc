@@ -33,6 +33,7 @@ using std::cerr ;
 using std::endl ;
 
 #include "NCRequestHandler.h"
+#include "NCTypeFactory.h"
 #include "DODSResponseHandler.h"
 #include "DODSResponseNames.h"
 #include "DAS.h"
@@ -74,9 +75,14 @@ bool
 NCRequestHandler::nc_build_dds( DODSDataHandlerInterface &dhi )
 {
     DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
+    NCTypeFactory *factory = new NCTypeFactory ;
+    dds->set_factory( factory ) ;
 
     read_descriptors( *dds, dhi.container->get_real_name() );
     dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+
+    dds->set_factory( NULL ) ;
+    delete factory ;
 
     return true ;
 }
@@ -85,10 +91,15 @@ bool
 NCRequestHandler::nc_build_data( DODSDataHandlerInterface &dhi )
 {
     DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
+    NCTypeFactory *factory = new NCTypeFactory ;
+    dds->set_factory( factory ) ;
 
     dds->filename( dhi.container->get_real_name() );
     read_descriptors( *dds, dhi.container->get_real_name() ); 
     dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+
+    dds->set_factory( NULL ) ;
+    delete factory ;
 
     return true ;
 }
