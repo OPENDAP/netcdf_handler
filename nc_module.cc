@@ -30,23 +30,22 @@
 using std::endl ;
 
 #include "DODSInitList.h"
-#include "TheRequestHandlerList.h"
+#include "DODSRequestHandlerList.h"
 #include "NCRequestHandler.h"
-#include "TheDODSLog.h"
+#include "DODSLog.h"
 
 #define NC_NAME "nc"
 
 static bool
 NCInit(int, char**)
 {
-    if( TheDODSLog->is_verbose() )
-	(*TheDODSLog) << "Initializing NC:" << endl ;
+    if( DODSLog::TheLog()->is_verbose() )
+	(*DODSLog::TheLog()) << "Initializing NC:" << endl ;
 
-    if( TheDODSLog->is_verbose() )
-	(*TheDODSLog) << "    adding " << NC_NAME << " request handler" 
+    if( DODSLog::TheLog()->is_verbose() )
+	(*DODSLog::TheLog()) << "    adding " << NC_NAME << " request handler" 
 		      << endl ;
-    TheRequestHandlerList->add_handler( NC_NAME,
-					new NCRequestHandler( NC_NAME ) ) ;
+    DODSRequestHandlerList::TheList()->add_handler( NC_NAME, new NCRequestHandler( NC_NAME ) ) ;
 
     return true ;
 }
@@ -54,9 +53,9 @@ NCInit(int, char**)
 static bool
 NCTerm(void)
 {
-    if( TheDODSLog->is_verbose() )
-	(*TheDODSLog) << "Removing NC Handlers" << endl;
-    DODSRequestHandler *rh = TheRequestHandlerList->remove_handler( NC_NAME ) ;
+    if( DODSLog::TheLog()->is_verbose() )
+	(*DODSLog::TheLog()) << "Removing NC Handlers" << endl;
+    DODSRequestHandler *rh = DODSRequestHandlerList::TheList()->remove_handler( NC_NAME ) ;
     if( rh ) delete rh ;
     return true ;
 }

@@ -35,8 +35,7 @@ SERVER_HDR = NCRequestHandler.h
 
 MODULE_DIR = $(BES_MODULE_DIR)
 MODULES = $(MODULE_DIR)/OPeNDAPServerHandler.o $(MODULE_DIR)/ServerApp.o \
-	$(MODULE_DIR)/opendap_commands.o $(MODULE_DIR)/dods_module.o \
-	$(MODULE_DIR)/test_authenticator.o
+	$(MODULE_DIR)/opendap_commands.o $(MODULE_DIR)/dods_module.o
 
 #SERVER_LIBS = -L../bes/command -lopendap_command -L../bes/dispatch -ldispatch -L../bes/ppt -lppt
 
