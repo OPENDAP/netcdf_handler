@@ -31,6 +31,8 @@
 // Class declarations; Make sure to include the corresponding headers in the
 // implementation file.
 
+#include "BaseTypeFactory.h"
+
 class NCByte;
 class NCInt16;
 class NCUInt16;
