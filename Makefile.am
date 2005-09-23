@@ -9,10 +9,10 @@ AUTOMAKE_OPTIONS = foreign check-news
 
 ACLOCAL_AMFLAGS = -I conf
 
+bin_PROGRAMS = dap_nc_handler
+
 if OPENDAPSERVER
-    bin_PROGRAMS = dap_nc_handler opendapserver
-else
-    bin_PROGRAMS = dap_nc_handler
+    noinst_PROGRAMS = opendapserver
 endif
 
 NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc	\
@@ -23,11 +23,9 @@ NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h		\
     NCArray.h NCGrid.h NCSequence.h NCUInt16.h NCByte.h NCInt16.h	\
     NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
 
-HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc 
+HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc config_nc.h
 
 dap_nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
-
-noinst_HEADERS = config_nc.h
 
 SERVER_SRC = ncdas.cc ncdds.cc NCRequestHandler.cc nc_module.cc
 
@@ -48,7 +46,16 @@ opendapserver_LDADD = $(MODULES)
 
 EXTRA_PROGRAMS = opendapserver
 
-EXTRA_DIST = COPYRIGHT
+EXTRA_DIST = COPYRIGHT COPYING netcdf_handler.spec
 
 CLEANFILES = *~
 
+###########################################################################
+
+# Build linux RPMs
+
+srpm:
+	rpmbuild -ts netcdf_handler-@PACKAGE_VERSION@.tar.gz
+
+rpm:
+	rpmbuild -tb netcdf_handler-@PACKAGE_VERSION@.tar.gz

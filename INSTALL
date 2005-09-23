@@ -1,7 +1,8 @@
 
 $Id$
 
-Installing the NetCDF server software and client library for DODS.
+Installing the NetCDF server software and client library for the OPeNDAP
+server.
 
 ---------------------------------------------------------------------------
 
@@ -40,6 +41,11 @@ REQUIREMENTS
   o You need the libdap library to build and install this software. If you're
     using Linux, this means either building form source or using the libdap
     and libdap-devel RPM packages.
+
+  o You also need a recent copy of netCDF. We've tested this server with
+    version 3.5, although any recent version should work fine. If the
+    configure script cannot find your copy of libnetcdf, use the
+    --with-netcdf options to tell it where to look (see configure --help).
 
 NOTES
 
