@@ -1,13 +1,13 @@
 
 $Id$
 
-This is the OPeNDAP netCDF Data Handler. This is ued along with the OPeNDAP
+This is the OPeNDAP netCDF Data Handler. It is used along with the OPeNDAP
 DAP Server.
 
 For information about building the OPeNDAP netCDF Data Handler, see the
 INSTALL file.
 
-This data handler is compnent of the OPeNDAP DAP Server; the server base
+This data handler is a component of the OPeNDAP DAP Server; the server base
 software is designed to allow any number of handlers to be configured easily.
 See the DAP Server README and INSTALL files for information about
 configuration, including how to use this handler.
