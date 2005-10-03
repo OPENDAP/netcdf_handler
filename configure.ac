@@ -35,7 +35,7 @@ AC_CHECK_LIBDAP([3.5.2],
  ],
  [ AC_MSG_ERROR([Cannot find libdap])
 ])
-
+  
 dnl Check for the netcdf library.
 AC_DEFUN([AC_CHECK_NETCDF],
 [
@@ -123,23 +123,34 @@ AC_CHECK_NETCDF(
    ]
 )
 
+dnl if test "$NC_PATH"
+dnl then
+dnl     AC_MSG_RESULT([$NC_PATH])
+dnl     LDFLAGS="$LDFLAGS -L${NC_PATH}/lib"
+dnl     LIBS="$LIBS -lnetcdf"
+dnl     CPPFLAGS="$CPPFLAGS -I${NC_PATH}/include"
+dnl fi
+
+AC_ARG_WITH([bes],
+            [AS_HELP_STRING([--with-bes=PATH],[bes install root directory])],
+            [BES_PATH=${withval}], 
+            [BES_PATH=""])
+
 dnl Simple test for BES. A better test would look something like the libdap
-dnl macro written by Patrice. This will get us going...
-if test -n "`bes-config --version 2>/dev/null`"
+dnl macro written by Patrice. This will get us going... If --with-bes is not
+dnl given, then don't build the bes code. jhrg 10/3/05
+if test -x "${BES_PATH}/bin/bes-config"
 then
     AM_CONDITIONAL([OPENDAPSERVER], [true])
-    BES_CPPFLAGS="`bes-config --cflags`"
+    BES_CPPFLAGS="`${BES_PATH}/bin/bes-config --cflags`"
     AC_SUBST([BES_CPPFLAGS])
-    BES_LDFLAGS="`bes-config --libs`"
+    BES_LDFLAGS="`${BES_PATH}/bin/bes-config --libs`"
     AC_SUBST([BES_LDFLAGS])
-    BES_MODULE_DIR="`bes-config --prefix`/lib/bes"
+    BES_MODULE_DIR="`${BES_PATH}/bin/bes-config --prefix`/lib/bes"
     AC_SUBST([BES_MODULE_DIR])
 else
     AM_CONDITIONAL([OPENDAPSERVER], [false])
 fi
-
-dnl AM_CONDITIONAL([OPENDAPSERVER], [test ])
-AM_CONDITIONAL([OPENDAPSERVER], [true])
 
 OPENDAP_DEBUG_OPTION
 
