@@ -50,6 +50,8 @@ public:
 
     NCInt32 &operator=(const NCInt32 &rhs);
     virtual BaseType *ptr_duplicate();
+
+    virtual bool read(const string &dataset);
 };
 
 /* 
