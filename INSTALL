@@ -1,8 +1,7 @@
 
 $Id$
 
-Installing the NetCDF server software and client library for the OPeNDAP
-server.
+Installing the NetCDF handler software for the OPeNDAP server.
 
 ---------------------------------------------------------------------------
 
@@ -41,6 +40,9 @@ REQUIREMENTS
   o You need the libdap library to build and install this software. If you're
     using Linux, this means either building form source or using the libdap
     and libdap-devel RPM packages.
+
+  o To use this software with our data server, you will need the OPeNDAP
+    dap-server software package.
 
   o You also need a recent copy of netCDF. We've tested this server with
     version 3.5, although any recent version should work fine. If the
