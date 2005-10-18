@@ -39,7 +39,7 @@ using std::endl ;
 #include "DAS.h"
 #include "DDS.h"
 #include "DODSConstraintFuncs.h"
-#include "DODSInfo.h"
+#include "DODSVersionInfo.h"
 #include "DODSResponseException.h"
 #include "OPeNDAPDataNames.h"
 
@@ -115,9 +115,8 @@ NCRequestHandler::nc_build_help( DODSDataHandlerInterface &dhi )
 bool
 NCRequestHandler::nc_build_version( DODSDataHandlerInterface &dhi )
 {
-    DODSInfo *info = (DODSInfo *)dhi.response_handler->get_response_object() ;
-    info->add_data( (string)"    0.9\n" ) ;
-    info->add_data( (string)"    libnc-dods 0.9\n" ) ;
+    DODSVersionInfo *info = (DODSVersionInfo *)dhi.response_handler->get_response_object() ;
+    info->addHandlerVersion( "libnc-dods", "0.9" ) ;
     return true ;
 }
 
