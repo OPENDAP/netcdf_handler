@@ -38,7 +38,7 @@ dnl dont use AC_CHECK_HEADERS to avoid autoconf internal caching
     ],
     [
       AC_MSG_RESULT([no])
-      ac_netcdf_h_preproc='no (ignored...)'
+      ac_netcdf_h_preproc='no'
     ])
   CPPFLAGS="$ac_nc_save_CPPFLAGS"
   AS_IF([test $ac_netcdf_h_compile = 'yes'],
