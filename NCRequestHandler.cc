@@ -54,8 +54,6 @@ NCRequestHandler::NCRequestHandler( string name )
     add_handler( DATA_RESPONSE, NCRequestHandler::nc_build_data ) ;
     add_handler( HELP_RESPONSE, NCRequestHandler::nc_build_help ) ;
     add_handler( VERS_RESPONSE, NCRequestHandler::nc_build_version ) ;
-    add_handler( NODES_RESPONSE, NCRequestHandler::nc_build_nodes ) ;
-    add_handler( LEAVES_RESPONSE, NCRequestHandler::nc_build_leaves ) ;
 }
 
 NCRequestHandler::~NCRequestHandler()
@@ -119,22 +117,6 @@ NCRequestHandler::nc_build_version( DODSDataHandlerInterface &dhi )
 {
     DODSVersionInfo *info = (DODSVersionInfo *)dhi.response_handler->get_response_object() ;
     info->addHandlerVersion( "libnc-dods", "0.9" ) ;
-    return true ;
-}
-
-bool
-NCRequestHandler::nc_build_nodes( DODSDataHandlerInterface &dhi )
-{
-    DODSInfo *info = (DODSInfo *)dhi.response_handler->get_response_object() ;
-    info->add_data( "adding nodes\n" ) ;
-    return true ;
-}
-
-bool
-NCRequestHandler::nc_build_leaves( DODSDataHandlerInterface &dhi )
-{
-    DODSInfo *info = (DODSInfo *)dhi.response_handler->get_response_object() ;
-    info->add_data( "adding leaves\n" ) ;
     return true ;
 }
 

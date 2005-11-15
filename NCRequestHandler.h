@@ -40,8 +40,6 @@ public:
     static bool		nc_build_data( DODSDataHandlerInterface &dhi ) ;
     static bool		nc_build_help( DODSDataHandlerInterface &dhi ) ;
     static bool		nc_build_version( DODSDataHandlerInterface &dhi ) ;
-    static bool		nc_build_nodes( DODSDataHandlerInterface &dhi ) ;
-    static bool		nc_build_leaves( DODSDataHandlerInterface &dhi ) ;
 };
 
 #endif
