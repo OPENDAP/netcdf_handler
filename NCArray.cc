@@ -324,7 +324,7 @@ NCArray::read(const string &dataset)
 
 	// read the vlaues in from the local netCDF file
 	if( has_stride)
-	    errstat = nc_get_vars_text(ncid, varid, cor, edg, step,chrbuf);
+	    errstat = nc_get_vars_text(ncid, varid, cor, edg, step, chrbuf);
 	else
 	    errstat = nc_get_vara_text(ncid, varid, cor, edg, chrbuf);
 
@@ -350,7 +350,30 @@ NCArray::read(const string &dataset)
 	delete [] strg;
 	delete [] chrbuf;
     }
+    else if (datatype || datatype == NC_BYTE) {
+        //default (no type conversion needed and the type Byte)
+        char *convbuf = new char [(nels*nctypelen(datatype))];
 
+        if( has_stride)
+            errstat = nc_get_vars_uchar(ncid, varid, cor, edg, step, (unsigned char*)convbuf);
+        else
+            errstat = nc_get_vara_uchar(ncid, varid, cor, edg, (unsigned char*)convbuf);
+ 
+        if (errstat != NC_NOERR)
+            throw Error(errstat,string("Could not read the variable `") + name() 
+                        + string("'."));
+
+        set_read_p(true);  
+        val2buf((void *)convbuf);
+
+        delete [] convbuf;
+    }
+    else {
+        throw InternalErr(__FILE__, __LINE__, 
+                          string("Unknow data type for the variable '")
+                          + name() + string("'."));
+    }
+    
     if (nc_close(ncid) != NC_NOERR)
 	throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
