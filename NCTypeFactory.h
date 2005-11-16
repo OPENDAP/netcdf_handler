@@ -33,6 +33,7 @@
 
 #include "BaseTypeFactory.h"
 
+#if 0
 class NCByte;
 class NCInt16;
 class NCUInt16;
@@ -44,8 +45,9 @@ class NCStr;
 class NCUrl;
 class NCArray;
 class NCStructure;
-class NBSequence;
-class NBGrid;
+class NCSequence;
+class NCGrid;
+#endif
 
 /** A factory for the netCDF client library types.
 
