@@ -201,8 +201,8 @@ NCArray::read(const string &dataset)
     }
 
     // Correct data types to match with the local machine data types
-
-    if (datatype == NC_FLOAT) {
+    switch (datatype) {
+        case NC_FLOAT:  {
         fltbuf = (float *) new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
@@ -231,8 +231,11 @@ NCArray::read(const string &dataset)
 
 	set_read_p(true);  
         delete [] fltbuf;
+        
+        break;
     }
-    else if (datatype == NC_DOUBLE) {
+    
+      case NC_DOUBLE: {
 
         dblbuf = (double *) new char [(nels*nctypelen(datatype))];
 
@@ -260,8 +263,11 @@ NCArray::read(const string &dataset)
 
 	set_read_p(true);  
         delete [] dblbuf;
+        
+        break;
     }
-    else if (datatype == NC_SHORT) {
+    
+    case NC_SHORT: {
 
         shtbuf = (short *)new char [(nels*nctypelen(datatype))];
 
@@ -289,8 +295,11 @@ NCArray::read(const string &dataset)
 	}
 	set_read_p(true);  
         delete [] shtbuf;
+        
+        break;
     }
-    else if (datatype == NC_LONG) {
+    
+    case NC_LONG: {
 	lngbuf = (long int *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
@@ -317,8 +326,11 @@ NCArray::read(const string &dataset)
 
 	set_read_p(true);  
         delete [] lngbuf;
+        
+        break;
     }
-    else if (datatype == NC_CHAR) {
+    
+    case NC_CHAR: {
 
         chrbuf = (char *)new char [(nels*nctypelen(datatype))];
 
@@ -349,8 +361,11 @@ NCArray::read(const string &dataset)
 	// clean up
 	delete [] strg;
 	delete [] chrbuf;
+        
+        break;
     }
-    else if (datatype || datatype == NC_BYTE) {
+    
+    case NC_BYTE: {
         //default (no type conversion needed and the type Byte)
         char *convbuf = new char [(nels*nctypelen(datatype))];
 
@@ -367,8 +382,11 @@ NCArray::read(const string &dataset)
         val2buf((void *)convbuf);
 
         delete [] convbuf;
+        
+        break;
     }
-    else {
+    
+    default:
         throw InternalErr(__FILE__, __LINE__, 
                           string("Unknow data type for the variable '")
                           + name() + string("'."));
