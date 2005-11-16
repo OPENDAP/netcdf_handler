@@ -1,7 +1,11 @@
 
 $Id$
 
-Updated for version 3.5.0
+Updated for version 3.5.1
+
+Bug fix: The handler did not process arrays of bytes correctly.
+
+--------------------------------------------------------------------------
 
 The handler now works with the new dap server configuration.
 
