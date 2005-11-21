@@ -33,8 +33,11 @@ using std::endl ;
 #include "DODSRequestHandlerList.h"
 #include "NCRequestHandler.h"
 #include "DODSLog.h"
+#include "DirectoryCatalog.h"
+#include "CatalogList.h"
 
 #define NC_NAME "nc"
+#define NC_CATALOG_ROOT_KEY "NC.Catalog.Root"
 
 static bool
 NCInit(int, char**)
@@ -46,6 +49,11 @@ NCInit(int, char**)
 	(*DODSLog::TheLog()) << "    adding " << NC_NAME << " request handler" 
 		      << endl ;
     DODSRequestHandlerList::TheList()->add_handler( NC_NAME, new NCRequestHandler( NC_NAME ) ) ;
+
+    if( DODSLog::TheLog()->is_verbose() )
+	(*DODSLog::TheLog()) << "    adding " << NC_NAME << " catalog" 
+		      << endl ;
+    CatalogList::TheCatalogList()->add_catalog( new DirectoryCatalog( NC_CATALOG_ROOT_KEY ) ) ;
 
     return true ;
 }
