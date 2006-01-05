@@ -32,9 +32,9 @@
 
 using std::string ;
 
-#include "DODSContainerPersistence.h"
+#include "DODSContainerPersistenceVolatile.h"
 
-class NCContainerPersistence : public DODSContainerPersistence
+class NCContainerPersistence : public DODSContainerPersistenceVolatile
 {
 private:
     string			_nc_base ;
@@ -42,11 +42,8 @@ public:
     				NCContainerPersistence( const string &n);
     virtual			~NCContainerPersistence() ;
 
-    virtual void		look_for( DODSContainer &d ) ;
     virtual void		add_container( string s_name, string r_ame,
 					       string type ) ;
-    virtual bool		rem_container( const string &s_name ) ;
-    virtual void		show_containers( DODSInfo &info ) ;
 };
 
 #endif // I_NCContainerPersistence_h_

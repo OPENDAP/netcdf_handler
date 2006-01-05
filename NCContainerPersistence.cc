@@ -41,7 +41,7 @@ using std::ifstream ;
 #define NC_CATALOG_ROOT_KEY "NC.Catalog.Root"
 
 NCContainerPersistence::NCContainerPersistence( const string &n )
-    : DODSContainerPersistence( n )
+    : DODSContainerPersistenceVolatile( n )
 {
     bool found = false ;
     string key = NC_CATALOG_ROOT_KEY ;
@@ -60,34 +60,12 @@ NCContainerPersistence::~NCContainerPersistence()
 }
 
 void
-NCContainerPersistence::look_for( DODSContainer &d )
-{
-    d.set_valid_flag( true ) ;
-    d.set_real_name( _nc_base + "/" + d.get_symbolic_name() ) ;
-    d.set_container_type( "nc" ) ;
-}
-
-void
 NCContainerPersistence::add_container( string s_name,
-                                            string r_ame,
-					    string type )
+					string r_name,
+					string type )
 {
-    throw DODSContainerPersistenceException( "Unable to add a container to NC Persistence" ) ;
-}
-
-bool
-NCContainerPersistence::rem_container( const string &s_name )
-{
-    throw DODSContainerPersistenceException( "Unable to remove a container from NC Persistence" ) ;
-    return false ;
-}
-
-void
-NCContainerPersistence::show_containers( DODSInfo &info )
-{
-    info.add_data( get_name() ) ;
-    info.add_data( "\n" ) ;
-    info.add_data( "    For a list of NC containers please traverse the Catalog\n" ) ;
+    r_name = _nc_base + "/" + r_name ;
+    DODSContainerPersistenceVolatile::add_container( s_name, r_name, type ) ;
 }
 
 // $Log: NCContainerPersistence.cc,v $
