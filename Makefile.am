@@ -27,7 +27,7 @@ HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc config_nc.h
 
 dap_nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
 
-SERVER_SRC = ncdas.cc ncdds.cc NCRequestHandler.cc nc_module.cc
+SERVER_SRC = ncdas.cc ncdds.cc NCRequestHandler.cc nc_module.cc NCContainerPersistence.cc
 
 SERVER_HDR = NCRequestHandler.h
 

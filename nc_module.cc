@@ -32,6 +32,8 @@ using std::endl ;
 #include "DODSInitList.h"
 #include "DODSRequestHandlerList.h"
 #include "NCRequestHandler.h"
+#include "DODSContainerPersistenceList.h"
+#include "NCContainerPersistence.h"
 #include "DODSLog.h"
 #include "DirectoryCatalog.h"
 #include "CatalogList.h"
@@ -55,6 +57,12 @@ NCInit(int, char**)
 		      << endl ;
     CatalogList::TheCatalogList()->add_catalog( new DirectoryCatalog( NC_CATALOG_ROOT_KEY ) ) ;
 
+    if( DODSLog::TheLog()->is_verbose() )
+	(*DODSLog::TheLog()) << "Adding NC Persistence" << endl;
+    NCContainerPersistence *ncp =
+	    new NCContainerPersistence( "NC" ) ;
+    DODSContainerPersistenceList::TheList()->add_persistence( ncp ) ;
+
     return true ;
 }
 
@@ -65,6 +73,11 @@ NCTerm(void)
 	(*DODSLog::TheLog()) << "Removing NC Handlers" << endl;
     DODSRequestHandler *rh = DODSRequestHandlerList::TheList()->remove_handler( NC_NAME ) ;
     if( rh ) delete rh ;
+
+    if( DODSLog::TheLog()->is_verbose() )
+	(*DODSLog::TheLog()) << "Removing NC Persistence" << endl;
+    DODSContainerPersistenceList::TheList()->rem_persistence( "NC" ) ;
+
     return true ;
 }
 
