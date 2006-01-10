@@ -1,7 +1,13 @@
 
 $Id$
 
-Updated for version 3.5.1
+Version 3.5.2
+
+Fix for ticket 281: int variable break on 64 bit machines. The fix involved
+using nc_var_get_int() in place of nc_var_get_long in NCArray::read() and
+using NC_INT in place of NC_LONG in read's switch statement.
+
+Version 3.5.1
 
 Bug fix: The handler did not process arrays of bytes correctly.
 
