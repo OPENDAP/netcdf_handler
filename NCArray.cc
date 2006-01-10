@@ -132,29 +132,9 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
 bool
 NCArray::read(const string &dataset)
 {
-    int varid;                  /* variable Id */
-    nc_type datatype;           /* variable data type */
     size_t cor[MAX_NC_DIMS];      /* corner coordinates */
     size_t edg[MAX_NC_DIMS];      /* edges of hypercube */
-    ptrdiff_t step[MAX_NC_DIMS];     /* stride of hypercube */
-    int vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
-    int num_dim;                /* number of dim. in variable */
-    long nels;                  /* number of elements in buffer */
-    size_t vdim_siz;
-    // pointers to buffers for incoming data
-    double *dblbuf;
-    float *fltbuf;
-    short *shtbuf;
-    long int *lngbuf;
-    char *chrbuf;
-    // type conversion pointers
-    dods_int16 *intg16;
-    dods_int32 *intg32;
-    dods_float32 *flt32;
-    dods_float64 *flt64;
-    // misc.
-    int id;
-    bool has_stride;
+    ptrdiff_t step[MAX_NC_DIMS];  /* stride of hypercube */
 
     DBG(cerr << "In NCArray::read" << endl);
 
@@ -169,10 +149,14 @@ NCArray::read(const string &dataset)
     if (errstat != NC_NOERR)
 	throw Error(errstat, "Could not open the dataset's file.");
  
+    int varid;                  /* variable Id */
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
 	throw Error(errstat, "Could not get variable ID.");
 
+    nc_type datatype;           /* variable data type */
+    int vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
+    int num_dim;                /* number of dim. in variable */
     errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdims,
 			 (int *)0);
     if (errstat != NC_NOERR)
@@ -180,15 +164,17 @@ NCArray::read(const string &dataset)
 		    string("Could not read information about the variable `") 
 		    + name() + string("'."));
 
-    nels = format_constraint(cor, step, edg, &has_stride);
+    bool has_stride;
+    long nels = format_constraint(cor, step, edg, &has_stride);
 
     // without constraint (read everything)
     if ( nels == -1 ){
         nels = 1;
 	has_stride = false;
-        for (id = 0; id < num_dim; id++) {
+        for (int id = 0; id < num_dim; id++) {
             cor[id] = 0;
 
+            size_t vdim_siz;
             errstat = nc_inq_dim(ncid, vdims[id], (char *)0, &vdim_siz);
 	    if (errstat != NC_NOERR)
 		throw Error(errstat, 
@@ -202,42 +188,39 @@ NCArray::read(const string &dataset)
 
     // Correct data types to match with the local machine data types
     switch (datatype) {
-        case NC_FLOAT:  {
-        fltbuf = (float *) new char [(nels*nctypelen(datatype))];
+      case NC_FLOAT:{
+        float *fltbuf = (float *) new char[(nels * nctypelen(datatype))];
+        
+        if (has_stride)
+            errstat = nc_get_vars_float(ncid, varid, cor, edg, step, fltbuf);
+        else
+            errstat = nc_get_vara_float(ncid, varid, cor, edg, fltbuf);
+        
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read the variable `") + name()
+                        + string("'."));
+        
+        if (nctypelen(datatype) != sizeof(dods_float32)) {
+            dods_float32 *flt32 = new dods_float32[nels];
+        
+            for (int id = 0; id < nels; id++)
+                *(flt32 + id) = (dods_float32) * (fltbuf + id);
+        
+            val2buf((void *) flt32);
+            delete[]flt32;
+        } else {
+            val2buf((void *) fltbuf);
+        }
 
-	if( has_stride)
-	    errstat = nc_get_vars_float(ncid, varid, cor, edg, step, fltbuf);
-	else
-	    errstat = nc_get_vara_float(ncid, varid, cor, edg, fltbuf);
-
-	if (errstat != NC_NOERR)
-	    throw Error(errstat, 
-			string("Could not read the variable `") + name() 
-			+ string("'."));
-
-	if (nctypelen(datatype) != sizeof(dods_float32)) {
-
-	flt32 = new dods_float32 [nels]; 
-
-        for (id = 0; id < nels; id++) 
-            *(flt32+id) = (dods_float32) *(fltbuf+id);
-
-        val2buf((void *)flt32);
-        delete [] flt32;
-	}
-	else {
-        val2buf((void *)fltbuf);
-	}
-
-	set_read_p(true);  
-        delete [] fltbuf;
+        set_read_p(true);
+        delete[]fltbuf;
         
         break;
-    }
+      }
     
       case NC_DOUBLE: {
 
-        dblbuf = (double *) new char [(nels*nctypelen(datatype))];
+        double *dblbuf = (double *) new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
 	    errstat = nc_get_vars_double(ncid, varid, cor, edg, step, dblbuf);
@@ -249,9 +232,9 @@ NCArray::read(const string &dataset)
 			+ string("'."));
 
 	if (nctypelen(datatype) != sizeof(dods_float64)) {
-	flt64 = new dods_float64 [nels]; 
+	dods_float64 *flt64 = new dods_float64 [nels]; 
 
-        for (id = 0; id < nels; id++) 
+        for (int id = 0; id < nels; id++) 
             *(flt64+id) = (dods_float64) *(dblbuf+id);
 
         val2buf((void *)flt64);
@@ -269,7 +252,7 @@ NCArray::read(const string &dataset)
     
     case NC_SHORT: {
 
-        shtbuf = (short *)new char [(nels*nctypelen(datatype))];
+        short *shtbuf = (short *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
 	    errstat = nc_get_vars_short(ncid, varid, cor, edg, step, shtbuf);
@@ -282,9 +265,9 @@ NCArray::read(const string &dataset)
 			+ string("'."));
 
 	if (nctypelen(datatype) != sizeof(dods_int16)) {
-	intg16 = new dods_int16 [nels];
+	dods_int16 *intg16 = new dods_int16 [nels];
 
-        for (id = 0; id < nels; id++) 
+        for (int id = 0; id < nels; id++) 
             *(intg16+id) = (dods_int16) *(shtbuf+id);
 
         val2buf((void *)intg16);
@@ -299,22 +282,22 @@ NCArray::read(const string &dataset)
         break;
     }
     
-    case NC_LONG: {
-	lngbuf = (long int *)new char [(nels*nctypelen(datatype))];
+    case NC_INT: {
+	int *lngbuf = (int *)new char [(nels*nctypelen(datatype))];
 
 	if( has_stride)
-	    errstat = nc_get_vars_long(ncid, varid, cor, edg, step, lngbuf);
+	    errstat = nc_get_vars_int(ncid, varid, cor, edg, step, lngbuf);
 	else
-	    errstat = nc_get_vara_long(ncid, varid, cor, edg, lngbuf);
+	    errstat = nc_get_vara_int(ncid, varid, cor, edg, lngbuf);
 
 	if (errstat != NC_NOERR)
 	    throw Error(errstat, string("Could not read the variable `")
 			+ name() + string("'."));
 
 	if (nctypelen(datatype) != sizeof(dods_int32)) {
-	    intg32 = new dods_int32 [nels];
+	    dods_int32 *intg32 = new dods_int32 [nels];
 
-	    for (id = 0; id < nels; id++) 
+	    for (int id = 0; id < nels; id++) 
 		*(intg32+id) = (dods_int32) *(lngbuf+id);
 
 	    val2buf((void *) intg32);
@@ -332,7 +315,7 @@ NCArray::read(const string &dataset)
     
     case NC_CHAR: {
 
-        chrbuf = (char *)new char [(nels*nctypelen(datatype))];
+        char *chrbuf = (char *)new char [(nels*nctypelen(datatype))];
 
 	// read the vlaues in from the local netCDF file
 	if( has_stride)
@@ -348,7 +331,7 @@ NCArray::read(const string &dataset)
 	char buf[2] = " "; // one char and EOS
 
 	// put the char values in the string array
-	for (id = 0; id < nels; id++){	  
+	for (int id = 0; id < nels; id++){	  
 	    strncpy(buf, (chrbuf+id), 1);
 	    strg[id] = (string) buf;
 	}
