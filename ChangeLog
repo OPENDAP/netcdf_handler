@@ -1,3 +1,228 @@
+2006-01-10  James Gallagher <jgallagher@opendap.org>
+
+	Updated for version 3.5.2
+
+2006-01-10  James Gallagher <jgallagher@opendap.org>
+
+	Fix for ticket 281: int variables break the netcdf handler on
+	64bit machines. The problem was in read(). In that method we test
+	for the case where the variable is type NC_LONG (but NC_LONG is
+	#defined to NC_INT!). In fact there are no 64 bit integers in
+	NetCDF3. However, probably because the word 'long' was used, the
+	type long was used to hold the result and thus the function
+	nc_var_get_long() was called. On a 64bit machine that reads the
+	C/C++ type 'long' which is a 64bit int while the data were 32bit
+	ints.
+
+2006-01-10  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2006-01-05  Patrick West <pwest@ucar.edu>
+
+	derived from volatile, changed add to prepend root catalog
+	directory to real name
+
+2006-01-05  Patrick West <pwest@ucar.edu>
+
+	container persistence that matches nc catalog
+
+2005-11-21  Patrick West <pwest@ucar.edu>
+
+	Using DirectoryCatalog for netcdf catalogs
+
+2005-11-16  James Gallagher <jgallagher@opendap.org>
+
+	Update for 3.5.1 bug fix release
+
+2005-11-16  James Gallagher <jgallagher@opendap.org>
+
+	Relese 3.5.1 update
+
+2005-11-16  James Gallagher <jgallagher@opendap.org>
+
+	Removed unneeded forward class declarations
+
+2005-11-16  James Gallagher <jgallagher@opendap.org>
+
+	REplaced if then else if ... with a switch.
+
+2005-11-16  James Gallagher <jgallagher@opendap.org>
+
+	Fixed bug 266: The handler failed to handle the NC_BYTE data type.
+
+2005-11-15  Patrick West <pwest@ucar.edu>
+
+	request handlers won't be handling show nodes or show leaves
+
+2005-11-10  Patrick West <pwest@ucar.edu>
+
+	began implementing THREDDS catalog commands show nodes and show leaves
+
+2005-10-29  James Gallagher <jgallagher@opendap.org>
+
+	Updates from Patrice.
+
+2005-10-24  James Gallagher <jgallagher@opendap.org>
+
+	Added version numbers.
+
+2005-10-19  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2005-10-18  Patrick West <pwest@ucar.edu>
+
+	new version info response object
+
+2005-10-12  James Gallagher <jgallagher@opendap.org>
+
+	Update configure's required version of libdap to 3.5.3.
+
+2005-10-12  James Gallagher <jgallagher@opendap.org>
+
+	Updates to the documentation files.
+
+2005-10-07  James Gallagher <jgallagher@opendap.org>
+
+	Removed
+
+2005-10-07  James Gallagher <jgallagher@opendap.org>
+
+	Removed
+
+2005-10-03  James Gallagher <jgallagher@opendap.org>
+
+	Build improvements from Patrice Dumas.
+
+2005-10-03  Patrick West <pwest@ucar.edu>
+
+	int 32 class for netcdf handler
+
+2005-09-23  James Gallagher <jgallagher@opendap.org>
+
+	Spelling corrections.
+
+2005-09-23  James Gallagher <jgallagher@opendap.org>
+
+	Updated to include a rpm spec file.
+
+2005-09-19  Patrick West <pwest@ucar.edu>
+
+	dispatch changes using globals now using singleton references.
+	Also removed authentication
+
+2005-09-19  Patrick West <pwest@ucar.edu>
+
+	adde include of parent class BaseTypeHandler
+
+2005-09-19  Patrick West <pwest@ucar.edu>
+
+	using NCTypeFactory for construction of NC types
+
+2005-09-16  Patrick West <pwest@ucar.edu>
+
+	added constraint to post constraint for later, parse constraint is
+	called later with any constraint that is left from building the
+	dds, so don't do it here!
+
+2005-09-15  James Gallagher <jgallagher@opendap.org>
+
+	Removed all the #if 0 .. #endif code blocks left over from when
+	this was split out of the libnc-dap software.
+
+2005-09-15  James Gallagher <jgallagher@opendap.org>
+
+	Updated the copyright
+
+2005-09-14  James Gallagher <jgallagher@opendap.org>
+
+	Updated with info about autoreconf
+
+2005-09-13  James Gallagher <jgallagher@opendap.org>
+
+	Build fixes
+
+2005-09-13  James Gallagher <jgallagher@opendap.org>
+
+	Build uses an automake conditional to build opendapserver iff the is
+	installed.
+
+2005-09-13  James Gallagher <jgallagher@opendap.org>
+
+	Removed SECURITY, changed install dir from sbin to bin.
+
+2005-09-12  James Gallagher <jgallagher@opendap.org>
+
+	Updated.
+
+2005-09-12  James Gallagher <jgallagher@opendap.org>
+
+	Removed
+
+2005-09-06  James Gallagher <jgallagher@opendap.org>
+
+	Applied patched from Patrice Dumas; make distcheck now works.
+
+2005-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Figured out how to put acinclude in conf (use ACLOCAL_AMFLAGS = -I conf in
+	Makefile.am).
+
+2005-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Build update: Use automake (with fixes and the libdap macro).
+
+2005-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Shuffled around automake stuff
+
+2005-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Property update.
+
+2005-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Dash to underscore in the name of this project
+
+2005-08-08  root
+
+	Auto reset of Subversion properties
+
+2005-07-05  Rob Morris <Robert.O.Morris@jpl.nasa.gov>
+
+	Set eol-style to native on all text file in the trunk
+
+2005-06-15  James Gallagher <jgallagher@opendap.org>
+
+	Fixed so that -gstabs is not included on OS/X.
+
+2005-06-10  James Gallagher <jgallagher@opendap.org>
+
+	Updated the Makefile.am and removed the directories ncdump and testsuite
+	since this code uses neither.
+
+2005-05-25  James Gallagher <jgallagher@opendap.org>
+
+	Modifications to match with the dap-server Perl code.
+
+2005-05-23  James Gallagher <jgallagher@opendap.org>
+
+	*** empty log message ***
+
+2005-05-23  James Gallagher <jgallagher@opendap.org>
+
+	*** empty log message ***
+
+2005-05-23  James Gallagher <jgallagher@opendap.org>
+
+	Added files missing from CVS and updated some of the build files. The
+	make dist and distcheck targets now work.
+
+2005-05-23  James Gallagher <jgallagher@opendap.org>
+
+	Rearrangement for automake.
+
 2005-05-23  James Gallagher  <jimg@zoey.opendap.org>
 
 	* .cdtproject, .project, Makefile.am, Makefile.in, acinclude.m4,
