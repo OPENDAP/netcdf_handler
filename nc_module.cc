@@ -32,14 +32,14 @@ using std::endl ;
 #include "DODSInitList.h"
 #include "DODSRequestHandlerList.h"
 #include "NCRequestHandler.h"
-#include "DODSContainerPersistenceList.h"
-#include "NCContainerPersistence.h"
+#include "ContainerStorageList.h"
+#include "ContainerStorageCatalog.h"
 #include "DODSLog.h"
 #include "DirectoryCatalog.h"
 #include "CatalogList.h"
 
 #define NC_NAME "nc"
-#define NC_CATALOG_ROOT_KEY "NC.Catalog.Root"
+#define NC_CATALOG_ROOT_KEY "Catalog.nc.RootDirectory"
 
 static bool
 NCInit(int, char**)
@@ -58,10 +58,9 @@ NCInit(int, char**)
     CatalogList::TheCatalogList()->add_catalog( new DirectoryCatalog( NC_CATALOG_ROOT_KEY ) ) ;
 
     if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "Adding NC Persistence" << endl;
-    NCContainerPersistence *ncp =
-	    new NCContainerPersistence( "NC" ) ;
-    DODSContainerPersistenceList::TheList()->add_persistence( ncp ) ;
+	(*DODSLog::TheLog()) << "Adding " << NC_NAME << " Catalog Storage" << endl;
+    ContainerStorageCatalog *csc = new ContainerStorageCatalog( NC_NAME ) ;
+    ContainerStorageList::TheList()->add_persistence( csc ) ;
 
     return true ;
 }
@@ -75,8 +74,8 @@ NCTerm(void)
     if( rh ) delete rh ;
 
     if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "Removing NC Persistence" << endl;
-    DODSContainerPersistenceList::TheList()->rem_persistence( "NC" ) ;
+	(*DODSLog::TheLog()) << "Removing " << NC_NAME << " Catalog Storage" << endl;
+    ContainerStorageList::TheList()->rem_persistence( NC_NAME ) ;
 
     return true ;
 }
