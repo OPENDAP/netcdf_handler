@@ -114,7 +114,7 @@ main(int argc, char *argv[])
     }
     catch (Error &e) {
 	delete nctf; nctf = 0;
-	set_mime_text(cout, dods_error, cgi_version);
+	set_mime_text(stdout, dods_error, cgi_version);
 	e.print(cout);
 	return 1;
     }
