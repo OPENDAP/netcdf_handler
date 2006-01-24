@@ -8,7 +8,7 @@ Source0:         http://www.opendap.org/pub/3.5/source/%{name}-%{version}.tar.gz
 URL:             http://www.opendap.org/
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:   libdap-devel >= 3.5.2
+#BuildRequires:   libdap-devel >= 3.5.2
 Requires:        dap-server >= 3.5.0
 
 %description
