@@ -4,12 +4,12 @@ Version:         3.5.2
 Release:         1
 License:         GPL
 Group:           System Environment/Daemons 
-Source0:         http://www.opendap.org/pub/3.5/source/%{name}-%{version}.tar.gz
+Source0:         ftp://ftp.unidata.ucar.edu/pub/opendap/source/%{name}-%{version}.tar.gz
 URL:             http://www.opendap.org/
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-#BuildRequires:   libdap-devel >= 3.5.2
-Requires:        dap-server >= 3.5.0
+BuildRequires:   libdap-devel netcdf-devel
+Requires:        dap-server
 
 %description
 This is the netcdf data handler for our data server. It reads netcdf 3
@@ -21,6 +21,7 @@ dap-server 3.5 software.
 
 %build
 %configure
+make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -36,8 +37,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 
 %changelog
+* Wed Feb  1 2006 Patrice Dumas <pertusus at free.fr> - 3.5.2-1
+- re-add netcdf-devel
+
 * Wed Nov 16 2005 James Gallagher <jgallagher@opendap.org> 3.5.1-1
 - Removed netcdf-devel from BuildRequires. it does, unless you install 
 - netcdf some other way.
+
 * Thu Sep 21 2005 James Gallagher <jgallagher@opendap.org> 3.5.0-1
 - initial release
