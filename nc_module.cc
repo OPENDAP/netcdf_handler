@@ -39,7 +39,7 @@ using std::endl ;
 #include "CatalogList.h"
 
 #define NC_NAME "nc"
-#define NC_CATALOG_ROOT_KEY "Catalog.catalog.RootDirectory"
+#define NC_CATALOG "catalog"
 
 static bool
 NCInit(int, char**)
@@ -55,11 +55,11 @@ NCInit(int, char**)
     if( DODSLog::TheLog()->is_verbose() )
 	(*DODSLog::TheLog()) << "    adding " << NC_NAME << " catalog" 
 		      << endl ;
-    CatalogList::TheCatalogList()->add_catalog( new DirectoryCatalog( NC_CATALOG_ROOT_KEY ) ) ;
+    CatalogList::TheCatalogList()->add_catalog( new DirectoryCatalog( NC_CATALOG ) ) ;
 
     if( DODSLog::TheLog()->is_verbose() )
 	(*DODSLog::TheLog()) << "Adding Catalog Container Storage" << endl;
-    ContainerStorageCatalog *csc = new ContainerStorageCatalog( "catalog" ) ;
+    ContainerStorageCatalog *csc = new ContainerStorageCatalog( NC_CATALOG ) ;
     ContainerStorageList::TheList()->add_persistence( csc ) ;
 
     return true ;
