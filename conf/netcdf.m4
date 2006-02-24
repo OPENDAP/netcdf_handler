@@ -68,6 +68,15 @@ dnl  AC_LINK_IFELSE([AC_LANG_CALL([],[$ac_check_func_checked])],
     ],
     [
       for ac_netcdf_libdir in "" \
+       /usr/local/netcdf-${ac_check_nc_interface}/lib64 \
+       /opt/netcdf-${ac_check_nc_interface}/lib64 \
+       /usr/netcdf-${ac_check_nc_interface}/lib64 \
+       /usr/local/lib64/netcdf-${ac_check_nc_interface} \
+       /opt/lib64/netcdf-${ac_check_nc_interface} \
+       /usr/lib64/netcdf-${ac_check_nc_interface} \
+       /usr/local/netcdf/lib64 /opt/netcdf/lib64 \
+       /usr/netcdf/lib64 /usr/local/lib64/netcdf /opt/lib64/netcdf \
+       /usr/lib64/netcdf \
        /usr/local/netcdf-${ac_check_nc_interface}/lib \
        /opt/netcdf-${ac_check_nc_interface}/lib \
        /usr/netcdf-${ac_check_nc_interface}/lib \
