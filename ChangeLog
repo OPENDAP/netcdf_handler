@@ -1,3 +1,71 @@
+2006-02-24  James Gallagher <jgallagher@opendap.org>
+
+	Applied patches from Patrice Duams for netcdf_handler.spec and
+	conf/netcdf.m4
+
+2006-02-24  Patrick West <pwest@ucar.edu>
+
+	different way of creating DirectoryCatalog
+
+2006-02-14  James Gallagher <jgallagher@opendap.org>
+
+	Patched netcdf_handler.spec using a patch from Patrice Dumas:
+	re-add the netcdf-devel package as a BuildRequies
+
+2006-02-03  James Gallagher <jgallagher@opendap.org>
+
+	Added
+
+2006-01-24  James Gallagher <jgallagher@opendap.org>
+
+	Commented out the BuildRequires line in netcdf_handler.spec for
+	libdap-devel 3.5.2 since I am building packages on my development
+	machine and don't want to install packages there.
+
+2006-01-24  James Gallagher <jgallagher@opendap.org>
+
+	Modified netcdf_handler.cc so that it no longer calls any of the
+	libdap iostreams methods (which have been removed from libdap).
+
+2006-01-19  James Gallagher <jgallagher@opendap.org>
+
+	Changed set_mime-test() in nc_handler.cc so that it uses stdout
+	and not cout. I removed the iostreams versions of the
+	set_mime...() function from libdap in version 3.6.
+
+2006-01-17  Patrick West <pwest@ucar.edu>
+
+	changed name of catalog from nc to catalog
+
+2006-01-17  Patrick West <pwest@ucar.edu>
+
+	removed NCContainerPersistence, creating a general catalog
+	persistence class in bes/dispatch
+
+2006-01-11  James Gallagher <jgallagher@opendap.org>
+
+	Updated ChangeLog
+
+2006-01-10  James Gallagher <jgallagher@opendap.org>
+
+	Updated for version 3.5.2
+
+2006-01-10  James Gallagher <jgallagher@opendap.org>
+
+	Fix for ticket 281: int variables break the netcdf handler on
+	64bit machines. The problem was in read(). In that method we test
+	for the case where the variable is type NC_LONG (but NC_LONG is
+	#defined to NC_INT!). In fact there are no 64 bit integers in
+	NetCDF3. However, probably because the word 'long' was used, the
+	type long was used to hold the result and thus the function
+	nc_var_get_long() was called. On a 64bit machine that reads the
+	C/C++ type 'long' which is a 64bit int while the data were 32bit
+	ints.
+
+2006-01-10  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
 2006-01-10  James Gallagher <jgallagher@opendap.org>
 
 	Updated for version 3.5.2
@@ -199,8 +267,8 @@
 
 2005-06-10  James Gallagher <jgallagher@opendap.org>
 
-	Updated the Makefile.am and removed the directories ncdump and testsuite
-	since this code uses neither.
+	Updated the Makefile.am and removed the directories ncdump and
+	testsuite since this code uses neither.
 
 2005-05-25  James Gallagher <jgallagher@opendap.org>
 

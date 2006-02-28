@@ -1,6 +1,15 @@
 
 $Id$
 
+Version 3.6.0
+
+This version of the netcdf handler builds with libdap 3.6.0.
+
+Patrice Dumas has contributed improvements to the spec file used to build the
+RPM packages.
+
+Misc. fixes for the handler when used with Server4 (which is in development).
+
 Version 3.5.2
 
 Fix for ticket 281: int variable break on 64 bit machines. The fix involved
