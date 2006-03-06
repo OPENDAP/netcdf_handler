@@ -1,14 +1,14 @@
 Summary:         NetCDF 3 data handler for the OPeNDAP Data server
 Name:            netcdf_handler
 Version:         3.6.0
-Release:         1
+Release:         2
 License:         LGPL
 Group:           System Environment/Daemons 
 Source0:         ftp://ftp.unidata.ucar.edu/pub/opendap/source/%{name}-%{version}.tar.gz
 URL:             http://www.opendap.org/
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:   libdap-devel >= 3.6.0 netcdf-devel >= 3.5
+BuildRequires:   libdap-devel >= 3.6.0 netcdf-devel
 # Don't require dap-server as dap_nc_handler works without dap-server,
 # however dap_nc_handler should be of use only with dap-server in most cases.
 #Requires:        dap-server
@@ -16,7 +16,7 @@ BuildRequires:   libdap-devel >= 3.6.0 netcdf-devel >= 3.5
 %description
 This is the netcdf data handler for our data server. It reads netcdf 3
 files and returns DAP responses that are compatible with DAP2 and the
-dap-server 3.6 software.
+dap-server software.
 
 %prep 
 %setup -q
@@ -39,6 +39,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 
 %changelog
+* Fri Mar  3 2006 Patrice Dumas <pertusus at free.fr> - 3.6.0-1
+- Update to 3.6.0
+
 * Wed Feb  1 2006 Patrice Dumas <pertusus at free.fr> - 3.5.2-1
 - re-add netcdf-devel
 
