@@ -74,8 +74,8 @@ AC_DEFUN([AC_CHECK_NETCDF_3_HEADER],
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netcdf.h>]],
     [[int status;
 int ncid;
-status = nc_open("foo.nc", 0, &ncid);
 char vernum;
+status = nc_open("foo.nc", 0, &ncid);
 vernum = *nc_inq_libvers();]])],
     [
       AS_IF([test "z$ac_check_netcdf_3_include" != "z"],
