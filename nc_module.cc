@@ -80,5 +80,8 @@ NCTerm(void)
     return true ;
 }
 
+// Global initialization. Call NCInit when initializing and NCTerm when shutting
+// down. The '3' means these are run after functions registered in groups 1 and 
+// 2. FUNINITQUIT is a macro defined in DODSInitList.h
 FUNINITQUIT( NCInit, NCTerm, 3 ) ;
 
