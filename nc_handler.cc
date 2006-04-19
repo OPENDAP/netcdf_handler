@@ -34,6 +34,7 @@ static char not_used rcsid[]={"$Id$"};
 #include "DDS.h"
 #include "DAS.h"
 #include "DataDDS.h"
+#include "ConstraintEvaluator.h"
 
 #include "ObjectType.h"
 #include "cgi_util.h"
@@ -67,26 +68,29 @@ main(int argc, char *argv[])
 
 	  case DODSFilter::DDS_Response: {
 	    DDS dds(nctf);
+            ConstraintEvaluator ce;
 
 	    read_descriptors(dds, df.get_dataset_name());
 	    df.read_ancillary_dds(dds);
-	    df.send_dds(dds, true);
+	    df.send_dds(dds, ce, true);
 	    break;
 	  }
 
 	  case DODSFilter::DataDDS_Response: {
 	    DDS dds(nctf);
-
+            ConstraintEvaluator ce;
+            
 	    dds.filename(df.get_dataset_name());
 	    read_descriptors(dds, df.get_dataset_name()); 
 	    df.read_ancillary_dds(dds);
-	    df.send_data(dds, stdout);
+	    df.send_data(dds, ce, stdout);
 	    break;
 	  }
 
 	  case DODSFilter::DDX_Response: {
 	    DDS dds(nctf);
 	    DAS das;
+            ConstraintEvaluator ce;
 
 	    dds.filename(df.get_dataset_name());
 
@@ -98,7 +102,7 @@ main(int argc, char *argv[])
 
 	    dds.transfer_attributes(&das);
 
-	    df.send_ddx(dds, stdout);
+	    df.send_ddx(dds, ce, stdout);
 	    break;
 	  }
 
