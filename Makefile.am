@@ -12,10 +12,22 @@ ACLOCAL_AMFLAGS = -I conf
 bin_PROGRAMS = dap_nc_handler
 
 if OPENDAPSERVER
-    noinst_PROGRAMS = opendapserver
+    lib_LTLIBRARIES = libnc_module.la libnc_handler.la
+else
+    lib_LTLIBRARIES = libnc_handler.la
 endif
 
-NCTYPE_SRC = NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc	\
+libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(HANDLER_HDR) $(NCTYPE_HDR)
+
+libnc_module_la_SOURCES = $(SERVER_SRC) $(SERVER_HDR)
+libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
+libnc_module_la_LDFLAGS = -lnc_handler $(BES_LDFLAGS)
+
+dap_nc_handler_SOURCES = nc_handler.cc
+dap_nc_handler_LDADD = libnc_handler.la
+
+NCTYPE_SRC = ncdas.cc ncdds.cc \
+	NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc	\
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc	\
 	NCUInt16.cc NCInt16.cc NCFloat32.cc NCTypeFactory.cc
 
@@ -23,28 +35,13 @@ NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h		\
     NCArray.h NCGrid.h NCSequence.h NCUInt16.h NCByte.h NCInt16.h	\
     NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
 
-HANDLER_SRC = ncdas.cc ncdds.cc nc_handler.cc config_nc.h
+HANDLER_SRC =
 
-dap_nc_handler_SOURCES = $(NCTYPE_SRC) $(HANDLER_SRC) $(NCTYPE_HDR)
+HANDLER_HDR = config_nc.h
 
-SERVER_SRC = ncdas.cc ncdds.cc NCRequestHandler.cc nc_module.cc
+SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
-SERVER_HDR = NCRequestHandler.h
-
-MODULE_DIR = $(BES_MODULE_DIR)
-MODULES = $(MODULE_DIR)/OPeNDAPServerHandler.o $(MODULE_DIR)/ServerApp.o \
-	$(MODULE_DIR)/opendap_commands.o $(MODULE_DIR)/dods_module.o
-
-#SERVER_LIBS = -L../bes/command -lopendap_command -L../bes/dispatch -ldispatch -L../bes/ppt -lppt
-
-opendapserver_CPPFLAGS = $(BES_CPPFLAGS)
-opendapserver_SOURCES = $(NCTYPE_SRC) $(SERVER_SRC) $(NCTYPE_HDR) $(SERVER_HDR)
-opendapserver_LDFLAGS = $(BES_LDFLAGS) 
-opendapserver_LDADD = $(MODULES) 
-
-# $(AUTH_MOD)  $(SERVER_LIBS)
-
-EXTRA_PROGRAMS = opendapserver
+SERVER_HDR = NCRequestHandler.h NCModule.h
 
 EXTRA_DIST = COPYRIGHT COPYING netcdf_handler.spec
 
@@ -59,3 +56,4 @@ srpm:
 
 rpm:
 	rpmbuild -tb netcdf_handler-@PACKAGE_VERSION@.tar.gz
+

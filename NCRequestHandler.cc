@@ -107,7 +107,7 @@ bool
 NCRequestHandler::nc_build_help( DODSDataHandlerInterface &dhi )
 {
     DODSInfo *info = (DODSInfo *)dhi.response_handler->get_response_object() ;
-    info->add_data( (string)"No help currently available for netCDF handler.\n" ) ;
+    //info->add_data( (string)"No help currently available for netCDF handler.\n" ) ;
 
     return true ;
 }
