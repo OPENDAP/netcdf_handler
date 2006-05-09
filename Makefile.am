@@ -12,7 +12,7 @@ ACLOCAL_AMFLAGS = -I conf
 bin_PROGRAMS = dap_nc_handler
 
 if OPENDAPSERVER
-    lib_LTLIBRARIES = libnc_module.la libnc_handler.la
+    lib_LTLIBRARIES = libnc_handler.la libnc_module.la
 else
     lib_LTLIBRARIES = libnc_handler.la
 endif
