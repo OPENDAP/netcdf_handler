@@ -77,7 +77,7 @@ NCModule::terminate()
 
     if( DODSLog::TheLog()->is_verbose() )
 	(*DODSLog::TheLog()) << "Removing catalog Container Storage" << endl;
-    ContainerStorageList::TheList()->rem_persistence( "catalog" ) ;
+    ContainerStorageList::TheList()->del_persistence( "catalog" ) ;
 }
 
 extern "C"
