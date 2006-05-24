@@ -43,6 +43,8 @@ using std::endl ;
 #include "DODSResponseException.h"
 #include "OPeNDAPDataNames.h"
 
+#include "config_nc.h"
+
 extern void read_variables(DAS &das, const string &filename) throw (Error);
 extern void read_descriptors(DDS &dds, const string &filename)  throw (Error);
 
@@ -116,7 +118,7 @@ bool
 NCRequestHandler::nc_build_version( DODSDataHandlerInterface &dhi )
 {
     DODSVersionInfo *info = (DODSVersionInfo *)dhi.response_handler->get_response_object() ;
-    info->addHandlerVersion( "libnc-dods", "0.9" ) ;
+    info->addHandlerVersion( PACKAGE_NAME, PACKAGE_VERSION ) ;
     return true ;
 }
 
