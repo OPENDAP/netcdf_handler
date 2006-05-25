@@ -17,11 +17,12 @@ else
     lib_LTLIBRARIES = libnc_handler.la
 endif
 
-libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(HANDLER_HDR) $(NCTYPE_HDR)
+libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR)
 
-libnc_module_la_SOURCES = $(SERVER_SRC) $(SERVER_HDR)
+libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
 libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
-libnc_module_la_LDFLAGS = -lnc_handler $(BES_LDFLAGS)
+# libnc_module_la_LDFLAGS = -lnc_handler $(BES_LDFLAGS)
+libnc_module_la_LDFLAGS = $(BES_LDFLAGS)
 
 dap_nc_handler_SOURCES = nc_handler.cc
 dap_nc_handler_LDADD = libnc_handler.la
@@ -35,9 +36,10 @@ NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h		\
     NCArray.h NCGrid.h NCSequence.h NCUInt16.h NCByte.h NCInt16.h	\
     NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
 
-HANDLER_SRC =
+# HANDLER_SRC =
 
-HANDLER_HDR = config_nc.h
+# HANDLER_HDR = 
+# config_nc.h
 
 SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
