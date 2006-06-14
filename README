@@ -2,7 +2,7 @@
 $Id$
 
 This is the OPeNDAP netCDF Data Handler. It is used along with the OPeNDAP
-DAP Server.
+DAP Server3 and Server4 1.2 beta.
 
 For information about building the OPeNDAP netCDF Data Handler, see the
 INSTALL file.

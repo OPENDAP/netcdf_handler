@@ -1,3 +1,101 @@
+2006-06-13  James Gallagher <jgallagher@opendap.org>
+
+	opendap.ini: Modified for my development machine. YMMV
+
+2006-05-25  James Gallagher <jgallagher@opendap.org>
+
+	Makefile.am: Changed the way libnc_module is linked so that on
+	OS/X it does not require libnc_handler. This is OK on linux, but
+	will be hard to handle for many admins should we be required to
+	support an OS/X binary release.
+
+2006-05-24  Patrick West <pwest@ucar.edu>
+
+	bes module updates
+
+2006-05-15  Patrick West <pwest@ucar.edu>
+
+	container storage changes
+
+2006-05-09  James Gallagher <jgallagher@opendap.org>
+
+	Makefile.am: Reordered the libraries build when making the
+	shared lib for the BES. This fixes ticket #370.
+
+2006-05-09  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2006-05-08  James Gallagher <jgallagher@opendap.org>
+
+	bes.m4: Added.
+
+2006-05-03  James Gallagher <jgallagher@opendap.org>
+
+	configure.ac: Now searches for the bes libraries and includes
+	the netcdf module in the build if they are found. It's no longer
+	necessary to use the --with-bes unless you have an odd setup.
+
+2006-05-02  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2006-05-01  Patrick West <pwest@ucar.edu>
+
+	dispatch_help files exist and should be installed
+
+2006-05-01  James Gallagher <jgallagher@opendap.org>
+
+	stuff on conf: Updated the files since the code now builds
+	shared object libraries (for use with the BES).
+
+2006-05-01  James Gallagher <jgallagher@opendap.org>
+
+	libdap.m4: Added DAP_CLIENT_LIBS and DAP_SERVER_LIBS to symbols
+	that are written out.
+
+2006-05-01  James Gallagher <jgallagher@opendap.org>
+
+	ltmain.sh: Added; needed now to build the SO library
+
+2006-04-27  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2006-04-26  Patrick West <pwest@ucar.edu>
+
+	netcdf handler dynamically loaded module support
+
+2006-04-19  James Gallagher <jgallagher@opendap.org>
+
+	configure.ac: Switched to the new libdap.m4 marco (uses
+	DAP_SERVER_LIBS in place of DAP_LIBS).
+
+2006-04-19  James Gallagher <jgallagher@opendap.org>
+
+	nc_handler.cc: Added ConstraintEvaluator objects.
+
+2006-04-19  James Gallagher <jgallagher@opendap.org>
+
+	nc_module.cc: Added a comment explaning the FUNINITQUIT macro.
+
+2006-04-19  James Gallagher <jgallagher@opendap.org>
+
+	libdap.m4: Updated the macro to the new version in libdap.
+
+2006-03-29  James Gallagher <jgallagher@opendap.org>
+
+	conf/netcdf_header.m4: Fixed a bug where C++ syntax was used in
+	a C test program. Reported by Martin.Peschke@noaa.gov.
+
+2006-03-06  James Gallagher <jgallagher@opendap.org>
+
+	Updated for 3.6.0-2.
+
+2006-03-06  James Gallagher <jgallagher@opendap.org>
+
+	Updated the release number in the .spec file
+
 2006-03-06  James Gallagher <jgallagher@opendap.org>
 
 	Updated the release number in the .spec file

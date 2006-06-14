@@ -21,7 +21,7 @@ libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR)
 
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
 libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
-# libnc_module_la_LDFLAGS = -lnc_handler $(BES_LDFLAGS)
+
 libnc_module_la_LDFLAGS = $(BES_LDFLAGS)
 
 dap_nc_handler_SOURCES = nc_handler.cc
@@ -34,12 +34,8 @@ NCTYPE_SRC = ncdas.cc ncdds.cc \
 
 NCTYPE_HDR = NCFloat64.h NCRequestHandler.h NCTypeFactory.h		\
     NCArray.h NCGrid.h NCSequence.h NCUInt16.h NCByte.h NCInt16.h	\
-    NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h
-
-# HANDLER_SRC =
-
-# HANDLER_HDR = 
-# config_nc.h
+    NCStr.h NCUInt32.h NCFloat32.h NCInt32.h NCStructure.h NCUrl.h	\
+    config_nc.h
 
 SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
