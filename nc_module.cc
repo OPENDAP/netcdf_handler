@@ -29,12 +29,12 @@
 
 using std::endl ;
 
-#include "DODSInitList.h"
-#include "DODSRequestHandlerList.h"
+#include "BESInitList.h"
+#include "BESRequestHandlerList.h"
 #include "NCRequestHandler.h"
 #include "ContainerStorageList.h"
 #include "ContainerStorageCatalog.h"
-#include "DODSLog.h"
+#include "BESLog.h"
 #include "DirectoryCatalog.h"
 #include "CatalogList.h"
 
@@ -44,21 +44,21 @@ using std::endl ;
 static bool
 NCInit(int, char**)
 {
-    if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "Initializing NC:" << endl ;
+    if( BESLog::TheLog()->is_verbose() )
+	(*BESLog::TheLog()) << "Initializing NC:" << endl ;
 
-    if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "    adding " << NC_NAME << " request handler" 
+    if( BESLog::TheLog()->is_verbose() )
+	(*BESLog::TheLog()) << "    adding " << NC_NAME << " request handler" 
 		      << endl ;
-    DODSRequestHandlerList::TheList()->add_handler( NC_NAME, new NCRequestHandler( NC_NAME ) ) ;
+    BESRequestHandlerList::TheList()->add_handler( NC_NAME, new NCRequestHandler( NC_NAME ) ) ;
 
-    if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "    adding " << NC_NAME << " catalog" 
+    if( BESLog::TheLog()->is_verbose() )
+	(*BESLog::TheLog()) << "    adding " << NC_NAME << " catalog" 
 		      << endl ;
     CatalogList::TheCatalogList()->add_catalog( new DirectoryCatalog( NC_CATALOG ) ) ;
 
-    if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "Adding Catalog Container Storage" << endl;
+    if( BESLog::TheLog()->is_verbose() )
+	(*BESLog::TheLog()) << "Adding Catalog Container Storage" << endl;
     ContainerStorageCatalog *csc = new ContainerStorageCatalog( NC_CATALOG ) ;
     ContainerStorageList::TheList()->add_persistence( csc ) ;
 
@@ -68,13 +68,13 @@ NCInit(int, char**)
 static bool
 NCTerm(void)
 {
-    if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "Removing NC Handlers" << endl;
-    DODSRequestHandler *rh = DODSRequestHandlerList::TheList()->remove_handler( NC_NAME ) ;
+    if( BESLog::TheLog()->is_verbose() )
+	(*BESLog::TheLog()) << "Removing NC Handlers" << endl;
+    BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( NC_NAME ) ;
     if( rh ) delete rh ;
 
-    if( DODSLog::TheLog()->is_verbose() )
-	(*DODSLog::TheLog()) << "Removing catalog Container Storage" << endl;
+    if( BESLog::TheLog()->is_verbose() )
+	(*BESLog::TheLog()) << "Removing catalog Container Storage" << endl;
     ContainerStorageList::TheList()->rem_persistence( "catalog" ) ;
 
     return true ;
@@ -82,6 +82,6 @@ NCTerm(void)
 
 // Global initialization. Call NCInit when initializing and NCTerm when shutting
 // down. The '3' means these are run after functions registered in groups 1 and 
-// 2. FUNINITQUIT is a macro defined in DODSInitList.h
+// 2. FUNINITQUIT is a macro defined in BESInitList.h
 FUNINITQUIT( NCInit, NCTerm, 3 ) ;
 

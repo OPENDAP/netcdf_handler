@@ -11,10 +11,10 @@ ACLOCAL_AMFLAGS = -I conf
 
 bin_PROGRAMS = dap_nc_handler
 
+lib_LTLIBRARIES = libnc_handler.la
 if OPENDAPSERVER
-    lib_LTLIBRARIES = libnc_handler.la libnc_module.la
-else
-    lib_LTLIBRARIES = libnc_handler.la
+    lib_besdir=$(prefix)/lib/bes
+    lib_bes_LTLIBRARIES = libnc_module.la
 endif
 
 libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR)

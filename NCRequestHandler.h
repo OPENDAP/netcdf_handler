@@ -28,18 +28,18 @@
 #ifndef I_NCRequestHandler_H
 #define I_NCRequestHandler_H 1
 
-#include "DODSRequestHandler.h"
+#include "BESRequestHandler.h"
 
-class NCRequestHandler : public DODSRequestHandler {
+class NCRequestHandler : public BESRequestHandler {
 public:
 			NCRequestHandler( string name ) ;
     virtual		~NCRequestHandler( void ) ;
 
-    static bool		nc_build_das( DODSDataHandlerInterface &dhi ) ;
-    static bool		nc_build_dds( DODSDataHandlerInterface &dhi ) ;
-    static bool		nc_build_data( DODSDataHandlerInterface &dhi ) ;
-    static bool		nc_build_help( DODSDataHandlerInterface &dhi ) ;
-    static bool		nc_build_version( DODSDataHandlerInterface &dhi ) ;
+    static bool		nc_build_das( BESDataHandlerInterface &dhi ) ;
+    static bool		nc_build_dds( BESDataHandlerInterface &dhi ) ;
+    static bool		nc_build_data( BESDataHandlerInterface &dhi ) ;
+    static bool		nc_build_help( BESDataHandlerInterface &dhi ) ;
+    static bool		nc_build_version( BESDataHandlerInterface &dhi ) ;
 };
 
 #endif
