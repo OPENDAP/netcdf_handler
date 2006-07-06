@@ -315,7 +315,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 // otherwise. 
 
 void
-read_variables(DAS &das, const string &filename) throw (Error) 
+nc_read_variables(DAS &das, const string &filename) throw (Error) 
 {
     ncopts = 0;
     int ncid, errstat; 
@@ -398,7 +398,7 @@ main(int argc, char *argv[])
 {
     DAS das;
 
-    if(!read_variables(das, argv[1], ""))
+    if(!nc_read_variables(das, argv[1], ""))
 	abort();
 
     das.print();

@@ -45,8 +45,8 @@ using std::endl ;
 
 #include "config_nc.h"
 
-extern void read_variables(DAS &das, const string &filename) throw (Error);
-extern void read_descriptors(DDS &dds, const string &filename)  throw (Error);
+extern void nc_read_variables(DAS &das, const string &filename) throw (Error);
+extern void nc_read_descriptors(DDS &dds, const string &filename)  throw (Error);
 
 NCRequestHandler::NCRequestHandler( string name )
     : BESRequestHandler( name )
@@ -67,7 +67,7 @@ NCRequestHandler::nc_build_das( BESDataHandlerInterface &dhi )
 {
     DAS *das = (DAS *)dhi.response_handler->get_response_object() ;
 
-    read_variables( *das, dhi.container->get_real_name() );
+    nc_read_variables( *das, dhi.container->get_real_name() );
 
     return true ;
 }
@@ -79,7 +79,7 @@ NCRequestHandler::nc_build_dds( BESDataHandlerInterface &dhi )
     NCTypeFactory *factory = new NCTypeFactory ;
     dds->set_factory( factory ) ;
 
-    read_descriptors( *dds, dhi.container->get_real_name() );
+    nc_read_descriptors( *dds, dhi.container->get_real_name() );
     dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
     dds->set_factory( NULL ) ;
@@ -96,7 +96,7 @@ NCRequestHandler::nc_build_data( BESDataHandlerInterface &dhi )
     dds->set_factory( factory ) ;
 
     dds->filename( dhi.container->get_real_name() );
-    read_descriptors( *dds, dhi.container->get_real_name() ); 
+    nc_read_descriptors( *dds, dhi.container->get_real_name() ); 
     dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
     dds->set_factory( NULL ) ;

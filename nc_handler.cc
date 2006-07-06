@@ -41,8 +41,8 @@ static char not_used rcsid[]={"$Id$"};
 
 #include "NCTypeFactory.h"
 
-extern void read_variables(DAS &das, const string &filename) throw (Error);
-extern void read_descriptors(DDS &dds, const string &filename)  throw (Error);
+extern void nc_read_variables(DAS &das, const string &filename) throw (Error);
+extern void nc_read_descriptors(DDS &dds, const string &filename)  throw (Error);
 
 const string cgi_version = PACKAGE_VERSION;
 
@@ -60,7 +60,7 @@ main(int argc, char *argv[])
 	  case DODSFilter::DAS_Response: {
 	    DAS das;
 
-	    read_variables(das, df.get_dataset_name());
+	    nc_read_variables(das, df.get_dataset_name());
 	    df.read_ancillary_das(das);
 	    df.send_das(das);
 	    break;
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 	    DDS dds(nctf);
             ConstraintEvaluator ce;
 
-	    read_descriptors(dds, df.get_dataset_name());
+	    nc_read_descriptors(dds, df.get_dataset_name());
 	    df.read_ancillary_dds(dds);
 	    df.send_dds(dds, ce, true);
 	    break;
@@ -81,7 +81,7 @@ main(int argc, char *argv[])
             ConstraintEvaluator ce;
             
 	    dds.filename(df.get_dataset_name());
-	    read_descriptors(dds, df.get_dataset_name()); 
+	    nc_read_descriptors(dds, df.get_dataset_name()); 
 	    df.read_ancillary_dds(dds);
 	    df.send_data(dds, ce, stdout);
 	    break;
@@ -94,10 +94,10 @@ main(int argc, char *argv[])
 
 	    dds.filename(df.get_dataset_name());
 
-	    read_descriptors(dds, df.get_dataset_name()); 
+	    nc_read_descriptors(dds, df.get_dataset_name()); 
 	    df.read_ancillary_dds(dds);
 
-	    read_variables(das, df.get_dataset_name());
+	    nc_read_variables(das, df.get_dataset_name());
 	    df.read_ancillary_das(das);
 
 	    dds.transfer_attributes(&das);

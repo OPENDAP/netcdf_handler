@@ -269,7 +269,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 // otherwise. 
 
 void
-read_descriptors(DDS &dds_table, const string &filename) throw (Error) 
+nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error) 
 
 {
   ncopts = 0;
@@ -315,11 +315,11 @@ main(int argc, char *argv[])
 {
   DDS dds;
   /*  
-    if(!read_descriptors(dds, argv[1]))
+    if(!nc_read_descriptors(dds, argv[1]))
     abort();
   */
   try {
-      read_descriptors(dds, (string)argv[1]);
+      nc_read_descriptors(dds, (string)argv[1]);
       dds.print();
     }
     catch (Error &e) {
