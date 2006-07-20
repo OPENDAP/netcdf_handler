@@ -1,6 +1,13 @@
 
 $Id$
 
+Version 3.7.1
+
+This version includes a fix for bug 435. There are serveral data handlers
+that use the same names for externally visible functions. That's fine when
+the handlers are executables, but not so when they are shared object
+libraries. The function named have been changed.
+
 Version 3.7.0
 
 This version of the netCDF handler includes an executable for use with

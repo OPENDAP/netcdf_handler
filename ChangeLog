@@ -1,3 +1,32 @@
+2006-07-06  Patrick West <pwest@ucar.edu>
+
+	dap_cmdmodule library renamed to dap_cmd_module so that all loaded
+	module libraries are named <something>_module
+
+2006-07-06  James Gallagher <jgallagher@opendap.org>
+
+	nc_hander.cc, ncdas.cc, ncdds.cc, NCRequestHandler.cc: The function
+	read_descriptors(...) was renamed to nc_read_descriptors(...) to avoid
+	a name collision with the read_descriptors(...) function in the
+	freeform handler. I made a similar change to the function that builds
+	the DAS.
+
+2006-06-30  Patrick West <pwest@ucar.edu>
+
+	In the help response added begin and end tags called handler to
+	separate the different hander help responses and added a tag
+	called name within the handler tag to say which handler this help
+	is for, what requests this handler handles, and what version this
+	handler is. Removed the file nc_module.cc
+
+2006-06-20  Patrick West <pwest@ucar.edu>
+
+	DODS to BES changes
+
+2006-06-14  James Gallagher <jgallagher@opendap.org>
+
+	Updates to the distribution files (README, NEWS, et c.)
+
 2006-06-13  James Gallagher <jgallagher@opendap.org>
 
 	opendap.ini: Modified for my development machine. YMMV
