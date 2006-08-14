@@ -54,11 +54,13 @@ static char not_used rcsid[]={"$Id$"};
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include <netcdf.h>
 
 #include "cgi_util.h"
 #include "util.h"
+#include "escaping.h"
 #include "DAS.h"
 
 // These are used as the return values for print_type().
@@ -74,95 +76,71 @@ static const char FLOAT32[]="Float32";
 
 static char Msgt[255];
 
-// Given the type, array number and pointer to a attribute, build the printed
-// representation of that attribute. 
-//
-// Largely taken from ncdump. Copyright 1993, University Corporation for
-// Atmospheric Research.
-//
-// Return a char * to newly allocated memory. The caller must call delete [].
-
-static char *
+/** Given the type, array number and pointer to the associated attribute,
+    Return the string representaion of the attribute's value. 
+    
+    This function is modeled on code from ncdump. I modified the original 
+    version to use C++ string streams and also to call escattr() so that
+    attributes with quotes would be handled correctly. */
+static string
 print_attr(nc_type type, int loc, void *vals)
 {
-    char *rep;			// return value
+    ostringstream rep;
     union {
-	char *cp;
-	short *sp;
-	nclong *lp;
-	float *fp;
-	double *dp;
+        char *cp;
+        short *sp;
+        nclong *lp;
+        float *fp;
+        double *dp;
     } gp;
 
     switch (type) {
       case NC_BYTE:
-	unsigned char uc;
-	//char uc;  
-	rep = new char [32];
-	gp.cp = (char *) vals;
+        unsigned char uc;
+        gp.cp = (char *) vals;
 
-	uc = *(gp.cp+loc);
-	sprintf (rep, "%d",uc);
-
-	return rep;
-	break;
+        uc = *(gp.cp+loc);
+        rep << uc;
+        return rep.str();
 
       case NC_CHAR:
-	rep = new char [strlen((const char *)vals) + 3];
-	sprintf(rep, "\"%s\"", (char *)vals);
-	return rep;
-	break;
+        rep << "\"" << escattr(static_cast<const char*>(vals)) << "\"";
+        return rep.str();
 
       case NC_SHORT:
-	rep = new char [32];
-	gp.sp = (short *) vals;
-	sprintf (rep, "%d",*(gp.sp+loc));
-	return rep;
-	break;
+        gp.sp = (short *) vals;
+        rep << *(gp.sp+loc);
+        return rep.str();
 
       case NC_LONG:
-	rep = new char [32];
-	gp.lp = (nclong *) vals; // warning: long int format, int arg (arg 3)
-	sprintf (rep, "%d",*(gp.lp+loc));
-	return rep;
-	break;
+        gp.lp = (nclong *) vals; // warning: long int format, int arg (arg 3)
+        rep << *(gp.lp+loc);
+        return rep.str();
 
       case NC_FLOAT: {
-	  char *f_fmt = "%.10g";
-	  char gps[30];		// for ascii of a float and double precision
-
-	  rep = new char [32];
-	  gp.fp = (float *) vals;
-	  int ll;
-	  (void) sprintf(gps, f_fmt, * (gp.fp+loc));
-	  // make sure we get a decimal point for float type attributes
-	  ll = strlen(gps);
-	  if (!strchr(gps, '.') && !strchr(gps,'e')) 
-	      gps[ll++] = '.';
-	  gps[ll] = '\0';
-	  sprintf (rep, "%s", gps);
-	  return rep;
-	  break;
+          gp.fp = (float *) vals;
+          rep << *(gp.fp+loc);
+          // If there's no decimal point and the rep does not use scientific
+          // notation, add a decimal point. This little jaunt was taken because
+          // this code is modeled after older code and that's what it did. I'm
+          // trying to keep the same behavior as the old code without it's 
+          // problems. jhrg 8/11/2006
+          if (rep.str().find('.') == string::npos 
+              && rep.str().find('e') == string::npos)
+                rep << ".";
+          return rep.str();
       }
       case NC_DOUBLE: {
-	  char *d_fmt = "%.17g";
-	  char gps[30];		// for ascii of a float and double precision
-
-	  rep = new char [32];
-	  gp.dp = (double *) vals;
-	  (void) sprintf(gps, d_fmt, *(gp.dp+loc));
-	  // make sure we get a decimal point for float type attributes
-	  int ll = strlen(gps);
-	  if (!strchr(gps, '.') && !strchr(gps,'e')) 
-	      gps[ll++] = '.';
-	  gps[ll] = '\0';
-	  sprintf (rep, "%s", gps);
-	  return rep;
-	  break;
+          gp.dp = (double *) vals;
+          rep << *(gp.dp+loc);
+          if (rep.str().find('.') == string::npos 
+              && rep.str().find('e') == string::npos)
+                rep << ".";
+          return rep.str();
+          break;
       }
       default:
-        ErrMsgT("nc_das: print_attr: bad type");
-	return NULL;
+        return string("\"\"");
     }
 }
 
@@ -295,9 +273,8 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 
 	// add all the attributes in the array
 	for (unsigned int loc=0; loc < len ; loc++) {
-	    char *print_rep = print_attr(datatype, loc, (void *)value);	
+	    string print_rep = print_attr(datatype, loc, (void *)value);	
 	    at->append_attr(attrname, print_type(datatype), print_rep);
-	    delete [] print_rep;
 	}
 
 	delete [] value;
@@ -382,161 +359,10 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     nc_inq(ncid, (int *)0, (int *)0, (int *)0, &xdimid);
     if (xdimid != -1){
 	nc_inq_dim(ncid, xdimid, dimname, (size_t *)0);
-	char *print_rep = print_attr(datatype, 0, dimname);	
+	string print_rep = print_attr(datatype, 0, dimname);	
 	attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
 	attr_table_ptr->append_attr("Unlimited_Dimension", 
 				    print_type(datatype), print_rep);
-	delete [] print_rep;
     }
 
 }
-
-#ifdef TEST
-
-int
-main(int argc, char *argv[])
-{
-    DAS das;
-
-    if(!nc_read_variables(das, argv[1], ""))
-	abort();
-
-    das.print();
-}
-
-#endif
-
-// $Log: ncdas.cc,v $
-// Revision 1.10  2005/04/19 23:16:18  jimg
-// Removed client side parts; the client library is now in libnc-dap.
-//
-// Revision 1.9  2004/03/08 19:08:33  jimg
-// This version of the code uses the Unidata netCDF 3.5.1 version of the
-// netCDF 2 API emulation. This functions call our netCDF 3 API functions
-// which may either interact with a DAP server r call the local netCDF 3
-// functions.
-//
-// Revision 1.8  2004/02/25 00:47:52  jimg
-// This code will translate Structures, including ones that are nested.
-// Not tested much; needs work.
-//
-// Revision 1.7  2003/12/08 18:06:37  edavis
-// Merge release-3-4 into trunk
-//
-// Revision 1.6  2003/09/25 23:09:36  jimg
-// Meerged from 3.4.1.
-//
-// Revision 1.5.4.1  2003/06/06 08:23:41  reza
-// Updated the servers to netCDF-3 and fixed error handling between client and server.
-//
-// Revision 1.5  2003/01/28 07:08:24  jimg
-// Merged with release-3-2-8.
-//
-// Revision 1.3.4.3  2002/12/27 00:39:09  jimg
-// Replaced %ld with %d for integer argument in sprintf.
-//
-// Revision 1.3.4.2  2002/11/06 22:53:23  pwest
-// Cleaned up some uninitialized memory read warnings from purify
-//
-// Revision 1.4  2001/08/30 23:08:24  jimg
-// Merged with 3.2.4
-//
-// Revision 1.3.4.1  2001/06/22 04:45:28  reza
-// Added/Fixed exception handling.
-//
-// Revision 1.3  2000/10/06 01:22:03  jimg
-// Moved the CVS Log entries to the ends of files.
-// Modified the read() methods to match the new definition in the dap library.
-// Added exception handlers in various places to catch exceptions thrown
-// by the dap library.
-//
-// Revision 1.2  1999/11/05 05:15:07  jimg
-// Result of merge woth 3-1-0
-//
-// Revision 1.1.2.1  1999/10/29 05:05:23  jimg
-// Reza's fixes plus the configure & Makefile update
-//
-// Revision 1.1  1999/07/28 00:22:47  jimg
-// Added
-//
-// Revision 1.21  1999/05/08 00:38:20  jimg
-// Fixes for the String --> string changes
-//
-// Revision 1.20  1999/05/07 23:45:33  jimg
-// String --> string fixes
-//
-// Revision 1.19  1999/03/30 05:20:56  reza
-// Added support for the new data types (Int16, UInt16, and Float32).
-//
-// Revision 1.18  1997/03/10 16:24:22  reza
-// Added error object and upgraded to DODS core release 2.12.
-//
-// Revision 1.17  1996/09/17 17:07:05  jimg
-// Merge the release-2-0 tagged files (which were off on a branch) back into
-// the trunk revision.
-//
-// Revision 1.16.2.2  1996/07/10 21:44:44  jimg
-// Changes for version 2.06. These fixed lingering problems from the migration
-// from version 1.x to version 2.x.
-// Removed some (but not all) warning generated with gcc's -Wall option.
-//
-// Revision 1.16.2.1  1996/06/25 22:05:07  jimg
-// Version 2.0 from Reza.
-//
-// Revision 1.15  1995/07/09  21:34:01  jimg
-// Added copyright notice.
-//
-// Revision 1.14  1995/06/29  20:29:50  jimg
-// Added delete [] of the return value from print_attr(). This patched a
-// reported memory leak (reported from dbnew).
-//
-// Revision 1.13  1995/06/28  20:22:42  jimg
-// Replaced malloc calls with calls to new (and calls to free with calls to
-// delete).
-//
-// Revision 1.12  1995/06/27  20:48:52  jimg
-// Changed the scope of print_type() and print_attr() to static.
-// Fixed an off-by-one error in read_attribtes() when working with NC_CHAR
-// attributes (which we represent as strings).
-//
-// Revision 1.11  1995/06/23  15:35:23  jimg
-// Added netio.h.
-// Fixed some misc problems which may have come about do to the modifications
-// in nc_das.cc and nc_dds.cc (they went from CGIs to simple UNIX filters).
-//
-// Revision 1.10  1995/03/16  16:38:35  reza
-// Updated byte transfer. Bytes are no longer transmitted in binary but in
-// an ASCII string (0-255).
-//
-// Revision 1.9  1995/02/10  04:47:37  reza
-// Updated to use type subclasses, NCArray, NCByte, NCInt32, NCGrid....
-//
-// Revision 1.8  1994/12/22  04:46:20  reza
-// Updated to use DODS new attribute array capability.
-//
-// Revision 1.7  1994/11/03  05:18:27  reza
-// Modified the redundant trailing type-code and illegal (in das parser)
-// single quotation marks used for byte type.
-//
-// Revision 1.6  1994/10/28  15:14:15  reza
-// Changed some comments
-//
-// Revision 1.5  1994/10/06  17:53:07  jimg
-// Some reformatting of code for emacs, ...
-// Fixed Makefile.in so that two targets are built: client and server.
-// Fixed cast away of const in ncdas.cc.
-//
-// Revision 1.4  1994/10/06  16:29:54  jimg
-// Fixed printed representation of Strings read from a netcdf file -- they
-// now are correctly enclosed in double quotes.
-//
-// Revision 1.3  1994/10/06  15:52:10  reza
-// Changed error messeges
-//
-// Revision 1.2  1994/10/05  18:00:17  jimg
-// Modified so that types (as represented by the DAS) are now handled
-// correctly.
-//
-// Revision 1.1  1994/09/27  23:19:37  jimg
-// First version of the netcdf software which used libdas++.a.
-//
