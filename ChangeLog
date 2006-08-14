@@ -1,3 +1,15 @@
+2006-08-14  James Gallagher <jgallagher@opendap.org>
+
+	ncdas.cc: Now escapes attribute values when those are Strings using
+	libdap's escattr(). I rewrote the function that builds the print
+	representation of the attributes using stringstream in place of the
+	older sprintf() version. This is a fix for ticket 488.
+
+2006-07-20  James Gallagher <jgallagher@opendap.org>
+
+	Updates for bug 435 fixes (netcdf_handler.spec and configure.ac updated
+	for the version number; NEWS and ChangeLog for the fix).
+
 2006-07-06  Patrick West <pwest@ucar.edu>
 
 	dap_cmdmodule library renamed to dap_cmd_module so that all loaded

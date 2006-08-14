@@ -1,6 +1,14 @@
 
 $Id$
 
+Version 3.7.2
+
+Fix for ticket 488. Embedded double quotes in string attributes were not
+escaped. The server was modified so that String attributes are now passed
+through the libdap function escattr(). There may be differences for some
+String attributes in some clients as a result. Note that this version of the
+handler requires libdap 3.7.0 or greater.
+
 Version 3.7.1
 
 This version includes a fix for bug 435. There are serveral data handlers
