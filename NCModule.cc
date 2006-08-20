@@ -42,22 +42,21 @@ using std::endl ;
 #include "BESCatalogList.h"
 #include "BESLog.h"
 
-#define NC_NAME "nc"
 #define NC_CATALOG "catalog"
 
 void
-NCModule::initialize()
+NCModule::initialize( const string &modname )
 {
     if( BESLog::TheLog()->is_verbose() )
 	(*BESLog::TheLog()) << "Initializing NC:" << endl ;
 
     if( BESLog::TheLog()->is_verbose() )
-	(*BESLog::TheLog()) << "    adding " << NC_NAME << " request handler" 
+	(*BESLog::TheLog()) << "    adding " << modname << " request handler" 
 		      << endl ;
-    BESRequestHandlerList::TheList()->add_handler( NC_NAME, new NCRequestHandler( NC_NAME ) ) ;
+    BESRequestHandlerList::TheList()->add_handler( modname, new NCRequestHandler( modname ) ) ;
 
     if( BESLog::TheLog()->is_verbose() )
-	(*BESLog::TheLog()) << "    adding " << NC_NAME << " catalog" 
+	(*BESLog::TheLog()) << "    adding " << NC_CATALOG << " catalog" 
 		      << endl ;
     BESCatalogList::TheCatalogList()->add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
 
@@ -68,11 +67,11 @@ NCModule::initialize()
 }
 
 void
-NCModule::terminate()
+NCModule::terminate( const string &modname )
 {
     if( BESLog::TheLog()->is_verbose() )
 	(*BESLog::TheLog()) << "Removing NC Handlers" << endl;
-    BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( NC_NAME ) ;
+    BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( modname ) ;
     if( rh ) delete rh ;
 
     if( BESLog::TheLog()->is_verbose() )

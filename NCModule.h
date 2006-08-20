@@ -39,8 +39,8 @@ class NCModule : public BESAbstractModule
 public:
     				NCModule() {}
     virtual		    	~NCModule() {}
-    virtual void		initialize() ;
-    virtual void		terminate() ;
+    virtual void		initialize( const string &modname ) ;
+    virtual void		terminate( const string &modname ) ;
 } ;
 
 #endif // A_NCModule_H

@@ -67,7 +67,7 @@ NCRequestHandler::nc_build_das( BESDataHandlerInterface &dhi )
 {
     DAS *das = (DAS *)dhi.response_handler->get_response_object() ;
 
-    nc_read_variables( *das, dhi.container->get_real_name() );
+    nc_read_variables( *das, dhi.container->access() );
 
     return true ;
 }
@@ -79,7 +79,7 @@ NCRequestHandler::nc_build_dds( BESDataHandlerInterface &dhi )
     NCTypeFactory *factory = new NCTypeFactory ;
     dds->set_factory( factory ) ;
 
-    nc_read_descriptors( *dds, dhi.container->get_real_name() );
+    nc_read_descriptors( *dds, dhi.container->access() );
     dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
     dds->set_factory( NULL ) ;
@@ -95,8 +95,8 @@ NCRequestHandler::nc_build_data( BESDataHandlerInterface &dhi )
     NCTypeFactory *factory = new NCTypeFactory ;
     dds->set_factory( factory ) ;
 
-    dds->filename( dhi.container->get_real_name() );
-    nc_read_descriptors( *dds, dhi.container->get_real_name() ); 
+    dds->filename( dhi.container->access() );
+    nc_read_descriptors( *dds, dhi.container->access() ); 
     dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
     dds->set_factory( NULL ) ;

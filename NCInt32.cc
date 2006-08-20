@@ -96,7 +96,11 @@ NCInt32::read(const string &dataset)
   errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
   if (errstat != NC_NOERR)
-    throw Error(errstat, "Could not open the dataset's file.");
+    {
+	string err = (string)"Could not open the dataset's file ("
+	             + dataset.c_str() + ")" ;
+	throw Error(errstat, err);
+    }
  
   errstat = nc_inq_varid(ncid, name().c_str(), &varid);
   if (errstat != NC_NOERR)
