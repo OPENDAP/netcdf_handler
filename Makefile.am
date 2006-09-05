@@ -13,7 +13,7 @@ bin_PROGRAMS = dap_nc_handler
 
 lib_LTLIBRARIES = libnc_handler.la
 if OPENDAPSERVER
-    lib_besdir=$(prefix)/lib/bes
+    lib_besdir=$(libdir)/bes
     lib_bes_LTLIBRARIES = libnc_module.la
 endif
 
