@@ -21,8 +21,8 @@ libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR)
 
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
 libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
-
-libnc_module_la_LDFLAGS = $(BES_LDFLAGS)
+libnc_module_la_LDFLAGS = -avoid-version -module 
+libnc_module_la_LIBADD = $(BES_LIBS)
 
 dap_nc_handler_SOURCES = nc_handler.cc
 dap_nc_handler_LDADD = libnc_handler.la

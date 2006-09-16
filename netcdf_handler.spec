@@ -9,9 +9,7 @@ URL:             http://www.opendap.org/
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:   libdap-devel >= 3.7.0 netcdf-devel
-# Don't require dap-server as dap_nc_handler works without dap-server,
-# however dap_nc_handler should be of use only with dap-server in most cases.
-#Requires:        dap-server
+BuildRequires:   bes-devel
 
 %description
 This is the netcdf data handler for our data server. It reads netcdf 3
@@ -22,23 +20,36 @@ dap-server software.
 %setup -q
 
 %build
-%configure
+%configure --disable-static --disable-dependency-tracking
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.so
+rm -f $RPM_BUILD_ROOT%{_libdir}/bes/*.la
+
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
 %{_bindir}/dap_nc_handler
+%{_libdir}/bes/*
+%{_libdir}/lib*.so.*
 %doc COPYING COPYRIGHT NEWS
 %doc README
 
 %changelog
+* Thu Sep  7 2006 Patrice Dumas <pertusus at free.fr> - 3.7.2-1
+- Update to 3.7.2
+
 * Fri Mar  3 2006 Patrice Dumas <pertusus at free.fr> - 3.6.0-1
 - Update to 3.6.0
 
