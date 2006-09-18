@@ -77,12 +77,21 @@ main(int argc, char *argv[])
 	  }
 
 	  case DODSFilter::DataDDS_Response: {
+            // This code now builds DDS with attributes because geogrid
+            // depend on attribtues to work.
 	    DDS dds(nctf);
             ConstraintEvaluator ce;
             
 	    dds.filename(df.get_dataset_name());
 	    nc_read_descriptors(dds, df.get_dataset_name()); 
 	    df.read_ancillary_dds(dds);
+            
+            DAS das;
+            nc_read_variables(das, df.get_dataset_name());
+            df.read_ancillary_das(das);
+
+            dds.transfer_attributes(&das);
+            
 	    df.send_data(dds, ce, stdout);
 	    break;
 	  }
