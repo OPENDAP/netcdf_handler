@@ -1,9 +1,82 @@
+2006-09-18  James Gallagher <jgallagher@opendap.org>
+
+	nc_handler.cc: Modified so that the DDS includes attributes. This
+	was done so that the new geogrid function could use attributes to
+	determine which dimensions are latitude and longitude.
+
+2006-09-15  Patrick West <pwest@ucar.edu>
+
+	Added default host and port information to the bes configuration
+	file. Added ascii_module, usage_module and www_module to the list
+	of modules to load in the bes configuration file. Spec update per
+	Patrice. Building _module library without version information and
+	as a module.
+
+	M    netcdf_handler.spec
+	M    opendap.ini
+	M    Makefile.am
+
+2006-09-04  Patrick West <pwest@ucar.edu>
+
+	Using the --modulesdir directive in bes-config to create
+	BES_MODULES_DIR variable. Using libdir in place of prefix/lib in
+	Makefile.am.
+	
+	M    Makefile.am
+	M    conf/bes.m4
+
+2006-08-19  Patrick West <pwest@ucar.edu>
+
+	The error messages that say that the code is unable to open the dataset
+	doesn't include the name of the data set. Changed the error message to
+	include the name of the dataset.
+	
+	M    NCUInt32.cc
+	M    NCUInt16.cc
+	M    NCInt32.cc
+	M    NCInt16.cc
+	M    NCByte.cc
+	M    NCFloat32.cc
+	M    NCArray.cc
+	M    NCFloat64.cc
+	M    NCStr.cc
+
+	Changed parameter names that start with OPeNDAP to BES and added
+	BES to the beginning of the Catalog parameters. Added the
+	compression parameters to tell BES where to uncompress files, what
+	are compressed files, and what script to use to uncompress the
+	compressed data files.
+
+	M    opendap.ini
+
+	Added support for compressed data sets by adding the method
+	'access' to the container class. When access is called it
+	determines if the file is compressed or not, if it is it
+	uncompresses it.
+
+	M    NCRequestHandler.cc
+
+	Changed the module loading to include the name of the module so
+	that it can be set in the bes configuration file.
+
+	M    NCModule.h
+	M    NCModule.cc
+
 2006-08-14  James Gallagher <jgallagher@opendap.org>
 
-	ncdas.cc: Now escapes attribute values when those are Strings using
-	libdap's escattr(). I rewrote the function that builds the print
-	representation of the attributes using stringstream in place of the
-	older sprintf() version. This is a fix for ticket 488.
+	Updates to version info and distribution documentation
+	
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    NEWS
+	M    ChangeLog
+
+2006-08-14  James Gallagher <jgallagher@opendap.org>
+
+	ncdas.cc: Now escapes attribute values when those are Strings
+	using libdap's escattr(). I rewrote the function that builds the
+	print representation of the attributes using stringstream in place
+	of the older sprintf() version.
 
 2006-07-20  James Gallagher <jgallagher@opendap.org>
 
