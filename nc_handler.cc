@@ -4,7 +4,7 @@
 // This file is part of nc_handler, a data handler for the OPeNDAP data
 // server. 
 
-// Copyright (c) 2002,2003 OPeNDAP, Inc.
+// Copyright (c) 2002,2003,2006 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
 //
 // This is free software; you can redistribute it and/or modify it under the
@@ -46,6 +46,25 @@ extern void nc_read_descriptors(DDS &dds, const string &filename)  throw (Error)
 
 const string cgi_version = PACKAGE_VERSION;
 
+/** Build a DDS which holds attributes.
+    @param dds A DDS constructed with the correct factory.
+    @param filter The DODSFilter built using the input arguments
+    @return The built-up DDS */
+DDS & build_dds(DDS & dds, const DODSFilter & filter)
+{
+    dds.filename(filter.get_dataset_name());
+    nc_read_descriptors(dds, filter.get_dataset_name());
+    filter.read_ancillary_dds(dds);
+
+    DAS das;
+    nc_read_variables(das, filter.get_dataset_name());
+    filter.read_ancillary_das(das);
+
+    dds.transfer_attributes(&das);
+
+    return dds;
+}
+
 int 
 main(int argc, char *argv[])
 {
@@ -77,40 +96,17 @@ main(int argc, char *argv[])
 	  }
 
 	  case DODSFilter::DataDDS_Response: {
-            // This code now builds DDS with attributes because geogrid
-            // depend on attribtues to work.
 	    DDS dds(nctf);
+            dds = build_dds(dds, df);
             ConstraintEvaluator ce;
-            
-	    dds.filename(df.get_dataset_name());
-	    nc_read_descriptors(dds, df.get_dataset_name()); 
-	    df.read_ancillary_dds(dds);
-            
-            DAS das;
-            nc_read_variables(das, df.get_dataset_name());
-            df.read_ancillary_das(das);
-
-            dds.transfer_attributes(&das);
-            
 	    df.send_data(dds, ce, stdout);
 	    break;
 	  }
 
 	  case DODSFilter::DDX_Response: {
 	    DDS dds(nctf);
-	    DAS das;
+            dds = build_dds(dds, df);
             ConstraintEvaluator ce;
-
-	    dds.filename(df.get_dataset_name());
-
-	    nc_read_descriptors(dds, df.get_dataset_name()); 
-	    df.read_ancillary_dds(dds);
-
-	    nc_read_variables(das, df.get_dataset_name());
-	    df.read_ancillary_das(das);
-
-	    dds.transfer_attributes(&das);
-
 	    df.send_ddx(dds, ce, stdout);
 	    break;
 	  }
@@ -135,21 +131,3 @@ main(int argc, char *argv[])
     delete nctf; nctf = 0;
     return 0;
 }
-
-// $Log: nc_handler.cc,v $
-// Revision 1.5  2005/05/23 22:09:41  jimg
-// Rearrangement for automake.
-//
-// Revision 1.4  2005/03/31 00:04:51  jimg
-// Modified to use the factory class in libdap++ 3.5.
-//
-// Revision 1.3  2003/12/08 18:06:37  edavis
-// Merge release-3-4 into trunk
-//
-// Revision 1.2  2003/09/25 23:09:36  jimg
-// Meerged from 3.4.1.
-//
-// Revision 1.1  2003/05/13 22:03:34  jimg
-// Created. This works with newly modified DODS_Dispatch.pm script and
-// DODSFilter class.
-//
