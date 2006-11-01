@@ -148,6 +148,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 
 	if (ndims == 0){
 	    dds_table.add_var(bt);
+	    delete bt ;
 	}
 	
 	// Grid vs. Array type matching
@@ -226,6 +227,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
       
 	    ar = dds_table.get_factory()->NewArray(varname1);
 	    ar->add_var(bt);
+	    delete bt ;
 	    for (d = 0; d < ndims; ++d) 
 		ar->append_dim(dim_szs[d],dim_nms[d]);
       
@@ -235,23 +237,29 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 		gr = dds_table.get_factory()->NewGrid(varname1);
 		pr = array;
 		gr->add_var(ar,pr);
+		delete ar ;
 		pr = maps;
 		for ( d = 0; d < ndims; ++d){
 		    ar = new NCArray; 
 		    bt = Get_bt(dds_table.get_factory(), var_match[d],
 				typ_match[d]);
 		    ar->add_var(bt);     
+		    delete bt ;
 		    ar->append_dim(dim_szs[d],dim_nms[d]);
 		    gr->add_var(ar,pr);
+		    delete ar ;
 		}
 		dds_table.add_var(gr);
+		delete gr ;
 	    }
 	    else {                    // must be an Array, add it
 		dds_table.add_var(ar);
+		delete ar ;
 	    }
 #else
       
 	    dds_table.add_var(ar);
+	    delete ar ;
       
 #endif
 	}
@@ -306,6 +314,10 @@ nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error)
 	string msg = (string) *error;
 	throw Error(errstat, msg);
     }
+
+    if (nc_close(ncid) != NC_NOERR)
+	throw InternalErr(__FILE__, __LINE__,
+	                  "ncdds: Could not close the dataset!");
 }
 
 #ifdef TEST

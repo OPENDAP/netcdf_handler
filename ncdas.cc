@@ -365,4 +365,7 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 				    print_type(datatype), print_rep);
     }
 
+    if (nc_close(ncid) != NC_NOERR)
+	throw InternalErr(__FILE__, __LINE__,
+	                  "ncdds: Could not close the dataset!");
 }
