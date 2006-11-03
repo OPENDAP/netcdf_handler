@@ -25,22 +25,21 @@
  
 // NCRequestHandler.cc
 
-#include <iostream>
-#include <fstream>
+#include <sstream>
 
-using std::ifstream ;
-using std::cerr ;
-using std::endl ;
+using std::ostringstream ;
 
 #include "NCRequestHandler.h"
 #include "NCTypeFactory.h"
 #include "BESResponseHandler.h"
 #include "BESResponseNames.h"
-#include "DAS.h"
-#include "DDS.h"
+#include "BESDASResponse.h"
+#include "BESDDSResponse.h"
+#include "BESDataDDSResponse.h"
 #include "BESConstraintFuncs.h"
 #include "BESVersionInfo.h"
-#include "BESResponseException.h"
+#include "Error.h"
+#include "BESHandlerException.h"
 #include "BESDataNames.h"
 
 #include "config_nc.h"
@@ -65,9 +64,29 @@ NCRequestHandler::~NCRequestHandler()
 bool
 NCRequestHandler::nc_build_das( BESDataHandlerInterface &dhi )
 {
-    DAS *das = (DAS *)dhi.response_handler->get_response_object() ;
+    BESResponseObject *response = dhi.response_handler->get_response_object() ;
+    BESDASResponse *bdas = dynamic_cast<BESDASResponse *>( response ) ;
+    DAS *das = bdas->get_das() ;
 
-    nc_read_variables( *das, dhi.container->access() );
+    try
+    {
+	nc_read_variables( *das, dhi.container->access() );
+    }
+    catch( Error &e )
+    {
+	ostringstream s ;
+	s << "libdap exception building DAS"
+	  << ": error_code = " << e.get_error_code()
+	  << ": " << e.get_error_message() ;
+	BESHandlerException ex( s.str(), __FILE__, __LINE__ ) ;
+	throw ex ;
+    }
+    catch( ... )
+    {
+	string s = "unknown exception caught building DAS" ;
+	BESHandlerException ex( s, __FILE__, __LINE__ ) ;
+	throw ex ;
+    }
 
     return true ;
 }
@@ -75,15 +94,36 @@ NCRequestHandler::nc_build_das( BESDataHandlerInterface &dhi )
 bool
 NCRequestHandler::nc_build_dds( BESDataHandlerInterface &dhi )
 {
-    DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
-    NCTypeFactory *factory = new NCTypeFactory ;
-    dds->set_factory( factory ) ;
+    BESResponseObject *response = dhi.response_handler->get_response_object() ;
+    BESDDSResponse *bdds = dynamic_cast<BESDDSResponse *>( response ) ;
+    DDS *dds = bdds->get_dds() ;
 
-    nc_read_descriptors( *dds, dhi.container->access() );
-    dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+    try
+    {
+	NCTypeFactory *factory = new NCTypeFactory ;
+	dds->set_factory( factory ) ;
 
-    dds->set_factory( NULL ) ;
-    delete factory ;
+	nc_read_descriptors( *dds, dhi.container->access() );
+	dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+
+	dds->set_factory( NULL ) ;
+	delete factory ;
+    }
+    catch( Error &e )
+    {
+	ostringstream s ;
+	s << "libdap exception building DDS"
+	  << ": error_code = " << e.get_error_code()
+	  << ": " << e.get_error_message() ;
+	BESHandlerException ex( s.str(), __FILE__, __LINE__ ) ;
+	throw ex ;
+    }
+    catch( ... )
+    {
+	string s = "unknown exception caught building DDS" ;
+	BESHandlerException ex( s, __FILE__, __LINE__ ) ;
+	throw ex ;
+    }
 
     return true ;
 }
@@ -91,16 +131,37 @@ NCRequestHandler::nc_build_dds( BESDataHandlerInterface &dhi )
 bool
 NCRequestHandler::nc_build_data( BESDataHandlerInterface &dhi )
 {
-    DDS *dds = (DDS *)dhi.response_handler->get_response_object() ;
-    NCTypeFactory *factory = new NCTypeFactory ;
-    dds->set_factory( factory ) ;
+    BESResponseObject *response = dhi.response_handler->get_response_object() ;
+    BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *>( response ) ;
+    DataDDS *dds = bdds->get_dds() ;
 
-    dds->filename( dhi.container->access() );
-    nc_read_descriptors( *dds, dhi.container->access() ); 
-    dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+    try
+    {
+	NCTypeFactory *factory = new NCTypeFactory ;
+	dds->set_factory( factory ) ;
 
-    dds->set_factory( NULL ) ;
-    delete factory ;
+	dds->filename( dhi.container->access() );
+	nc_read_descriptors( *dds, dhi.container->access() ); 
+	dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+
+	dds->set_factory( NULL ) ;
+	delete factory ;
+    }
+    catch( Error &e )
+    {
+	ostringstream s ;
+	s << "libdap exception reading variables"
+	  << ": error_code = " << e.get_error_code()
+	  << ": " << e.get_error_message() ;
+	BESHandlerException ex( s.str(), __FILE__, __LINE__ ) ;
+	throw ex ;
+    }
+    catch( ... )
+    {
+	string s = "unknown exception caught building DAS" ;
+	BESHandlerException ex( s, __FILE__, __LINE__ ) ;
+	throw ex ;
+    }
 
     return true ;
 }
