@@ -100,7 +100,7 @@ print_attr(nc_type type, int loc, void *vals)
         gp.cp = (char *) vals;
 
         uc = *(gp.cp+loc);
-        rep << uc;
+        rep << (int)uc;
         return rep.str();
 
       case NC_CHAR:
