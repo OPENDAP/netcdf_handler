@@ -55,6 +55,7 @@ static char not_used rcsid[]={"$Id$"};
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 #include <netcdf.h>
 
@@ -119,6 +120,8 @@ print_attr(nc_type type, int loc, void *vals)
 
       case NC_FLOAT: {
           gp.fp = (float *) vals;
+          rep << std::showpoint;
+          rep << std::setprecision(10);
           rep << *(gp.fp+loc);
           // If there's no decimal point and the rep does not use scientific
           // notation, add a decimal point. This little jaunt was taken because
@@ -132,6 +135,8 @@ print_attr(nc_type type, int loc, void *vals)
       }
       case NC_DOUBLE: {
           gp.dp = (double *) vals;
+          rep << std::showpoint;
+          rep << std::setprecision(17);
           rep << *(gp.dp+loc);
           if (rep.str().find('.') == string::npos 
               && rep.str().find('e') == string::npos)
