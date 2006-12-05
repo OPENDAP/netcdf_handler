@@ -106,8 +106,11 @@ NCRequestHandler::nc_build_dds( BESDataHandlerInterface &dhi )
 	nc_read_descriptors( *dds, dhi.container->access() );
 	dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
+#if 0
+    // see ticket 720
 	dds->set_factory( NULL ) ;
 	delete factory ;
+#endif
     }
     catch( Error &e )
     {
@@ -144,8 +147,11 @@ NCRequestHandler::nc_build_data( BESDataHandlerInterface &dhi )
 	nc_read_descriptors( *dds, dhi.container->access() ); 
 	dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
+#if 0
+    // see ticket 720
 	dds->set_factory( NULL ) ;
 	delete factory ;
+#endif
     }
     catch( Error &e )
     {
