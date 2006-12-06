@@ -22,12 +22,12 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 // NCRequestHandler.cc
 
 #include <sstream>
 
-using std::ostringstream ;
+using std::ostringstream;
 
 #include "NCRequestHandler.h"
 #include "NCTypeFactory.h"
@@ -44,157 +44,158 @@ using std::ostringstream ;
 
 #include "config_nc.h"
 
-extern void nc_read_variables(DAS &das, const string &filename) throw (Error);
-extern void nc_read_descriptors(DDS &dds, const string &filename)  throw (Error);
+extern void nc_read_variables(DAS & das,
+                              const string & filename) throw(Error);
+extern void nc_read_descriptors(DDS & dds,
+                                const string & filename) throw(Error);
 
-NCRequestHandler::NCRequestHandler( string name )
-    : BESRequestHandler( name )
+NCRequestHandler::NCRequestHandler(string name)
+:  BESRequestHandler(name)
 {
-    add_handler( DAS_RESPONSE, NCRequestHandler::nc_build_das ) ;
-    add_handler( DDS_RESPONSE, NCRequestHandler::nc_build_dds ) ;
-    add_handler( DATA_RESPONSE, NCRequestHandler::nc_build_data ) ;
-    add_handler( HELP_RESPONSE, NCRequestHandler::nc_build_help ) ;
-    add_handler( VERS_RESPONSE, NCRequestHandler::nc_build_version ) ;
+    add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
+    add_handler(DDS_RESPONSE, NCRequestHandler::nc_build_dds);
+    add_handler(DATA_RESPONSE, NCRequestHandler::nc_build_data);
+    add_handler(HELP_RESPONSE, NCRequestHandler::nc_build_help);
+    add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
 }
 
 NCRequestHandler::~NCRequestHandler()
 {
 }
 
-bool
-NCRequestHandler::nc_build_das( BESDataHandlerInterface &dhi )
+bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response = dhi.response_handler->get_response_object() ;
-    BESDASResponse *bdas = dynamic_cast<BESDASResponse *>( response ) ;
-    DAS *das = bdas->get_das() ;
+    BESResponseObject *response =
+        dhi.response_handler->get_response_object();
+    BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response);
+    DAS *das = bdas->get_das();
 
-    try
-    {
-	nc_read_variables( *das, dhi.container->access() );
+    try {
+        nc_read_variables(*das, dhi.container->access());
     }
-    catch( Error &e )
-    {
-	ostringstream s ;
-	s << "libdap exception building DAS"
-	  << ": error_code = " << e.get_error_code()
-	  << ": " << e.get_error_message() ;
-	BESHandlerException ex( s.str(), __FILE__, __LINE__ ) ;
-	throw ex ;
+    catch(Error & e) {
+        ostringstream s;
+        s << "libdap exception building DAS"
+            << ": error_code = " << e.get_error_code()
+            << ": " << e.get_error_message();
+        BESHandlerException ex(s.str(), __FILE__, __LINE__);
+        throw ex;
     }
-    catch( ... )
-    {
-	string s = "unknown exception caught building DAS" ;
-	BESHandlerException ex( s, __FILE__, __LINE__ ) ;
-	throw ex ;
+    catch(...) {
+        string s = "unknown exception caught building DAS";
+        BESHandlerException ex(s, __FILE__, __LINE__);
+        throw ex;
     }
 
-    return true ;
+    return true;
 }
 
-bool
-NCRequestHandler::nc_build_dds( BESDataHandlerInterface &dhi )
+bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response = dhi.response_handler->get_response_object() ;
-    BESDDSResponse *bdds = dynamic_cast<BESDDSResponse *>( response ) ;
-    DDS *dds = bdds->get_dds() ;
+    BESResponseObject *response =
+        dhi.response_handler->get_response_object();
+    BESDDSResponse *bdds = dynamic_cast < BESDDSResponse * >(response);
+    DDS *dds = bdds->get_dds();
 
-    try
-    {
-	NCTypeFactory *factory = new NCTypeFactory ;
-	dds->set_factory( factory ) ;
+    try {
+        NCTypeFactory *factory = new NCTypeFactory;
+        dds->set_factory(factory);
 
-	nc_read_descriptors( *dds, dhi.container->access() );
-	dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+        dds->filename(dhi.container->access());
+        nc_read_descriptors(*dds, dhi.container->access());
+        DAS das;
+        nc_read_variables(das, dhi.container->access());
 
+        dds->transfer_attributes(&das);
+
+        dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 #if 0
-    // see ticket 720
-	dds->set_factory( NULL ) ;
-	delete factory ;
+        // see ticket 720
+        dds->set_factory(NULL);
+        delete factory;
 #endif
     }
-    catch( Error &e )
-    {
-	ostringstream s ;
-	s << "libdap exception building DDS"
-	  << ": error_code = " << e.get_error_code()
-	  << ": " << e.get_error_message() ;
-	BESHandlerException ex( s.str(), __FILE__, __LINE__ ) ;
-	throw ex ;
+    catch(Error & e) {
+        ostringstream s;
+        s << "libdap exception building DDS"
+            << ": error_code = " << e.get_error_code()
+            << ": " << e.get_error_message();
+        BESHandlerException ex(s.str(), __FILE__, __LINE__);
+        throw ex;
     }
-    catch( ... )
-    {
-	string s = "unknown exception caught building DDS" ;
-	BESHandlerException ex( s, __FILE__, __LINE__ ) ;
-	throw ex ;
+    catch(...) {
+        string s = "unknown exception caught building DDS";
+        BESHandlerException ex(s, __FILE__, __LINE__);
+        throw ex;
     }
 
-    return true ;
+    return true;
 }
 
-bool
-NCRequestHandler::nc_build_data( BESDataHandlerInterface &dhi )
+bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response = dhi.response_handler->get_response_object() ;
-    BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *>( response ) ;
-    DataDDS *dds = bdds->get_dds() ;
+    BESResponseObject *response =
+        dhi.response_handler->get_response_object();
+    BESDataDDSResponse *bdds =
+        dynamic_cast < BESDataDDSResponse * >(response);
+    DataDDS *dds = bdds->get_dds();
 
-    try
-    {
-	NCTypeFactory *factory = new NCTypeFactory ;
-	dds->set_factory( factory ) ;
+    try {
+        NCTypeFactory *factory = new NCTypeFactory;
+        dds->set_factory(factory);
 
-	dds->filename( dhi.container->access() );
-	nc_read_descriptors( *dds, dhi.container->access() ); 
-	dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+        dds->filename(dhi.container->access());
+        nc_read_descriptors(*dds, dhi.container->access());
+        DAS das;
+        nc_read_variables(das, dhi.container->access());
+
+        dds->transfer_attributes(&das);
+
+        dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
 #if 0
-    // see ticket 720
-	dds->set_factory( NULL ) ;
-	delete factory ;
+        // see ticket 720
+        dds->set_factory(NULL);
+        delete factory;
 #endif
     }
-    catch( Error &e )
-    {
-	ostringstream s ;
-	s << "libdap exception reading variables"
-	  << ": error_code = " << e.get_error_code()
-	  << ": " << e.get_error_message() ;
-	BESHandlerException ex( s.str(), __FILE__, __LINE__ ) ;
-	throw ex ;
+    catch(Error & e) {
+        ostringstream s;
+        s << "libdap exception reading variables"
+            << ": error_code = " << e.get_error_code()
+            << ": " << e.get_error_message();
+        BESHandlerException ex(s.str(), __FILE__, __LINE__);
+        throw ex;
     }
-    catch( ... )
-    {
-	string s = "unknown exception caught building DAS" ;
-	BESHandlerException ex( s, __FILE__, __LINE__ ) ;
-	throw ex ;
+    catch(...) {
+        string s = "unknown exception caught building DAS";
+        BESHandlerException ex(s, __FILE__, __LINE__);
+        throw ex;
     }
 
-    return true ;
+    return true;
 }
 
-bool
-NCRequestHandler::nc_build_help( BESDataHandlerInterface &dhi )
+bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 {
-    BESInfo *info = (BESInfo *)dhi.response_handler->get_response_object() ;
-    info->begin_tag( "Handler" ) ;
-    info->add_tag( "name", PACKAGE_NAME ) ;
-    string handles = (string)DAS_RESPONSE
-                     + "," + DDS_RESPONSE
-                     + "," + DATA_RESPONSE
-                     + "," + HELP_RESPONSE
-                     + "," + VERS_RESPONSE ;
-    info->add_tag( "handles", handles ) ;
-    info->add_tag( "version", PACKAGE_STRING ) ;
-    info->end_tag( "Handler" ) ;
+    BESInfo *info =
+        (BESInfo *) dhi.response_handler->get_response_object();
+    info->begin_tag("Handler");
+    info->add_tag("name", PACKAGE_NAME);
+    string handles = (string) DAS_RESPONSE
+        + "," + DDS_RESPONSE
+        + "," + DATA_RESPONSE + "," + HELP_RESPONSE + "," + VERS_RESPONSE;
+    info->add_tag("handles", handles);
+    info->add_tag("version", PACKAGE_STRING);
+    info->end_tag("Handler");
 
-    return true ;
+    return true;
 }
 
-bool
-NCRequestHandler::nc_build_version( BESDataHandlerInterface &dhi )
+bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
 {
-    BESVersionInfo *info = (BESVersionInfo *)dhi.response_handler->get_response_object() ;
-    info->addHandlerVersion( PACKAGE_NAME, PACKAGE_VERSION ) ;
-    return true ;
+    BESVersionInfo *info =
+        (BESVersionInfo *) dhi.response_handler->get_response_object();
+    info->addHandlerVersion(PACKAGE_NAME, PACKAGE_VERSION);
+    return true;
 }
-

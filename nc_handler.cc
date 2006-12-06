@@ -22,10 +22,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id$"};
+static char not_used rcsid[] =
+    { "$Id$" };
 
 #include <iostream>
 #include <string>
@@ -41,8 +42,10 @@ static char not_used rcsid[]={"$Id$"};
 
 #include "NCTypeFactory.h"
 
-extern void nc_read_variables(DAS &das, const string &filename) throw (Error);
-extern void nc_read_descriptors(DDS &dds, const string &filename)  throw (Error);
+extern void nc_read_variables(DAS & das,
+                              const string & filename) throw(Error);
+extern void nc_read_descriptors(DDS & dds,
+                                const string & filename) throw(Error);
 
 const string cgi_version = PACKAGE_VERSION;
 
@@ -65,69 +68,68 @@ DDS & build_dds(DDS & dds, const DODSFilter & filter)
     return dds;
 }
 
-int 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     NCTypeFactory *nctf = new NCTypeFactory;
 
-    try { 
-	DODSFilter df(argc, argv);
-	if (df.get_cgi_version() == "")
-	    df.set_cgi_version(cgi_version);
+    try {
+        DODSFilter df(argc, argv);
+        if (df.get_cgi_version() == "")
+            df.set_cgi_version(cgi_version);
 
-	switch (df.get_response()) {
-	  case DODSFilter::DAS_Response: {
-	    DAS das;
+        switch (df.get_response()) {
+        case DODSFilter::DAS_Response:{
+                DAS das;
 
-	    nc_read_variables(das, df.get_dataset_name());
-	    df.read_ancillary_das(das);
-	    df.send_das(das);
-	    break;
-	  }
+                nc_read_variables(das, df.get_dataset_name());
+                df.read_ancillary_das(das);
+                df.send_das(das);
+                break;
+            }
 
-	  case DODSFilter::DDS_Response: {
-	    DDS dds(nctf);
-            ConstraintEvaluator ce;
+        case DODSFilter::DDS_Response:{
+                DDS dds(nctf);
+                dds = build_dds(dds, df);
+                ConstraintEvaluator ce;
+                df.send_dds(dds, ce, true);
+                break;
+            }
 
-	    nc_read_descriptors(dds, df.get_dataset_name());
-	    df.read_ancillary_dds(dds);
-	    df.send_dds(dds, ce, true);
-	    break;
-	  }
+        case DODSFilter::DataDDS_Response:{
+                DDS dds(nctf);
+                dds = build_dds(dds, df);
+                ConstraintEvaluator ce;
+                df.send_data(dds, ce, stdout);
+                break;
+            }
 
-	  case DODSFilter::DataDDS_Response: {
-	    DDS dds(nctf);
-            dds = build_dds(dds, df);
-            ConstraintEvaluator ce;
-	    df.send_data(dds, ce, stdout);
-	    break;
-	  }
+        case DODSFilter::DDX_Response:{
+                DDS dds(nctf);
+                dds = build_dds(dds, df);
+                ConstraintEvaluator ce;
+                df.send_ddx(dds, ce, stdout);
+                break;
+            }
 
-	  case DODSFilter::DDX_Response: {
-	    DDS dds(nctf);
-            dds = build_dds(dds, df);
-            ConstraintEvaluator ce;
-	    df.send_ddx(dds, ce, stdout);
-	    break;
-	  }
+        case DODSFilter::Version_Response:{
+                df.send_version_info();
 
-	  case DODSFilter::Version_Response: {
-	    df.send_version_info();
+                break;
+            }
 
-	    break;
-	  }
-
-	  default:
-	    df.print_usage();	// Throws Error
-	}
+        default:
+            df.print_usage();   // Throws Error
+        }
     }
-    catch (Error &e) {
-	delete nctf; nctf = 0;
-	set_mime_text(stdout, dods_error, cgi_version);
-	e.print(stdout);
-	return 1;
+    catch(Error & e) {
+        delete nctf;
+        nctf = 0;
+        set_mime_text(stdout, dods_error, cgi_version);
+        e.print(stdout);
+        return 1;
     }
 
-    delete nctf; nctf = 0;
+    delete nctf;
+    nctf = 0;
     return 0;
 }
