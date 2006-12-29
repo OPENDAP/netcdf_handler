@@ -1,3 +1,104 @@
+;; Local Variables:
+;; coding: utf-8
+;; End:
+2006-12-06  James Gallagher <jgallagher@opendap.org>
+
+	nc_handler.cc, NCRequestHandler.cc: The DDS/DataDDS now return
+	DDS objects loaded with attributes.
+
+2006-12-06  James Gallagher <jgallagher@opendap.org>
+
+	NCModule.cc: Indenting
+
+2006-12-05  James Gallagher <jgallagher@opendap.org>
+
+	NCRequestHandler.cc: Fix for ticekt #720: The DDS and DataDDS
+	type factories were being deleted and then the CE was being
+	evaluated; this breaks when the CE contains a constant since
+	the factory is used to make a variable to hold the constant's
+	value. I removed the delete calls and add code to the BES to
+	handle the clean up of the DDS/Factory.
+
+2006-11-23  Patrick West <pwest@ucar.edu>
+
+	Added a dump method to the Module class for BES debugging.
+	M    netcdf_handler/NCModule.cc
+	M    netcdf_handler/NCModule.h
+	M    netcdf_handler/opendap.ini
+
+2006-11-22  James Gallagher <jgallagher@opendap.org>
+
+	ncdas.cc: In July I switched from C's sprintf() function to C++
+	string streams to make the value to string conversions (for float
+	and double, maybe others). However, the precision of the reps
+	was changed which caused the attribute values to be wrong when
+	read from a server newer than the pre-July code. I added
+	setprecision() calls where Float32 uses 10 and Float64 17 and
+	fixed the problem.
+
+2006-11-06  James Gallagher <jgallagher@opendap.org>
+
+	ncdas.cc: Modified the way attributes with type NC_BYTE
+	are represented. Now the values are cast to 'int' before
+	the string representation is made. This prevents values
+	above 128 from making odd print reps which show up as
+	blanks or unicode caharacters.
+
+2006-11-03  Patrick West <pwest@ucar.edu>
+
+	The netcdf handler uses a dap dependent bes, so use the --dap-libs
+	option on bes-config. Was setting BES_LDFLAGS and using BES_LIBS.
+	Now using BES_LIBS only.
+	M    configure.ac
+	M    conf/bes.m4
+
+2006-11-02  Patrick West <pwest@ucar.edu>
+
+	ConstraintEvaluator is now a part of the BESDDSResponse and
+	BESDataDDSResponse classes instead of BESDataHandlerInterface. Any Error
+	exceptions need to be caught in the request handlers and converted into
+	BESHandlerException, which is the non-fatal exception.
+	M    NCRequestHandler.cc
+
+2006-11-01  Patrick West <pwest@ucar.edu>
+
+	After adding basetype using add_var, which duplicates the basetype
+	passed in, delete the basetype. Also, close the netcdf file after
+	reading variables and attributes and dataset.
+	M    ncdas.cc
+	M    ncdds.cc
+
+2006-10-24  James Gallagher <jgallagher@opendap.org>
+
+	nc_handler.cc: Factored some duplicated code from main().
+
+2006-09-27  Patrick West <pwest@ucar.edu>
+
+	--without-bes now works for the different handler directories as
+	well as for the dap-server directory. cedar-handler requires bes. If
+	--without-bes is not specified then either --with-bes is looked at
+	if specified, or the bes-config script is looked for.
+	M    fits-handler/configure.ac
+	M    netcdf_handler/configure.ac
+	M    freeform_handler/configure.ac
+	M    hdf4_handler/configure.ac
+	M    hdf5_handler/configure.ac
+	M    jgofs_handler/configure.ac
+	M    cdf-handler/configure.ac
+	M    dap-server/configure.ac
+	M    fits-handler/configure.ac
+	M    netcdf_handler/configure.ac
+	M    freeform_handler/configure.ac
+	M    hdf4_handler/configure.ac
+	M    hdf5_handler/configure.ac
+	M    jgofs_handler/configure.ac
+	M    cdf-handler/configure.ac
+	M    dap-server/configure.ac
+
+2006-09-18  James Gallagher <jgallagher@opendap.org>
+
+	Updated for version 3.7.3
+
 2006-09-18  James Gallagher <jgallagher@opendap.org>
 
 	nc_handler.cc: Modified so that the DDS includes attributes. This

@@ -1,6 +1,11 @@
 
 $Id$
 
+Version 3.7.4
+
+Updates for the 1.4 release of Server 4. Also included are bug fixes, memory
+leak fixes, and performance enhencements.
+
 Version 3.7.3
 
 The handler now builds DDS objects that contain attributes and will thus work
