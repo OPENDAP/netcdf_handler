@@ -25,10 +25,6 @@
 
 // NCRequestHandler.cc
 
-#include <sstream>
-
-using std::ostringstream;
-
 #include "NCRequestHandler.h"
 #include "NCTypeFactory.h"
 #include "BESResponseHandler.h"
@@ -39,7 +35,7 @@ using std::ostringstream;
 #include "BESConstraintFuncs.h"
 #include "BESVersionInfo.h"
 #include "Error.h"
-#include "BESHandlerException.h"
+#include "BESDapHandlerException.h"
 #include "BESDataNames.h"
 
 #include "config_nc.h"
@@ -74,11 +70,8 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         nc_read_variables(*das, dhi.container->access());
     }
     catch(Error & e) {
-        ostringstream s;
-        s << "libdap exception building DAS"
-            << ": error_code = " << e.get_error_code()
-            << ": " << e.get_error_message();
-        BESHandlerException ex(s.str(), __FILE__, __LINE__);
+        BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
+				   e.get_error_code() ) ;
         throw ex;
     }
     catch(...) {
@@ -116,11 +109,8 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 #endif
     }
     catch(Error & e) {
-        ostringstream s;
-        s << "libdap exception building DDS"
-            << ": error_code = " << e.get_error_code()
-            << ": " << e.get_error_message();
-        BESHandlerException ex(s.str(), __FILE__, __LINE__);
+        BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
+				   e.get_error_code() ) ;
         throw ex;
     }
     catch(...) {
@@ -160,11 +150,8 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 #endif
     }
     catch(Error & e) {
-        ostringstream s;
-        s << "libdap exception reading variables"
-            << ": error_code = " << e.get_error_code()
-            << ": " << e.get_error_message();
-        BESHandlerException ex(s.str(), __FILE__, __LINE__);
+        BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
+				   e.get_error_code() ) ;
         throw ex;
     }
     catch(...) {
