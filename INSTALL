@@ -41,12 +41,13 @@ REQUIREMENTS
     software. If you're using Linux, this means either building form source
     or using the libdap and libdap-devel RPM packages.
 
-  o To use this software with our data server, you will need the OPeNDAP
-    dap-server software package, version 3.6.0 (although for this release,
-    operation with Server3 has not been tested).
-  
-  o If you're planning on using this with Hyrax, version 1.2, you'll need
-    version 3.1.0 of the BES software.
+  o If you're planning on using this with the OPeNDAP 4 Data Server (Hyrax),
+    you'll need version 3.4.0 of the BES software. Make sure to build that 
+    first.
+
+  o To use this software with our cgi-based data server, you will need the 
+    OPeNDAP dap-server software package, version 3.7.3 (although for this
+    release, operation with Server3 has not been tested).
 
   o You also need a recent copy of netCDF. We've tested this server with
     netcdf version 3.5, although any recent version should work fine. If the

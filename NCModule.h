@@ -34,15 +34,14 @@
 
 #include "BESAbstractModule.h"
 
-class NCModule : public BESAbstractModule
-{
-public:
-    				NCModule() {}
-    virtual		    	~NCModule() {}
-    virtual void		initialize( const string &modname ) ;
-    virtual void		terminate( const string &modname ) ;
+class NCModule : public BESAbstractModule {
+   public:
+    NCModule() {}
+    virtual	~NCModule() {}
+    virtual void initialize( const string &modname ) ;
+    virtual void terminate( const string &modname ) ;
 
-    virtual void		dump( ostream &strm ) const ;
+    virtual void dump( ostream &strm ) const ;
 } ;
 
 #endif // A_NCModule_H

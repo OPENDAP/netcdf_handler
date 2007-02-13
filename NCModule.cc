@@ -44,8 +44,7 @@ using std::endl;
 
 #define NC_CATALOG "catalog"
 
-void
- NCModule::initialize(const string & modname)
+void NCModule::initialize(const string & modname)
 {
     if (BESLog::TheLog()->is_verbose())
         (*BESLog::TheLog()) << "Initializing NC:" << endl;
