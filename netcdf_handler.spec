@@ -31,21 +31,17 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/bes/*.la
 
-# pre: commands to run before install; post: commnds run after install;
-# preun; postun for commands before and after uninstall
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post -p /sbin/ldconfig
 
 # Only try to configure the bes.conf file if the bes can be found.
-%post
 if bes-config --version >/dev/null 2>&1
 then
 	bes_prefix=`bes-config --prefix`
 	configure-ff-data.sh $bes_prefix/etc/bes/bes.conf $bes_prefix/lib/bes
 fi
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
 
