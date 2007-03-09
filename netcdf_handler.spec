@@ -31,6 +31,17 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/bes/*.la
 
+# pre: commands to run before install; post: commnds run after install;
+# preun; postun for commands before and after uninstall
+
+# Only try to configure the bes.conf file if the bes can be found.
+%post
+if bes-config --version >/dev/null 2>&1
+then
+	bes_prefix=`bes-config --prefix`
+	configure-ff-data.sh $bes_prefix/etc/bes/bes.conf $bes_prefix/lib/bes
+fi
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -41,10 +52,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_bindir}/dap_nc_handler
+%{_bindir}/configure-nc-data.sh
 %{_libdir}/
 %{_libdir}/bes/
-%doc COPYING COPYRIGHT NEWS
-%doc README
+%{_datadir}/hyrax/data/nc
+%doc COPYING COPYRIGHT NEWS README
 
 %changelog
 * Thu Sep  7 2006 Patrice Dumas <pertusus at free.fr> - 3.7.2-1

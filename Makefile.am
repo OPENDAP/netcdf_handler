@@ -12,9 +12,13 @@ ACLOCAL_AMFLAGS = -I conf
 bin_PROGRAMS = dap_nc_handler
 
 lib_LTLIBRARIES = libnc_handler.la
+
 if OPENDAPSERVER
-    lib_besdir=$(libdir)/bes
-    lib_bes_LTLIBRARIES = libnc_module.la
+
+lib_besdir=$(libdir)/bes
+lib_bes_LTLIBRARIES = libnc_module.la
+dist_bin_SCRIPTS = configure-nc-data.sh
+
 endif
 
 libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR)
@@ -45,8 +49,31 @@ EXTRA_DIST = COPYRIGHT COPYING netcdf_handler.spec
 
 CLEANFILES = *~
 
-###########################################################################
+if OPENDAPSERVER
 
+EXTRA_DIST += configure-nc-data.sh.in
+CLEANFILES += configure-nc-data.sh
+	
+sample_datadir = $(datadir)/hyrax/data/nc
+sample_data_DATA = data/coads_climatology.nc data/fnoc1.nc
+
+do_subst = sed -e 's,[@]sysconfdir[@],$(sysconfdir),g' \
+		   	   -e 's,[@]libdir[@],$(libdir),g'
+				  
+configure-nc-data.sh: configure-nc-data.sh.in Makefile
+	$(do_subst) < $(srcdir)/configure-nc-data.sh.in > configure-nc-data.sh
+	chmod +x configure-nc-data.sh
+
+# This makes sure that the handler modifies the bes  which confiure found
+# even with distcheck is run.
+install-data-hook: configure-nc-data.sh
+	(bes_prefix=`bes-config --prefix` && \
+	 ./configure-nc-data.sh $$bes_prefix/etc/bes/bes.conf $$bes_prefix/lib/bes)
+
+endif
+
+###########################################################################
+#
 # Build linux RPMs
 
 srpm:
