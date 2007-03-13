@@ -53,14 +53,14 @@ if OPENDAPSERVER
 
 EXTRA_DIST += configure-nc-data.sh.in
 CLEANFILES += configure-nc-data.sh
-	
+
 sample_datadir = $(datadir)/hyrax/data/nc
-sample_data_DATA = data/coads_climatology.nc data/fnoc1.nc
+sample_data_DATA = data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das
 
 do_subst = sed -e 's,[@]sysconfdir[@],$(sysconfdir),g' \
 		   	   -e 's,[@]libdir[@],$(libdir),g' \
 		   	   -e 's,[@]datadir[@],$(datadir),g'
-				  
+
 configure-nc-data.sh: configure-nc-data.sh.in Makefile
 	$(do_subst) < $(srcdir)/configure-nc-data.sh.in > configure-nc-data.sh
 	chmod +x configure-nc-data.sh

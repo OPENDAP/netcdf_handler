@@ -1,6 +1,11 @@
 
 $Id$
 
+Version 3.7.6 (13 March 2007)
+
+Default data and bes.conf with make install, same as the other handlers in
+this release.
+
 Version 3.7.5
 
 Better error handling.
