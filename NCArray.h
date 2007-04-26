@@ -44,7 +44,7 @@
 
 class NCArray: public Array {
 public:
-    NCArray(const string &n = "", BaseType *v = 0);
+    NCArray(const string &n = "", BaseType *v = 0, const string &ds = "");
     NCArray(const NCArray &nc_array);
     NCArray &operator=(const NCArray &rhs);
     virtual ~NCArray();

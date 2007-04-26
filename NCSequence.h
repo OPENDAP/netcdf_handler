@@ -47,7 +47,7 @@ class NCSequence: public Sequence {
 private:
         
 public:
-    NCSequence(const string &n = "");
+    NCSequence(const string &n = "", const string &ds = "");
     NCSequence(const NCSequence &rhs);
     virtual ~NCSequence();
 

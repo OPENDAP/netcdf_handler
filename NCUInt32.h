@@ -44,7 +44,7 @@
 class NCUInt32: public UInt32 {
         
 public:
-    NCUInt32(const string &n = "");
+    NCUInt32(const string &n = "", const string &ds = "");
     NCUInt32(const NCUInt32 &rhs);
     virtual ~NCUInt32();
 

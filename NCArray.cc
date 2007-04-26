@@ -72,7 +72,8 @@ NCArray::ptr_duplicate()
     storage used by the actual parameter. Also, if the actual parameter
     is an Array, libdap++ code will use the template of that Array as the
     template for this NCArray. */
-NCArray::NCArray(const string &n, BaseType *v) : Array(n, v)
+NCArray::NCArray(const string &n, BaseType *v, const string &ds)
+    : Array(n, v, ds)
 {
 }
 
@@ -130,8 +131,14 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
 
 
 bool
-NCArray::read(const string &dataset)
+NCArray::read(const string &ds)
 {
+    string use_dataset = dataset() ;
+    if( use_dataset.empty() )
+    {
+	use_dataset = ds ;
+    }
+
     size_t cor[MAX_NC_DIMS];      /* corner coordinates */
     size_t edg[MAX_NC_DIMS];      /* edges of hypercube */
     ptrdiff_t step[MAX_NC_DIMS];  /* stride of hypercube */
@@ -144,12 +151,12 @@ NCArray::read(const string &dataset)
     DBG(cerr << "In NCArray, opening the dataset, reading " << name() << endl);
 
     int ncid;
-    int errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    int errstat = nc_open(use_dataset.c_str(), NC_NOWRITE, &ncid); // netCDF id
 
     if (errstat != NC_NOERR)
     {
 	string err = (string)"Could not open the dataset's file ("
-	             + dataset.c_str() + ")" ;
+	             + use_dataset.c_str() + ")" ;
 	throw Error(errstat, err);
     }
  

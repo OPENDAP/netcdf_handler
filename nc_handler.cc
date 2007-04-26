@@ -41,11 +41,8 @@ static char not_used rcsid[] =
 #include "cgi_util.h"
 
 #include "NCTypeFactory.h"
-
-extern void nc_read_variables(DAS & das,
-                              const string & filename) throw(Error);
-extern void nc_read_descriptors(DDS & dds,
-                                const string & filename) throw(Error);
+#include "ncdas.h"
+#include "ncdds.h"
 
 const string cgi_version = PACKAGE_VERSION;
 

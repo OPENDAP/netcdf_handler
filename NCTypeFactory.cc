@@ -43,81 +43,82 @@
 #include "debug.h"
 
 Byte *
-NCTypeFactory::NewByte(const string &n ) const 
+NCTypeFactory::NewByte(const string &n, const string &ds ) const 
 { 
-    return new NCByte(n);
+    return new NCByte(n, ds);
 }
 
 Int16 *
-NCTypeFactory::NewInt16(const string &n ) const 
+NCTypeFactory::NewInt16(const string &n, const string &ds ) const 
 { 
-    return new NCInt16(n); 
+    return new NCInt16(n, ds); 
 }
 
 UInt16 *
-NCTypeFactory::NewUInt16(const string &n ) const 
+NCTypeFactory::NewUInt16(const string &n, const string &ds ) const 
 { 
-    return new NCUInt16(n);
+    return new NCUInt16(n, ds);
 }
 
 Int32 *
-NCTypeFactory::NewInt32(const string &n ) const 
+NCTypeFactory::NewInt32(const string &n, const string &ds ) const 
 { 
     DBG(cerr << "Inside NCTypeFactory::NewInt32" << endl);
-    return new NCInt32(n);
+    return new NCInt32(n, ds);
 }
 
 UInt32 *
-NCTypeFactory::NewUInt32(const string &n ) const 
+NCTypeFactory::NewUInt32(const string &n, const string &ds ) const 
 { 
-    return new NCUInt32(n);
+    return new NCUInt32(n, ds);
 }
 
 Float32 *
-NCTypeFactory::NewFloat32(const string &n ) const 
+NCTypeFactory::NewFloat32(const string &n, const string &ds ) const 
 { 
-    return new NCFloat32(n);
+    return new NCFloat32(n, ds);
 }
 
 Float64 *
-NCTypeFactory::NewFloat64(const string &n ) const 
+NCTypeFactory::NewFloat64(const string &n, const string &ds ) const 
 { 
-    return new NCFloat64(n);
+    return new NCFloat64(n, ds);
 }
 
 Str *
-NCTypeFactory::NewStr(const string &n ) const 
+NCTypeFactory::NewStr(const string &n, const string &ds ) const 
 { 
-    return new NCStr(n);
+    return new NCStr(n, ds);
 }
 
 Url *
-NCTypeFactory::NewUrl(const string &n ) const 
+NCTypeFactory::NewUrl(const string &n, const string &ds ) const 
 { 
-    return new NCUrl(n);
+    return new NCUrl(n, ds);
 }
 
 Array *
-NCTypeFactory::NewArray(const string &n , BaseType *v) const 
+NCTypeFactory::NewArray(const string &n , BaseType *v, const string &ds) const
 { 
-    return new NCArray(n, v);
+    return new NCArray(n, v, ds);
 }
 
 Structure *
-NCTypeFactory::NewStructure(const string &n ) const 
+NCTypeFactory::NewStructure(const string &n, const string &ds ) const 
 { 
-    return new NCStructure(n);
+    return new NCStructure(n, ds);
 }
 
 Sequence *
-NCTypeFactory::NewSequence(const string &n ) const 
+NCTypeFactory::NewSequence(const string &n, const string &ds ) const 
 { 
     DBG(cerr << "Inside NCTypeFactory::NewSequence" << endl);
-    return new NCSequence(n);
+    return new NCSequence(n, ds);
 }
 
 Grid *
-NCTypeFactory::NewGrid(const string &n ) const 
+NCTypeFactory::NewGrid(const string &n, const string &ds ) const 
 { 
-    return new NCGrid(n);
+    return new NCGrid(n, ds);
 }
+

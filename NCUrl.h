@@ -43,7 +43,7 @@
 class NCUrl: public Url {
         
 public:
-    NCUrl(const string &n = "");
+    NCUrl(const string &n = "", const string &ds = "");
     NCUrl(const NCUrl &rhs);
     virtual ~NCUrl();
 

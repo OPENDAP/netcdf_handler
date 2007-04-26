@@ -44,7 +44,7 @@
 class NCStr: public Str {
      
 public:
-    NCStr(const string &n = "");
+    NCStr(const string &n = "", const string &ds = "");
     NCStr(const NCStr &rhs);
     virtual ~NCStr();
 

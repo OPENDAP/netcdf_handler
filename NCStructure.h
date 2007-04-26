@@ -47,7 +47,7 @@
 class NCStructure: public Structure {
         
 public:
-    NCStructure(const string &n = "");
+    NCStructure(const string &n = "", const string &ds = "");
     NCStructure(const NCStructure &rhs);
     virtual ~NCStructure();
 

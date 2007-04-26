@@ -44,7 +44,7 @@
 class NCByte: public Byte {
    
 public:
-    NCByte(const string &n = "");
+    NCByte(const string &n = "", const string &ds = "");
     NCByte(const NCByte &rhs);
     virtual ~NCByte();
 

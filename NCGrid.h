@@ -44,7 +44,7 @@
 class NCGrid: public Grid {
 
 public:
-    NCGrid(const string &n = "");
+    NCGrid(const string &n = "", const string &ds = "");
     NCGrid(const NCGrid &rhs);
     virtual ~NCGrid();
 

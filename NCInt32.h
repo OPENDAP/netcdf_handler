@@ -44,7 +44,7 @@
 class NCInt32: public Int32 {
         
 public:
-    NCInt32(const string &n = "");
+    NCInt32(const string &n = "", const string &ds = "");
     NCInt32(const NCInt32 &rhs);
     virtual ~NCInt32();
 

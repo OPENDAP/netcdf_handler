@@ -44,7 +44,7 @@
 class NCInt16: public Int16 {
         
 public:
-    NCInt16(const string &n = "");
+    NCInt16(const string &n = "", const string &ds = "");
     NCInt16(const NCInt16 &rhs);
     virtual ~NCInt16();
 

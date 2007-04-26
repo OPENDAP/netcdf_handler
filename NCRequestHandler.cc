@@ -37,13 +37,11 @@
 #include "Error.h"
 #include "BESDapHandlerException.h"
 #include "BESDataNames.h"
+#include "BESContextManager.h"
 
 #include "config_nc.h"
-
-extern void nc_read_variables(DAS & das,
-                              const string & filename) throw(Error);
-extern void nc_read_descriptors(DDS & dds,
-                                const string & filename) throw(Error);
+#include "ncdas.h"
+#include "ncdds.h"
 
 NCRequestHandler::NCRequestHandler(string name)
 :  BESRequestHandler(name)
@@ -66,8 +64,20 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response);
     DAS *das = bdas->get_das();
 
+    // determine if this is a dap2 response format, where there won't be
+    // multiple files. If there are no multiple files (this is a dap2
+    // response format) then the data structures won't be nested
+    bool found = false ;
+    bool multi = true ;
+    string val = BESContextManager::TheManager()->get_context( "format", found ) ;
+    if( val == "dap2" )
+    {
+	multi = false ;
+    }
+
     try {
-        nc_read_variables(*das, dhi.container->access());
+        nc_read_variables(*das, dhi.container->access(),
+	                  dhi.container->get_symbolic_name(), multi);
     }
     catch(Error & e) {
         BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
@@ -90,18 +100,32 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
     BESDDSResponse *bdds = dynamic_cast < BESDDSResponse * >(response);
     DDS *dds = bdds->get_dds();
 
+    // determine if this is a dap2 response format, where there won't be
+    // multiple files. If there are no multiple files (this is a dap2
+    // response format) then the data structures won't be nested
+    bool found = false ;
+    bool multi = true ;
+    string val = BESContextManager::TheManager()->get_context( "format", found ) ;
+    if( val == "dap2" )
+    {
+	multi = false ;
+    }
+
     try {
         NCTypeFactory *factory = new NCTypeFactory;
         dds->set_factory(factory);
 
         dds->filename(dhi.container->access());
-        nc_read_descriptors(*dds, dhi.container->access());
+        nc_read_descriptors(*dds, dhi.container->access(),
+	                    dhi.container->get_symbolic_name(), multi);
         DAS das;
-        nc_read_variables(das, dhi.container->access());
+        nc_read_variables(das, dhi.container->access(),
+			  dhi.container->get_symbolic_name(), multi);
 
         dds->transfer_attributes(&das);
 
-        dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+	BESConstraintFuncs::post_append( dhi, multi ) ;
+        //dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 #if 0
         // see ticket 720
         dds->set_factory(NULL);
@@ -130,18 +154,32 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         dynamic_cast < BESDataDDSResponse * >(response);
     DataDDS *dds = bdds->get_dds();
 
+    // determine if this is a dap2 response format, where there won't be
+    // multiple files. If there are no multiple files (this is a dap2
+    // response format) then the data structures won't be nested
+    bool found = false ;
+    bool multi = true ;
+    string val = BESContextManager::TheManager()->get_context( "format", found ) ;
+    if( val == "dap2" )
+    {
+	multi = false ;
+    }
+
     try {
         NCTypeFactory *factory = new NCTypeFactory;
         dds->set_factory(factory);
 
         dds->filename(dhi.container->access());
-        nc_read_descriptors(*dds, dhi.container->access());
+        nc_read_descriptors(*dds, dhi.container->access(),
+	                    dhi.container->get_symbolic_name(), multi);
         DAS das;
-        nc_read_variables(das, dhi.container->access());
+        nc_read_variables(das, dhi.container->access(),
+			  dhi.container->get_symbolic_name(), multi);
 
         dds->transfer_attributes(&das);
 
-        dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+	BESConstraintFuncs::post_append( dhi, multi ) ;
+        //dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
 
 #if 0
         // see ticket 720

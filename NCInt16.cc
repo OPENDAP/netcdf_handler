@@ -46,7 +46,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include "NCInt16.h"
 
 
-NCInt16::NCInt16(const string &n) : Int16(n)
+NCInt16::NCInt16(const string &n, const string &ds) : Int16(n, ds)
 {
 }
 
@@ -79,7 +79,7 @@ NCInt16::ptr_duplicate(){
 
 
 bool
-NCInt16::read(const string &dataset)
+NCInt16::read(const string &ds)
 {
   int varid;                  /* variable Id */
   nc_type datatype;           /* variable data type */
@@ -88,17 +88,23 @@ NCInt16::read(const string &dataset)
   dods_int16 intg16;
   int id;
 
+    string use_dataset = dataset() ;
+    if( use_dataset.empty() )
+    {
+	use_dataset = ds ;
+    }
+
   if (read_p()) // nothing to do
     return false;
 
   int ncid, errstat;
 
-  errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+  errstat = nc_open(use_dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
   if (errstat != NC_NOERR)
     {
 	string err = (string)"Could not open the dataset's file ("
-	             + dataset.c_str() + ")" ;
+	             + use_dataset.c_str() + ")" ;
 	throw Error(errstat, err);
     }
  

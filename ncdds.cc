@@ -65,6 +65,7 @@ static char not_used rcsid[]={"$Id$"};
 #include "NCArray.h"
 #include "NCGrid.h"
 #include "NCStr.h"
+#include "PassiveStructure.h"
 #include "cgi_util.h"
 #include "util.h"
 
@@ -77,29 +78,30 @@ static char Msgt[255];
 //
 
 static BaseType *
-Get_bt(BaseTypeFactory *factory, string varname, nc_type datatype) 
+Get_bt(BaseTypeFactory *factory, string varname,
+       const string &filename, nc_type datatype) 
 {
     switch (datatype) {
       case NC_CHAR:
-	return (factory->NewStr(varname));
+	return (factory->NewStr(varname, filename));
 
       case NC_BYTE:
-	return (factory->NewByte(varname));
+	return (factory->NewByte(varname, filename));
 	
       case NC_SHORT:
-	return (factory->NewInt16(varname));
+	return (factory->NewInt16(varname, filename));
 
       case NC_LONG:
-	return (factory->NewInt32(varname));
+	return (factory->NewInt32(varname, filename));
 
       case NC_FLOAT:
-	return (factory->NewFloat32(varname));
+	return (factory->NewFloat32(varname, filename));
 
       case NC_DOUBLE:
-	return (factory->NewFloat64(varname));
+	return (factory->NewFloat64(varname, filename));
 	
       default:
-	return (factory->NewStr(varname));
+	return (factory->NewStr(varname, filename));
     }
 }
 
@@ -111,7 +113,9 @@ Get_bt(BaseTypeFactory *factory, string varname, nc_type datatype)
 // otherwise.
 
 int
-read_class(DDS &dds_table, int ncid, int nvars, string *error)
+read_class(DDS &dds_table, const string &filename,
+	   int ncid, int nvars, const string &name, bool multi,
+	   string *error)
 {
     char varname1[MAX_NC_NAME];
     char varname2[MAX_NC_VARS][MAX_NC_NAME];
@@ -131,7 +135,20 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
     Part pr;
     int errstat;
 
-    //add all the variables in this file to DDS table 
+    //add all the variables in this file to DDS table if this is a single
+    //container request or if the request is in the context of a dap
+    //response. If a multi container request or not int he context of a dap
+    //response, then add all variables to a structure representing the
+    //symbolic name.
+
+    PassiveStructure *container = NULL ;
+    if( multi )
+    {
+	PassiveStructure *temp_container = new PassiveStructure( name ) ;
+	dds_table.add_var( temp_container ) ;
+	delete temp_container ;
+	container = dynamic_cast<PassiveStructure *>( dds_table.var( name ) ) ;
+    }
 
     for (int v1 = 0; v1 < nvars; ++v1) {
       errstat = nc_inq_var(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0);
@@ -142,12 +159,13 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	    return errstat;
 	}
 
-	BaseType *bt = Get_bt(dds_table.get_factory(), varname1, nctype);
+	BaseType *bt = Get_bt(dds_table.get_factory(), varname1, filename, nctype);
     
 	// is an Atomic-class ?
 
 	if (ndims == 0){
-	    dds_table.add_var(bt);
+	    if( multi ) container->add_var( bt ) ;
+	    else dds_table.add_var( bt ) ;
 	    delete bt ;
 	}
 	
@@ -225,7 +243,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
       
 	    // Create common array for both Array and Grid types
       
-	    ar = dds_table.get_factory()->NewArray(varname1);
+	    ar = dds_table.get_factory()->NewArray(varname1, 0, filename);
 	    ar->add_var(bt);
 	    delete bt ;
 	    for (d = 0; d < ndims; ++d) 
@@ -234,37 +252,40 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 #ifndef NOGRID
       
 	    if (ndims == dim_match){   // Found Grid type, add it
-		gr = dds_table.get_factory()->NewGrid(varname1);
+		gr = dds_table.get_factory()->NewGrid(varname1, filename);
 		pr = array;
 		gr->add_var(ar,pr);
 		delete ar ;
 		pr = maps;
 		for ( d = 0; d < ndims; ++d){
-		    ar = new NCArray; 
+		    ar = new NCArray( "", 0, filename); 
 		    bt = Get_bt(dds_table.get_factory(), var_match[d],
-				typ_match[d]);
+		                filename, typ_match[d]);
 		    ar->add_var(bt);     
 		    delete bt ;
 		    ar->append_dim(dim_szs[d],dim_nms[d]);
 		    gr->add_var(ar,pr);
 		    delete ar ;
 		}
-		dds_table.add_var(gr);
+		if( multi ) container->add_var( gr ) ;
+		else dds_table.add_var( gr ) ;
 		delete gr ;
 	    }
 	    else {                    // must be an Array, add it
-		dds_table.add_var(ar);
+		if( multi ) container->add_var( ar ) ;
+		else dds_table.add_var( ar ) ;
 		delete ar ;
 	    }
 #else
       
-	    dds_table.add_var(ar);
+	    if( multi ) container->add_var( ar ) ;
+	    else dds_table.add_var( ar ) ;
 	    delete ar ;
       
 #endif
 	}
     }
-  
+
     return NC_NOERR;
 }
 
@@ -277,8 +298,8 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 // otherwise. 
 
 void
-nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error) 
-
+nc_read_descriptors(DDS &dds_table, const string &filename,
+                    const string &name, bool multi) throw (Error) 
 {
   ncopts = 0;
   int ncid, errstat;
@@ -309,7 +330,7 @@ nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error)
     // read variables class
     string *error;
 
-    errstat = read_class(dds_table,ncid,nvars,error);
+    errstat = read_class(dds_table,filename,ncid,nvars,name,multi,error);
     if (errstat != NC_NOERR) {
 	string msg = (string) *error;
 	throw Error(errstat, msg);

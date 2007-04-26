@@ -44,7 +44,7 @@
 class NCFloat32: public Float32 {
 
 public:
-    NCFloat32(const string &n = "");
+    NCFloat32(const string &n = "", const string &ds = "");
     NCFloat32(const NCFloat32 &rhs);
     virtual ~NCFloat32();
 

@@ -44,7 +44,7 @@
 class NCUInt16: public UInt16 {
         
 public:
-    NCUInt16(const string &n = "");
+    NCUInt16(const string &n = "", const string &ds = "");
     NCUInt16(const NCUInt16 &rhs);
     virtual ~NCUInt16();
 

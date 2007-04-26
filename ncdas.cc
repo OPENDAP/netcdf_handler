@@ -297,13 +297,19 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 // otherwise. 
 
 void
-nc_read_variables(DAS &das, const string &filename) throw (Error) 
+nc_read_variables(DAS &das, const string &filename,
+		  const string &name, bool multi) throw(Error)
 {
     ncopts = 0;
     int ncid, errstat; 
     int nvars, ngatts, natts = 0 ;
     string *error = NULL ;
     AttrTable *attr_table_ptr = NULL ;
+    AttrTable *virtual_table_ptr = NULL ;
+    if( multi )
+    {
+	virtual_table_ptr = das.add_table( name, new AttrTable ) ;
+    }
 
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
 
@@ -335,9 +341,18 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 	    throw Error(errstat, msg);
 	}
 
-	attr_table_ptr = das.get_table(varname);
-	if (!attr_table_ptr)
-	    attr_table_ptr = das.add_table(varname, new AttrTable);
+	if( multi )
+	{
+	    attr_table_ptr = virtual_table_ptr->find_container( varname ) ;
+	    if( !attr_table_ptr )
+		attr_table_ptr = virtual_table_ptr->append_container( varname );
+	}
+	else
+	{
+	    attr_table_ptr = das.get_table(varname);
+	    if (!attr_table_ptr)
+		attr_table_ptr = das.add_table(varname, new AttrTable);
+	}
 
 	errstat = read_attributes(ncid, v, natts, attr_table_ptr, error);
 	if (errstat != NC_NOERR){
@@ -348,7 +363,14 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 
     // global attributes
     if (ngatts > 0) {
-	attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
+	if( multi )
+	{
+	    attr_table_ptr = virtual_table_ptr->append_container( "NC_GLOBAL" );
+	}
+	else
+	{
+	    attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
+	}
 
 	errstat = read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr, error);
 	if (errstat != NC_NOERR){
@@ -365,7 +387,14 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     if (xdimid != -1){
 	nc_inq_dim(ncid, xdimid, dimname, (size_t *)0);
 	string print_rep = print_attr(datatype, 0, dimname);	
-	attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
+	if( multi )
+	{
+	    attr_table_ptr = virtual_table_ptr->append_container( "DODS_EXTRA");
+	}
+	else
+	{
+	    attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
+	}
 	attr_table_ptr->append_attr("Unlimited_Dimension", 
 				    print_type(datatype), print_rep);
     }

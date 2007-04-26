@@ -44,7 +44,7 @@
 class NCFloat64: public Float64 {
 
 public:
-    NCFloat64(const string &n = "");
+    NCFloat64(const string &n = "", const string &ds = "");
     NCFloat64(const NCFloat64 &rhs);
     virtual ~NCFloat64();
 
