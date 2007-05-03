@@ -69,6 +69,9 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     try {
         nc_read_variables(*das, dhi.container->access());
     }
+    catch( BESException &e ) {
+	throw e ;
+    }
     catch(Error & e) {
         BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
 				   e.get_error_code() ) ;
@@ -107,6 +110,9 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         dds->set_factory(NULL);
         delete factory;
 #endif
+    }
+    catch( BESException &e ) {
+	throw e ;
     }
     catch(Error & e) {
         BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
@@ -148,6 +154,9 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         dds->set_factory(NULL);
         delete factory;
 #endif
+    }
+    catch( BESException &e ) {
+	throw e ;
     }
     catch(Error & e) {
         BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
