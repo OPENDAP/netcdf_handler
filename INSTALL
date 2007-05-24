@@ -40,7 +40,7 @@ Building from Our SVN Repository
 REQUIREMENTS
 
   o You need the libdap library version 3.7.5 to build and install this
-    software. If you're using Linux, this means either building form source
+    software. If you're using Linux, this means either building from source
     or using the libdap and libdap-devel RPM packages.
 
   o If you're planning on using this with the OPeNDAP 4 Data Server (Hyrax),

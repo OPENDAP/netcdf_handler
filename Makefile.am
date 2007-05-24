@@ -88,3 +88,19 @@ srpm: dist
 rpm: dist
 	rpmbuild -tb netcdf_handler-@PACKAGE_VERSION@.tar.gz
 
+###########################################################################
+#
+# Build OS/X Packages.
+
+PACKAGEMAKER=/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker*
+
+pkg:
+	rm -rf mac_osx @PACKAGE@-@PACKAGE_VERSION@.pkg
+	./configure --prefix=/usr $(PKG_CONFIGURE_FLAGS)
+	make configure-nc-data.sh
+	cp configure-nc-data.sh configure-nc-data.sh.macosx
+	./configure --prefix=`pwd`/mac_osx $(PKG_CONFIGURE_FLAGS)
+	make clean install
+	mv configure-nc-data.sh.macosx mac_osx/bin/configure-nc-data.sh
+	${PACKAGEMAKER} -build -p @PACKAGE@-@PACKAGE_VERSION@.pkg -f mac_osx -ds -r OSX_Resources -i OSX_Resources/Info.plist -d OSX_Resources/Description.plist
+
