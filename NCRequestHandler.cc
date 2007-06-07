@@ -45,7 +45,7 @@ extern void nc_read_variables(DAS & das,
 extern void nc_read_descriptors(DDS & dds,
                                 const string & filename) throw(Error);
 
-NCRequestHandler::NCRequestHandler(string name)
+NCRequestHandler::NCRequestHandler(const string &name)
 :  BESRequestHandler(name)
 {
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);

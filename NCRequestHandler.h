@@ -32,7 +32,7 @@
 
 class NCRequestHandler : public BESRequestHandler {
 public:
-			NCRequestHandler( string name ) ;
+			NCRequestHandler( const string &name ) ;
     virtual		~NCRequestHandler( void ) ;
 
     static bool		nc_build_das( BESDataHandlerInterface &dhi ) ;
