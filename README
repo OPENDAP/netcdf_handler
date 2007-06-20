@@ -2,7 +2,7 @@
 $Id$
 
 This is the OPeNDAP netCDF Data Handler. It is used along with the OPeNDAP
-DAP Server3 and Hyrax 1.02 beta.
+DAP Server3 and Hyrax.
 
 For information about building the OPeNDAP netCDF Data Handler, see the
 INSTALL file.

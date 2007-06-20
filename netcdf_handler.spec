@@ -40,7 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 if bes-config --version >/dev/null 2>&1
 then
 	bes_prefix=`bes-config --prefix`
-	configure-ff-data.sh $bes_prefix/etc/bes/bes.conf $bes_prefix/lib/bes
+	configure-nc-data.sh $bes_prefix/etc/bes/bes.conf $bes_prefix/lib/bes
 fi
 
 %postun -p /sbin/ldconfig

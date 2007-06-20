@@ -23,7 +23,7 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-// (c) COPYRIGHT University Corporation for Atmostpheric Research 2004-2005
+// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
 // Please read the full copyright statement in the file COPYRIGHT_UCAR.
 //
 // Authors:
@@ -46,28 +46,28 @@ using std::endl;
 
 void NCModule::initialize(const string & modname)
 {
-    if (BESLog::TheLog()->is_verbose())
+    if (BESLog::TheLog()->is_verbose()) {
         (*BESLog::TheLog()) << "Initializing NC:" << endl;
-
-    if (BESLog::TheLog()->is_verbose())
-        (*BESLog::
-         TheLog()) << "    adding " << modname << " request handler" << endl;
+        (*BESLog::TheLog()) << "    adding " << modname << " request handler" 
+			    << endl;
+    }
          
     BESRequestHandlerList::TheList()->add_handler(modname,
-                                                  new
-                                                  NCRequestHandler
-                                                  (modname));
+                                               new NCRequestHandler(modname));
 
     if (BESLog::TheLog()->is_verbose())
         (*BESLog::TheLog()) << "    adding " << NC_CATALOG << " catalog"
-            << endl;
+			    << endl;
+
     BESCatalogList::TheCatalogList()->
         add_catalog(new BESCatalogDirectory(NC_CATALOG));
 
     if (BESLog::TheLog()->is_verbose())
         (*BESLog::TheLog()) << "Adding Catalog Container Storage" << endl;
+
     BESContainerStorageCatalog *csc =
         new BESContainerStorageCatalog(NC_CATALOG);
+
     BESContainerStorageList::TheList()->add_persistence(csc);
 }
 
@@ -75,14 +75,15 @@ void NCModule::terminate(const string & modname)
 {
     if (BESLog::TheLog()->is_verbose())
         (*BESLog::TheLog()) << "Removing NC Handlers" << endl;
+
     BESRequestHandler *rh =
         BESRequestHandlerList::TheList()->remove_handler(modname);
     if (rh)
         delete rh;
 
     if (BESLog::TheLog()->is_verbose())
-        (*BESLog::
-         TheLog()) << "Removing catalog Container Storage" << endl;
+        (*BESLog::TheLog()) << "Removing catalog Container Storage" << endl;
+
     BESContainerStorageList::TheList()->del_persistence("catalog");
 }
 
@@ -94,8 +95,8 @@ void NCModule::terminate(const string & modname)
  */
 void NCModule::dump(ostream & strm) const
 {
-    strm << BESIndent::LMarg << "NCModule::dump - ("
-        << (void *) this << ")" << endl;
+    strm << BESIndent::LMarg << "NCModule::dump - (" << (void *) this << ")" 
+	 << endl;
 }
 
 extern "C" BESAbstractModule * maker()

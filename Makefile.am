@@ -45,13 +45,13 @@ SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
-EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec
+EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
+    configure-nc-data.sh.in
 
 CLEANFILES = *~
 
 if OPENDAPSERVER
 
-EXTRA_DIST += configure-nc-data.sh.in
 CLEANFILES += configure-nc-data.sh
 
 sample_datadir = $(datadir)/hyrax/data/nc
@@ -61,7 +61,7 @@ do_subst = sed -e 's,[@]sysconfdir[@],$(sysconfdir),g' \
 		   	   -e 's,[@]libdir[@],$(libdir),g' \
 		   	   -e 's,[@]datadir[@],$(datadir),g'
 
-configure-nc-data.sh: configure-nc-data.sh.in Makefile
+configure-nc-data.sh: configure-nc-data.sh.in config.status
 	$(do_subst) < $(srcdir)/configure-nc-data.sh.in > configure-nc-data.sh
 	chmod +x configure-nc-data.sh
 
