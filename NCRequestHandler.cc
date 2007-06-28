@@ -67,7 +67,8 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     DAS *das = bdas->get_das();
 
     try {
-        nc_read_variables(*das, dhi.container->access());
+	string accessed = dhi.container->access();
+        nc_read_variables(*das, accessed);
     }
     catch( BESException &e ) {
 	throw e ;
@@ -97,10 +98,11 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         NCTypeFactory *factory = new NCTypeFactory;
         dds->set_factory(factory);
 
-        dds->filename(dhi.container->access());
-        nc_read_descriptors(*dds, dhi.container->access());
+	string accessed = dhi.container->access() ;
+        dds->filename( accessed );
+        nc_read_descriptors(*dds, accessed);
         DAS das;
-        nc_read_variables(das, dhi.container->access());
+        nc_read_variables(das, accessed);
 
         dds->transfer_attributes(&das);
 
@@ -140,10 +142,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         NCTypeFactory *factory = new NCTypeFactory;
         dds->set_factory(factory);
 
-        dds->filename(dhi.container->access());
-        nc_read_descriptors(*dds, dhi.container->access());
+	string accessed = dhi.container->access() ;
+        dds->filename(accessed);
+        nc_read_descriptors(*dds, accessed);
         DAS das;
-        nc_read_variables(das, dhi.container->access());
+        nc_read_variables(das, accessed);
 
         dds->transfer_attributes(&das);
 
