@@ -40,7 +40,7 @@
 
 #include <sstream>
 
-#include "Array.h"
+#include <Array.h>
 
 class NCArray: public Array {
 public:

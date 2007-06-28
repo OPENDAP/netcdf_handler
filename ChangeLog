@@ -1,3 +1,11 @@
+2007-06-26  James Gallagher <jgallagher@opendap.org>
+
+	Don't edit bes.conf automatically. The handler may be installed and
+	not used and it breaks staged installs (patch from Patrice Dumas
+	<pertusu@free.fr>)
+	
+	Rename configure-nc-data.sh to bes-nc-data.sh
+
 2007-03-09  James Gallagher <jgallagher@opendap.org>
 
 	Final changes for the default configuration and data install for

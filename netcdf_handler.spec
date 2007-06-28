@@ -9,7 +9,7 @@ URL:             http://www.opendap.org/
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:   libdap-devel >= 3.7.5 netcdf-devel
-# BuildRequires:   bes-devel
+BuildRequires:   bes-devel
 
 %description
 This is the netcdf data handler for our data server. It reads netcdf 3
@@ -25,33 +25,26 @@ make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=$RPM_BUILD_ROOT install
+make DESTDIR=$RPM_BUILD_ROOT install INSTALL="install -p"
 
-rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
-rm -f $RPM_BUILD_ROOT%{_libdir}/*.so
-rm -f $RPM_BUILD_ROOT%{_libdir}/bes/*.la
+rm $RPM_BUILD_ROOT%{_libdir}/*.la
+rm $RPM_BUILD_ROOT%{_libdir}/*.so
+rm $RPM_BUILD_ROOT%{_libdir}/bes/*.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %post -p /sbin/ldconfig
 
-# Only try to configure the bes.conf file if the bes can be found.
-if bes-config --version >/dev/null 2>&1
-then
-	bes_prefix=`bes-config --prefix`
-	configure-nc-data.sh $bes_prefix/etc/bes/bes.conf $bes_prefix/lib/bes
-fi
-
 %postun -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
 %{_bindir}/dap_nc_handler
-%{_bindir}/configure-nc-data.sh
-%{_libdir}/
-%{_libdir}/bes/
-%{_datadir}/hyrax/data/nc
+%{_bindir}/bes-nc-data.sh
+%{_libdir}/libnc_handler.so.*
+%{_libdir}/bes/libnc_module.so
+%{_datadir}/hyrax/
 %doc COPYING COPYRIGHT NEWS README
 
 %changelog

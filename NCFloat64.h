@@ -39,7 +39,7 @@
 #ifndef _ncfloat64_h
 #define _ncfloat64_h 1
 
-#include "Float64.h"
+#include <Float64.h>
 
 class NCFloat64: public Float64 {
 

@@ -39,7 +39,7 @@
 #ifndef _ncbyte_h
 #define _ncbyte_h 1
 
-#include "Byte.h"
+#include <Byte.h>
 
 class NCByte: public Byte {
    
