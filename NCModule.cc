@@ -40,51 +40,45 @@ using std::endl;
 #include "BESContainerStorageCatalog.h"
 #include "BESCatalogDirectory.h"
 #include "BESCatalogList.h"
-#include "BESLog.h"
+#include "BESDebug.h"
 
 #define NC_CATALOG "catalog"
 
-void NCModule::initialize(const string & modname)
+void NCModule::initialize( const string & modname )
 {
-    if (BESLog::TheLog()->is_verbose()) {
-        (*BESLog::TheLog()) << "Initializing NC:" << endl;
-        (*BESLog::TheLog()) << "    adding " << modname << " request handler" 
-			    << endl;
-    }
-         
-    BESRequestHandlerList::TheList()->add_handler(modname,
-                                               new NCRequestHandler(modname));
+    BESDEBUG( "Initializing NC module " << modname << endl )
 
-    if (BESLog::TheLog()->is_verbose())
-        (*BESLog::TheLog()) << "    adding " << NC_CATALOG << " catalog"
-			    << endl;
+    BESDEBUG( "    adding " << modname << " request handler" << endl )
+    BESRequestHandler *handler = new NCRequestHandler( modname ) ;
+    BESRequestHandlerList::TheList()->add_handler( modname, handler ) ;
 
+    BESDEBUG( "    adding " << NC_CATALOG << " catalog" << endl )
     BESCatalogList::TheCatalogList()->
-        add_catalog(new BESCatalogDirectory(NC_CATALOG));
+        add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
 
-    if (BESLog::TheLog()->is_verbose())
-        (*BESLog::TheLog()) << "Adding Catalog Container Storage" << endl;
-
+    BESDEBUG( "    adding catalog container storage " << NC_CATALOG << endl )
     BESContainerStorageCatalog *csc =
-        new BESContainerStorageCatalog(NC_CATALOG);
+        new BESContainerStorageCatalog( NC_CATALOG ) ;
+    BESContainerStorageList::TheList()->add_persistence( csc ) ;
 
-    BESContainerStorageList::TheList()->add_persistence(csc);
+    BESDEBUG( "Done Initializing NC module " << modname << endl )
 }
 
-void NCModule::terminate(const string & modname)
+void NCModule::terminate( const string & modname )
 {
-    if (BESLog::TheLog()->is_verbose())
-        (*BESLog::TheLog()) << "Removing NC Handlers" << endl;
+    BESDEBUG( "Cleaning NC module " << modname << endl )
 
-    BESRequestHandler *rh =
-        BESRequestHandlerList::TheList()->remove_handler(modname);
-    if (rh)
-        delete rh;
+    BESDEBUG( "    removing NC Handler" << modname << endl )
+    BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( modname ) ;
+    if( rh ) delete rh ;
 
-    if (BESLog::TheLog()->is_verbose())
-        (*BESLog::TheLog()) << "Removing catalog Container Storage" << endl;
+    BESDEBUG( "    removing catalog container storage" << NC_CATALOG << endl )
+    BESContainerStorageList::TheList()->del_persistence( NC_CATALOG ) ;
 
-    BESContainerStorageList::TheList()->del_persistence("catalog");
+    BESDEBUG( "    removing " << NC_CATALOG << " catalog" << endl )
+    BESCatalogList::TheCatalogList()->del_catalog( NC_CATALOG ) ;
+
+    BESDEBUG( "Done Cleaning NC module " << modname << endl )
 }
 
 /** @brief dumps information about this object
@@ -93,7 +87,7 @@ void NCModule::terminate(const string & modname)
  *
  * @param strm C++ i/o stream to dump the information to
  */
-void NCModule::dump(ostream & strm) const
+void NCModule::dump( ostream & strm ) const
 {
     strm << BESIndent::LMarg << "NCModule::dump - (" << (void *) this << ")" 
 	 << endl;
@@ -101,6 +95,6 @@ void NCModule::dump(ostream & strm) const
 
 extern "C" BESAbstractModule * maker()
 {
-    return new NCModule;
+    return new NCModule ;
 }
 
