@@ -46,39 +46,42 @@ using std::endl;
 
 void NCModule::initialize( const string & modname )
 {
-    BESDEBUG( "Initializing NC module " << modname << endl )
+    BESDEBUG( "nc", "Initializing NC module " << modname << endl )
 
-    BESDEBUG( "    adding " << modname << " request handler" << endl )
+    BESDEBUG( "nc", "    adding " << modname << " request handler" << endl )
     BESRequestHandler *handler = new NCRequestHandler( modname ) ;
     BESRequestHandlerList::TheList()->add_handler( modname, handler ) ;
 
-    BESDEBUG( "    adding " << NC_CATALOG << " catalog" << endl )
+    BESDEBUG( "nc", "    adding " << NC_CATALOG << " catalog" << endl )
     BESCatalogList::TheCatalogList()->
         add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
 
-    BESDEBUG( "    adding catalog container storage " << NC_CATALOG << endl )
+    BESDEBUG( "nc", "    adding catalog container storage " << NC_CATALOG << endl )
     BESContainerStorageCatalog *csc =
         new BESContainerStorageCatalog( NC_CATALOG ) ;
     BESContainerStorageList::TheList()->add_persistence( csc ) ;
 
-    BESDEBUG( "Done Initializing NC module " << modname << endl )
+    BESDEBUG( "nc", "    adding nc debug context" << endl )
+    BESDebug::Register( "nc" ) ;
+
+    BESDEBUG( "nc", "Done Initializing NC module " << modname << endl )
 }
 
 void NCModule::terminate( const string & modname )
 {
-    BESDEBUG( "Cleaning NC module " << modname << endl )
+    BESDEBUG( "nc", "Cleaning NC module " << modname << endl )
 
-    BESDEBUG( "    removing NC Handler" << modname << endl )
+    BESDEBUG( "nc", "    removing NC Handler" << modname << endl )
     BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( modname ) ;
     if( rh ) delete rh ;
 
-    BESDEBUG( "    removing catalog container storage" << NC_CATALOG << endl )
+    BESDEBUG( "nc", "    removing catalog container storage" << NC_CATALOG << endl )
     BESContainerStorageList::TheList()->del_persistence( NC_CATALOG ) ;
 
-    BESDEBUG( "    removing " << NC_CATALOG << " catalog" << endl )
+    BESDEBUG( "nc", "    removing " << NC_CATALOG << " catalog" << endl )
     BESCatalogList::TheCatalogList()->del_catalog( NC_CATALOG ) ;
 
-    BESDEBUG( "Done Cleaning NC module " << modname << endl )
+    BESDEBUG( "nc", "Done Cleaning NC module " << modname << endl )
 }
 
 /** @brief dumps information about this object
