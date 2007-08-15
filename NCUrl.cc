@@ -40,7 +40,7 @@
 
 static char rcsid[] not_used ={"$Id$"};
 
-#include "InternalErr.h"
+#include <InternalErr.h>
 #include "NCUrl.h"
 
 NCUrl::NCUrl(const string &n) : Url(n)

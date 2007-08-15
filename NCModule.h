@@ -32,7 +32,7 @@
 #ifndef A_NCModule_H
 #define A_NCModule_H 1
 
-#include "BESAbstractModule.h"
+#include <BESAbstractModule.h>
 
 class NCModule : public BESAbstractModule {
    public:

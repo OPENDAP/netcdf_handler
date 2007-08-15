@@ -59,10 +59,10 @@ static char not_used rcsid[]={"$Id$"};
 
 #include <netcdf.h>
 
-#include "cgi_util.h"
-#include "util.h"
-#include "escaping.h"
-#include "DAS.h"
+#include <cgi_util.h>
+#include <util.h>
+#include <escaping.h>
+#include <DAS.h>
 
 // These are used as the return values for print_type().
 

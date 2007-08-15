@@ -27,16 +27,16 @@
 
 #include "NCRequestHandler.h"
 #include "NCTypeFactory.h"
-#include "BESResponseHandler.h"
-#include "BESResponseNames.h"
-#include "BESDASResponse.h"
-#include "BESDDSResponse.h"
-#include "BESDataDDSResponse.h"
-#include "BESConstraintFuncs.h"
-#include "BESVersionInfo.h"
-#include "Error.h"
-#include "BESDapHandlerException.h"
-#include "BESDataNames.h"
+#include <BESResponseHandler.h>
+#include <BESResponseNames.h>
+#include <BESDASResponse.h>
+#include <BESDDSResponse.h>
+#include <BESDataDDSResponse.h>
+#include <BESConstraintFuncs.h>
+#include <BESVersionInfo.h>
+#include <Error.h>
+#include <BESDapHandlerException.h>
+#include <BESDataNames.h>
 
 #include "config_nc.h"
 

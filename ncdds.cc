@@ -54,7 +54,7 @@ static char not_used rcsid[]={"$Id$"};
 #include <string>
 
 #include <netcdf.h>
-#include "DDS.h"
+#include <DDS.h>
 #include "NCInt32.h"
 #include "NCUInt32.h"
 #include "NCUInt16.h"
@@ -65,8 +65,8 @@ static char not_used rcsid[]={"$Id$"};
 #include "NCArray.h"
 #include "NCGrid.h"
 #include "NCStr.h"
-#include "cgi_util.h"
-#include "util.h"
+#include <cgi_util.h>
+#include <util.h>
 
 // Used by ErrMsgT
 

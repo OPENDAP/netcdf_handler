@@ -54,12 +54,12 @@ static char rcsid[] not_used =
 
 // #define DODS_DEBUG 1
 
-#include "Error.h"
-#include "InternalErr.h"
+#include <Error.h>
+#include <InternalErr.h>
 
 #include "NCArray.h"
 
-#include "debug.h"
+#include <debug.h>
 
 BaseType *
 NCArray::ptr_duplicate()

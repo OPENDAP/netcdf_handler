@@ -31,14 +31,14 @@ static char not_used rcsid[] =
 #include <iostream>
 #include <string>
 
-#include "DODSFilter.h"
-#include "DDS.h"
-#include "DAS.h"
-#include "DataDDS.h"
-#include "ConstraintEvaluator.h"
+#include <DODSFilter.h>
+#include <DDS.h>
+#include <DAS.h>
+#include <DataDDS.h>
+#include <ConstraintEvaluator.h>
 
-#include "ObjectType.h"
-#include "cgi_util.h"
+#include <ObjectType.h>
+#include <cgi_util.h>
 
 #include "NCTypeFactory.h"
 

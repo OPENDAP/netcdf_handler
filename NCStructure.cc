@@ -43,7 +43,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include <algorithm>
 
 #include <netcdf.h>
-#include "InternalErr.h"
+#include <InternalErr.h>
 
 #include "NCStructure.h"
 

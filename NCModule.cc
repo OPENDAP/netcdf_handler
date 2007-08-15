@@ -34,13 +34,13 @@
 using std::endl;
 
 #include "NCModule.h"
-#include "BESRequestHandlerList.h"
+#include <BESRequestHandlerList.h>
 #include "NCRequestHandler.h"
-#include "BESContainerStorageList.h"
-#include "BESContainerStorageCatalog.h"
-#include "BESCatalogDirectory.h"
-#include "BESCatalogList.h"
-#include "BESDebug.h"
+#include <BESContainerStorageList.h>
+#include <BESContainerStorageCatalog.h>
+#include <BESCatalogDirectory.h>
+#include <BESCatalogList.h>
+#include <BESDebug.h>
 
 #define NC_CATALOG "catalog"
 

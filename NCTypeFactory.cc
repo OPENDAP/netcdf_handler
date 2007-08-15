@@ -40,7 +40,7 @@
 #include "NCGrid.h"
 
 #include "NCTypeFactory.h"
-#include "debug.h"
+#include <debug.h>
 
 Byte *
 NCTypeFactory::NewByte(const string &n ) const 

@@ -28,7 +28,7 @@
 #ifndef I_NCRequestHandler_H
 #define I_NCRequestHandler_H 1
 
-#include "BESRequestHandler.h"
+#include <BESRequestHandler.h>
 
 class NCRequestHandler : public BESRequestHandler {
 public:
