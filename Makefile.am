@@ -79,6 +79,15 @@ bes-conf: bes-nc-data.sh
 endif
 
 ###########################################################################
+
+# Fortify targets. These 
+
+.PHONY: fortify
+fortify:
+	sourceanalyzer -b netcdf_handler $(MAKE)
+	sourceanalyzer -b netcdf_handler -scan -f netcdf_handler.fpr
+
+###########################################################################
 #
 # Build linux RPMs
 
