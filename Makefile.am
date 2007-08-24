@@ -80,12 +80,17 @@ endif
 
 ###########################################################################
 
-# Fortify targets. These 
+# Fortify targets.
 
 .PHONY: fortify
 fortify:
-	sourceanalyzer -b netcdf_handler $(MAKE)
-	sourceanalyzer -b netcdf_handler -scan -f netcdf_handler.fpr
+	sourceanalyzer -b @PACKAGE@ $(MAKE)
+	sourceanalyzer -b @PACKAGE@ -scan -f @PACKAGE@-@PACKAGE_VERSION@.fpr
+
+# Use this to clean the fortify project.
+.PHONY: fortifyclean
+fortifyclean:
+	sourceanalyzer -b @PACKAGE@ -clean
 
 ###########################################################################
 #
