@@ -40,8 +40,6 @@ awk "BEGIN {bes_module_found=0}
 	 < $bes_conf > tmp.conf
 mv tmp.conf $bes_conf
 
-# Use awk here.
-
 # Add the data path to the BES.Catalog.catalog.RootDirectory parameter, when 
 # the BES can support more than one. For now, the BES default bes.conf file is
 # preset to point at $datadir/hyrax and we put all of the sample data in 

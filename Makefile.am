@@ -65,8 +65,8 @@ bes-nc-data.sh: bes-nc-data.sh.in config.status
 	$(do_subst) < $(srcdir)/bes-nc-data.sh.in > bes-nc-data.sh
 	chmod +x bes-nc-data.sh
 
-# This makes sure that the handler modifies the bes  which confiure found
-# even with distcheck is run.
+# This makes sure that the handler modifies the bes which configure found
+# even when distcheck is run.
 bes-conf: bes-nc-data.sh
 	(bes_prefix=`bes-config --prefix` ; \
 	if test "$$bes_prefix" = "/usr" ; \
