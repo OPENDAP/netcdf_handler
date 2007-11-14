@@ -1,3 +1,107 @@
+2007-11-14  James Gallagher <jgallagher@opendap.org>
+
+	Added bounds checking to the read() methods for all of
+	the scalar type classes.
+
+	M NCByte.cc, ...
+
+2007-09-17  James Gallagher <jgallagher@opendap.org>
+
+	configure.ac: Corrected the tech mailing list address.
+
+2007-09-17  James Gallagher <jgallagher@opendap.org>
+
+	README: Added text describing how to run the bes-*-data.sh
+	script because it is no longer run automatically.
+	INSTALL: Added a note about the bes-conf target and about
+	LD_LIBRARY_PATH.
+
+2007-09-17  James Gallagher <jgallagher@opendap.org>
+
+	README: Added text describing how to run the bes-*-data.sh
+	script because it is nolonger run automatically.
+
+2007-08-24  James Gallagher <jgallagher@opendap.org>
+
+	Makefile.am: Updated fortify targets
+
+2007-08-23  James Gallagher <jgallagher@opendap.org>
+
+	Makefile.am: Added fortify target.
+
+2007-08-15  James Gallagher <jgallagher@opendap.org>
+
+	Applied a patch from Patrice Dumas: Fixes includes and updates
+	pkg-config support.
+
+	M    ncdds.cc
+	M    nc_handler.cc
+	M    conf/bes.m4
+	M    NCUInt32.cc
+	M    NCModule.cc
+	M    NCGrid.cc
+	M    NCUInt16.cc
+	M    NCRequestHandler.cc
+	M    NCRequestHandler.h
+	M    NCInt32.cc
+	M    NCInt16.cc
+	M    NCByte.cc
+	M    NCSequence.cc
+	M    NCFloat32.cc
+	M    NCArray.cc
+	M    NCFloat64.cc
+	M    NCModule.h
+	M    NCStructure.cc
+	M    NCUrl.cc
+	M    Makefile.am
+	M    ncdas.cc
+	M    NCStr.cc
+	M    NCTypeFactory.cc
+
+2007-07-31  Patrick West <pwest@ucar.edu>
+
+	BESDebug modifications, passing context to BESDEBUG and
+	registering debug context in Module classes.
+
+	M    NCModule.cc
+
+2007-07-11  Patrick West <pwest@ucar.edu>
+
+	Changed logging file and socket file names.
+	
+	M    bes.conf
+
+2007-07-11  Patrick West <pwest@ucar.edu>
+
+	Using BESDebug instead of BESLog and logging correct information.
+	Also removing anything that was added in the initialization.
+	M    NCModule.cc
+
+2007-06-28  Patrick West <pwest@ucar.edu>
+
+	Calling access on container only once so that it doesn't keep going to
+	cache, or uncompressing, or whatever access does.
+	
+	M    NCRequestHandler.cc
+
+2007-06-28  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a handful of the libdap includes so they use <> instead of
+	"". Applied a patch from Patrice Dumas so that the bes.conf script
+	is no longer edited automatically. The script that does the edit
+	is still included, but it's run from a new target (make bes.conf).
+
+	M    NCFloat64.h
+	M    netcdf_handler.spec
+	M    bes-nc-data.sh.in
+	M    NEWS
+	M    NCFloat32.h
+	M    NCArray.h
+	M    ChangeLog
+	M    README
+	M    Makefile.am
+	M    NCByte.h
+
 2007-06-26  James Gallagher <jgallagher@opendap.org>
 
 	Don't edit bes.conf automatically. The handler may be installed and

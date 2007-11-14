@@ -3,7 +3,7 @@ $Id$
 
 Installing the NetCDF handler software for the OPeNDAP server.
 
-Updated for version 3.7.6 (13 March 2007)
+Updated for version 3.7.7 (14 Nov 2007)
 
 ---------------------------------------------------------------------------
 
@@ -49,16 +49,16 @@ Building from Our SVN Repository
 
 REQUIREMENTS
 
-  o You need the libdap library version 3.7.5 to build and install this
+  o You need the libdap library version 3.7.9 to build and install this
     software. If you're using Linux, this means either building from source
     or using the libdap and libdap-devel RPM packages.
 
   o If you're planning on using this with the OPeNDAP 4 Data Server (Hyrax),
-    you'll need version 3.4.1 of the BES software. Make sure to build that 
+    you'll need version 3.5.2 of the BES software. Make sure to build that 
     first.
 
   o To use this software with our cgi-based data server, you will need the 
-    OPeNDAP dap-server software package, version 3.7.3 (although for this
+    OPeNDAP dap-server software package, version 3.8.3 (although for this
     release, operation with Server3 has not been tested).
 
   o You also need a recent copy of netCDF. We've tested this server with
@@ -67,9 +67,6 @@ REQUIREMENTS
     --with-netcdf options to tell it where to look (see configure --help).
 
 NOTES
-
-  o For information about installing secure OPeNDAP servers, see the file
-    SECURITY included with the dap-server software.
 
   o DEBUGGING AIDS
 
