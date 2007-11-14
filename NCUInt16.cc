@@ -106,7 +106,7 @@ NCUInt16::read(const string &dataset)
 		string("Could not read information about the variable `") 
 		+ name() + string("'."));
 
-  for (id = 0; id <= num_dim; id++) 
+  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++) 
     cor[id] = 0;
 
   if (datatype == NC_SHORT)

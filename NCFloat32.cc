@@ -113,7 +113,7 @@ NCFloat32::read(const string &dataset)
     throw Error(errstat,string("Could not read information about the variable `") 
 		+ name() + string("'."));
 
-  for (id = 0; id <= num_dim; id++) 
+  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++) 
     cor[id] = 0;
 
   if (datatype == NC_FLOAT) 
