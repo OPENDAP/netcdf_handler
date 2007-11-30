@@ -111,10 +111,7 @@ PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/P
 pkg:
 	rm -rf mac_osx @PACKAGE@-@PACKAGE_VERSION@.pkg
 	./configure --prefix=/usr $(PKG_CONFIGURE_FLAGS)
-	make bes-nc-data.sh
-	cp bes-nc-data.sh bes-nc-data.sh.macosx
-	./configure --prefix=`pwd`/mac_osx $(PKG_CONFIGURE_FLAGS)
 	make clean install
-	mv bes-nc-data.sh.macosx mac_osx/bin/bes-nc-data.sh
-	${PACKAGEMAKER} -build -p @PACKAGE@-@PACKAGE_VERSION@.pkg -f mac_osx -ds -r OSX_Resources -i OSX_Resources/Info.plist -d OSX_Resources/Description.plist
+	DESTDIR=${PWD}/mac_osx make install
+	${PACKAGEMAKER} -build -p @PACKAGE@-@PACKAGE_VERSION@.pkg -f mac_osx/usr -ds -r OSX_Resources -i OSX_Resources/Info.plist -d OSX_Resources/Description.plist
 
