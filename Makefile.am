@@ -46,7 +46,7 @@ SERVER_SRC = NCRequestHandler.cc NCModule.cc
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
-    bes-nc-data.sh.in
+    bes-nc-data.sh.in OSX_Resources
 
 CLEANFILES = *~
 
@@ -111,7 +111,7 @@ PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/P
 pkg:
 	rm -rf mac_osx @PACKAGE@-@PACKAGE_VERSION@.pkg
 	./configure --prefix=/usr $(PKG_CONFIGURE_FLAGS)
-	make clean install
+	make clean all
 	DESTDIR=${PWD}/mac_osx make install
 	${PACKAGEMAKER} -build -p @PACKAGE@-@PACKAGE_VERSION@.pkg -f mac_osx/usr -ds -r OSX_Resources -i OSX_Resources/Info.plist -d OSX_Resources/Description.plist
 

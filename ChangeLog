@@ -1,3 +1,25 @@
+2007-11-30  Patrick West <pwest@ucar.edu>
+
+	Updated MacOSX pkg build resources and process.
+	M    bes.conf
+	M    OSX_Resources/Info.plist
+	M    OSX_Resources/Welcome.html
+	M    Makefile.am
+
+2007-11-14  James Gallagher <jgallagher@opendap.org>
+
+	Updated for version 3.7.7
+
+	M    conf/libdap.m4
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    ChangeLog
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
 2007-11-14  James Gallagher <jgallagher@opendap.org>
 
 	Added bounds checking to the read() methods for all of
