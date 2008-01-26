@@ -55,7 +55,7 @@ if OPENDAPSERVER
 CLEANFILES += bes-nc-data.sh
 
 sample_datadir = $(datadir)/hyrax/data/nc
-sample_data_DATA = data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das
+sample_data_DATA = data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
 
 do_subst = sed -e 's,[@]sysconfdir[@],$(sysconfdir),g' \
 		   	   -e 's,[@]libdir[@],$(libdir),g' \

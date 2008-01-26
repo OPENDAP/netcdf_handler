@@ -34,8 +34,9 @@
 #include <BESDataDDSResponse.h>
 #include <BESConstraintFuncs.h>
 #include <BESVersionInfo.h>
-#include <Error.h>
-#include <BESDapHandlerException.h>
+#include <InternalErr.h>
+#include <BESDapError.h>
+#include <BESInternalFatalError.h>
 #include <BESDataNames.h>
 
 #include "config_nc.h"
@@ -70,17 +71,22 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 	string accessed = dhi.container->access();
         nc_read_variables(*das, accessed);
     }
-    catch( BESException &e ) {
+    catch( BESError &e ) {
 	throw e ;
     }
+    catch(InternalErr & e) {
+        BESDapError ex( e.get_error_message(), true, e.get_error_code(),
+	                __FILE__, __LINE__ ) ;
+        throw ex;
+    }
     catch(Error & e) {
-        BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
-				   e.get_error_code() ) ;
+        BESDapError ex( e.get_error_message(), false, e.get_error_code(),
+	                __FILE__, __LINE__ ) ;
         throw ex;
     }
     catch(...) {
         string s = "unknown exception caught building DAS";
-        BESHandlerException ex(s, __FILE__, __LINE__);
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
 
@@ -113,17 +119,22 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         delete factory;
 #endif
     }
-    catch( BESException &e ) {
+    catch( BESError &e ) {
 	throw e ;
     }
+    catch(InternalErr & e) {
+        BESDapError ex( e.get_error_message(), true, e.get_error_code(),
+	                __FILE__, __LINE__ ) ;
+        throw ex;
+    }
     catch(Error & e) {
-        BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
-				   e.get_error_code() ) ;
+        BESDapError ex( e.get_error_message(), false, e.get_error_code(),
+	                __FILE__, __LINE__ ) ;
         throw ex;
     }
     catch(...) {
         string s = "unknown exception caught building DDS";
-        BESHandlerException ex(s, __FILE__, __LINE__);
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
 
@@ -158,17 +169,22 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         delete factory;
 #endif
     }
-    catch( BESException &e ) {
+    catch( BESError &e ) {
 	throw e ;
     }
+    catch(InternalErr & e) {
+        BESDapError ex( e.get_error_message(), true, e.get_error_code(),
+	                __FILE__, __LINE__ ) ;
+        throw ex;
+    }
     catch(Error & e) {
-        BESDapHandlerException ex( e.get_error_message(), __FILE__, __LINE__,
-				   e.get_error_code() ) ;
+        BESDapError ex( e.get_error_message(), false, e.get_error_code(),
+	                __FILE__, __LINE__ ) ;
         throw ex;
     }
     catch(...) {
         string s = "unknown exception caught building DAS";
-        BESHandlerException ex(s, __FILE__, __LINE__);
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
 
