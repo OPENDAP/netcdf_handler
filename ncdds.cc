@@ -68,6 +68,8 @@ static char not_used rcsid[]={"$Id$"};
 #include <cgi_util.h>
 #include <util.h>
 
+using namespace libdap ;
+
 // Used by ErrMsgT
 
 static char Msgt[255];

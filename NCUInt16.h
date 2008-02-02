@@ -41,6 +41,8 @@
 
 #include "UInt16.h"
 
+using namespace libdap ;
+
 class NCUInt16: public UInt16 {
         
 public:

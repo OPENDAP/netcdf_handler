@@ -33,6 +33,8 @@
 
 #include "BaseTypeFactory.h"
 
+using namespace libdap ;
+
 #if 0
 class NCByte;
 class NCInt16;

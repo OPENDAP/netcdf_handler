@@ -41,6 +41,8 @@
 
 #include "Grid.h"
 
+using namespace libdap ;
+
 class NCGrid: public Grid {
 
 public:

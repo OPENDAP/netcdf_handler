@@ -40,6 +40,8 @@
 
 #include "Url.h"
 
+using namespace libdap ;
+
 class NCUrl: public Url {
         
 public:

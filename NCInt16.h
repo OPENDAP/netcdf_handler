@@ -41,6 +41,8 @@
 
 #include "Int16.h"
 
+using namespace libdap ;
+
 class NCInt16: public Int16 {
         
 public:

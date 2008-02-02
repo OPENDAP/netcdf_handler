@@ -41,6 +41,8 @@
 
 #include "Str.h"
 
+using namespace libdap ;
+
 class NCStr: public Str {
      
 public:

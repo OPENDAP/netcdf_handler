@@ -41,6 +41,8 @@
 
 #include "config_nc.h"
 
+using namespace libdap ;
+
 extern void nc_read_variables(DAS & das,
                               const string & filename) throw(Error);
 extern void nc_read_descriptors(DDS & dds,

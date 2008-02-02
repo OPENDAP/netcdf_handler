@@ -64,6 +64,8 @@ static char not_used rcsid[]={"$Id$"};
 #include <escaping.h>
 #include <DAS.h>
 
+using namespace libdap ;
+
 // These are used as the return values for print_type().
 
 static const char STRING[]="String";

@@ -41,6 +41,8 @@
 
 #include "UInt32.h"
 
+using namespace libdap ;
+
 class NCUInt32: public UInt32 {
         
 public:

@@ -41,6 +41,8 @@
 
 #include <Float64.h>
 
+using namespace libdap ;
+
 class NCFloat64: public Float64 {
 
 public:

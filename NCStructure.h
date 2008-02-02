@@ -44,6 +44,8 @@
 
 #include "Structure.h"
 
+using namespace libdap ;
+
 class NCStructure: public Structure {
         
 public:

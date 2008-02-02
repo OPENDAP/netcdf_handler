@@ -41,6 +41,8 @@
 
 #include <Byte.h>
 
+using namespace libdap ;
+
 class NCByte: public Byte {
    
 public:

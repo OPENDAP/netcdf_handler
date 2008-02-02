@@ -43,6 +43,8 @@
 
 #include "Sequence.h"
 
+using namespace libdap ;
+
 class NCSequence: public Sequence {
 private:
         

@@ -41,6 +41,8 @@
 
 #include "Int32.h"
 
+using namespace libdap ;
+
 class NCInt32: public Int32 {
         
 public:

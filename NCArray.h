@@ -42,6 +42,8 @@
 
 #include <Array.h>
 
+using namespace libdap ;
+
 class NCArray: public Array {
 public:
     NCArray(const string &n = "", BaseType *v = 0);
