@@ -67,8 +67,11 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     BESResponseObject *response =
         dhi.response_handler->get_response_object();
     BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response);
-    DAS *das = bdas->get_das();
-
+    DAS *das;
+	if (bdas)
+		das = bdas->get_das();
+	else
+		throw InternalErr(__FILE__, __LINE__, "cast error.");
     try {
 	string accessed = dhi.container->access();
         nc_read_variables(*das, accessed);
@@ -100,7 +103,11 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
     BESResponseObject *response =
         dhi.response_handler->get_response_object();
     BESDDSResponse *bdds = dynamic_cast < BESDDSResponse * >(response);
-    DDS *dds = bdds->get_dds();
+    DDS *dds;
+    if (bdds)
+    	dds = bdds->get_dds();
+    else
+    	throw InternalErr(__FILE__, __LINE__, "cast error.");
 
     try {
         NCTypeFactory *factory = new NCTypeFactory;
@@ -149,7 +156,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         dhi.response_handler->get_response_object();
     BESDataDDSResponse *bdds =
         dynamic_cast < BESDataDDSResponse * >(response);
-    DataDDS *dds = bdds->get_dds();
+    DataDDS *dds;
+    if (bdds)
+    	dds = bdds->get_dds();
+    else
+    	throw InternalErr(__FILE__, __LINE__, "cast error.");
 
     try {
         NCTypeFactory *factory = new NCTypeFactory;

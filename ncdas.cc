@@ -265,6 +265,7 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	}
 	errstat = dap_get_att(ncid, v, attrname, (void *)value);
 	if (errstat != NC_NOERR) {
+		delete[] value;
             ErrMsgT("nc_das server: could not read attribute value");
 	    *(error) =  (string)"\"nc_das: Could not read attribute value \"";
    	    return errstat;
@@ -310,7 +311,7 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
 
     if (errstat != NC_NOERR) {
-        sprintf (Msgt,"nc_das server: could not open file %s", filename.c_str());
+        snprintf(Msgt, 255,"nc_das server: could not open file %s", filename.c_str());
         ErrMsgT(Msgt); //local error message
         string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
         throw Error(errstat, msg); 

@@ -289,7 +289,7 @@ nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error)
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
     if (errstat != NC_NOERR) {
      //local error
-      sprintf (Msgt,"netCDF server: Could not open file %s ", filename.c_str());
+      snprintf(Msgt, 255,"netCDF server: Could not open file %s ", filename.c_str());
       ErrMsgT(Msgt); //local error messag
       string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
       throw Error(errstat, msg);

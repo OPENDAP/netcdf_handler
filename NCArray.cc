@@ -193,10 +193,12 @@ bool NCArray::read(const string &dataset)
             else
                 errstat = nc_get_vara_float(ncid, varid, cor, edg, fltbuf);
 
-            if (errstat != NC_NOERR)
+            if (errstat != NC_NOERR) {
+            	delete[] fltbuf;
                 throw Error(errstat, string("Could not read the variable `") + name()
                             + string("'."));
-
+            }
+            
             if (nctypelen(datatype) != sizeof(dods_float32)) {
                 dods_float32 *flt32 = new dods_float32[nels];
 
@@ -225,10 +227,11 @@ bool NCArray::read(const string &dataset)
             else
                 errstat = nc_get_vara_double(ncid, varid, cor, edg, dblbuf);
 
-            if (errstat != NC_NOERR)
+            if (errstat != NC_NOERR) {
+            	delete[] dblbuf;
                 throw Error(errstat,
                             string("Could not read the variable `") + name() + string("'."));
-
+            }
             if (nctypelen(datatype) != sizeof(dods_float64)) {
                 dods_float64 *flt64 = new dods_float64 [nels];
 
@@ -257,10 +260,12 @@ bool NCArray::read(const string &dataset)
             else
                 errstat = nc_get_vara_short(ncid, varid, cor, edg, shtbuf);
 
-            if (errstat != NC_NOERR)
+            if (errstat != NC_NOERR) {
+            	delete[] shtbuf;
                 throw Error(errstat,
                             string("Could not read the variable `") + name() + string("'."));
-
+            }
+            
             if (nctypelen(datatype) != sizeof(dods_int16)) {
                 dods_int16 *intg16 = new dods_int16 [nels];
 
@@ -287,10 +292,12 @@ bool NCArray::read(const string &dataset)
             else
                 errstat = nc_get_vara_int(ncid, varid, cor, edg, lngbuf);
 
-            if (errstat != NC_NOERR)
+            if (errstat != NC_NOERR) {
+            	delete[] lngbuf;
                 throw Error(errstat, string("Could not read the variable `")
                             + name() + string("'."));
-
+            }
+            
             if (nctypelen(datatype) != sizeof(dods_int32)) {
                 dods_int32 *intg32 = new dods_int32 [nels];
 
@@ -320,10 +327,12 @@ bool NCArray::read(const string &dataset)
             else
                 errstat = nc_get_vara_text(ncid, varid, cor, edg, chrbuf);
 
-            if (errstat != NC_NOERR)
+            if (errstat != NC_NOERR) {
+            	delete[] chrbuf;
                 throw Error(errstat, string("Could not read the variable `") + name()
                             + string("'."));
-
+            }
+            
             string *strg = new string [nels]; // array of strings
             char buf[2] = " "; // one char and EOS
 
@@ -354,10 +363,12 @@ bool NCArray::read(const string &dataset)
             else
                 errstat = nc_get_vara_uchar(ncid, varid, cor, edg, (unsigned char*)convbuf);
 
-            if (errstat != NC_NOERR)
+            if (errstat != NC_NOERR) {
+            	delete[] convbuf;
                 throw Error(errstat,
                             string("Could not read the variable `") + name() + string("'."));
-
+            }
+            
             set_read_p(true);
             val2buf((void *)convbuf);
 
