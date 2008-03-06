@@ -1,3 +1,92 @@
+2008-03-04  James Gallagher <jgallagher@opendap.org>
+
+	Code audit complete.
+	M    ncdds.cc
+	M    NCRequestHandler.cc
+	M    NCArray.cc
+	M    ncdas.cc
+
+2008-02-26  Patrick West <pwest@ucar.edu>
+
+	Removed the version of Hyrax so we don't keep having to edit the
+	Welcome.html file
+	M    OSX_Resources/Welcome.html
+
+2008-02-26  Patrick West <pwest@ucar.edu>
+
+	Grabbing the version correctly for pkg build.
+	M    configure.ac
+	M    OSX_Resources/Info.plist
+
+2008-02-26  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2008-02-25  Patrick West <pwest@ucar.edu>
+
+	Updated pkg build, more fully automated, uses DropDMG
+	M    README
+	AM   OSX_Resources/update_mac_package_contents.pl
+	M    OSX_Resources/Info.plist
+	M    OSX_Resources/ReadMe.txt
+	M    Makefile.am
+
+2008-02-14  Patrick West <pwest@ucar.edu>
+
+	Updated configure to use latest and greatest libdap and bes config
+	macros and m4 files.
+	M    conf/bes.m4
+	M    conf/libdap.m4
+
+2008-02-05  James Gallagher <jgallagher@opendap.org>
+
+	Auto reset of Subversion properties
+
+2008-02-02  Patrick West <pwest@ucar.edu>
+
+	Added using namespace libdap where needed.
+	M    NCStr.h
+	M    ncdds.cc
+	M    nc_handler.cc
+	M    NCFloat64.h
+	M    NCRequestHandler.cc
+	M    NCUInt32.h
+	M    NCUInt16.h
+	M    NCSequence.h
+	M    NCTypeFactory.h
+	M    NCFloat32.h
+	M    NCArray.h
+	M    NCGrid.h
+	M    NCInt32.h
+	M    NCStructure.h
+	M    NCInt16.h
+	M    NCUrl.h
+	M    NCByte.h
+	M    ncdas.cc
+
+2008-01-25  Patrick West <pwest@ucar.edu>
+
+	Exception/Error handling changes in the BES. Added the fnoc1.nc.html
+	file for additional information in the info response.
+	M    NCRequestHandler.cc
+	M    bes.conf
+	A    data/fnoc1.nc.html
+	M    Makefile.am
+
+2007-12-03  Patrick West <pwest@ucar.edu>
+
+	3.7.8 release
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    ChangeLog
+	M    OSX_Resources/Info.plist
+	M    Makefile.am
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
 2007-11-30  Patrick West <pwest@ucar.edu>
 
 	Updated MacOSX pkg build resources and process.

@@ -1,6 +1,15 @@
 
 $Id$
 
+Version 3.7.9 (04 Mar 2008)
+
+pkg and dmg build fixes using PackageMaker and DropDMG. General
+configuration upgrades.
+
+libdap namespace addition
+
+BES exception upgrade
+
 Version 3.7.8 (03 Dec 2007)
 
 pkg and dmg build fixes
