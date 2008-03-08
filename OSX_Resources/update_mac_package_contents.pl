@@ -92,6 +92,7 @@ sub substitute_arch {
 
   rename "$inst_check.out", $inst_check 
     or die("Could not rename $inst_check\n");
+  chmod(0755, $inst_check);
 }
 
 # Find the size in kilobytes of the given directory
