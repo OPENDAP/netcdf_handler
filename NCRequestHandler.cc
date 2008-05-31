@@ -38,6 +38,7 @@
 #include <BESDapError.h>
 #include <BESInternalFatalError.h>
 #include <BESDataNames.h>
+#include <Ancillary.h>
 
 #include "config_nc.h"
 
@@ -75,6 +76,7 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     try {
 	string accessed = dhi.container->access();
         nc_read_variables(*das, accessed);
+	Ancillary::read_ancillary_das( *das, accessed ) ;
     }
     catch( BESError &e ) {
 	throw e ;
@@ -116,8 +118,10 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 	string accessed = dhi.container->access() ;
         dds->filename( accessed );
         nc_read_descriptors(*dds, accessed);
+	Ancillary::read_ancillary_dds( *dds, accessed ) ;
         DAS das;
         nc_read_variables(das, accessed);
+	Ancillary::read_ancillary_das( das, accessed ) ;
 
         dds->transfer_attributes(&das);
 
@@ -169,8 +173,10 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 	string accessed = dhi.container->access() ;
         dds->filename(accessed);
         nc_read_descriptors(*dds, accessed);
+	Ancillary::read_ancillary_dds( *dds, accessed ) ;
         DAS das;
         nc_read_variables(das, accessed);
+	Ancillary::read_ancillary_das( das, accessed ) ;
 
         dds->transfer_attributes(&das);
 

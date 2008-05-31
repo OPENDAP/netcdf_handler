@@ -53,13 +53,28 @@ void NCModule::initialize( const string & modname )
     BESRequestHandlerList::TheList()->add_handler( modname, handler ) ;
 
     BESDEBUG( "nc", "    adding " << NC_CATALOG << " catalog" << endl )
-    BESCatalogList::TheCatalogList()->
-        add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
+    if( !BESCatalogList::TheCatalogList()->find_catalog( NC_CATALOG ) )
+    {
+	BESCatalogList::TheCatalogList()->
+	    add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
+    }
+    else
+    {
+	BESDEBUG( "nc", "    catalog already exists, skipping" << endl )
+    }
 
-    BESDEBUG( "nc", "    adding catalog container storage " << NC_CATALOG << endl )
-    BESContainerStorageCatalog *csc =
-        new BESContainerStorageCatalog( NC_CATALOG ) ;
-    BESContainerStorageList::TheList()->add_persistence( csc ) ;
+    BESDEBUG( "nc", "    adding catalog container storage " << NC_CATALOG
+		    << endl )
+    if( !BESContainerStorageList::TheList()->find_persistence( NC_CATALOG ) )
+    {
+	BESContainerStorageCatalog *csc =
+	    new BESContainerStorageCatalog( NC_CATALOG ) ;
+	BESContainerStorageList::TheList()->add_persistence( csc ) ;
+    }
+    else
+    {
+	BESDEBUG( "nc", "    storage already exists, skipping" << endl )
+    }
 
     BESDEBUG( "nc", "    adding nc debug context" << endl )
     BESDebug::Register( "nc" ) ;
