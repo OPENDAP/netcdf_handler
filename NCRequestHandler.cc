@@ -65,14 +65,13 @@ NCRequestHandler::~NCRequestHandler()
 
 bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response =
-        dhi.response_handler->get_response_object();
-    BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response);
-    DAS *das;
-	if (bdas)
-		das = bdas->get_das();
-	else
-		throw InternalErr(__FILE__, __LINE__, "cast error.");
+    BESResponseObject *response = dhi.response_handler->get_response_object() ;
+    BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response) ;
+    if( !bdas )
+	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+
+    DAS *das = bdas->get_das();
+
     try {
 	string accessed = dhi.container->access();
         nc_read_variables(*das, accessed);
@@ -102,14 +101,12 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response =
-        dhi.response_handler->get_response_object();
+    BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDDSResponse *bdds = dynamic_cast < BESDDSResponse * >(response);
-    DDS *dds;
-    if (bdds)
-    	dds = bdds->get_dds();
-    else
-    	throw InternalErr(__FILE__, __LINE__, "cast error.");
+    if( !bdds )
+	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+  
+    DDS *dds = bdds->get_dds();
 
     try {
         NCTypeFactory *factory = new NCTypeFactory;
@@ -156,15 +153,12 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response =
-        dhi.response_handler->get_response_object();
-    BESDataDDSResponse *bdds =
-        dynamic_cast < BESDataDDSResponse * >(response);
-    DataDDS *dds;
-    if (bdds)
-    	dds = bdds->get_dds();
-    else
-    	throw InternalErr(__FILE__, __LINE__, "cast error.");
+    BESResponseObject *response = dhi.response_handler->get_response_object();
+    BESDataDDSResponse *bdds = dynamic_cast < BESDataDDSResponse * >(response);
+    if( !bdds )
+	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+  
+    DataDDS *dds = bdds->get_dds();
 
     try {
         NCTypeFactory *factory = new NCTypeFactory;
@@ -212,8 +206,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 {
-    BESInfo *info =
-        (BESInfo *) dhi.response_handler->get_response_object();
+    BESResponseObject *response = dhi.response_handler->get_response_object();
+    BESInfo *info = dynamic_cast<BESInfo *>(response);
+    if( !info )
+	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+
     info->begin_tag("Handler");
     info->add_tag("name", PACKAGE_NAME);
     string handles = (string) DAS_RESPONSE
@@ -228,8 +225,12 @@ bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
 {
-    BESVersionInfo *info =
-        (BESVersionInfo *) dhi.response_handler->get_response_object();
+    BESResponseObject *response = dhi.response_handler->get_response_object();
+    BESVersionInfo *info = dynamic_cast < BESVersionInfo * >(response);
+    if( !info )
+	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+  
     info->addHandlerVersion(PACKAGE_NAME, PACKAGE_VERSION);
+
     return true;
 }
