@@ -2,7 +2,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,18 +11,18 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 
 // (c) COPYRIGHT URI/MIT 1994-1996
 // Please read the full copyright statement in the file COPYRIGHT.
@@ -35,7 +35,7 @@
 // core of the server-side software necessary to extract the DAS from a
 // netcdf data file.
 //
-// It also contains test code which will print the in-memeory DAS to
+// It also contains test code which will print the in-memory DAS to
 // stdout. It uses both the DAS class as well as the netcdf library.
 // In addition, parts of these functions were taken from the netcdf program
 // ncdump, from the netcdf standard distribution (ver 2.3.2)
@@ -64,6 +64,8 @@ static char not_used rcsid[]={"$Id$"};
 #include <escaping.h>
 #include <DAS.h>
 
+#define ATTR_STRING_QUOTE_FIX
+
 using namespace libdap ;
 
 // These are used as the return values for print_type().
@@ -80,9 +82,9 @@ static const char FLOAT32[]="Float32";
 static char Msgt[255];
 
 /** Given the type, array number and pointer to the associated attribute,
-    Return the string representaion of the attribute's value. 
-    
-    This function is modeled on code from ncdump. I modified the original 
+    Return the string representation of the attribute's value.
+
+    This function is modeled on code from ncdump. I modified the original
     version to use C++ string streams and also to call escattr() so that
     attributes with quotes would be handled correctly. */
 static string
@@ -107,9 +109,12 @@ print_attr(nc_type type, int loc, void *vals)
         return rep.str();
 
       case NC_CHAR:
+#ifndef ATTR_STRING_QUOTE_FIX
         rep << "\"" << escattr(static_cast<const char*>(vals)) << "\"";
         return rep.str();
-
+#else
+        return escattr(static_cast<const char*>(vals));
+#endif
       case NC_SHORT:
         gp.sp = (short *) vals;
         rep << *(gp.sp+loc);
@@ -128,9 +133,9 @@ print_attr(nc_type type, int loc, void *vals)
           // If there's no decimal point and the rep does not use scientific
           // notation, add a decimal point. This little jaunt was taken because
           // this code is modeled after older code and that's what it did. I'm
-          // trying to keep the same behavior as the old code without it's 
+          // trying to keep the same behavior as the old code without it's
           // problems. jhrg 8/11/2006
-          if (rep.str().find('.') == string::npos 
+          if (rep.str().find('.') == string::npos
               && rep.str().find('e') == string::npos)
                 rep << ".";
           return rep.str();
@@ -140,7 +145,7 @@ print_attr(nc_type type, int loc, void *vals)
           rep << std::showpoint;
           rep << std::setprecision(17);
           rep << *(gp.dp+loc);
-          if (rep.str().find('.') == string::npos 
+          if (rep.str().find('.') == string::npos
               && rep.str().find('e') == string::npos)
                 rep << ".";
           return rep.str();
@@ -158,7 +163,7 @@ print_attr(nc_type type, int loc, void *vals)
 // char * is static.
 
 static string
-print_type(nc_type datatype) 
+print_type(nc_type datatype)
 {
     switch (datatype) {
       case NC_CHAR:
@@ -166,7 +171,7 @@ print_type(nc_type datatype)
 
       case NC_BYTE:
 	return BYTE;
-	
+
       case NC_SHORT:
 	return INT16;
 
@@ -178,7 +183,7 @@ print_type(nc_type datatype)
 
       case NC_DOUBLE:
 	return FLOAT64;
-	
+
       default:
 	return STRING;
     }
@@ -226,7 +231,7 @@ dap_get_att(int ncid, int varid, const char *name, void *value)
 // NB: currently values are stored only as strings.
 //
 // Returns: false if an error was detected reading from the netcdf file, true
-// otherwise. 
+// otherwise.
 
 int
 read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
@@ -274,20 +279,20 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 	// If the datatype is NC_CHAR then we have a string. netCDF
 	// represents strings as arrays of char, but we represent them as X
 	// strings. So... Add the null and set the length to 1
-	if (datatype == NC_CHAR) { 
+	if (datatype == NC_CHAR) {
 	    *(value + len) = '\0';
 	    len = 1;
 	}
 
 	// add all the attributes in the array
 	for (unsigned int loc=0; loc < len ; loc++) {
-	    string print_rep = print_attr(datatype, loc, (void *)value);	
+	    string print_rep = print_attr(datatype, loc, (void *)value);
 	    at->append_attr(attrname, print_type(datatype), print_rep);
 	}
 
 	delete [] value;
     }
-    
+
     return errstat;
 }
 
@@ -297,13 +302,13 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 // instance of DAS.
 //
 // Returns: false if an error accessing the netcdf file was detected, true
-// otherwise. 
+// otherwise.
 
 void
-nc_read_variables(DAS &das, const string &filename) throw (Error) 
+nc_read_variables(DAS &das, const string &filename) throw (Error)
 {
     ncopts = 0;
-    int ncid, errstat; 
+    int ncid, errstat;
     int nvars, ngatts, natts = 0 ;
     string *error = NULL ;
     AttrTable *attr_table_ptr = NULL ;
@@ -313,17 +318,17 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     if (errstat != NC_NOERR) {
         snprintf(Msgt, 255,"nc_das server: could not open file %s", filename.c_str());
         ErrMsgT(Msgt); //local error message
-        string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
-        throw Error(errstat, msg); 
+        string msg = (string)"Could not open " + path_to_filename(filename) + ".";
+        throw Error(errstat, msg);
     }
 
-    // how many variables? how many global attributes? 
+    // how many variables? how many global attributes?
     errstat = nc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
 
     if (errstat != NC_NOERR) {
         ErrMsgT("nc_das: Could not inquires about netcdf file");
-	string msg = (string)"Could not inquire about netcdf file: " 
-	+ path_to_filename(filename) + "."; 
+	string msg = (string)"Could not inquire about netcdf file: "
+	+ path_to_filename(filename) + ".";
 	throw Error(errstat, msg);
     }
 
@@ -333,7 +338,7 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
         errstat = nc_inq_var(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, &natts);
 	if (errstat != NC_NOERR) {
             sprintf (Msgt, "nc_das server: could not get information for variable %d",v);
-            ErrMsgT(Msgt); //local error message 
+            ErrMsgT(Msgt); //local error message
 	    string msg = (string)Msgt;
 	    throw Error(errstat, msg);
 	}
@@ -367,9 +372,9 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     nc_inq(ncid, (int *)0, (int *)0, (int *)0, &xdimid);
     if (xdimid != -1){
 	nc_inq_dim(ncid, xdimid, dimname, (size_t *)0);
-	string print_rep = print_attr(datatype, 0, dimname);	
+	string print_rep = print_attr(datatype, 0, dimname);
 	attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
-	attr_table_ptr->append_attr("Unlimited_Dimension", 
+	attr_table_ptr->append_attr("Unlimited_Dimension",
 				    print_type(datatype), print_rep);
     }
 
