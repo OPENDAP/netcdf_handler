@@ -15,6 +15,8 @@ lib_LTLIBRARIES = libnc_handler.la
 
 if OPENDAPSERVER
 
+SUBDIRS = testsuite
+
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
 dist_bin_SCRIPTS = bes-nc-data.sh
