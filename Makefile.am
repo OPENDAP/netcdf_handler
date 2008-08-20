@@ -15,7 +15,7 @@ lib_LTLIBRARIES = libnc_handler.la
 
 if OPENDAPSERVER
 
-SUBDIRS = testsuite
+SUBDIRS = bes-testsuite
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
