@@ -1,4 +1,0 @@
-set context dap_format to dap2;
-set container in catalog values c,/data/fnoc1.nc;
-define d as c;
-get dods for d;

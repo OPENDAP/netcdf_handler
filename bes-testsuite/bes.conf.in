@@ -64,12 +64,9 @@ BES.LogVerbose=no
 # BES.module.h4=@libdir@/bes/libhdf4_module.so
 # BES.module.ff=@libdir@/bes/libff_module.so
 
-BES.modules=dap,cmd,ascii,usage,www,nc
+BES.modules=dap,cmd,nc
 BES.module.dap=@libdir@/bes/libdap_module.so
 BES.module.cmd=@libdir@/bes/libdap_cmd_module.so
-BES.module.ascii=@libdir@/bes/libascii_module.so
-BES.module.usage=@libdir@/bes/libusage_module.so
-BES.module.www=@libdir@/bes/libwww_module.so
 BES.module.nc=@abs_top_builddir@/.libs/libnc_module.so
 
 #-----------------------------------------------------------------------#
