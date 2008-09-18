@@ -26,7 +26,6 @@
 // NCRequestHandler.cc
 
 #include "NCRequestHandler.h"
-#include "NCTypeFactory.h"
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
 #include <BESDASResponse.h>
@@ -69,13 +68,13 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response) ;
     if( !bdas )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
-
-    DAS *das = bdas->get_das();
-
     try {
+	bdas->set_container( dhi.container->get_symbolic_name() ) ;
+	DAS *das = bdas->get_das();
 	string accessed = dhi.container->access();
         nc_read_variables(*das, accessed);
 	Ancillary::read_ancillary_das( *das, accessed ) ;
+	bdas->clear_container( ) ;
     }
     catch( BESError &e ) {
 	throw e ;
@@ -105,29 +104,25 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
     BESDDSResponse *bdds = dynamic_cast < BESDDSResponse * >(response);
     if( !bdds )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
-  
-    DDS *dds = bdds->get_dds();
-
     try {
-        NCTypeFactory *factory = new NCTypeFactory;
-        dds->set_factory(factory);
-
+	bdds->set_container( dhi.container->get_symbolic_name() ) ;
+	DDS *dds = bdds->get_dds();
 	string accessed = dhi.container->access() ;
         dds->filename( accessed );
         nc_read_descriptors(*dds, accessed);
 	Ancillary::read_ancillary_dds( *dds, accessed ) ;
-        DAS das;
-        nc_read_variables(das, accessed);
-	Ancillary::read_ancillary_das( das, accessed ) ;
 
-        dds->transfer_attributes(&das);
+        DAS *das = new DAS ;
+	BESDASResponse bdas( das ) ;
+	bdas.set_container( dhi.container->get_symbolic_name() ) ;
+        nc_read_variables( *das, accessed ) ;
+	Ancillary::read_ancillary_das( *das, accessed ) ;
+
+        dds->transfer_attributes( das ) ;
+
+	bdds->clear_container( ) ;
 
         dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
-#if 0
-        // see ticket 720
-        dds->set_factory(NULL);
-        delete factory;
-#endif
     }
     catch( BESError &e ) {
 	throw e ;
@@ -158,29 +153,26 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
     if( !bdds )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
   
-    DataDDS *dds = bdds->get_dds();
 
     try {
-        NCTypeFactory *factory = new NCTypeFactory;
-        dds->set_factory(factory);
-
+	bdds->set_container( dhi.container->get_symbolic_name() ) ;
+	DataDDS *dds = bdds->get_dds();
 	string accessed = dhi.container->access() ;
         dds->filename(accessed);
         nc_read_descriptors(*dds, accessed);
 	Ancillary::read_ancillary_dds( *dds, accessed ) ;
-        DAS das;
-        nc_read_variables(das, accessed);
-	Ancillary::read_ancillary_das( das, accessed ) ;
 
-        dds->transfer_attributes(&das);
+        DAS *das = new DAS ;
+	BESDASResponse bdas( das ) ;
+	bdas.set_container( dhi.container->get_symbolic_name() ) ;
+        nc_read_variables( *das, accessed ) ;
+	Ancillary::read_ancillary_das( *das, accessed ) ;
+
+        dds->transfer_attributes( das ) ;
+
+	bdds->clear_container( ) ;
 
         dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
-
-#if 0
-        // see ticket 720
-        dds->set_factory(NULL);
-        delete factory;
-#endif
     }
     catch( BESError &e ) {
 	throw e ;

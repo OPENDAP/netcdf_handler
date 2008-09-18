@@ -46,14 +46,14 @@ using namespace libdap ;
 class NCInt16: public Int16 {
         
 public:
-    NCInt16(const string &n = "");
+    NCInt16(const string &n, const string &d);
     NCInt16(const NCInt16 &rhs);
     virtual ~NCInt16();
 
     NCInt16 &operator=(const NCInt16 &rhs);
     virtual BaseType *ptr_duplicate();
 
-    virtual bool read(const string &dataset);
+    virtual bool read();
 };
 
 /* 

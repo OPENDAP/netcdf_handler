@@ -54,7 +54,7 @@ NCStructure::ptr_duplicate()
     return new NCStructure(*this);
 }
 
-NCStructure::NCStructure(const string &n) : Structure(n)
+NCStructure::NCStructure(const string &n, const string &d) : Structure(n, d)
 {
 }
 

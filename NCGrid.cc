@@ -62,7 +62,7 @@ NCGrid::ptr_duplicate()
 
 // public
 
-NCGrid::NCGrid(const string &n) : Grid(n)
+NCGrid::NCGrid(const string &n, const string &d) : Grid(n, d)
 {
 }
 
@@ -89,7 +89,7 @@ NCGrid::operator=(const NCGrid &rhs)
 
 
 bool
-NCGrid::read(const string &dataset)
+NCGrid::read()
 {
     DBG(cerr << "In NCGrid::read" << endl);
 
@@ -100,12 +100,12 @@ NCGrid::read(const string &dataset)
 
     // read array elements
     if (array_var()->send_p() || array_var()->is_in_selection())
-	   array_var()->read(dataset);
+	   array_var()->read();
 
     // read maps elements
     for (Map_iter p = map_begin(); p != map_end(); ++p)
     	if ((*p)->send_p() || (*p)->is_in_selection())
-    	    (*p)->read(dataset);
+    	    (*p)->read();
 
     set_read_p(true);
 

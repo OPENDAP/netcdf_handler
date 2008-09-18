@@ -40,8 +40,6 @@ static char not_used rcsid[] =
 #include <ObjectType.h>
 #include <cgi_util.h>
 
-#include "NCTypeFactory.h"
-
 using namespace libdap ;
 
 extern void nc_read_variables(DAS & das,
@@ -72,8 +70,6 @@ DDS & build_dds(DDS & dds, const DODSFilter & filter)
 
 int main(int argc, char *argv[])
 {
-    NCTypeFactory *nctf = new NCTypeFactory;
-
     try {
         DODSFilter df(argc, argv);
         if (df.get_cgi_version() == "")
@@ -90,7 +86,7 @@ int main(int argc, char *argv[])
             }
 
         case DODSFilter::DDS_Response:{
-                DDS dds(nctf);
+                DDS dds(NULL);
                 dds = build_dds(dds, df);
                 ConstraintEvaluator ce;
                 df.send_dds(dds, ce, true);
@@ -98,7 +94,7 @@ int main(int argc, char *argv[])
             }
 
         case DODSFilter::DataDDS_Response:{
-                DDS dds(nctf);
+                DDS dds(NULL);
                 dds = build_dds(dds, df);
                 ConstraintEvaluator ce;
                 df.send_data(dds, ce, stdout);
@@ -106,7 +102,7 @@ int main(int argc, char *argv[])
             }
 
         case DODSFilter::DDX_Response:{
-                DDS dds(nctf);
+                DDS dds(NULL);
                 dds = build_dds(dds, df);
                 ConstraintEvaluator ce;
                 df.send_ddx(dds, ce, stdout);
@@ -124,14 +120,10 @@ int main(int argc, char *argv[])
         }
     }
     catch(Error & e) {
-        delete nctf;
-        nctf = 0;
         set_mime_text(stdout, dods_error, cgi_version);
         e.print(stdout);
         return 1;
     }
 
-    delete nctf;
-    nctf = 0;
     return 0;
 }

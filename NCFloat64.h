@@ -46,14 +46,14 @@ using namespace libdap ;
 class NCFloat64: public Float64 {
 
 public:
-    NCFloat64(const string &n = "");
+    NCFloat64(const string &n, const string &d);
     NCFloat64(const NCFloat64 &rhs);
     virtual ~NCFloat64();
 
     NCFloat64 &operator=(const NCFloat64 &rhs);
     virtual BaseType *ptr_duplicate();
 
-    virtual bool read(const string &dataset);
+    virtual bool read();
 };
 
 /* 

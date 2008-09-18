@@ -79,29 +79,29 @@ static char Msgt[255];
 //
 
 static BaseType *
-Get_bt(BaseTypeFactory *factory, string varname, nc_type datatype) 
+Get_bt(const string &varname, const string &dataset, nc_type datatype) 
 {
     switch (datatype) {
       case NC_CHAR:
-	return (factory->NewStr(varname));
+	return (new NCStr(varname, dataset));
 
       case NC_BYTE:
-	return (factory->NewByte(varname));
+	return (new NCByte(varname, dataset));
 	
       case NC_SHORT:
-	return (factory->NewInt16(varname));
+	return (new NCInt16(varname, dataset));
 
       case NC_LONG:
-	return (factory->NewInt32(varname));
+	return (new NCInt32(varname, dataset));
 
       case NC_FLOAT:
-	return (factory->NewFloat32(varname));
+	return (new NCFloat32(varname, dataset));
 
       case NC_DOUBLE:
-	return (factory->NewFloat64(varname));
+	return (new NCFloat64(varname, dataset));
 	
       default:
-	return (factory->NewStr(varname));
+	return (new NCStr(varname, dataset));
     }
 }
 
@@ -113,7 +113,8 @@ Get_bt(BaseTypeFactory *factory, string varname, nc_type datatype)
 // otherwise.
 
 int
-read_class(DDS &dds_table, int ncid, int nvars, string *error)
+read_class(DDS &dds_table, const string &filename,
+           int ncid, int nvars, string *error)
 {
     char varname1[MAX_NC_NAME];
     char varname2[MAX_NC_VARS][MAX_NC_NAME];
@@ -144,7 +145,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 	    return errstat;
 	}
 
-	BaseType *bt = Get_bt(dds_table.get_factory(), varname1, nctype);
+	BaseType *bt = Get_bt(varname1, filename, nctype);
     
 	// is an Atomic-class ?
 
@@ -227,8 +228,7 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
       
 	    // Create common array for both Array and Grid types
       
-	    ar = dds_table.get_factory()->NewArray(varname1);
-	    ar->add_var(bt);
+	    ar = new NCArray(varname1, filename, bt);
 	    delete bt ;
 	    for (d = 0; d < ndims; ++d) 
 		ar->append_dim(dim_szs[d],dim_nms[d]);
@@ -236,16 +236,14 @@ read_class(DDS &dds_table, int ncid, int nvars, string *error)
 #ifndef NOGRID
       
 	    if (ndims == dim_match){   // Found Grid type, add it
-		gr = dds_table.get_factory()->NewGrid(varname1);
+		gr = new NCGrid(varname1, filename);
 		pr = array;
 		gr->add_var(ar,pr);
 		delete ar ;
 		pr = maps;
 		for ( d = 0; d < ndims; ++d){
-		    ar = new NCArray; 
-		    bt = Get_bt(dds_table.get_factory(), var_match[d],
-				typ_match[d]);
-		    ar->add_var(bt);     
+		    bt = Get_bt(var_match[d], filename, typ_match[d]);
+		    ar = new NCArray(bt->name(), filename, bt); 
 		    delete bt ;
 		    ar->append_dim(dim_szs[d],dim_nms[d]);
 		    gr->add_var(ar,pr);
@@ -311,7 +309,7 @@ nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error)
     // read variables class
     string *error;
 
-    errstat = read_class(dds_table,ncid,nvars,error);
+    errstat = read_class(dds_table,filename,ncid,nvars,error);
     if (errstat != NC_NOERR) {
 	string msg = (string) *error;
 	throw Error(errstat, msg);

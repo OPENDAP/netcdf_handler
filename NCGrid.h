@@ -46,14 +46,14 @@ using namespace libdap ;
 class NCGrid: public Grid {
 
 public:
-    NCGrid(const string &n = "");
+    NCGrid(const string &n, const string &d);
     NCGrid(const NCGrid &rhs);
     virtual ~NCGrid();
 
     NCGrid &operator=(const NCGrid &rhs);
     virtual BaseType *ptr_duplicate();
 
-    virtual bool read(const string &dataset);
+    virtual bool read();
 };
 
 /* 

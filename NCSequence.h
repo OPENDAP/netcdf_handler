@@ -49,7 +49,7 @@ class NCSequence: public Sequence {
 private:
         
 public:
-    NCSequence(const string &n = "");
+    NCSequence(const string &n, const string &d);
     NCSequence(const NCSequence &rhs);
     virtual ~NCSequence();
 

@@ -45,7 +45,7 @@ using namespace libdap ;
 class NCUrl: public Url {
         
 public:
-    NCUrl(const string &n = "");
+    NCUrl(const string &n, const string &d);
     NCUrl(const NCUrl &rhs);
     virtual ~NCUrl();
 

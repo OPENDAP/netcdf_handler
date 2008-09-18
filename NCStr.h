@@ -46,7 +46,7 @@ using namespace libdap ;
 class NCStr: public Str {
      
 public:
-    NCStr(const string &n = "");
+    NCStr(const string &n, const string &d);
     NCStr(const NCStr &rhs);
     virtual ~NCStr();
 
@@ -54,7 +54,7 @@ public:
 
     virtual BaseType *ptr_duplicate();
     
-    virtual bool read(const string &dataset);
+    virtual bool read();
 };
 
 /* 

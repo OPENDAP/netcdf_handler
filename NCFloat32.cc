@@ -49,7 +49,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include "NCFloat32.h"
 
 
-NCFloat32::NCFloat32(const string &n) : Float32(n)
+NCFloat32::NCFloat32(const string &n, const string &d) : Float32(n, d)
 {
 }
 
@@ -81,7 +81,7 @@ NCFloat32::ptr_duplicate()
 
 
 bool
-NCFloat32::read(const string &dataset)
+NCFloat32::read()
 {
   int varid;                  /* variable Id */
   nc_type datatype;           /* variable data type */
@@ -95,11 +95,11 @@ NCFloat32::read(const string &dataset)
 
   int ncid, errstat;
 
-  errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+  errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
   if (errstat != NC_NOERR)
     {
 	string err = (string)"Could not open the dataset's file ("
-	             + dataset.c_str() + ")" ;
+	             + dataset().c_str() + ")" ;
 	throw Error(errstat, err);
     }
 

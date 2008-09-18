@@ -63,7 +63,7 @@ static char rcsid[] not_used ={"$Id$"};
 
 
 
-NCByte::NCByte(const string &n) : Byte(n)
+NCByte::NCByte(const string &n, const string &d) : Byte(n, d)
 {
 }
 
@@ -95,7 +95,7 @@ NCByte::ptr_duplicate()
 
 
 bool
-NCByte::read(const string &dataset)
+NCByte::read()
 {
     int varid;                  /* variable Id */
     nc_type datatype;           /* variable data type */
@@ -108,12 +108,12 @@ NCByte::read(const string &dataset)
 
     int ncid, errstat;
 
-    errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR)
     {
 	string err = (string)"Could not open the dataset's file ("
-	             + dataset.c_str() + ")" ;
+	             + dataset().c_str() + ")" ;
 	throw Error(errstat, err);
     }
 

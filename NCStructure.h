@@ -49,7 +49,7 @@ using namespace libdap ;
 class NCStructure: public Structure {
         
 public:
-    NCStructure(const string &n = "");
+    NCStructure(const string &n, const string &d);
     NCStructure(const NCStructure &rhs);
     virtual ~NCStructure();
 

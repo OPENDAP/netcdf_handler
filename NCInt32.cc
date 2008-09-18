@@ -46,7 +46,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include "NCInt32.h"
 
 
-NCInt32::NCInt32(const string &n) : Int32(n)
+NCInt32::NCInt32(const string &n, const string &d) : Int32(n, d)
 {
 }
 
@@ -79,7 +79,7 @@ NCInt32::ptr_duplicate(){
 
 
 bool
-NCInt32::read(const string &dataset)
+NCInt32::read()
 {
   int varid;                  /* variable Id */
   nc_type datatype;           /* variable data type */
@@ -93,12 +93,12 @@ NCInt32::read(const string &dataset)
 
   int ncid, errstat;
 
-  errstat = nc_open(dataset.c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+  errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
   if (errstat != NC_NOERR)
     {
 	string err = (string)"Could not open the dataset's file ("
-	             + dataset.c_str() + ")" ;
+	             + dataset().c_str() + ")" ;
 	throw Error(errstat, err);
     }
  

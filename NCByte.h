@@ -46,7 +46,7 @@ using namespace libdap ;
 class NCByte: public Byte {
    
 public:
-    NCByte(const string &n = "");
+    NCByte(const string &n, const string &d);
     NCByte(const NCByte &rhs);
     virtual ~NCByte();
 
@@ -54,7 +54,7 @@ public:
 
     virtual BaseType *ptr_duplicate();
 
-    virtual bool read(const string &dataset);
+    virtual bool read();
 };
 
 /* 

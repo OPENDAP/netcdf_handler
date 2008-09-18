@@ -56,7 +56,7 @@ NCSequence::ptr_duplicate()
     return new NCSequence(*this);
 }
 
-NCSequence::NCSequence(const string &n) : Sequence(n)
+NCSequence::NCSequence(const string &n, const string &d) : Sequence(n, d)
 {
 }
 

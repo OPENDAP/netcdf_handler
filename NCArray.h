@@ -46,14 +46,14 @@ using namespace libdap ;
 
 class NCArray: public Array {
 public:
-    NCArray(const string &n = "", BaseType *v = 0);
+    NCArray(const string &n, const string &d, BaseType *v);
     NCArray(const NCArray &nc_array);
     NCArray &operator=(const NCArray &rhs);
     virtual ~NCArray();
 
     virtual BaseType *ptr_duplicate();
 
-    virtual bool read(const string &dataset);
+    virtual bool read();
     
     virtual long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, 
 			bool *has_stride);
