@@ -2,7 +2,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003,2006 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,12 +11,12 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
                 DDS dds(NULL);
                 dds = build_dds(dds, df);
                 ConstraintEvaluator ce;
-                df.send_data(dds, ce, stdout);
+                df.send_data(dds, ce, cout);
                 break;
             }
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
                 DDS dds(NULL);
                 dds = build_dds(dds, df);
                 ConstraintEvaluator ce;
-                df.send_ddx(dds, ce, stdout);
+                df.send_ddx(dds, ce, cout);
                 break;
             }
 
