@@ -44,12 +44,8 @@
 
 static char not_used rcsid[]={"$Id$"};
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <assert.h>
-
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <string>
 
