@@ -2,7 +2,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,12 +11,12 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -45,8 +45,7 @@ using namespace libdap ;
 
 extern void nc_read_variables(DAS & das,
                               const string & filename) throw(Error);
-extern void nc_read_descriptors(DDS & dds,
-                                const string & filename) throw(Error);
+extern void nc_read_descriptors(DDS & dds, const string & filename);
 
 NCRequestHandler::NCRequestHandler(const string &name)
 :  BESRequestHandler(name)
@@ -152,7 +151,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
     BESDataDDSResponse *bdds = dynamic_cast < BESDataDDSResponse * >(response);
     if( !bdds )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
-  
+
 
     try {
 	bdds->set_container( dhi.container->get_symbolic_name() ) ;
@@ -221,7 +220,7 @@ bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
     BESVersionInfo *info = dynamic_cast < BESVersionInfo * >(response);
     if( !info )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
-  
+
     info->addHandlerVersion(PACKAGE_NAME, PACKAGE_VERSION);
 
     return true;

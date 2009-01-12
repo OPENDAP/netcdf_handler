@@ -195,7 +195,7 @@ bool NCArray::read()
                 throw Error(errstat, string("Could not read the variable `") + name()
                             + string("'."));
             }
-            
+
             if (nctypelen(datatype) != sizeof(dods_float32)) {
                 dods_float32 *flt32 = new dods_float32[nels];
 
@@ -262,7 +262,7 @@ bool NCArray::read()
                 throw Error(errstat,
                             string("Could not read the variable `") + name() + string("'."));
             }
-            
+
             if (nctypelen(datatype) != sizeof(dods_int16)) {
                 dods_int16 *intg16 = new dods_int16 [nels];
 
@@ -294,7 +294,7 @@ bool NCArray::read()
                 throw Error(errstat, string("Could not read the variable `")
                             + name() + string("'."));
             }
-            
+
             if (nctypelen(datatype) != sizeof(dods_int32)) {
                 dods_int32 *intg32 = new dods_int32 [nels];
 
@@ -314,11 +314,12 @@ bool NCArray::read()
             break;
         }
 
+    // This is one place we'd make the change in the representation of NC_CHAR
+    // arrays from one-char arrays to a single string object. jhrg 1/8/09
     case NC_CHAR: {
-
             char *chrbuf = (char *)new char [(nels*nctypelen(datatype))];
 
-            // read the vlaues in from the local netCDF file
+            // read the values in from the local netCDF file
             if (has_stride)
                 errstat = nc_get_vars_text(ncid, varid, cor, edg, step, chrbuf);
             else
@@ -329,7 +330,7 @@ bool NCArray::read()
                 throw Error(errstat, string("Could not read the variable `") + name()
                             + string("'."));
             }
-            
+
             string *strg = new string [nels]; // array of strings
             char buf[2] = " "; // one char and EOS
 
@@ -365,7 +366,7 @@ bool NCArray::read()
                 throw Error(errstat,
                             string("Could not read the variable `") + name() + string("'."));
             }
-            
+
             set_read_p(true);
             val2buf((void *)convbuf);
 

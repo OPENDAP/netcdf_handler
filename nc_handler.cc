@@ -44,8 +44,7 @@ using namespace libdap ;
 
 extern void nc_read_variables(DAS & das,
                               const string & filename) throw(Error);
-extern void nc_read_descriptors(DDS & dds,
-                                const string & filename) throw(Error);
+extern void nc_read_descriptors(DDS & dds, const string & filename);
 
 const string cgi_version = PACKAGE_VERSION;
 

@@ -2,7 +2,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,18 +11,18 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 
 // (c) COPYRIGHT URI/MIT 1994-1996
 // Please read the full copyright statement in the file COPYRIGHT.
@@ -36,7 +36,7 @@
 // netcdf data file.
 //
 // It also contains test code which will print the in-memeory DDS to
-// stdout. 
+// stdout.
 //
 // ReZa 10/20/94
 
@@ -50,7 +50,11 @@ static char not_used rcsid[]={"$Id$"};
 #include <string>
 
 #include <netcdf.h>
+
 #include <DDS.h>
+#include <cgi_util.h>
+#include <util.h>
+
 #include "NCInt32.h"
 #include "NCUInt32.h"
 #include "NCUInt16.h"
@@ -61,8 +65,6 @@ static char not_used rcsid[]={"$Id$"};
 #include "NCArray.h"
 #include "NCGrid.h"
 #include "NCStr.h"
-#include <cgi_util.h>
-#include <util.h>
 
 using namespace libdap ;
 
@@ -70,198 +72,234 @@ using namespace libdap ;
 
 static char Msgt[255];
 
-// This function returns the appropriate DODS BaseType for the given 
+// This function returns the appropriate DODS BaseType for the given
 // netCDF data type.
 //
 
 static BaseType *
-Get_bt(const string &varname, const string &dataset, nc_type datatype) 
+Get_bt(const string &varname, const string &dataset, nc_type datatype)
 {
     switch (datatype) {
-      case NC_CHAR:
-	return (new NCStr(varname, dataset));
+        case NC_CHAR:
+            return (new NCStr(varname, dataset));
 
-      case NC_BYTE:
-	return (new NCByte(varname, dataset));
-	
-      case NC_SHORT:
-	return (new NCInt16(varname, dataset));
+        case NC_BYTE:
+            return (new NCByte(varname, dataset));
 
-      case NC_LONG:
-	return (new NCInt32(varname, dataset));
+        case NC_SHORT:
+            return (new NCInt16(varname, dataset));
 
-      case NC_FLOAT:
-	return (new NCFloat32(varname, dataset));
+        case NC_LONG:
+            return (new NCInt32(varname, dataset));
 
-      case NC_DOUBLE:
-	return (new NCFloat64(varname, dataset));
-	
-      default:
-	return (new NCStr(varname, dataset));
+        case NC_FLOAT:
+            return (new NCFloat32(varname, dataset));
+
+        case NC_DOUBLE:
+            return (new NCFloat64(varname, dataset));
+
+        default: // Maybe this should be an error? jhrg 1/12/09
+            return (new NCStr(varname, dataset));
     }
 }
 
-// Read given number of variables (nvars) from the opened netCDF file 
-// (ncid) and add them with their appropriate type and dimensions to 
+// Read given number of variables (nvars) from the opened netCDF file
+// (ncid) and add them with their appropriate type and dimensions to
 // the given instance of the DDS class.
 //
 // Returns: false if an error accessing the netcdf file was detected, true
 // otherwise.
 
-int
-read_class(DDS &dds_table, const string &filename,
-           int ncid, int nvars, string *error)
+static void
+read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
 {
-    char varname1[MAX_NC_NAME];
-    char varname2[MAX_NC_VARS][MAX_NC_NAME];
-    char dimname[MAX_NC_NAME];
-    char dimname2[MAX_NC_NAME];
-    char *var_match[MAX_NC_VARS];
-    int dim_ids[MAX_VAR_DIMS];
-    int dim_szs[MAX_VAR_DIMS];
-    char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME];
-    int tmp_dim_ids[MAX_VAR_DIMS];
-    nc_type typ_match[MAX_NC_VARS];
-    int ndims, ndims2, dim_match;
-    size_t dim_sz, tmp_sz;  
-    nc_type nctype;
-    Array *ar;
-    Grid *gr;
-    Part pr;
-    int errstat;
-
-    //add all the variables in this file to DDS table 
-
+    //add all the variables in this file to DDS table
     for (int v1 = 0; v1 < nvars; ++v1) {
-      errstat = nc_inq_var(ncid,v1,varname1,&nctype,&ndims,dim_ids,(int *)0);
-      if (errstat != NC_NOERR){
-	sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v1);
-	    ErrMsgT(Msgt); //local error messag
-	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-	    return errstat;
-	}
+        char varname1[MAX_NC_NAME];
+        nc_type nctype;
+        int ndims;
+        int dim_ids[MAX_VAR_DIMS];
 
-	BaseType *bt = Get_bt(varname1, filename, nctype);
-    
-	// is an Atomic-class ?
+        int errstat = nc_inq_var(ncid, v1, varname1, &nctype, &ndims, dim_ids,
+                (int *) 0);
+        if (errstat != NC_NOERR) {
+            string msg = "netcdf 3: could not get name or dimension number for variable ";
+            msg += long_to_string(v1);
+            throw Error(msg);
+#if 0
+            snprintf(Msgt, 255,
+                    "netcdf 3 server: could not get variable name or dimension number for variable %d ",
+                    v1);
+            ErrMsgT(Msgt); //local error message
+            throw Error(Msgt);
 
-	if (ndims == 0){
-	    dds_table.add_var(bt);
-	    delete bt ;
-	}
-	
-	// Grid vs. Array type matching
-    
-	else {
-      
-	    dim_match = 0;
-	  
-	    // match all the dimensions of this variable to other variables
-	    int d;
-	    for (d = 0; d < ndims; ++d){
-	      errstat = nc_inq_dim(ncid, dim_ids[d], dimname, &dim_sz);
-	      if (errstat != NC_NOERR){
-		sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v1);
-		ErrMsgT(Msgt); //server error messag
-		*error = (string)"\"" + (string)Msgt + (string)"\"";
-		return errstat;
-	      }
-	      dim_szs[d] = (int) dim_sz;
-	      (void) strcpy(dim_nms[d],dimname);
-	
-	      for (int v2 = 0; v2 < nvars; ++v2) { 
-		errstat = nc_inq_var(ncid,v2,varname2[v2],&nctype,&ndims2,tmp_dim_ids,(int *)0);
-		    if (errstat != NC_NOERR) {
-			sprintf (Msgt,"ncdds server: could not get variable name or dimension number for variable %d ",v2);
-			ErrMsgT(Msgt); 
-			*error = (string)"\"" + (string)Msgt + (string)"\"";
-			return errstat;
-		    }
-	  
-		    // Is it a Grid ?     1) variable name = the dimension name
-		    //                    2) The variable has only one dimension
-		    //                    3) It is not itself
-		    //                    4) They are the same size
-		    if ((v1 != v2) && (strcmp(dimname,varname2[v2]) == 0) && 
-			(ndims2 == 1)){
-
-		      errstat = nc_inq_dim(ncid,tmp_dim_ids[0],(char *)0, &tmp_sz);
-		      if (errstat != NC_NOERR){
-			sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d ",d,v2);
-			ErrMsgT(Msgt);
-			*error = (string)"\"" + (string)Msgt + (string)"\"";
-			return errstat;
-		      }
-			if (tmp_sz == dim_sz){    
-			    typ_match[dim_match] = nctype; 
-			    var_match[dim_match] = varname2[v2]; 
-			    dim_match++;
-			    break; // Stop var search, matching variable 
-			    // for the given dimension was found
-			}
-		    }
-		}		
-	
-		// Stop dimensions search, the variable does not 
-		// fit into a grid, due to a dimension mis-match.
-		// Also, get the size for the remainder of the   
-		// dimensions in the variable.
-		if (dim_match != d+1) {
-		    for (int d2 = d+1; d2 < ndims; ++d2){
-		      errstat = nc_inq_dim(ncid, dim_ids[d2], dimname2, &dim_sz);
-		      if (errstat != NC_NOERR){
-			sprintf (Msgt,"ncdds server: could not get dimension size for dimension %d in variable %d (ncdds)",d2,v1);
-			    ErrMsgT(Msgt);
-			    *error = (string)"\"" + (string)Msgt + (string)"\"";
-			    return errstat;
-			}
-			dim_szs[d2] = (int) dim_sz;
-			(void) strcpy(dim_nms[d2],dimname2);
-		    }
-		    break;
-		}
-	    }
-      
-	    // Create common array for both Array and Grid types
-      
-	    ar = new NCArray(varname1, filename, bt);
-	    delete bt ;
-	    for (d = 0; d < ndims; ++d) 
-		ar->append_dim(dim_szs[d],dim_nms[d]);
-      
-#ifndef NOGRID
-      
-	    if (ndims == dim_match){   // Found Grid type, add it
-		gr = new NCGrid(varname1, filename);
-		pr = array;
-		gr->add_var(ar,pr);
-		delete ar ;
-		pr = maps;
-		for ( d = 0; d < ndims; ++d){
-		    bt = Get_bt(var_match[d], filename, typ_match[d]);
-		    ar = new NCArray(bt->name(), filename, bt); 
-		    delete bt ;
-		    ar->append_dim(dim_szs[d],dim_nms[d]);
-		    gr->add_var(ar,pr);
-		    delete ar ;
-		}
-		dds_table.add_var(gr);
-		delete gr ;
-	    }
-	    else {                    // must be an Array, add it
-		dds_table.add_var(ar);
-		delete ar ;
-	    }
-#else
-      
-	    dds_table.add_var(ar);
-	    delete ar ;
-      
+            *error = (string) "\"" + (string) Msgt + (string) "\"";
+            return errstat;
 #endif
-	}
+        }
+
+        BaseType *bt = Get_bt(varname1, filename, nctype);
+
+        // is an Atomic-class ?
+
+        if (ndims == 0) {
+            dds_table.add_var(bt);
+            delete bt;
+        }
+        else {       // Grid vs. Array type matching
+            int dim_match = 0;
+            int dim_szs[MAX_VAR_DIMS];
+
+            char *var_match[MAX_NC_VARS];
+            nc_type typ_match[MAX_NC_VARS];
+
+            char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME];
+
+            // match all the dimensions of this variable to other variables
+            for (int d = 0; d < ndims; ++d) {
+                char dimname[MAX_NC_NAME];
+                size_t dim_sz;
+
+                errstat = nc_inq_dim(ncid, dim_ids[d], dimname, &dim_sz);
+                if (errstat != NC_NOERR) {
+                    string msg = "netcdf 3: could not get size for dimension ";
+                    msg += long_to_string(d);
+                    msg += " in variable ";
+                    msg += long_to_string(v1);
+                    throw Error(msg);
+#if 0
+                    snprintf(Msgt, 255,
+                            "netcdf server: could not get dimension size for dimension %d in variable %d ",
+                            d, v1);
+                    ErrMsgT(Msgt);
+                    throw Error(Msgt);
+                    *error = (string) "\"" + (string) Msgt + (string) "\"";
+                    return errstat;
+#endif
+                }
+                dim_szs[d] = (int) dim_sz;
+                (void) strcpy(dim_nms[d], dimname);
+
+                for (int v2 = 0; v2 < nvars; ++v2) {
+                    char varname2[MAX_NC_VARS][MAX_NC_NAME];
+                    int ndims2;
+                    int tmp_dim_ids[MAX_VAR_DIMS];
+
+                    errstat = nc_inq_var(ncid, v2, varname2[v2], &nctype,
+                            &ndims2, tmp_dim_ids, (int *) 0);
+                    if (errstat != NC_NOERR) {
+                        string msg = "netcdf 3: could not get name or dimension number for variable ";
+                        msg += long_to_string(v1);
+                        throw Error(msg);
+#if 0
+                        *error = (string) "\"" + (string) Msgt
+                                + (string) "\"";
+                        return errstat;
+#endif
+                    }
+
+                    // Is it a Grid ?     1) variable name = the dimension name
+                    //                    2) The variable has only one dimension
+                    //                    3) It is not itself
+                    //                    4) They are the same size
+                    if ((v1 != v2) && (strcmp(dimname, varname2[v2]) == 0)
+                            && (ndims2 == 1)) {
+                        size_t tmp_sz;
+
+                        errstat = nc_inq_dim(ncid, tmp_dim_ids[0],
+                                (char *) 0, &tmp_sz);
+                        if (errstat != NC_NOERR) {
+                            string msg = "netcdf 3: could not get size for dimension ";
+                            msg += long_to_string(d);
+                            msg += " in variable ";
+                            msg += long_to_string(v1);
+                            throw Error(msg);
+#if 0
+                            *error = (string) "\"" + (string) Msgt
+                                    + (string) "\"";
+                            return errstat;
+#endif
+                        }
+                        if (tmp_sz == dim_sz) {
+                            typ_match[dim_match] = nctype;
+                            var_match[dim_match] = varname2[v2];
+                            dim_match++;
+                            break; // Stop var search, matching variable
+                            // for the given dimension was found
+                        }
+                    }
+                }
+
+                // Stop dimensions search, the variable does not
+                // fit into a grid, due to a dimension mis-match.
+                // Also, get the size for the remainder of the
+                // dimensions in the variable.
+                if (dim_match != d + 1) {
+                    for (int d2 = d + 1; d2 < ndims; ++d2) {
+                        char dimname2[MAX_NC_NAME];
+
+                        errstat = nc_inq_dim(ncid, dim_ids[d2], dimname2,
+                                &dim_sz);
+                        if (errstat != NC_NOERR) {
+                            snprintf(Msgt, 255,
+                                    "ncdds server: could not get dimension size for dimension %d in variable %d",
+                                    d2, v1);
+                            ErrMsgT(Msgt);
+                            throw Error(Msgt);
+#if 0
+                            *error = (string) "\"" + (string) Msgt
+                                    + (string) "\"";
+                            return errstat;
+#endif
+                        }
+                        dim_szs[d2] = (int) dim_sz;
+                        (void) strcpy(dim_nms[d2], dimname2);
+                    }
+                    break;
+                }
+            }
+
+            // Create common array for both Array and Grid types
+
+            // Here is where the handler makes an array of NCStr objects
+            // when it has found an array of NC_CHAR. This would need
+            // to change the rep of NC_CHAR arrays to String. 1/8/09 jhrg
+            Array *ar = new NCArray(varname1, filename, bt);
+            delete bt;
+            for (int d = 0; d < ndims; ++d)
+                ar->append_dim(dim_szs[d], dim_nms[d]);
+
+#ifndef NOGRID
+
+            if (ndims == dim_match) { // Found Grid type, add it
+                Grid *gr = new NCGrid(varname1, filename);
+                Part pr = array;
+                gr->add_var(ar, pr);
+                delete ar;
+                pr = maps;
+                for (int d = 0; d < ndims; ++d) {
+                    bt = Get_bt(var_match[d], filename, typ_match[d]);
+                    ar = new NCArray(bt->name(), filename, bt);
+                    delete bt;
+                    ar->append_dim(dim_szs[d], dim_nms[d]);
+                    gr->add_var(ar, pr);
+                    delete ar;
+                }
+                dds_table.add_var(gr);
+                delete gr;
+            }
+            else { // must be an Array, add it
+                dds_table.add_var(ar);
+                delete ar;
+            }
+#else
+
+            dds_table.add_var(ar);
+            delete ar;
+
+#endif
+        }
     }
-  
-    return NC_NOERR;
 }
 
 // Given a reference to an instance of class DDS and a filename that refers
@@ -270,50 +308,58 @@ read_class(DDS &dds_table, const string &filename,
 // instance of DDS.
 //
 // Returns: false if an error accessing the netcdf file was detected, true
-// otherwise. 
+// otherwise.
 
-void
-nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error) 
-
+void nc_read_descriptors(DDS &dds_table, const string &filename)
 {
-  ncopts = 0;
-  int ncid, errstat;
-  int nvars; 
-  
+    ncopts = 0;
+    int ncid, errstat;
+    int nvars;
+
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
     if (errstat != NC_NOERR) {
-     //local error
-      snprintf(Msgt, 255,"netCDF server: Could not open file %s ", filename.c_str());
-      ErrMsgT(Msgt); //local error messag
-      string msg = (string)"Could not open " + path_to_filename(filename) + "."; 
-      throw Error(errstat, msg);
-     
-     }
-  
-    // how many variables? 
+        //local error
+        snprintf(Msgt, 255, "netCDF server: Could not open file %s ",
+                filename.c_str());
+        ErrMsgT(Msgt); //local error message
+        string msg = (string) "Could not open " + path_to_filename(filename)
+                + ".";
+        throw Error(errstat, msg);
+    }
 
+    // how many variables?
     errstat = nc_inq_nvars(ncid, &nvars);
     if (errstat != NC_NOERR) {
-      ErrMsgT("Could not inquire about netcdf file (ncdds)");
-      string msg = (string)"Could not inquire about netcdf file: " 
-	+ path_to_filename(filename) + "."; 
-      throw Error(errstat, msg);
+        ErrMsgT("Could not inquire about netcdf file (ncdds)");
+        string msg = (string) "Could not inquire about netcdf file: "
+                + path_to_filename(filename) + ".";
+        throw Error(errstat, msg);
     }
+
     // dataset name
     dds_table.set_dataset_name(name_path(filename));
-  
+
     // read variables class
     string *error;
 
-    errstat = read_class(dds_table,filename,ncid,nvars,error);
+#if 0
+    errstat = read_class(dds_table, filename, ncid, nvars, error);
     if (errstat != NC_NOERR) {
-	string msg = (string) *error;
-	throw Error(errstat, msg);
+        string msg = (string) * error;
+        throw Error(errstat, msg);
+    }
+#endif
+    try {
+        read_class(dds_table, filename, ncid, nvars); // remove error.
+    }
+    catch (Error &e) {
+        ErrMsgT(e.get_error_message().c_str());
+        throw e;
     }
 
     if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__,
-	                  "ncdds: Could not close the dataset!");
+        throw InternalErr(__FILE__, __LINE__,
+                "ncdds: Could not close the dataset!");
 }
 
 #ifdef TEST
@@ -321,21 +367,16 @@ nc_read_descriptors(DDS &dds_table, const string &filename) throw (Error)
 int
 main(int argc, char *argv[])
 {
-  DDS dds;
-  /*  
-    if(!nc_read_descriptors(dds, argv[1]))
-    abort();
-  */
-  try {
-      nc_read_descriptors(dds, (string)argv[1]);
-      dds.print();
+    DDS dds;
+
+    try {
+        nc_read_descriptors(dds, (string)argv[1]);
+        dds.print();
     }
     catch (Error &e) {
-      e.display_message();
-      return 1;
+        e.display_message();
+        return 1;
     }
-
-    //  dds.print();
 }
 
 #endif

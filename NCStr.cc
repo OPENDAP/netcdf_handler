@@ -2,7 +2,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,18 +11,18 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 
 // (c) COPYRIGHT URI/MIT 1994-1996
 // Please read the full copyright statement in the file COPYRIGHT.
@@ -31,7 +31,7 @@
 //      reza            Reza Nekovei (reza@intcomm.net)
 
 // netCDF sub-class implementation for NCByte,...NCGrid.
-// The files are patterned after the subcalssing examples 
+// The files are patterned after the subcalssing examples
 // Test<type>.c,h files.
 //
 // ReZa 1/12/95
@@ -102,7 +102,7 @@ NCStr::read()
 	             + dataset().c_str() + ")" ;
 	throw Error(errstat, err);
     }
- 
+
   errstat = nc_inq_varid(ncid, name().c_str(), &varid);
   if (errstat != NC_NOERR)
     throw Error(errstat, "Could not get variable ID.");
@@ -110,11 +110,13 @@ NCStr::read()
   errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
 			(int *)0);
   if (errstat != NC_NOERR)
-    throw Error(errstat, 
-		string("Could not read information about the variable `") 
+    throw Error(errstat,
+		string("Could not read information about the variable `")
 		+ name() + string("'."));
-
-  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++) 
+  // This will need to be changed if we're to represent an array of NC_CHARs
+  // as a DAP String (and a two dim array of NC_CHAR as a one dim array of
+  // String. jhrg 1/8/09
+  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
     cor[id] = 0;
 
   if (datatype == NC_CHAR)
@@ -122,8 +124,8 @@ NCStr::read()
       char chr[2];
       errstat = nc_get_var1_text (ncid, varid, cor, &chr[0]);
       if(errstat != NC_NOERR)
-	throw Error(errstat, 
-		    string("Could not read the variable `") + name() 
+	throw Error(errstat,
+		    string("Could not read the variable `") + name()
 		    + string("'."));
 
       chr[1] = '\0';		// make it a C-style string
@@ -133,7 +135,7 @@ NCStr::read()
       val2buf(&str);
 
       if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__, 
+	throw InternalErr(__FILE__, __LINE__,
 			  "Could not close the dataset!");
     }
   else
