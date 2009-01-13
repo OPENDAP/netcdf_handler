@@ -103,6 +103,36 @@ Get_bt(const string &varname, const string &dataset, nc_type datatype)
     }
 }
 
+// Build a grid given that one has been found. The Grid's Array is already
+// allocated and is passed in along with a number of arrays containing
+// information about the dimensions of the Grid.
+//
+// Note: The dim_szs and dim_nms arrays could be removed since that information
+// is already in the Array ar.
+
+static Grid *build_grid(Array *ar,
+        const int ndims,
+        char *var_match[MAX_NC_VARS],
+        const nc_type typ_match[MAX_NC_VARS],
+        const int dim_szs[MAX_VAR_DIMS],
+        const char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME])
+{
+    const string &filename = ar->dataset();
+    Grid *gr = new NCGrid(ar->name(), filename);
+    gr->add_var(ar, array);
+
+    for (int d = 0; d < ndims; ++d) {
+        BaseType *local_bt = Get_bt(var_match[d], filename, typ_match[d]);
+        NCArray *local_ar = new NCArray(local_bt->name(), filename, local_bt);
+        delete local_bt;
+        ar->append_dim(dim_szs[d], dim_nms[d]);
+        gr->add_var(local_ar, maps);
+        delete local_ar;
+    }
+
+    return gr;
+}
+
 // Read given number of variables (nvars) from the opened netCDF file
 // (ncid) and add them with their appropriate type and dimensions to
 // the given instance of the DDS class.
@@ -113,7 +143,7 @@ Get_bt(const string &varname, const string &dataset, nc_type datatype)
 static void
 read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
 {
-    //add all the variables in this file to DDS table
+    // add all the variables in this file to DDS table
     for (int v1 = 0; v1 < nvars; ++v1) {
         char varname1[MAX_NC_NAME];
         nc_type nctype;
@@ -126,22 +156,11 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
             string msg = "netcdf 3: could not get name or dimension number for variable ";
             msg += long_to_string(v1);
             throw Error(msg);
-#if 0
-            snprintf(Msgt, 255,
-                    "netcdf 3 server: could not get variable name or dimension number for variable %d ",
-                    v1);
-            ErrMsgT(Msgt); //local error message
-            throw Error(Msgt);
-
-            *error = (string) "\"" + (string) Msgt + (string) "\"";
-            return errstat;
-#endif
         }
 
         BaseType *bt = Get_bt(varname1, filename, nctype);
 
         // is an Atomic-class ?
-
         if (ndims == 0) {
             dds_table.add_var(bt);
             delete bt;
@@ -149,11 +168,10 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
         else {       // Grid vs. Array type matching
             int dim_match = 0;
             int dim_szs[MAX_VAR_DIMS];
+            char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME];
 
             char *var_match[MAX_NC_VARS];
             nc_type typ_match[MAX_NC_VARS];
-
-            char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME];
 
             // match all the dimensions of this variable to other variables
             for (int d = 0; d < ndims; ++d) {
@@ -167,19 +185,13 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                     msg += " in variable ";
                     msg += long_to_string(v1);
                     throw Error(msg);
-#if 0
-                    snprintf(Msgt, 255,
-                            "netcdf server: could not get dimension size for dimension %d in variable %d ",
-                            d, v1);
-                    ErrMsgT(Msgt);
-                    throw Error(Msgt);
-                    *error = (string) "\"" + (string) Msgt + (string) "\"";
-                    return errstat;
-#endif
                 }
                 dim_szs[d] = (int) dim_sz;
-                (void) strcpy(dim_nms[d], dimname);
+                strncpy(dim_nms[d], dimname, MAX_NC_NAME-1);
 
+                // Look at every variable in the data set to see if there's
+                // a one dimensional array that is the map for the current
+                // variable.
                 for (int v2 = 0; v2 < nvars; ++v2) {
                     char varname2[MAX_NC_VARS][MAX_NC_NAME];
                     int ndims2;
@@ -191,11 +203,6 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                         string msg = "netcdf 3: could not get name or dimension number for variable ";
                         msg += long_to_string(v1);
                         throw Error(msg);
-#if 0
-                        *error = (string) "\"" + (string) Msgt
-                                + (string) "\"";
-                        return errstat;
-#endif
                     }
 
                     // Is it a Grid ?     1) variable name = the dimension name
@@ -214,11 +221,6 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                             msg += " in variable ";
                             msg += long_to_string(v1);
                             throw Error(msg);
-#if 0
-                            *error = (string) "\"" + (string) Msgt
-                                    + (string) "\"";
-                            return errstat;
-#endif
                         }
                         if (tmp_sz == dim_sz) {
                             typ_match[dim_match] = nctype;
@@ -241,19 +243,14 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                         errstat = nc_inq_dim(ncid, dim_ids[d2], dimname2,
                                 &dim_sz);
                         if (errstat != NC_NOERR) {
-                            snprintf(Msgt, 255,
-                                    "ncdds server: could not get dimension size for dimension %d in variable %d",
-                                    d2, v1);
-                            ErrMsgT(Msgt);
-                            throw Error(Msgt);
-#if 0
-                            *error = (string) "\"" + (string) Msgt
-                                    + (string) "\"";
-                            return errstat;
-#endif
+                            string msg = "netcdf 3: could not get size for dimension ";
+                            msg += long_to_string(d);
+                            msg += " in variable ";
+                            msg += long_to_string(v1);
+                            throw Error(msg);
                         }
                         dim_szs[d2] = (int) dim_sz;
-                        (void) strcpy(dim_nms[d2], dimname2);
+                        strncpy(dim_nms[d2], dimname2, MAX_NC_NAME-1);
                     }
                     break;
                 }
@@ -269,35 +266,16 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
             for (int d = 0; d < ndims; ++d)
                 ar->append_dim(dim_szs[d], dim_nms[d]);
 
-#ifndef NOGRID
-
             if (ndims == dim_match) { // Found Grid type, add it
-                Grid *gr = new NCGrid(varname1, filename);
-                Part pr = array;
-                gr->add_var(ar, pr);
-                delete ar;
-                pr = maps;
-                for (int d = 0; d < ndims; ++d) {
-                    bt = Get_bt(var_match[d], filename, typ_match[d]);
-                    ar = new NCArray(bt->name(), filename, bt);
-                    delete bt;
-                    ar->append_dim(dim_szs[d], dim_nms[d]);
-                    gr->add_var(ar, pr);
-                    delete ar;
-                }
+                Grid *gr = build_grid(ar, ndims, var_match, typ_match, dim_szs, dim_nms);
                 dds_table.add_var(gr);
+                delete ar;
                 delete gr;
             }
             else { // must be an Array, add it
                 dds_table.add_var(ar);
                 delete ar;
             }
-#else
-
-            dds_table.add_var(ar);
-            delete ar;
-
-#endif
         }
     }
 }
@@ -340,15 +318,6 @@ void nc_read_descriptors(DDS &dds_table, const string &filename)
     dds_table.set_dataset_name(name_path(filename));
 
     // read variables class
-    string *error;
-
-#if 0
-    errstat = read_class(dds_table, filename, ncid, nvars, error);
-    if (errstat != NC_NOERR) {
-        string msg = (string) * error;
-        throw Error(errstat, msg);
-    }
-#endif
     try {
         read_class(dds_table, filename, ncid, nvars); // remove error.
     }
