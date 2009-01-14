@@ -99,7 +99,10 @@ Get_bt(const string &varname, const string &dataset, nc_type datatype)
             return (new NCFloat64(varname, dataset));
 
         default: // Maybe this should be an error? jhrg 1/12/09
+            throw Error("netcdf 3: Unknow type");
+#if 0
             return (new NCStr(varname, dataset));
+#endif
     }
 }
 
@@ -112,7 +115,7 @@ Get_bt(const string &varname, const string &dataset, nc_type datatype)
 
 static Grid *build_grid(Array *ar,
         const int ndims,
-        char *var_match[MAX_NC_VARS],
+        char var_match[MAX_NC_VARS][MAX_NC_NAME],
         const nc_type typ_match[MAX_NC_VARS],
         const int dim_szs[MAX_VAR_DIMS],
         const char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME])
@@ -125,7 +128,7 @@ static Grid *build_grid(Array *ar,
         BaseType *local_bt = Get_bt(var_match[d], filename, typ_match[d]);
         NCArray *local_ar = new NCArray(local_bt->name(), filename, local_bt);
         delete local_bt;
-        ar->append_dim(dim_szs[d], dim_nms[d]);
+        local_ar->append_dim(dim_szs[d], dim_nms[d]);
         gr->add_var(local_ar, maps);
         delete local_ar;
     }
@@ -133,6 +136,62 @@ static Grid *build_grid(Array *ar,
     return gr;
 }
 
+/**
+     @param v1 Variable number
+     @param dimname Name of the current dimension
+     @param dim_sz Size of the current dimension
+     @param typ_match Value-result parameter, holds dimension type if match found
+     @param var_match Value-result parameter, holds coordinate var name if match found
+ */
+static bool find_matching_coordinate_variable(int ncid, int nvars, int v1, char dimname[], size_t dim_sz,
+        nc_type *match_type, string &match_name)
+{
+    // Look at every variable in the data set to see if there's
+    // a one dimensional array that is the map for the current
+    // variable.
+    for (int v2 = 0; v2 < nvars; ++v2) {
+        char varname2[MAX_NC_VARS][MAX_NC_NAME];
+        int ndims2;
+        int tmp_dim_ids[MAX_VAR_DIMS];
+        nc_type nctype;
+
+        int errstat = nc_inq_var(ncid, v2, varname2[v2], &nctype,
+                &ndims2, tmp_dim_ids, (int *) 0);
+        if (errstat != NC_NOERR) {
+            string msg = "netcdf 3: could not get name or dimension number for variable ";
+            msg += long_to_string(v1);
+            throw Error(msg);
+        }
+
+        // Is it a Grid ?     1) variable name = the dimension name
+        //                    2) The variable has only one dimension
+        //                    3) It is not itself
+        //                    4) They are the same size
+        if ((v1 != v2) && (strcmp(dimname, varname2[v2]) == 0) && (ndims2 == 1)) {
+            size_t tmp_sz;
+
+            errstat = nc_inq_dim(ncid, tmp_dim_ids[0], (char *)0, &tmp_sz);
+            if (errstat != NC_NOERR) {
+                string msg = "netcdf 3: could not get size for dimension ";
+                msg += long_to_string(tmp_dim_ids[0]);
+                msg += " in variable ";
+                msg += long_to_string(v1);
+                throw Error(msg);
+            }
+            if (tmp_sz == dim_sz) {
+                *match_type = nctype;
+                match_name = varname2[v2];
+                //dim_match++;
+                return true;
+                //break; // Stop var search, matching variable
+                // for the given dimension was found
+            }
+        }
+    }
+
+    // If all variables are examined and no match is found, return false
+    return false;
+}
 // Read given number of variables (nvars) from the opened netCDF file
 // (ncid) and add them with their appropriate type and dimensions to
 // the given instance of the DDS class.
@@ -170,10 +229,11 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
             int dim_szs[MAX_VAR_DIMS];
             char dim_nms[MAX_VAR_DIMS][MAX_NC_NAME];
 
-            char *var_match[MAX_NC_VARS];
-            nc_type typ_match[MAX_NC_VARS];
+            char map_names[MAX_NC_VARS][MAX_NC_NAME];
+            nc_type map_types[MAX_NC_VARS];
 
-            // match all the dimensions of this variable to other variables
+            // To determine if this is a Grid, see if it has matching 'maps'
+            // in the data set. if so, call it a Grid. If not, it's an Array.
             for (int d = 0; d < ndims; ++d) {
                 char dimname[MAX_NC_NAME];
                 size_t dim_sz;
@@ -186,62 +246,31 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                     msg += long_to_string(v1);
                     throw Error(msg);
                 }
+
+                // Record the dimension sizes and names for use regardless of
+                // whether this is a Grid or an Array.
                 dim_szs[d] = (int) dim_sz;
                 strncpy(dim_nms[d], dimname, MAX_NC_NAME-1);
 
-                // Look at every variable in the data set to see if there's
-                // a one dimensional array that is the map for the current
-                // variable.
-                for (int v2 = 0; v2 < nvars; ++v2) {
-                    char varname2[MAX_NC_VARS][MAX_NC_NAME];
-                    int ndims2;
-                    int tmp_dim_ids[MAX_VAR_DIMS];
-
-                    errstat = nc_inq_var(ncid, v2, varname2[v2], &nctype,
-                            &ndims2, tmp_dim_ids, (int *) 0);
-                    if (errstat != NC_NOERR) {
-                        string msg = "netcdf 3: could not get name or dimension number for variable ";
-                        msg += long_to_string(v1);
-                        throw Error(msg);
-                    }
-
-                    // Is it a Grid ?     1) variable name = the dimension name
-                    //                    2) The variable has only one dimension
-                    //                    3) It is not itself
-                    //                    4) They are the same size
-                    if ((v1 != v2) && (strcmp(dimname, varname2[v2]) == 0)
-                            && (ndims2 == 1)) {
-                        size_t tmp_sz;
-
-                        errstat = nc_inq_dim(ncid, tmp_dim_ids[0],
-                                (char *) 0, &tmp_sz);
-                        if (errstat != NC_NOERR) {
-                            string msg = "netcdf 3: could not get size for dimension ";
-                            msg += long_to_string(d);
-                            msg += " in variable ";
-                            msg += long_to_string(v1);
-                            throw Error(msg);
-                        }
-                        if (tmp_sz == dim_sz) {
-                            typ_match[dim_match] = nctype;
-                            var_match[dim_match] = varname2[v2];
-                            dim_match++;
-                            break; // Stop var search, matching variable
-                            // for the given dimension was found
-                        }
-                    }
+                nc_type match_type;
+                string match_name;
+                if (find_matching_coordinate_variable(ncid, nvars, v1, dimname, dim_sz,
+                        &match_type, match_name)) {
+                    map_types[d] = match_type;
+                    strncpy(map_names[d], match_name.c_str(), MAX_NC_NAME-1);
+                    dim_match++;
                 }
-
-                // Stop dimensions search, the variable does not
-                // fit into a grid, due to a dimension mis-match.
-                // Also, get the size for the remainder of the
-                // dimensions in the variable.
-                if (dim_match != d + 1) {
+                else {
+                    // Since find_matching_coordinate_variable() returned false
+                    // stop dimensions search, the variable does not fit into
+                    // a grid, due to a dimension mismatch.
+                    // Also, get the size for the remainder of the dimensions
+                    // in the variable and then exit the loop over the dims
+                    // for this variable.
                     for (int d2 = d + 1; d2 < ndims; ++d2) {
                         char dimname2[MAX_NC_NAME];
 
-                        errstat = nc_inq_dim(ncid, dim_ids[d2], dimname2,
-                                &dim_sz);
+                        errstat = nc_inq_dim(ncid, dim_ids[d2], dimname2, &dim_sz);
                         if (errstat != NC_NOERR) {
                             string msg = "netcdf 3: could not get size for dimension ";
                             msg += long_to_string(d);
@@ -252,27 +281,45 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                         dim_szs[d2] = (int) dim_sz;
                         strncpy(dim_nms[d2], dimname2, MAX_NC_NAME-1);
                     }
+
+                    // exit the loop of the dimensions for this variable
                     break;
                 }
             }
 
-            // Create common array for both Array and Grid types
-
             // Here is where the handler makes an array of NCStr objects
             // when it has found an array of NC_CHAR. This would need
             // to change the rep of NC_CHAR arrays to String. 1/8/09 jhrg
-            Array *ar = new NCArray(varname1, filename, bt);
-            delete bt;
-            for (int d = 0; d < ndims; ++d)
-                ar->append_dim(dim_szs[d], dim_nms[d]);
+            if (bt->type() == dods_str_c) { // arrays of NC_CHR --> DAP String
+                if (ndims == 1) {
+                    dds_table.add_var(bt);
+                    delete bt;
+                }
+                else { // if ndims > 1 we have an array[ndims-1] of strings
+                    Array *ar = new NCArray(varname1, filename, bt);
+                    delete bt;
+                    for (int d = 0; d < ndims - 1; ++d)
+                        ar->append_dim(dim_szs[d], dim_nms[d]);
+                }
 
-            if (ndims == dim_match) { // Found Grid type, add it
-                Grid *gr = build_grid(ar, ndims, var_match, typ_match, dim_szs, dim_nms);
-                dds_table.add_var(gr);
+                // We can add an attribute here for the new variable using dim_szs[ndims-1]
+            }
+            else if (ndims == dim_match) { // Found Grid type, add it
+                Array *ar = new NCArray(varname1, filename, bt);
+                delete bt;
+                for (int d = 0; d < ndims; ++d)
+                    ar->append_dim(dim_szs[d], dim_nms[d]);
+                Grid *gr = build_grid(ar, ndims, map_names, map_types, dim_szs, dim_nms);
                 delete ar;
+                dds_table.add_var(gr);
                 delete gr;
             }
             else { // must be an Array, add it
+                Array *ar = new NCArray(varname1, filename, bt);
+                delete bt;
+                for (int d = 0; d < ndims; ++d)
+                    ar->append_dim(dim_szs[d], dim_nms[d]);
+
                 dds_table.add_var(ar);
                 delete ar;
             }

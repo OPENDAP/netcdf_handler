@@ -80,69 +80,65 @@ NCStr::ptr_duplicate()
     return new NCStr(*this);
 }
 
-bool
-NCStr::read()
+bool NCStr::read()
 {
-  int varid;                  /* variable Id */
-  nc_type datatype;           /* variable data type */
-  size_t cor[MAX_NC_DIMS];      /* corner coordinates */
-  int num_dim;                /* number of dim. in variable */
-  int id;
+    int varid; /* variable Id */
+    nc_type datatype; /* variable data type */
+    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
+    int num_dim; /* number of dim. in variable */
+    int id;
 
-  if (read_p()) //has been done
+    if (read_p()) //has been done
+        return false;
+
+    int ncid, errstat;
+
+    errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+
+    if (errstat != NC_NOERR) {
+        string err = (string) "Could not open the dataset's file ("
+                + dataset().c_str() + ")";
+        throw Error(errstat, err);
+    }
+
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not get variable ID.");
+
+    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim,
+            (int *) 0, (int *) 0);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, string(
+                "Could not read information about the variable `") + name()
+                + string("'."));
+    // This will need to be changed if we're to represent an array of NC_CHARs
+    // as a DAP String (and a two dim array of NC_CHAR as a one dim array of
+    // String. jhrg 1/8/09
+    for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
+        cor[id] = 0;
+
+    if (datatype == NC_CHAR) {
+        char chr[2];
+        errstat = nc_get_var1_text(ncid, varid, cor, &chr[0]);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read the variable `")
+                    + name() + string("'."));
+
+        chr[1] = '\0'; // make it a C-style string
+        set_read_p(true);
+        string str = chr;
+
+        val2buf(&str);
+
+        if (nc_close(ncid) != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__,
+                    "Could not close the dataset!");
+    }
+    else
+        throw InternalErr(__FILE__, __LINE__,
+                "Entered NCStr::read() with non-string/char variable!");
+
     return false;
-
-  int ncid, errstat;
-
-  errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
-
-  if (errstat != NC_NOERR)
-    {
-	string err = (string)"Could not open the dataset's file ("
-	             + dataset().c_str() + ")" ;
-	throw Error(errstat, err);
-    }
-
-  errstat = nc_inq_varid(ncid, name().c_str(), &varid);
-  if (errstat != NC_NOERR)
-    throw Error(errstat, "Could not get variable ID.");
-
-  errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
-			(int *)0);
-  if (errstat != NC_NOERR)
-    throw Error(errstat,
-		string("Could not read information about the variable `")
-		+ name() + string("'."));
-  // This will need to be changed if we're to represent an array of NC_CHARs
-  // as a DAP String (and a two dim array of NC_CHAR as a one dim array of
-  // String. jhrg 1/8/09
-  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
-    cor[id] = 0;
-
-  if (datatype == NC_CHAR)
-    {
-      char chr[2];
-      errstat = nc_get_var1_text (ncid, varid, cor, &chr[0]);
-      if(errstat != NC_NOERR)
-	throw Error(errstat,
-		    string("Could not read the variable `") + name()
-		    + string("'."));
-
-      chr[1] = '\0';		// make it a C-style string
-      set_read_p(true);
-      string str = chr;
-
-      val2buf(&str);
-
-      if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__,
-			  "Could not close the dataset!");
-    }
-  else
-    throw InternalErr(__FILE__, __LINE__,
-		      "Entered NCStr::read() with non-string/char variable!");
-
-  return false;
 }
 
 // $Log: NCStr.cc,v $
