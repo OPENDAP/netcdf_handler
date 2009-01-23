@@ -155,34 +155,6 @@ bool NCStr::read()
         delete[] charbuf;
     }
 
-#if 0
-    // This will need to be changed if we're to represent an array of NC_CHARs
-    // as a DAP String (and a two dim array of NC_CHAR as a one dim array of
-    // String. jhrg 1/8/09
-    for (int id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
-        cor[id] = 0;
-
-    if (datatype == NC_CHAR) {
-        char chr[2];
-        errstat = nc_get_var1_text(ncid, varid, cor, &chr[0]);
-        if (errstat != NC_NOERR)
-            throw Error(errstat, string("Could not read the variable `")
-                    + name() + string("'."));
-
-        chr[1] = '\0'; // make it a C-style string
-        set_read_p(true);
-        string str = chr;
-
-        val2buf(&str);
-
-        if (nc_close(ncid) != NC_NOERR)
-            throw InternalErr(__FILE__, __LINE__,
-                    "Could not close the dataset!");
-    }
-    else
-        throw InternalErr(__FILE__, __LINE__,
-                "Entered NCStr::read() with non-string/char variable!");
-#endif
     return false;
 }
 

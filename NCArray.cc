@@ -363,27 +363,6 @@ bool NCArray::read()
             delete [] strg;
             delete [] chrbuf;
 
-#if 0
-            // This is the old way the code worked - each char from the array
-            // was sent in a separate string. 1//21/09 jhrg
-            string *strg = new string [nels]; // array of strings
-            char buf[2] = " "; // one char and EOS
-
-            // put the char values in the string array
-            for (int id = 0; id < nels; id++) {
-                strncpy(buf, (chrbuf + id), 1);
-                strg[id] = (string) buf;
-            }
-
-            // reading is done (don't need to read each individual array value)
-            set_read_p(true);
-            // put values in the buffers
-            val2buf(strg);
-
-            // clean up
-            delete [] strg;
-            delete [] chrbuf;
-#endif
             break;
         }
 

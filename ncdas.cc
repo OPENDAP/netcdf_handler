@@ -71,16 +71,16 @@ static const char INT16[]="Int16";
 static const char FLOAT64[]="Float64";
 static const char FLOAT32[]="Float32";
 
-// Used by ErrMsgT
-
-static char Msgt[255];
-
-/** Given the type, array number and pointer to the associated attribute,
+/** Given the type, array index number and pointer to the associated attribute,
     Return the string representation of the attribute's value.
 
     This function is modeled on code from ncdump. I modified the original
     version to use C++ string streams and also to call escattr() so that
-    attributes with quotes would be handled correctly. */
+    attributes with quotes would be handled correctly.
+
+    @param type The nc_type of this attribute
+    @param loc The offset within \e vals
+    @param vals a void* to the array of values */
 static string
 print_attr(nc_type type, int loc, void *vals)
 {
@@ -150,12 +150,12 @@ print_attr(nc_type type, int loc, void *vals)
     }
 }
 
-// Return the printed representation of a netcdf type -- in a form that dods
-// can use.
-//
-// Returns: a char * referencing the datatype's printed representation. The
-// char * is static.
+/** Return the printed representation of a netcdf type -- in a form the
+    handler can use.
 
+    @param datatype A nc_type
+    @return A string that holds the type name.
+ */
 static string
 print_type(nc_type datatype)
 {
@@ -183,9 +183,15 @@ print_type(nc_type datatype)
     }
 }
 
-// Code borrowed from the netcdf 2 interface compat code. Replace this with a
-// direct block of statements and look at maybe using stringstreams to
-// generate the print representations. 4/19/05 jhrg
+/** Read the vector of attribute values from the netcdf file.
+
+    @param ncid The netCDF file id
+    @param varid The variable id
+    @param name THe attribute name
+    @param value A value-result parameter which will point to the vector of
+    values.
+    @see print_attr
+  */
 static int
 dap_get_att(int ncid, int varid, const char *name, void *value)
 {
@@ -218,17 +224,19 @@ dap_get_att(int ncid, int varid, const char *name, void *value)
     }
 }
 
-// Given the netcdf file id, variable id, number of attributes for the
-// variable, and an attribute table pointer, read the attributes and store
-// their names and values in the attribute table.
-//
-// NB: currently values are stored only as strings.
-//
-// Returns: false if an error was detected reading from the netcdf file, true
-// otherwise.
+/** Given the netcdf file id, variable id, number of attributes for the
+    variable, and an attribute table pointer, read the attributes and store
+    their names and values in the attribute table.
 
-int
-read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
+    @note Attribute values in the DAP are stored only as strings.
+    @param ncid The netcdf file id
+    @param v The netcdf variable id
+    @param natts The number of attributes
+    @param at A value-result parameter; a point to the attribute table to which
+    the new information will be added.
+*/
+static void
+read_attributes(int ncid, int v, int natts, AttrTable *at)
 {
     char attrname[MAX_NC_NAME];
     nc_type datatype;
@@ -239,35 +247,22 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
     for (int a = 0; a < natts; ++a) {
         errstat = nc_inq_attname(ncid, v, a, attrname);
         if (errstat != NC_NOERR) {
-            sprintf (Msgt,"nc_das server: could not get the name for attribute %d",a);
-	    ErrMsgT(Msgt); //local error messag
-	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-	    return errstat;
-	}
+	    string msg = "Could not get the name for attribute ";
+	    msg += long_to_string(a);
+	    throw Error(errstat, msg);
+        }
 	errstat = nc_inq_att(ncid, v, attrname, &datatype, &len);
 	if (errstat != NC_NOERR) {
-      	    sprintf(Msgt,
-		    "nc_das server: could not gettype or length for attribute %s",
-		    attrname);
-	    ErrMsgT(Msgt); //local error message
-	    *error = (string)"\"" + (string)Msgt + (string)"\"";
-	    return errstat;
+	    string msg = "Could not get the name for attribute '";
+            msg += attrname + string("'");
+            throw Error(errstat, msg);
 	}
 
 	value = new char [(len + 1) * nctypelen(datatype)];
-
-	if (!value) {
-            ErrMsgT("nc_das server: Out of memory!");
-	    *(error) =  (string)"\"nc_das: Out of memory! \"";
-	    (void) nc_close(ncid);
-	    return ENOMEM;
-	}
 	errstat = dap_get_att(ncid, v, attrname, (void *)value);
 	if (errstat != NC_NOERR) {
-		delete[] value;
-            ErrMsgT("nc_das server: could not read attribute value");
-	    *(error) =  (string)"\"nc_das: Could not read attribute value \"";
-   	    return errstat;
+            delete[] value;
+   	    throw Error(errstat, "Could not get the attribute value");
 	}
 
 	// If the datatype is NC_CHAR then we have a string. netCDF
@@ -286,31 +281,19 @@ read_attributes(int ncid, int v, int natts, AttrTable *at, string *error)
 
 	delete [] value;
     }
-
-    return errstat;
 }
 
-// Given a reference to an instance of class DAS and a filename that refers
-// to a netcdf file, read the netcdf file and extract all the attributes of
-// each of its variables. Add the variables and their attributes to the
-// instance of DAS.
-//
-// Returns: false if an error accessing the netcdf file was detected, true
-// otherwise.
-
+/** Given a reference to an instance of class DAS and a filename that refers
+    to a netcdf file, read the netcdf file and extract all the attributes of
+    each of its variables. Add the variables and their attributes to the
+    instance of DAS.
+*/
 void
-nc_read_variables(DAS &das, const string &filename) throw (Error)
+nc_read_variables(DAS &das, const string &filename)
 {
-    ncopts = 0;
     int ncid, errstat;
-    string *error = NULL ;
-    AttrTable *attr_table_ptr = NULL ;
-
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
-
     if (errstat != NC_NOERR) {
-        snprintf(Msgt, 255,"nc_das server: could not open file %s", filename.c_str());
-        ErrMsgT(Msgt); //local error message
         string msg = (string)"Could not open " + path_to_filename(filename) + ".";
         throw Error(errstat, msg);
     }
@@ -318,10 +301,8 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     // how many variables? how many global attributes?
     int nvars, ngatts;
     errstat = nc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
-
     if (errstat != NC_NOERR) {
-        ErrMsgT("nc_das: Could not inquires about netcdf file");
-	string msg = (string)"Could not inquire about netcdf file: "
+        string msg = (string)"Could not inquire about netcdf file: "
 	+ path_to_filename(filename) + ".";
 	throw Error(errstat, msg);
     }
@@ -330,12 +311,12 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     char varname[MAX_NC_NAME];
     int natts = 0;
     nc_type var_type;
+    AttrTable *attr_table_ptr = NULL ;
     for (int v = 0; v < nvars; ++v) {
         errstat = nc_inq_var(ncid, v, varname, &var_type, (int *)0, (int *)0, &natts);
 	if (errstat != NC_NOERR) {
-            sprintf (Msgt, "nc_das server: could not get information for variable %d",v);
-            ErrMsgT(Msgt); //local error message
-	    string msg = (string)Msgt;
+	    string msg = "Could not get information for variable ";
+	    msg += long_to_string(v);
 	    throw Error(errstat, msg);
 	}
 
@@ -343,13 +324,9 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 	if (!attr_table_ptr)
 	    attr_table_ptr = das.add_table(varname, new AttrTable);
 
-	errstat = read_attributes(ncid, v, natts, attr_table_ptr, error);
-	if (errstat != NC_NOERR){
-	  string msg = (string) *error;
-	  throw Error(errstat, msg);
-	}
+	read_attributes(ncid, v, natts, attr_table_ptr/*, error*/);
 
-	// Add a special attribute for string lengths
+        // Add a special attribute for string lengths
 	if (var_type == NC_CHAR) {
 	    // number of dimensions and size of Nth dimension
 	    int num_dim;
@@ -382,11 +359,7 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     if (ngatts > 0) {
 	attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
 
-	errstat = read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr, error);
-	if (errstat != NC_NOERR){
-	  string msg = (string) *error;
-	  throw Error(errstat, msg);
-	}
+	read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
     }
 
     // Add unlimited dimension name in DODS_EXTRA attribute table

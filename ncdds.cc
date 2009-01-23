@@ -68,14 +68,8 @@ static char not_used rcsid[]={"$Id$"};
 
 using namespace libdap ;
 
-// Used by ErrMsgT
-
-static char Msgt[255];
-
-// This function returns the appropriate DODS BaseType for the given
-// netCDF data type.
-//
-
+/** This function returns the appropriate DODS BaseType for the given
+    netCDF data type. */
 static BaseType *
 Get_bt(const string &varname, const string &dataset, nc_type datatype)
 {
@@ -100,19 +94,15 @@ Get_bt(const string &varname, const string &dataset, nc_type datatype)
 
         default: // Maybe this should be an error? jhrg 1/12/09
             throw Error("netcdf 3: Unknow type");
-#if 0
-            return (new NCStr(varname, dataset));
-#endif
     }
 }
 
-// Build a grid given that one has been found. The Grid's Array is already
-// allocated and is passed in along with a number of arrays containing
-// information about the dimensions of the Grid.
-//
-// Note: The dim_szs and dim_nms arrays could be removed since that information
-// is already in the Array ar.
+/** Build a grid given that one has been found. The Grid's Array is already
+    allocated and is passed in along with a number of arrays containing
+    information about the dimensions of the Grid.
 
+    Note: The dim_szs and dim_nms arrays could be removed since that information
+    is already in the Array ar. */
 static Grid *build_grid(Array *ar,
         const int ndims,
         char var_match[MAX_NC_VARS][MAX_NC_NAME],
@@ -192,13 +182,11 @@ static bool find_matching_coordinate_variable(int ncid, int nvars, int v1, char 
     // If all variables are examined and no match is found, return false
     return false;
 }
-// Read given number of variables (nvars) from the opened netCDF file
-// (ncid) and add them with their appropriate type and dimensions to
-// the given instance of the DDS class.
-//
-// Returns: false if an error accessing the netcdf file was detected, true
-// otherwise.
 
+/** Read given number of variables (nvars) from the opened netCDF file
+    (ncid) and add them with their appropriate type and dimensions to
+    the given instance of the DDS class.
+*/
 static void
 read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
 {
@@ -327,14 +315,10 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
     }
 }
 
-// Given a reference to an instance of class DDS and a filename that refers
-// to a netcdf file, read the netcdf file and extract all the dimensions of
-// each of its variables. Add the variables and their dimensions to the
-// instance of DDS.
-//
-// Returns: false if an error accessing the netcdf file was detected, true
-// otherwise.
-
+/** Given a reference to an instance of class DDS and a filename that refers
+    to a netcdf file, read the netcdf file and extract all the dimensions of
+    each of its variables. Add the variables and their dimensions to the
+    instance of DDS. */
 void nc_read_descriptors(DDS &dds_table, const string &filename)
 {
     ncopts = 0;
@@ -343,11 +327,7 @@ void nc_read_descriptors(DDS &dds_table, const string &filename)
 
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
     if (errstat != NC_NOERR) {
-        //local error
-        snprintf(Msgt, 255, "netCDF server: Could not open file %s ",
-                filename.c_str());
-        ErrMsgT(Msgt); //local error message
-        string msg = (string) "Could not open " + path_to_filename(filename)
+        string msg = (string)"Could not open " + path_to_filename(filename)
                 + ".";
         throw Error(errstat, msg);
     }
@@ -355,7 +335,6 @@ void nc_read_descriptors(DDS &dds_table, const string &filename)
     // how many variables?
     errstat = nc_inq_nvars(ncid, &nvars);
     if (errstat != NC_NOERR) {
-        ErrMsgT("Could not inquire about netcdf file (ncdds)");
         string msg = (string) "Could not inquire about netcdf file: "
                 + path_to_filename(filename) + ".";
         throw Error(errstat, msg);
@@ -365,37 +344,12 @@ void nc_read_descriptors(DDS &dds_table, const string &filename)
     dds_table.set_dataset_name(name_path(filename));
 
     // read variables class
-    try {
-        read_class(dds_table, filename, ncid, nvars); // remove error.
-    }
-    catch (Error &e) {
-        ErrMsgT(e.get_error_message().c_str());
-        throw e;
-    }
+    read_class(dds_table, filename, ncid, nvars); // remove error.
 
     if (nc_close(ncid) != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__,
                 "ncdds: Could not close the dataset!");
 }
-
-#ifdef TEST
-
-int
-main(int argc, char *argv[])
-{
-    DDS dds;
-
-    try {
-        nc_read_descriptors(dds, (string)argv[1]);
-        dds.print();
-    }
-    catch (Error &e) {
-        e.display_message();
-        return 1;
-    }
-}
-
-#endif
 
 // $Log: ncdds.cc,v $
 // Revision 1.8  2005/04/19 23:16:18  jimg
