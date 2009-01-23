@@ -42,8 +42,7 @@ static char not_used rcsid[] =
 
 using namespace libdap ;
 
-extern void nc_read_variables(DAS & das,
-                              const string & filename) throw(Error);
+extern void nc_read_variables(DAS & das, const string & filename);
 extern void nc_read_descriptors(DDS & dds, const string & filename);
 
 const string cgi_version = PACKAGE_VERSION;
@@ -119,6 +118,11 @@ int main(int argc, char *argv[])
         }
     }
     catch(Error & e) {
+        // This call replaces many other calls inside the handler code that
+        // have been removed since this is where all of the exceptions
+        // ultimately wind up. 1/23/09 jhrg
+        ErrMsgT(e.get_error_message());
+
         set_mime_text(stdout, dods_error, cgi_version);
         e.print(stdout);
         return 1;
