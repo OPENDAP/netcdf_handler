@@ -303,7 +303,6 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 {
     ncopts = 0;
     int ncid, errstat;
-    int nvars, ngatts, natts = 0 ;
     string *error = NULL ;
     AttrTable *attr_table_ptr = NULL ;
 
@@ -317,6 +316,7 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
     }
 
     // how many variables? how many global attributes?
+    int nvars, ngatts;
     errstat = nc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
 
     if (errstat != NC_NOERR) {
@@ -328,8 +328,10 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 
     // for each variable
     char varname[MAX_NC_NAME];
+    int natts = 0;
+    nc_type var_type;
     for (int v = 0; v < nvars; ++v) {
-        errstat = nc_inq_var(ncid, v, varname, (nc_type *)0, (int *)0, (int *)0, &natts);
+        errstat = nc_inq_var(ncid, v, varname, &var_type, (int *)0, (int *)0, &natts);
 	if (errstat != NC_NOERR) {
             sprintf (Msgt, "nc_das server: could not get information for variable %d",v);
             ErrMsgT(Msgt); //local error message
@@ -345,6 +347,34 @@ nc_read_variables(DAS &das, const string &filename) throw (Error)
 	if (errstat != NC_NOERR){
 	  string msg = (string) *error;
 	  throw Error(errstat, msg);
+	}
+
+	// Add a special attribute for string lengths
+	if (var_type == NC_CHAR) {
+	    // number of dimensions and size of Nth dimension
+	    int num_dim;
+	    errstat = nc_inq_var(ncid, v, (char *) 0, (nc_type *)0, &num_dim,
+	            (int *) 0, (int *) 0);
+	    if (errstat != NC_NOERR)
+	        throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
+
+	    if (num_dim == 0) {
+	        // a scalar NC_CHAR is stuffed into a string of length 1
+	        int size = 1;
+                string print_rep = print_attr(NC_LONG, 0, (void *)&size);
+                attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
+	    }
+	    else {
+                int *dim_sizes = new int[num_dim];
+                errstat = nc_inq_vardimid(ncid, v, dim_sizes);
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
+                // add attribute
+                string print_rep = print_attr(NC_LONG, 0, (void *) (dim_sizes + num_dim - 1));
+                attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
+
+                delete[] dim_sizes;
+            }
 	}
     }
 

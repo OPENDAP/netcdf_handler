@@ -80,19 +80,15 @@ NCStr::ptr_duplicate()
     return new NCStr(*this);
 }
 
+// This method assumes that NC_CHAR variables with zero or one dimension will
+// be represented as a DAP String. If there are two or more dimensions, then
+// the variable is represented in an array of DAP Strings.
 bool NCStr::read()
 {
-    int varid; /* variable Id */
-    nc_type datatype; /* variable data type */
-    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
-    int num_dim; /* number of dim. in variable */
-    int id;
-
     if (read_p()) //has been done
         return false;
 
     int ncid, errstat;
-
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR) {
@@ -101,20 +97,69 @@ bool NCStr::read()
         throw Error(errstat, err);
     }
 
+    int varid; /* variable Id */
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not get variable ID.");
 
+    nc_type datatype; /* variable data type */
+    int num_dim; /* number of dim. in variable */
     errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim,
             (int *) 0, (int *) 0);
     if (errstat != NC_NOERR)
         throw Error(errstat, string(
                 "Could not read information about the variable `") + name()
                 + string("'."));
+    if (datatype != NC_CHAR)
+        throw InternalErr(__FILE__, __LINE__,
+                "Entered String read method with non-string/char variable!");
+    if (num_dim > 1)
+        throw Error(string("Multidimensional character array found in string class while reading '")
+                        + name() + string("'."));
+
+    if (num_dim == 1) {
+        int dim_size;
+        // get the size
+        errstat = nc_inq_vardimid(ncid, varid, &dim_size);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string(
+                    "Could not read information about the variable `")
+                    + name() + string("'."));
+
+        char *charbuf = new char[dim_size + 1];
+        // get the data
+        size_t cor[1] = { 0 };
+        size_t edg[1];
+        edg[0] = dim_size;
+        errstat = nc_get_vara_text(ncid, varid, cor, edg, charbuf);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read data from the variable `")
+                    + name() + string("'."));
+        charbuf[dim_size] = '\0';
+        // poke the data into the DAP string
+        set_value(string(charbuf));
+
+        delete[] charbuf;
+    }
+    else { // the variable is a scalar, so it's just one character.
+        char *charbuf = new char[2];
+        // get the data
+        errstat = nc_get_var_text(ncid, varid, charbuf);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read data from the variable `")
+                    + name() + string("'."));
+        charbuf[1] = '\0';
+        // poke the data into the DAP string
+        set_value(string(charbuf));
+
+        delete[] charbuf;
+    }
+
+#if 0
     // This will need to be changed if we're to represent an array of NC_CHARs
     // as a DAP String (and a two dim array of NC_CHAR as a one dim array of
     // String. jhrg 1/8/09
-    for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
+    for (int id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
         cor[id] = 0;
 
     if (datatype == NC_CHAR) {
@@ -137,7 +182,7 @@ bool NCStr::read()
     else
         throw InternalErr(__FILE__, __LINE__,
                 "Entered NCStr::read() with non-string/char variable!");
-
+#endif
     return false;
 }
 

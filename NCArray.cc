@@ -118,7 +118,7 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
 
     *has_stride = false;
 
-    for (Dim_iter p = dim_begin(); p != dim_end(); ++p, id++) {
+    for (Dim_iter p = dim_begin(); p != dim_end(); ++p) {
         start = dimension_start(p, true);
         stride = dimension_stride(p, true);
         stop = dimension_stop(p, true);
@@ -132,7 +132,7 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
         cor[id] = start;
         step[id] = stride;
         edg[id] = ((stop - start) / stride) + 1; // count of elements
-        nels *= edg[id];      // total number of values for variable
+        nels *= edg[id++];      // total number of values for variable
 
         if (stride != 1)
             *has_stride = true;
@@ -141,13 +141,8 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
     return nels;
 }
 
-
 bool NCArray::read()
 {
-    size_t cor[MAX_NC_DIMS];      /* corner coordinates */
-    size_t edg[MAX_NC_DIMS];      /* edges of hypercube */
-    ptrdiff_t step[MAX_NC_DIMS];  /* stride of hypercube */
-
     DBG(cerr << "In NCArray::read" << endl);
 
     if (read_p())  // Nothing to do
@@ -177,6 +172,9 @@ bool NCArray::read()
                     string("Could not read information about the variable `")
                     + name() + string("'."));
 
+    size_t cor[MAX_NC_DIMS];      /* corner coordinates */
+    size_t edg[MAX_NC_DIMS];      /* edges of hyper-cube */
+    ptrdiff_t step[MAX_NC_DIMS];  /* stride of hyper-cube */
     bool has_stride;
     long nels = format_constraint(cor, step, edg, &has_stride);
 
@@ -314,12 +312,19 @@ bool NCArray::read()
             break;
         }
 
-    // This is one place we'd make the change in the representation of NC_CHAR
-    // arrays from one-char arrays to a single string object. jhrg 1/8/09
     case NC_CHAR: {
             char *chrbuf = (char *)new char [(nels*nctypelen(datatype))];
+            // Use the dimension info from netcdf since that's the place where
+            // this variable has N-dims. In the DAP representation it's a N-1
+            // dimensional variable.
+            int nth_dim_size = vdims[num_dim - 1];
 
-            // read the values in from the local netCDF file
+            cor[num_dim-1] = 0;
+            edg[num_dim-1] = nth_dim_size;
+            if (has_stride)
+                step[num_dim-1] = 1;
+
+            // read the values in from the local netCDF file.
             if (has_stride)
                 errstat = nc_get_vars_text(ncid, varid, cor, edg, step, chrbuf);
             else
@@ -328,9 +333,39 @@ bool NCArray::read()
             if (errstat != NC_NOERR) {
             	delete[] chrbuf;
                 throw Error(errstat, string("Could not read the variable `") + name()
-                            + string("'."));
+                        + string("'."));
             }
 
+            if (num_dim < 2) { // one-dim --> DAP String and we should not be here
+                delete[] chrbuf;
+                throw Error(string("A one-dimensional NC_CHAR array should now map to a DAP string: '")
+                        + name() + string("'."));
+            }
+
+            // How large is the Nth dimension? Allocate space for the N-1 dims.
+            string *strg = new string[nels]; // array of strings
+            char *buf = new char[nth_dim_size+1];
+
+            // put the char values in the string array
+            for (int i = 0; i < nels; i++) {
+                strncpy(buf, (chrbuf + (i * nth_dim_size)), nth_dim_size);
+                buf[nth_dim_size] = '\0';
+                strg[i] = (string)buf;
+            }
+
+            // reading is done (don't need to read each individual array value)
+            set_read_p(true);
+            // put values in the buffers
+            val2buf(strg);
+
+            // clean up
+            delete [] buf;
+            delete [] strg;
+            delete [] chrbuf;
+
+#if 0
+            // This is the old way the code worked - each char from the array
+            // was sent in a separate string. 1//21/09 jhrg
             string *strg = new string [nels]; // array of strings
             char buf[2] = " "; // one char and EOS
 
@@ -340,7 +375,7 @@ bool NCArray::read()
                 strg[id] = (string) buf;
             }
 
-            // reading is done (dont need to read each individual array value)
+            // reading is done (don't need to read each individual array value)
             set_read_p(true);
             // put values in the buffers
             val2buf(strg);
@@ -348,7 +383,7 @@ bool NCArray::read()
             // clean up
             delete [] strg;
             delete [] chrbuf;
-
+#endif
             break;
         }
 
@@ -377,7 +412,7 @@ bool NCArray::read()
 
     default:
         throw InternalErr(__FILE__, __LINE__,
-                          string("Unknow data type for the variable '")
+                          string("Unknown data type for the variable '")
                           + name() + string("'."));
     }
 

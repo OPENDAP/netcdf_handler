@@ -287,9 +287,6 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                 }
             }
 
-            // Here is where the handler makes an array of NCStr objects
-            // when it has found an array of NC_CHAR. This would need
-            // to change the rep of NC_CHAR arrays to String. 1/8/09 jhrg
             if (bt->type() == dods_str_c) { // arrays of NC_CHR --> DAP String
                 if (ndims == 1) {
                     dds_table.add_var(bt);
@@ -300,6 +297,9 @@ read_class(DDS &dds_table, const string &filename, int ncid, int nvars)
                     delete bt;
                     for (int d = 0; d < ndims - 1; ++d)
                         ar->append_dim(dim_szs[d], dim_nms[d]);
+
+                    dds_table.add_var(ar);
+                    delete ar;
                 }
 
                 // We can add an attribute here for the new variable using dim_szs[ndims-1]
