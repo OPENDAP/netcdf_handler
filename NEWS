@@ -1,6 +1,22 @@
 
 $Id$
 
+version 3.8.0 (29 Jan 2009)
+
+Cleaned up error handling so that wehn installed as a BES handler there's no
+spurious output to stderr.
+
+The handler no longer packages NC_CHAR arrays as arrays of DAP Strings - an
+array of char is now a string and a rank N array of char is a rank N-1 array
+of string. The DAP String variables have an new attribute called
+'string_length' which gives a hint to code that needs to know how much memory
+allocate for the string. Inthe rank N case the 'string_length' is te size of
+the Nth dimension.
+
+The code has been updated to work with the new libdap and bes.
+
+The handler now has standalone tests using the besstandalone test driver.
+
 Version 3.7.9 (04 Mar 2008)
 
 pkg and dmg build fixes using PackageMaker and DropDMG. General

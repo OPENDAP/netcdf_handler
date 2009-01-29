@@ -1,6 +1,8 @@
 
 $Id$
 
+Updated for version 3.8.0 (29 Jan 2009)
+
 This is the OPeNDAP netCDF Data Handler. It is used along with the OPeNDAP
 DAP Server3 and Hyrax.
 
