@@ -6,6 +6,7 @@ AC_INIT(netcdf_handler, 3.8.0, opendap-tech@opendap.org)
 AC_CONFIG_AUX_DIR([conf])
 
 AM_INIT_AUTOMAKE
+AC_CONFIG_TESTDIR(bes-testsuite, [.])
 
 AC_CONFIG_SRCDIR([NCStr.h])
 AC_CONFIG_HEADER([config.h])
@@ -62,5 +63,5 @@ AC_CHECK_BES([3.7.0],
 
 OPENDAP_DEBUG_OPTION
 
-AC_CONFIG_FILES([Makefile bes-testsuite/Makefile])
+AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal])
 AC_OUTPUT
