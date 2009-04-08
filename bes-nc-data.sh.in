@@ -55,4 +55,17 @@ sed "s%^\(BES.Catalog.catalog.TypeMatch=.*\)%\1$type_match;%" \
 mv tmp.conf $bes_conf
 
 # Set/append any handler-specific params.
+comment_1="# NetCDF handler specific parameters"
+comment_2="# ShowSharedDimensions: Include shared dimensions as separate variables. (true,yes|false,no, defaults to false)"
+show_shared="NC.ShowSharedDimensions=false"
+
+awk "BEGIN {nc_found=0}
+	/# Data Handler Specific/ {nc_found=1}
+	/^$/ && nc_found == 1 {print}
+	/^$/ && nc_found == 1 {print \"$comment_1\"}
+	/^$/ && nc_found == 1 {print \"$comment_2\"}
+	/^$/ && nc_found == 1 {print \"$show_shared\"; nc_found=0}
+	{print}" \
+	< $bes_conf > tmp.conf
+mv tmp.conf $bes_conf
 

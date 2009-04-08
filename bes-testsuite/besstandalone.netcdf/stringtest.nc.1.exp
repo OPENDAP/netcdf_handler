@@ -1,0 +1,21 @@
+# Test the netcdf handler with the bes.
+#
+# $Id: data.1.exp 14588 2006-09-15 21:13:55Z jimg $
+
+global comp_output              # contains output from besstandalone_start
+global verbose                  # this and srcdir are set by runtest.exp
+global srcdir
+
+# The `1' in compare_stdout means call xfail if the test fails.
+
+besstandalone_start "nc/stringtest.nc.2.bescmd"
+compare_stdout "nc/stringtest.nc.2.bescmd.baseline" "DDS /data/stringtest.nc" 0
+
+besstandalone_start "nc/stringtest.nc.1a.bescmd" 1
+compare_stdout "nc/stringtest.nc.1a.bescmd.baseline" "Data String scalar/data/stringtest.nc" 0
+
+besstandalone_start "nc/stringtest.nc.1b.bescmd" 1
+compare_stdout "nc/stringtest.nc.1b.bescmd.baseline" "Data String array /data/stringtest.nc" 0
+
+besstandalone_start "nc/stringtest.nc.1.bescmd" 1
+compare_stdout "nc/stringtest.nc.1.bescmd.baseline" "Data String scalar and array /data/stringtest.nc" 0

@@ -163,13 +163,20 @@ bool NCArray::read()
         throw Error(errstat, "Could not get variable ID.");
 
     nc_type datatype;           /* variable data type */
-    int vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
+    int vdimids[MAX_VAR_DIMS];  // variable dimension ids
+    size_t vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
     int num_dim;                /* number of dim. in variable */
-    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdims,
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdimids,
                          (int *)0);
     if (errstat != NC_NOERR)
         throw Error(errstat,
                     string("Could not read information about the variable `")
+                    + name() + string("'."));
+
+    for (int i = 0; i < num_dim; ++i)
+        if ((errstat = nc_inq_dimlen(ncid, vdimids[i], &vdims[i])) != NC_NOERR)
+            throw Error(errstat,
+                    string("Could not read dimension information about the variable `")
                     + name() + string("'."));
 
     size_t cor[MAX_NC_DIMS];      /* corner coordinates */
@@ -313,11 +320,12 @@ bool NCArray::read()
         }
 
     case NC_CHAR: {
-            char *chrbuf = (char *)new char [(nels*nctypelen(datatype))];
             // Use the dimension info from netcdf since that's the place where
             // this variable has N-dims. In the DAP representation it's a N-1
             // dimensional variable.
             int nth_dim_size = vdims[num_dim - 1];
+
+            char *chrbuf = (char *)new char [(nels*nth_dim_size*nctypelen(datatype))];
 
             cor[num_dim-1] = 0;
             edg[num_dim-1] = nth_dim_size;

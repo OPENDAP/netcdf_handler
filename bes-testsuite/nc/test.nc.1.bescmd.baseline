@@ -20,7 +20,7 @@ Attributes {
         String c "\\200\\177AZ$&";
     }
     cr {
-        Int32 string_length 0;
+        Int32 string_length 2;
     }
     br {
     }

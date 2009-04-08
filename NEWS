@@ -1,6 +1,15 @@
 
 $Id$
 
+Version 3.8.2 (16 March 2009)
+
+Constraint fixes and support for the service responses.
+
+version 3.8.1 (5 Feb 2009)
+
+Fixed a problem with the new code to represent arrays of NC_CHAR as DAP
+String variables.
+
 version 3.8.0 (29 Jan 2009)
 
 Cleaned up error handling so that wehn installed as a BES handler there's no

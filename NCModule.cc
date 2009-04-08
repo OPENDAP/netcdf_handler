@@ -36,6 +36,7 @@ using std::endl;
 #include "NCModule.h"
 #include <BESRequestHandlerList.h>
 #include "NCRequestHandler.h"
+#include <BESDapService.h>
 #include <BESContainerStorageList.h>
 #include <BESContainerStorageCatalog.h>
 #include <BESCatalogDirectory.h>
@@ -52,8 +53,11 @@ void NCModule::initialize( const string & modname )
     BESRequestHandler *handler = new NCRequestHandler( modname ) ;
     BESRequestHandlerList::TheList()->add_handler( modname, handler ) ;
 
+    BESDEBUG( "nc", modname << " handles dap services" << endl )
+    BESDapService::handle_dap_service( modname ) ;
+
     BESDEBUG( "nc", "    adding " << NC_CATALOG << " catalog" << endl )
-    if( !BESCatalogList::TheCatalogList()->find_catalog( NC_CATALOG ) )
+    if( !BESCatalogList::TheCatalogList()->ref_catalog( NC_CATALOG ) )
     {
 	BESCatalogList::TheCatalogList()->
 	    add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
@@ -65,7 +69,7 @@ void NCModule::initialize( const string & modname )
 
     BESDEBUG( "nc", "    adding catalog container storage " << NC_CATALOG
 		    << endl )
-    if( !BESContainerStorageList::TheList()->find_persistence( NC_CATALOG ) )
+    if( !BESContainerStorageList::TheList()->ref_persistence( NC_CATALOG ) )
     {
 	BESContainerStorageCatalog *csc =
 	    new BESContainerStorageCatalog( NC_CATALOG ) ;
@@ -90,11 +94,12 @@ void NCModule::terminate( const string & modname )
     BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( modname ) ;
     if( rh ) delete rh ;
 
-    BESDEBUG( "nc", "    removing catalog container storage" << NC_CATALOG << endl )
-    BESContainerStorageList::TheList()->del_persistence( NC_CATALOG ) ;
+    BESDEBUG( "nc", "    removing catalog container storage"
+                    << NC_CATALOG << endl )
+    BESContainerStorageList::TheList()->deref_persistence( NC_CATALOG ) ;
 
     BESDEBUG( "nc", "    removing " << NC_CATALOG << " catalog" << endl )
-    BESCatalogList::TheCatalogList()->del_catalog( NC_CATALOG ) ;
+    BESCatalogList::TheCatalogList()->deref_catalog( NC_CATALOG ) ;
 
     BESDEBUG( "nc", "Done Cleaning NC module " << modname << endl )
 }

@@ -1,3 +1,157 @@
+2009-03-16  James Gallagher <jgallagher@opendap.org>
+
+	Results of a code review
+
+	M    NCModule.h
+
+2009-03-11  James Gallagher <jgallagher@opendap.org>
+
+	Audit fixes
+
+	M    ncdds.cc
+	M    ncdas.cc
+	M    NCStr.cc
+
+2009-03-08  Patrick West <pwest@ucar.edu>
+
+	POST_CONSTRAINT issues with multiple containers. Call set_constraint on
+	BESDapResponse in order to properly have the post constraint set.
+
+	M    NCRequestHandler.cc
+
+2009-03-08  Patrick West <pwest@ucar.edu>
+
+	Added a handler attribute to help response, specifying what
+	services the module handles.
+
+	M    NCModule.cc
+	M    NCRequestHandler.cc
+
+2009-03-04  Patrick West <pwest@ucar.edu>
+
+	container storage and catalog list reference changes
+	M    netcdf_handler-3.8.0/NCModule.cc
+
+2009-02-20  James Gallagher <jgallagher@opendap.org>
+
+	Merged the xmlresponse branch with the Hyrax 1.5 release branch.
+
+	_M   .
+	M    NCModule.cc
+	M    NCRequestHandler.cc
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/besstandalone.netcdf/fnoc1.nc.3.exp
+	M    ChangeLog
+
+2009-02-20  Patrick West <pwest@ucar.edu>
+
+	Added option in bes configuration file to show shared dimension arrays
+	or not. Also added bears.nc to the installed test data.
+	M    NCRequestHandler.cc
+	M    bes-nc-data.sh.in
+	M    NCRequestHandler.h
+	M    Makefile.am
+
+2009-02-20  James Gallagher <jgallagher@opendap.org>
+
+	Added paths to the netcdf.m4 file for macports and fink
+
+2009-02-18  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a memory error in NCArray when working with an array of Strings.
+	Also fixed an error where dimension ids were (still) used in place of
+	sizes in NCStr. Removed a warning from valgrind about a value possibly
+	used before initialization in ncdds.cc. From a report by Fedor Baart.
+	Added tests using Fedor's stringtest.nc file.
+
+2009-02-09  James Gallagher <jgallagher@opendap.org>
+
+	Fixed ticket 1249 - the string_length attribute was not correct.
+
+	M    bes-testsuite/nc/test.nc.1.bescmd.baseline
+	M    NCArray.cc
+	M    ncdas.cc
+
+2009-02-06  James Gallagher <jgallagher@opendap.org>
+
+	I fixed tickets 1244 and 1247: The Grid of CHARS now shows up as a
+	N-1 dim grid of strings as opposed to an N-1 Array of strings.
+	Also, there is a new parameter to nc_read_descritors() that
+	controls whether arrays that are also maps are included in the
+	DDS. Now they aer not included by default.
+
+	M    ncdds.cc
+	M    nc_handler.cc
+	M    NCRequestHandler.cc
+	M    NEWS
+
+2009-02-06  James Gallagher <jgallagher@opendap.org>
+
+	Test baseline modified to match the new behavior of
+	nc_read_descriptors which now will elide an array if it has been
+	used as a Grid's Map. Also fixed is the test for bears.nc - the
+	first variable is now a Grid, although it's a two dimensional Grid
+	of Strings and not a three dimensional grid of characters. This is
+	because of the other fix where an Array of Char is now represented
+	as a String.
+
+	M    bes-testsuite/nc/test.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/coads_climatology.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/bears.nc.1.bescmd.baseline
+
+2009-02-05  James Gallagher <jgallagher@opendap.org>
+
+	Bump the revision and release.
+
+	M    configure.ac
+	M    ChangeLog
+
+2009-02-05  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a bug where the dimension ids were used in place of the
+	dimension lengths when computing the size of the Nth dimension
+	of a NC_CHAR array. see ticket 1244. I added a test using bears.nc.
+	This fix also is for a related problem were the first grid in
+	the bears.nc data set was missing.
+
+2009-01-30  James Gallagher <jgallagher@opendap.org>
+
+	Moved here to coalesce the branches
+
+2009-01-29  James Gallagher <jgallagher@opendap.org>
+
+	Branch for Hyrax 1.5 release
+
+	A    http://scm.opendap.org/svn/branch/netcdf_handler/3.8.0
+
+2009-01-23  James Gallagher <jgallagher@opendap.org>
+
+	Added a call to ErrMsgT() to the nc_handler.cc main() function. This
+	replaces all the many calls to this function that were scattered
+	throughout the handler code (but are only used by the now unsupported
+	CGI version of the code).
+
+2009-01-23  James Gallagher <jgallagher@opendap.org>
+
+	Removed code that wrote errors using the ErrMsgT() function since
+	those were for the CGI version of the handler and that's no longer
+	actively supported. We can add a call to the nc_handler.cc if needed.
+	Also, I added comments to the function sin the ncdds.cc and ncdas.cc
+	files and removed lots of old code that was not being used.
+
+2009-01-23  James Gallagher <jgallagher@opendap.org>
+
+	I modified the netcdf handler so that the NC_CHAR type is handled
+	in a more sensible way. Now scalar and vector NC_CHAR variables in
+	netCDF are represented as strings in DAP while 2+ dimension
+	NC_CHAR variables are DAP String arrays. I added tests for this,
+	as well. Also, when a string variable is made an attribute is
+	added to the dataset that provides a client with the length of the
+	string. In the case on an array of strings, it's the length of the
+	longest string. This is really a hint only - it's easy to figure
+	out for netCDF files a useful for clients that use the netCDF API.
+
 2009-01-23  James Gallagher <jgallagher@opendap.org>
 
 	Added a call to ErrMsgT() to the nc_handler.cc main() function.
@@ -194,6 +348,202 @@
 	M    OSX_Resources/InstallationCheck.strings
 	M    OSX_Resources/Welcome.html
 
+=======
+	Added a call to ErrMsgT() to the nc_handler.cc main() function.
+	This replaces all the many calls to this function that were
+	scattered throughout the handler code (but are only used by the
+	now unsupported CGI version of the code).
+
+2009-01-23  James Gallagher <jgallagher@opendap.org>
+
+	Removed code that wrote errors using the ErrMsgT() function since
+	those were for the CGI version of the handler and that's no longer
+	actively supported. We can add a call to the nc_handler.cc if
+	needed. Also, I added comments to the function sin the ncdds.cc
+	and ncdas.cc files and removed lots of old code that was not being
+	used.
+
+2009-01-23  James Gallagher <jgallagher@opendap.org>
+
+	I modified the netcdf handler so that the NC_CHAR type is handled
+	in a more sensible way. Now scalar and vector NC_CHAR variables in
+	netCDF are represented as strings in DAP while 2+ dimension
+	NC_CHAR variables are DAP String arrays. I added tests for this,
+	as well. Also, when a string variable is made an attribute is
+	added to the dataset that provides a client with the length of the
+	string. In the case on an array of strings, it's the length of the
+	longest string. This is really a hint only - it's easy to figure
+	out for netCDF files a useful for clients that use the netCDF API.
+
+2009-01-14  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a bugaboo in ncdds.cc where Grid maps lost their dimensions
+	- typo.
+
+2009-01-12  James Gallagher <jgallagher@opendap.org>
+
+	Added a new function - part of a refactoring.
+
+	M ncdds.cc
+
+2009-01-12  James Gallagher <jgallagher@opendap.org>
+
+	Refactor of the nc_read_descriptors() function. Now it throws
+	Error all the time instead of returning a constant and relies on
+	the caller to write out the local error message (which may be moot
+	in the BES). I also distributed the variables so they are as close
+	as possible to their first point of use.
+
+2008-11-18  James Gallagher <jgallagher@opendap.org>
+
+	Added a patch from Patrice Dumas to clean up some of the headers
+	and update the copyright in the spec file.
+
+	M    ncdds.cc
+	M    netcdf_handler.spec
+	M    NCArray.cc
+	M    ncdas.cc
+
+2008-11-14  James Gallagher <jgallagher@opendap.org>
+
+	Merged the xmlrequest branch to the trunk.
+
+	_M   .
+	M    nc_handler.cc
+	M    bes-testsuite/nc/fnoc1.nc.0.bescmd
+	M    bes-testsuite/nc/fnoc1.nc.1.bescmd
+	M    bes-testsuite/nc/fnoc1.nc.2.bescmd
+	MM   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	_M   bes-testsuite/besstandalone.netcdf/fnoc1.nc.3.exp
+
+2008-09-18  James Gallagher <jgallagher@opendap.org>
+
+	Merged multifile branch
+
+2008-09-18  James Gallagher <jgallagher@opendap.org>
+
+	Removed Makefile.in from bes-testsuite
+
+2008-08-25  Patrick West <pwest@ucar.edu>
+
+	Built by autoreconf
+	
+	D    bes-testsuite/Makefile.in
+
+2008-08-25  James Gallagher <jgallagher@opendap.org>
+
+	Modified tests so that besstandalone is only used to test the
+	netcdf handler functions and not ASCII, WWW, et c., responses.
+	I modified the common_tests.exp and unix.exp files and moved
+	the #6 test (the data test) to #3 after removing the ASCII, ...
+	tests.
+
+2008-08-20  Patrick West <pwest@ucar.edu>
+
+	Moved bes testsuite to bes-testsuite directory
+	
+	M    configure.ac
+	M    Makefile.am
+	D    testsuite
+	A    bes-testsuite
+
+2008-08-20  Patrick West <pwest@ucar.edu>
+
+	Added BES testsuite to netcdf
+	
+	M    configure.ac
+	M    Makefile.am
+	A    testsuite
+	A    testsuite/nc
+	A    testsuite/nc/fnoc1.nc.0.bescmd
+	A    testsuite/nc/fnoc1.nc.0.bescmd.baseline
+	A    testsuite/nc/fnoc1.nc.1.bescmd
+	A    testsuite/nc/fnoc1.nc.1.bescmd.baseline
+	A    testsuite/nc/fnoc1.nc.2.bescmd
+	A    testsuite/nc/fnoc1.nc.2.bescmd.baseline
+	A    testsuite/nc/fnoc1.nc.3.bescmd
+	A    testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	A    testsuite/nc/fnoc1.nc.4.bescmd
+	A    testsuite/nc/fnoc1.nc.4.bescmd.baseline
+	A    testsuite/nc/fnoc1.nc.5.bescmd
+	A    testsuite/nc/fnoc1.nc.5.bescmd.baseline
+	A    testsuite/nc/fnoc1.nc.6.bescmd
+	AM   testsuite/nc/fnoc1.nc.6.bescmd.baseline
+	A    testsuite/bes.conf.in
+	A    testsuite/besstandalone.netcdf
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.1.exp
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.2.exp
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.3.exp
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.4.exp
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.5.exp
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.6.exp
+	A    testsuite/besstandalone.netcdf/fnoc1.nc.0.exp
+	A    testsuite/common_tests.exp
+	A    testsuite/config
+	A    testsuite/config/unix.exp
+	A    testsuite/Makefile.am
+
+2008-07-31  James Gallagher <jgallagher@opendap.org>
+
+	Fix for ticket 1163 - String attributes no longer have quotes
+	added to their values.
+
+	M    ncdas.cc
+
+2008-07-16  Patrick West <pwest@ucar.edu>
+
+	Cleaned up dynamic cast checks, error messages consistent with
+	other handlers. Added dynamic cast in help and version build
+	functions.
+	
+	M    NCRequestHandler.cc
+
+2008-05-30  Patrick West <pwest@ucar.edu>
+
+	Module checking to see if catalog already added. RequestHandler
+	now adding ancillary information to the das and dds.
+	
+	M    NCModule.cc
+	M    NCRequestHandler.cc
+
+2008-05-28  James Gallagher <jgallagher@opendap.org>
+
+	Test change...
+
+	M    ChangeLog
+
+2008-04-04  Patrick West <pwest@ucar.edu>
+
+	No longer need local bes.conf files for testing
+	
+	D    bes.conf
+
+2008-03-07  Nathan Potter <ndp@coas.oregonstate.edu>
+
+	$i: Fixing bug in OSX build.
+
+2008-03-05  Patrick West <pwest@ucar.edu>
+
+	Release 3.7.9
+	
+	M    OSX_Resources/update_mac_package_contents.pl
+
+2008-03-05  Patrick West <pwest@ucar.edu>
+
+	3.7.9 release
+	
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    ChangeLog
+	M    OSX_Resources/InstallationCheck
+	M    OSX_Resources/Info.plist
+	M    OSX_Resources/InstallationCheck.strings
+	M    OSX_Resources/Welcome.html
+
+>>>>>>> .merge-right.r20119
 2008-03-04  James Gallagher <jgallagher@opendap.org>
 
 	Code audit complete.

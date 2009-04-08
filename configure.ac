@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(netcdf_handler, 3.8.0, opendap-tech@opendap.org)
+AC_INIT(netcdf_handler, 3.8.2, opendap-tech@opendap.org)
 AC_CONFIG_AUX_DIR([conf])
 
 AM_INIT_AUTOMAKE

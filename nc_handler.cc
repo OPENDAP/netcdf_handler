@@ -43,7 +43,8 @@ static char not_used rcsid[] =
 using namespace libdap ;
 
 extern void nc_read_variables(DAS & das, const string & filename);
-extern void nc_read_descriptors(DDS & dds, const string & filename);
+extern void nc_read_descriptors(DDS & dds, const string & filename,
+        bool elide_dimension_arrays);
 
 const string cgi_version = PACKAGE_VERSION;
 
@@ -54,7 +55,9 @@ const string cgi_version = PACKAGE_VERSION;
 DDS & build_dds(DDS & dds, const DODSFilter & filter)
 {
     dds.filename(filter.get_dataset_name());
-    nc_read_descriptors(dds, filter.get_dataset_name());
+    // The handler can now show/hide arrays that are also Grid Maps. But this
+    // code, the CGI handler, only works the old way.
+    nc_read_descriptors(dds, filter.get_dataset_name(), false);
     filter.read_ancillary_dds(dds);
 
     DAS das;

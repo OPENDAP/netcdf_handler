@@ -118,12 +118,17 @@ bool NCStr::read()
                         + name() + string("'."));
 
     if (num_dim == 1) {
-        int dim_size;
-        // get the size
-        errstat = nc_inq_vardimid(ncid, varid, &dim_size);
+        int dim_id;
+        errstat = nc_inq_vardimid(ncid, varid, &dim_id);
         if (errstat != NC_NOERR)
             throw Error(errstat, string(
-                    "Could not read information about the variable `")
+                    "Could not read the dimension id of `")
+                    + name() + string("'."));
+        size_t dim_size;
+        errstat = nc_inq_dimlen(ncid, dim_id, &dim_size);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string(
+                    "Could not read  the dimension size of `")
                     + name() + string("'."));
 
         char *charbuf = new char[dim_size + 1];
@@ -131,10 +136,14 @@ bool NCStr::read()
         size_t cor[1] = { 0 };
         size_t edg[1];
         edg[0] = dim_size;
+
         errstat = nc_get_vara_text(ncid, varid, cor, edg, charbuf);
-        if (errstat != NC_NOERR)
+        if (errstat != NC_NOERR) {
+        	delete[] charbuf;
             throw Error(errstat, string("Could not read data from the variable `")
                     + name() + string("'."));
+        }
+        
         charbuf[dim_size] = '\0';
         // poke the data into the DAP string
         set_value(string(charbuf));
@@ -145,9 +154,12 @@ bool NCStr::read()
         char *charbuf = new char[2];
         // get the data
         errstat = nc_get_var_text(ncid, varid, charbuf);
-        if (errstat != NC_NOERR)
+        if (errstat != NC_NOERR) {
+        	delete[] charbuf;
             throw Error(errstat, string("Could not read data from the variable `")
                     + name() + string("'."));
+        }
+        
         charbuf[1] = '\0';
         // poke the data into the DAP string
         set_value(string(charbuf));

@@ -31,6 +31,9 @@
 #include <BESRequestHandler.h>
 
 class NCRequestHandler : public BESRequestHandler {
+private:
+    static bool		_show_shared_dims ;
+    static bool		_show_shared_dims_set ;
 public:
 			NCRequestHandler( const string &name ) ;
     virtual		~NCRequestHandler( void ) ;

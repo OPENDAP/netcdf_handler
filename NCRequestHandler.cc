@@ -31,21 +31,30 @@
 #include <BESDASResponse.h>
 #include <BESDDSResponse.h>
 #include <BESDataDDSResponse.h>
-#include <BESConstraintFuncs.h>
 #include <BESVersionInfo.h>
 #include <InternalErr.h>
 #include <BESDapError.h>
 #include <BESInternalFatalError.h>
 #include <BESDataNames.h>
+#include <TheBESKeys.h>
+#include <BESUtil.h>
 #include <Ancillary.h>
+#include <BESServiceRegistry.h>
+#include <BESUtil.h>
 
 #include "config_nc.h"
 
+#define NC_NAME "nc"
+
 using namespace libdap ;
 
+bool NCRequestHandler::_show_shared_dims = false ;
+bool NCRequestHandler::_show_shared_dims_set = false ;
+
 extern void nc_read_variables(DAS & das,
-                              const string & filename) throw(Error);
-extern void nc_read_descriptors(DDS & dds, const string & filename);
+			      const string & filename) throw(Error);
+extern void nc_read_descriptors(DDS & dds, const string & filename,
+        bool elide_dimension_arrays);
 
 NCRequestHandler::NCRequestHandler(const string &name)
 :  BESRequestHandler(name)
@@ -55,6 +64,22 @@ NCRequestHandler::NCRequestHandler(const string &name)
     add_handler(DATA_RESPONSE, NCRequestHandler::nc_build_data);
     add_handler(HELP_RESPONSE, NCRequestHandler::nc_build_help);
     add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
+
+    if( NCRequestHandler::_show_shared_dims_set == false )
+    {
+        bool found = false ;
+	string key = "NC.ShowSharedDimensions" ;
+        string doset = TheBESKeys::TheKeys()->get_key( key, found ) ;
+	if( found )
+	{
+	    doset = BESUtil::lowercase( doset ) ;
+	    if( doset == "true" || doset == "yes" )
+	    {
+		NCRequestHandler::_show_shared_dims = true ;
+	    }
+	}
+	NCRequestHandler::_show_shared_dims_set = true ;
+    }
 }
 
 NCRequestHandler::~NCRequestHandler()
@@ -108,7 +133,9 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 	DDS *dds = bdds->get_dds();
 	string accessed = dhi.container->access() ;
         dds->filename( accessed );
-        nc_read_descriptors(*dds, accessed);
+
+        bool elide_dimension_arrays = !(NCRequestHandler::_show_shared_dims);
+        nc_read_descriptors(*dds, accessed, elide_dimension_arrays);
 	Ancillary::read_ancillary_dds( *dds, accessed ) ;
 
         DAS *das = new DAS ;
@@ -119,9 +146,9 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
         dds->transfer_attributes( das ) ;
 
-	bdds->clear_container( ) ;
+	bdds->set_constraint( dhi ) ;
 
-        dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+	bdds->clear_container( ) ;
     }
     catch( BESError &e ) {
 	throw e ;
@@ -152,13 +179,14 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
     if( !bdds )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
 
-
     try {
 	bdds->set_container( dhi.container->get_symbolic_name() ) ;
 	DataDDS *dds = bdds->get_dds();
 	string accessed = dhi.container->access() ;
         dds->filename(accessed);
-        nc_read_descriptors(*dds, accessed);
+
+        bool elide_dimension_arrays = !(NCRequestHandler::_show_shared_dims);
+        nc_read_descriptors(*dds, accessed, elide_dimension_arrays);
 	Ancillary::read_ancillary_dds( *dds, accessed ) ;
 
         DAS *das = new DAS ;
@@ -169,9 +197,9 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
         dds->transfer_attributes( das ) ;
 
-	bdds->clear_container( ) ;
+	bdds->set_constraint( dhi ) ;
 
-        dhi.data[POST_CONSTRAINT] = dhi.container->get_constraint();
+	bdds->clear_container( ) ;
     }
     catch( BESError &e ) {
 	throw e ;
@@ -202,14 +230,18 @@ bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
     if( !info )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
 
-    info->begin_tag("Handler");
-    info->add_tag("name", PACKAGE_NAME);
-    string handles = (string) DAS_RESPONSE
-        + "," + DDS_RESPONSE
-        + "," + DATA_RESPONSE + "," + HELP_RESPONSE + "," + VERS_RESPONSE;
-    info->add_tag("handles", handles);
-    info->add_tag("version", PACKAGE_STRING);
-    info->end_tag("Handler");
+    map<string,string> attrs ;
+    attrs["name"] = PACKAGE_NAME ;
+    attrs["version"] = PACKAGE_VERSION ;
+    list<string> services ;
+    BESServiceRegistry::TheRegistry()->services_handled( NC_NAME, services );
+    if( services.size() > 0 )
+    {
+	string handles = BESUtil::implode( services, ',' ) ;
+	attrs["handles"] = handles ;
+    }
+    info->begin_tag( "module", &attrs ) ;
+    info->end_tag( "module" ) ;
 
     return true;
 }
@@ -220,8 +252,8 @@ bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
     BESVersionInfo *info = dynamic_cast < BESVersionInfo * >(response);
     if( !info )
 	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
-
-    info->addHandlerVersion(PACKAGE_NAME, PACKAGE_VERSION);
+  
+    info->add_module( PACKAGE_NAME, PACKAGE_VERSION ) ;
 
     return true;
 }
