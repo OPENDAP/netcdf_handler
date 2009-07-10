@@ -1,6 +1,10 @@
 
 $Id$
 
+Version 3.8.3 (9 June 2009)
+
+Fixes the dejagnu tests.
+
 Version 3.8.2 (16 March 2009)
 
 Constraint fixes and support for the service responses.

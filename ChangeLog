@@ -1,3 +1,22 @@
+2009-05-21  James Gallagher <jgallagher@opendap.org>
+
+	Added tests' config directory to Makefile.am
+
+2009-04-08  Nathan Potter <ndp@coas.oregonstate.edu>
+
+	netcdf_handler: Tagging version 3.8.2
+
+2009-03-16  James Gallagher <jgallagher@opendap.org>
+
+	Version 3.8.2
+
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    ChangeLog
+	M    README
+
 2009-03-16  James Gallagher <jgallagher@opendap.org>
 
 	Results of a code review
