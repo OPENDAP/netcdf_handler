@@ -14,6 +14,11 @@ software is designed to allow any number of handlers to be configured easily.
 See the DAP Server README and INSTALL files for information about
 configuration, including how to use this handler.
 
+Special options supported by the handler: 
+* ShowSharedDimensions: Include shared dimensions as separate variables. 
+Accepted values: true,yes|false,no, defaults to false.
+Example: "NC.ShowSharedDimensions=false"
+
 A configuration edition helper script, `bes-nc-data.sh' is provided in this 
 package for easy configuration of the Hyrax BES server, designed to edit
 bes.conf. The script is called using:
