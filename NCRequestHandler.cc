@@ -28,6 +28,7 @@
 #include "NCRequestHandler.h"
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
+#include <BESDapNames.h>
 #include <BESDASResponse.h>
 #include <BESDDSResponse.h>
 #include <BESDataDDSResponse.h>
