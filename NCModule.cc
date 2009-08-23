@@ -47,16 +47,16 @@ using std::endl;
 
 void NCModule::initialize( const string & modname )
 {
-    BESDEBUG( "nc", "Initializing NC module " << modname << endl )
+    BESDEBUG( "nc", "Initializing NC module " << modname << endl ) ;
 
-    BESDEBUG( "nc", "    adding " << modname << " request handler" << endl )
+    BESDEBUG( "nc", "    adding " << modname << " request handler" << endl ) ;
     BESRequestHandler *handler = new NCRequestHandler( modname ) ;
     BESRequestHandlerList::TheList()->add_handler( modname, handler ) ;
 
-    BESDEBUG( "nc", modname << " handles dap services" << endl )
+    BESDEBUG( "nc", modname << " handles dap services" << endl ) ;
     BESDapService::handle_dap_service( modname ) ;
 
-    BESDEBUG( "nc", "    adding " << NC_CATALOG << " catalog" << endl )
+    BESDEBUG( "nc", "    adding " << NC_CATALOG << " catalog" << endl ) ;
     if( !BESCatalogList::TheCatalogList()->ref_catalog( NC_CATALOG ) )
     {
 	BESCatalogList::TheCatalogList()->
@@ -64,11 +64,11 @@ void NCModule::initialize( const string & modname )
     }
     else
     {
-	BESDEBUG( "nc", "    catalog already exists, skipping" << endl )
+	BESDEBUG( "nc", "    catalog already exists, skipping" << endl ) ;
     }
 
     BESDEBUG( "nc", "    adding catalog container storage " << NC_CATALOG
-		    << endl )
+		    << endl ) ;
     if( !BESContainerStorageList::TheList()->ref_persistence( NC_CATALOG ) )
     {
 	BESContainerStorageCatalog *csc =
@@ -77,31 +77,31 @@ void NCModule::initialize( const string & modname )
     }
     else
     {
-	BESDEBUG( "nc", "    storage already exists, skipping" << endl )
+	BESDEBUG( "nc", "    storage already exists, skipping" << endl ) ;
     }
 
-    BESDEBUG( "nc", "    adding nc debug context" << endl )
+    BESDEBUG( "nc", "    adding nc debug context" << endl ) ;
     BESDebug::Register( "nc" ) ;
 
-    BESDEBUG( "nc", "Done Initializing NC module " << modname << endl )
+    BESDEBUG( "nc", "Done Initializing NC module " << modname << endl ) ;
 }
 
 void NCModule::terminate( const string & modname )
 {
-    BESDEBUG( "nc", "Cleaning NC module " << modname << endl )
+    BESDEBUG( "nc", "Cleaning NC module " << modname << endl ) ;
 
-    BESDEBUG( "nc", "    removing NC Handler" << modname << endl )
+    BESDEBUG( "nc", "    removing NC Handler" << modname << endl ) ;
     BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( modname ) ;
     if( rh ) delete rh ;
 
     BESDEBUG( "nc", "    removing catalog container storage"
-                    << NC_CATALOG << endl )
+                    << NC_CATALOG << endl ) ;
     BESContainerStorageList::TheList()->deref_persistence( NC_CATALOG ) ;
 
-    BESDEBUG( "nc", "    removing " << NC_CATALOG << " catalog" << endl )
+    BESDEBUG( "nc", "    removing " << NC_CATALOG << " catalog" << endl ) ;
     BESCatalogList::TheCatalogList()->deref_catalog( NC_CATALOG ) ;
 
-    BESDEBUG( "nc", "Done Cleaning NC module " << modname << endl )
+    BESDEBUG( "nc", "Done Cleaning NC module " << modname << endl ) ;
 }
 
 /** @brief dumps information about this object
