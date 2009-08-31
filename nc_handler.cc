@@ -38,7 +38,7 @@ static char not_used rcsid[] =
 #include <ConstraintEvaluator.h>
 
 #include <ObjectType.h>
-#include <cgi_util.h>
+#include <mime_util.h>
 
 using namespace libdap ;
 

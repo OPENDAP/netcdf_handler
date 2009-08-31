@@ -53,7 +53,7 @@ static char not_used rcsid[]={"$Id$"};
 #include <netcdf.h>
 
 #include <DDS.h>
-#include <cgi_util.h>
+#include <mime_util.h>
 #include <util.h>
 
 #include "NCInt32.h"
