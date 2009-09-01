@@ -5,7 +5,7 @@ AC_PREREQ(2.59)
 AC_INIT(netcdf_handler, 3.8.3, opendap-tech@opendap.org)
 AC_CONFIG_AUX_DIR([conf])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE(1.10)
 AC_CONFIG_TESTDIR(bes-testsuite, [.])
 
 AC_CONFIG_SRCDIR([NCStr.h])
