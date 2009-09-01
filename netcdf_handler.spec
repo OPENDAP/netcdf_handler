@@ -40,7 +40,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/dap_nc_handler
 %{_bindir}/bes-nc-data.sh
 %{_libdir}/libnc_handler.so.*
 %{_libdir}/bes/libnc_module.so

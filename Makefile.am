@@ -9,29 +9,16 @@ AUTOMAKE_OPTIONS = foreign check-news
 
 ACLOCAL_AMFLAGS = -I conf
 
-bin_PROGRAMS = dap_nc_handler
-
-lib_LTLIBRARIES = libnc_handler.la
-
-if OPENDAPSERVER
-
 SUBDIRS = bes-testsuite
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
 dist_bin_SCRIPTS = bes-nc-data.sh
 
-endif
-
-libnc_handler_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR)
-
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
 libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
 libnc_module_la_LDFLAGS = -avoid-version -module 
 libnc_module_la_LIBADD = $(BES_DAP_LIBS)
-
-dap_nc_handler_SOURCES = nc_handler.cc
-dap_nc_handler_LDADD = libnc_handler.la
 
 NCTYPE_SRC = ncdas.cc ncdds.cc \
 	NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc		\
@@ -49,11 +36,7 @@ SERVER_HDR = NCRequestHandler.h NCModule.h
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
     bes-nc-data.sh.in OSX_Resources
 
-CLEANFILES = *~
-
-if OPENDAPSERVER
-
-CLEANFILES += bes-nc-data.sh
+CLEANFILES = *~ bes-nc-data.sh
 
 sample_datadir = $(datadir)/hyrax/data/nc
 sample_data_DATA = data/bears.nc data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
@@ -76,8 +59,6 @@ bes-conf: bes-nc-data.sh
 	else \
 	    ./bes-nc-data.sh $$bes_prefix/etc/bes/bes.conf $$bes_prefix/lib/bes ; \
 	fi)
-
-endif
 
 ###########################################################################
 
