@@ -19,9 +19,7 @@ noinst_DATA = bes.conf
 
 CLEANFILES = *.log *.sum site.exp
 
-#EXTRA_DIST = nc besstandalone.netcdf common_tests.exp bes.conf.in
-EXTRA_DIST = netcdf_handlerTest.at $(TESTSUITE) atlocal.in $(srcdir)/package.m4 $(DIRS_EXTRA) 
-	     
+EXTRA_DIST = netcdf_handlerTest.at $(TESTSUITE) atlocal.in $(srcdir)/package.m4 bes.conf.in
 
 DISTCLEANFILES = bes.conf
 
@@ -38,7 +36,6 @@ bes.conf: bes.conf.in ../config.status
 ############## Autotest follows #####################
 
 AUTOM4TE = autom4te
-DIRS_EXTRA = bes-testsuite nc besstandalone.netcdf common_tests.exp bes.conf.in
  
 TESTSUITE = $(srcdir)/netcdf_handlerTest
 
