@@ -270,7 +270,7 @@ static NCArray *build_array(BaseType *bt, int ncid, int var, size_t ndims,
         int errstat = nc_inq_dim(ncid, dim_ids[d], dimname, &dim_sz);
         if (errstat != NC_NOERR) {
         	delete ar;
-        	
+
             string msg = "netcdf 3: could not get size for dimension ";
             msg += long_to_string(d);
             msg += " in variable ";
