@@ -1,8 +1,6 @@
 
 AUTOMAKE_OPTIONS = foreign 
 
-#DEJATOOL=besstandalone
-
 AM_CPPFLAGS = -I$(top_srcdir)
 
 # AM_CPPFLAGS =
@@ -19,7 +17,7 @@ noinst_DATA = bes.conf
 
 CLEANFILES = *.log *.sum site.exp
 
-EXTRA_DIST = netcdf_handlerTest.at $(TESTSUITE) atlocal.in $(srcdir)/package.m4 bes.conf.in
+EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE) atlocal.in $(srcdir)/package.m4 bes.conf.in
 
 DISTCLEANFILES = bes.conf
 
