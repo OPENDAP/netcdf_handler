@@ -60,6 +60,11 @@ bes-conf: bes-nc-data.sh
 	    ./bes-nc-data.sh $$bes_prefix/etc/bes/bes.conf $$bes_prefix/lib/bes ; \
 	fi)
 
+C4_DIR=./cccc
+.PHONY: cccc
+cccc:	
+	cccc --outdir=$(C4_DIR) $(libnc_module_la_SOURCES)
+
 ###########################################################################
 
 # Fortify targets.
