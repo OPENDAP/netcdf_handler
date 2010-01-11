@@ -13,7 +13,6 @@ SUBDIRS = bes-testsuite
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
-dist_bin_SCRIPTS = bes-nc-data.sh
 
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
 libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
@@ -34,31 +33,25 @@ SERVER_SRC = NCRequestHandler.cc NCModule.cc
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
-    bes-nc-data.sh.in OSX_Resources
+    nc.conf.in OSX_Resources
 
-CLEANFILES = *~ bes-nc-data.sh
+CLEANFILES = *~ nc.conf
 
 sample_datadir = $(datadir)/hyrax/data/nc
 sample_data_DATA = data/bears.nc data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
 
-do_subst = sed -e 's,[@]sysconfdir[@],$(sysconfdir),g' \
-		   	   -e 's,[@]libdir[@],$(libdir),g' \
-		   	   -e 's,[@]datadir[@],$(datadir),g'
+install-data-local: nc.conf
+	@currdate=`date +"%y%m%d%H%M"`; \
+	test -d $(DESTDIR)$(sysconfdir)/bes || $(MKDIR_P) $(DESTDIR)$(sysconfdir)/bes; \
+	test -d $(DESTDIR)$(sysconfdir)/bes/modules || $(MKDIR_P) $(DESTDIR)$(sysconfdir)/bes/modules; \
+	test -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf && mv -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf.$$currdate; \
+	$(INSTALL_DATA) nc.conf $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf
 
-bes-nc-data.sh: bes-nc-data.sh.in config.status
-	$(do_subst) < $(srcdir)/bes-nc-data.sh.in > bes-nc-data.sh
-	chmod +x bes-nc-data.sh
+uninstall-local:
+	rm -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf
 
-# This makes sure that the handler modifies the bes which configure found
-# even when distcheck is run.
-bes-conf: bes-nc-data.sh
-	(bes_prefix=`bes-config --prefix` ; \
-	if test "$$bes_prefix" = "/usr" ; \
-	 then \
-	    ./bes-nc-data.sh /etc/bes/bes.conf /usr/lib/bes ;\
-	else \
-	    ./bes-nc-data.sh $$bes_prefix/etc/bes/bes.conf $$bes_prefix/lib/bes ; \
-	fi)
+nc.conf: nc.conf.in config.status
+	sed -e "s%[@]bes_modules_dir[@]%${lib_besdir}%" $< > nc.conf
 
 C4_DIR=./cccc
 .PHONY: cccc
