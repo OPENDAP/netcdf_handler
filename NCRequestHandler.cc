@@ -70,7 +70,8 @@ NCRequestHandler::NCRequestHandler(const string &name)
     {
         bool found = false ;
 	string key = "NC.ShowSharedDimensions" ;
-        string doset = TheBESKeys::TheKeys()->get_key( key, found ) ;
+        string doset ;
+	TheBESKeys::TheKeys()->get_value( key, doset, found ) ;
 	if( found )
 	{
 	    doset = BESUtil::lowercase( doset ) ;
