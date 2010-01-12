@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------#
-# OPeNDAP DAP-server BES Module Configuration file                      #
+# OPeNDAP NetCDF Data Handler BES Module Configuration file             #
 #-----------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------#
@@ -32,7 +32,9 @@ BES.module.nc=@bes_modules_dir@/libnc_module.so
 
 BES.Catalog.catalog.TypeMatch+=nc:.*\.nc(\.bz2|\.gz|\.Z)?$;
 
+#-----------------------------------------------------------------------#
 # NetCDF handler specific parameters
+#-----------------------------------------------------------------------#
 # ShowSharedDimensions: Include shared dimensions as separate variables.
 #   (true,yes|false,no, defaults to false)
 NC.ShowSharedDimensions=false
