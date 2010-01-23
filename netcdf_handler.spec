@@ -40,7 +40,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/bes-nc-data.sh
+%dir %{_sysconfdir}/bes/
+%dir %{_sysconfdir}/bes/modules
+%config(noreplace) %{_sysconfdir}/bes/modules/nc.conf
 %{_libdir}/libnc_handler.so.*
 %{_libdir}/bes/libnc_module.so
 %{_datadir}/hyrax/
