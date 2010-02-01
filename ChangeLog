@@ -1,3 +1,128 @@
+2010-02-01  rduncan
+
+	Release 1/01/2010
+
+2010-01-22  Patrick West <pwest@ucar.edu>
+
+	RPM to use nc.conf instead of bes-nc-data.sh script
+	M    netcdf_handler.spec
+
+2010-01-12  Patrick West <pwest@ucar.edu>
+
+	Cleaned up comments
+	M    nc.conf.in
+
+2010-01-11  Patrick West <pwest@ucar.edu>
+
+	No longer using the script to update bes.conf, but using own
+	configuration
+	D    bes-nc-data.sh.in
+	A    nc.conf.in
+	M    Makefile.am
+
+2010-01-10  Patrick West <pwest@ucar.edu>
+
+	API changes to BESKeys
+	M    NCRequestHandler.cc
+
+2010-01-08  Patrick West <pwest@ucar.edu>
+
+	--clean to clean build and src files for rpmbuild
+	M    Makefile.am
+
+2009-12-29  James Gallagher <jgallagher@opendap.org>
+
+	Shrew build changes that will hopefully lead to a version that we can build using NMI's B&T system. Also, I added 'cccc' targets so that we can take a 'metrics snapshot' without undue pain.
+
+2009-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Added MACRO_DIR to configure.ac; minor libdap updates.
+
+	M    ncdds.cc
+	M    configure.ac
+	M    ncdas.cc
+
+2009-09-02  Patrick West <pwest@ucar.edu>
+
+	Removed reference to dejagnu
+	M    bes-testsuite/Makefile.am
+
+2009-09-01  Patrick West <pwest@ucar.edu>
+
+	Checking version of automake.
+	M    configure.ac
+
+2009-09-01  Patrick West <pwest@ucar.edu>
+
+	EXTRA_DIST contained files no longer needed, deleted from svn.
+	M    bes-testsuite/Makefile.am
+
+2009-09-01  Patrick West <pwest@ucar.edu>
+
+	Removed Server 3 code.
+	D    nc_handler.cc
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    Makefile.am
+
+2009-08-31  Patrick West <pwest@ucar.edu>
+
+	changed path variables to use during autotest
+
+2009-08-31  Patrick West <pwest@ucar.edu>
+
+	changed include of cgi_util to mime_util and removed include where not needed
+
+2009-08-23  Patrick West <pwest@ucar.edu>
+
+	Added ; after each BESDEBUG statement
+
+2009-08-21  James Gallagher <jgallagher@opendap.org>
+
+	Added this comd file that gets the DataDDX (which will be triggered by the
+	.dap extension on a URL.
+
+	A    nc/fnoc1.nc.dap.bescmd
+
+2009-08-21  James Gallagher <jgallagher@opendap.org>
+
+	Changed teh libdap_cmd_module for libdap_xml_module so that the parser for
+	dataddx works.
+
+	M    bes-testsuite/bes.conf.in
+
+2009-08-19  James Gallagher <jgallagher@opendap.org>
+
+	Deleted generated files
+
+2009-08-18  Patrick West <pwest@ucar.edu>
+
+	DAP Macro changes
+
+2009-08-12  James Gallagher <jgallagher@opendap.org>
+
+	Added info about the Shared Dimension special option.
+
+	M README
+
+2009-07-10  Patrick West <pwest@ucar.edu>
+
+	Merge 3.8.3 tag into trunk.
+	_M   .
+	M    netcdf_handler.spec
+	M    bes-testsuite/nc/fnoc1.nc.2.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/besstandalone.netcdf/fnoc1.nc.3.exp
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    ChangeLog
+	M    README
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
 2009-05-21  James Gallagher <jgallagher@opendap.org>
 
 	Added tests' config directory to Makefile.am
