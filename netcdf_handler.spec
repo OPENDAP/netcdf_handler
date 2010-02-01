@@ -1,6 +1,6 @@
 Summary:         NetCDF 3 data handler for the OPeNDAP Data server
 Name:            netcdf_handler
-Version:         3.8.3
+Version:         3.9.0
 Release:         1
 License:         LGPLv2+
 Group:           System Environment/Daemons 
