@@ -1,6 +1,18 @@
 
 $Id$
 
+Version 3.9.0 (3 Feb 2010)
+
+Removed dejagnu tests and added autotool tests.
+RPM to use nc.conf instead of bes-nc-data.sh.
+API changes to BESKeys. 
+Added some Shrew build changes for the shrew hyrax project. 
+Minor libdap changes.
+Removed server 3 code.
+Added comd file that gets the DataDDX.
+Made a few DAP macro changes.
+Added info about the shared dimension special option.
+
 Version 3.8.3 (9 June 2009)
 
 Fixes the dejagnu tests.
