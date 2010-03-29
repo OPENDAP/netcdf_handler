@@ -6,7 +6,7 @@
 # modules to load, includes data modules and command modules            #
 #-----------------------------------------------------------------------#
 
-BES.modules=nc
+BES.modules+=nc
 BES.module.nc=@bes_modules_dir@/libnc_module.so
 
 #-----------------------------------------------------------------------#
