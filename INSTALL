@@ -21,13 +21,11 @@ BUILDING THE SOFTWARE
 1) Type `./configure' at the system prompt. On some systems you may have to
    type `sh configure.' If you want this part of the server to install
    someplace other than /usr/local/bin, use --prefix to change the prefix
-   from the default "/use/local/." Make sure that the dap-server CGI knows
-   where the handler is located (you can list the complete pathname in the
-   dap-server.rc file; see dap-server's INSTALL and README files).
+   from the default "/use/local/."
 
-2) Type `make' to build the three server programs
+2) Type `make' to build the server module/handler
 
-3) Install the server components in $prefix by running `make install.'
+3) Install the server component in $prefix by running `make install.'
    This will also add the new nc.conf file to the $prefix/etc/bes/modules
    directory. The BES configuration file bes.conf will automatically
    load any module configuration files in that directory. The nc.conf
@@ -60,13 +58,14 @@ REQUIREMENTS
     you'll need version 3.8.0 of the BES software. Make sure to build that 
     first.
 
-  o To use this software with our cgi-based data server, ... Stop using the
-  CGI-based server!
-
   o You also need a recent copy of netCDF. We've tested this server with
     netcdf version 3.9.0, although any recent version should work fine. If the
     configure script cannot find your copy of libnetcdf, use the
     --with-netcdf options to tell it where to look (see configure --help).
+   
+  o If the build will fails because of problems linking with the netcdf
+    library, you may need to build the library from source and force the 
+    compiler/linker to use the option '-fPIC' (poisition Independet Code).
 
 NOTES
 
