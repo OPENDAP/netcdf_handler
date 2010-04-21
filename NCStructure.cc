@@ -97,7 +97,36 @@ public:
     }
 };
 
-
+/**
+ * Transfer attributes from a separately built DAS to the DDS. This method
+ * overrides the implementation found in libdap to accommodate the special
+ * characteristics of the NC handler's DAS object. The notworthy feature
+ * of this handler's DAS is that it lacks the specified structure that
+ * provides an easy way to match DAS and DDS items. Instead this DAS is
+ * flat.
+ *
+ * Because this handler produces a flat DAS, the nested structures (like
+ * NCStructure) pass the entire top level AttrTable to each of their children
+ * so that they can search for their attribute table. The default implementaiton
+ * of this method would find the Structure's table and pass only that to the
+ * children since it 'knows' that their tables would all be found within it.
+ *
+ * @param at An AttrTable for the entire DAS. Search this for attribtues
+ * by name.
+ * @see NCSequence::transfer_attributes
+ * @see NCGrid::transfer_attributes
+ * @see NCArray::transfer_attributes
+ */
+void NCStructure::transfer_attributes(AttrTable *at)
+{
+    if (at) {
+	Vars_iter var = var_begin();
+	while (var != var_end()) {
+	    (*var)->transfer_attributes(at);
+	    var++;
+	}
+    }
+}
 
 // $Log: NCStructure.cc,v $
 // Revision 1.13  2005/04/19 23:16:18  jimg

@@ -55,6 +55,8 @@ public:
 
     NCStructure &operator=(const NCStructure &rhs);
     virtual BaseType *ptr_duplicate();
+
+    virtual void transfer_attributes(AttrTable *at);
 };
 
 /* 
