@@ -1,6 +1,13 @@
 
 $Id$
 
+Version 3.9.1 (5 May 2010)
+
+The handler now implements its own transfer_attributes code to merge
+attributes from its DAS response into the DDS.
+
+The handler now builds with netcdf 4.1
+
 Version 3.9.0 (3 Feb 2010)
 
 Removed dejagnu tests and added autotool tests.

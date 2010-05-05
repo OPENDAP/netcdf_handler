@@ -3,7 +3,7 @@ $Id$
 
 Installing the NetCDF handler software for the OPeNDAP server.
 
-Updated for version 3.9.0 (2 Feb 2010)
+Updated for version 3.9.1
 
 ---------------------------------------------------------------------------
 
@@ -42,11 +42,12 @@ BUILDING THE SOFTWARE
 
 Building from Our SVN Repository
 
-  If you are building from a SVN checkout, run 'autoreconf --verbose' before
-  './configure; make'. If you try to run autoconf, et c., by hand and wind up
-  with build files that don't work, use 'autoreconf --force --verbose'. Once
-  autoreconf has made the configure and Makefile.in files, do ./configure;
-  make; make install as outlined above.
+  If you are building from a SVN checkout, run 'autoreconf --verbose'
+  before './configure; make'. If you try to run autoconf, et c., by
+  hand and wind up with build files that don't work, use 'autoreconf
+  --install --force --verbose'. Once autoreconf has made the configure
+  and Makefile.in files, do ./configure; make; make install as
+  outlined above.
 
 REQUIREMENTS
 

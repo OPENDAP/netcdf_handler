@@ -1,18 +1,18 @@
 Summary:         NetCDF 3 data handler for the OPeNDAP Data server
 Name:            netcdf_handler
-Version:         3.9.0
+Version:         3.9.1
 Release:         1
 License:         LGPLv2+
 Group:           System Environment/Daemons 
 Source0:         http://www.opendap.org/pub/source/%{name}-%{version}.tar.gz
 URL:             http://www.opendap.org/
-Requires:        libdap >= 3.10.0 
+Requires:        libdap >= 3.10.2
 Requires:        netcdf >= 3.6
-Requires:        bes >= 3.8.0
+Requires:        bes >= 3.8.3
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:   libdap-devel >= 3.10.0 netcdf-devel >= 3.6
-BuildRequires:   bes-devel >= 3.8.0
+BuildRequires:   libdap-devel >= 3.10.2 netcdf-devel >= 3.6
+BuildRequires:   bes-devel >= 3.8.3
 
 %description
 This is the netcdf data handler for our data server. It reads netcdf 3
