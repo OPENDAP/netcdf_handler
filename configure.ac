@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(netcdf_handler, 3.8.3, opendap-tech@opendap.org)
+AC_INIT(netcdf_handler, 3.9.1, opendap-tech@opendap.org)
 AC_CONFIG_AUX_DIR([conf])
 AC_CONFIG_MACRO_DIR([conf])
 
@@ -31,29 +31,45 @@ AC_CHECK_TYPES([ptrdiff_t])
 AC_CHECK_FUNCS([strchr])
 
 dnl Checks for specific libraries
-AC_CHECK_LIBDAP([3.9.0],
+AC_CHECK_LIBDAP([3.10.2],
  [
   LIBS="$LIBS $DAP_SERVER_LIBS"
   CPPFLAGS="$CPPFLAGS $DAP_CFLAGS"
  ],
  [ AC_MSG_ERROR([Cannot find libdap])
 ])
-  
-AC_CHECK_NETCDF(
-   [
-       LIBS="$LIBS $NC_LIBS"
-       LDFLAGS="$LDFLAGS $NC_LDFLAGS"
-       CPPFLAGS="$CPPFLAGS $NC_CPPFLAGS"
-   ],
-   [
-       echo "*** Use --with-netcdf for the root netcdf directory."
-       echo "*** Otherwise use --with-netcdf-include switch for includes directory"
-       echo "*** and --with-netcdf-libdir switch for libraries directory."
-       AC_MSG_ERROR([netcdf library and netcdf headers are required.])
-   ],[3]
+
+AX_PATH_GENERIC([nc], [4.0.0], [],
+    [
+	LIBS="$LIBS $NC_LIBS"
+	LDFLAGS="$LDFLAGS $NC_LDFLAGS"
+	CPPFLAGS="$CPPFLAGS $NC_CPPFLAGS"
+	netcdf4_found=1
+    ],
+    [
+	AC_MSG_WARN([Could not find netcdf 4; looking for the older library])
+	netcdf4_found=0
+    ]
 )
 
-AC_CHECK_BES([3.7.2],
+if test $netcdf4_found -ne 1
+then
+    AC_CHECK_NETCDF(
+       [
+	   LIBS="$LIBS $NC_LIBS"
+	   LDFLAGS="$LDFLAGS $NC_LDFLAGS"
+	   CPPFLAGS="$CPPFLAGS $NC_CPPFLAGS"
+       ],
+       [
+	   echo "*** Use --with-netcdf for the root netcdf directory."
+	   echo "*** Otherwise use --with-netcdf-include switch for includes directory"
+	   echo "*** and --with-netcdf-libdir switch for libraries directory."
+	   AC_MSG_ERROR([netcdf library and netcdf headers are required.])
+       ],[3]
+    )
+fi
+
+AC_CHECK_BES([3.8.3],
 [
 ],
 [ AC_MSG_ERROR([Cannot find bes])

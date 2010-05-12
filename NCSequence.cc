@@ -79,6 +79,17 @@ NCSequence::operator=(const NCSequence &rhs)
     return *this;
 }
 
+void NCSequence::transfer_attributes(AttrTable *at)
+{
+    if (at) {
+	Vars_iter var = var_begin();
+	while (var != var_end()) {
+	    (*var)->transfer_attributes(at);
+	    var++;
+	}
+    }
+}
+
 
 // $Log: NCSequence.cc,v $
 // Revision 1.17  2005/04/19 23:16:18  jimg
