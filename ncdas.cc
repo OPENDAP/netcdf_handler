@@ -130,8 +130,13 @@ print_attr(nc_type type, int loc, void *vals)
           // this code is modeled after older code and that's what it did. I'm
           // trying to keep the same behavior as the old code without it's
           // problems. jhrg 8/11/2006
-          if (rep.str().find('.') == string::npos
-              && rep.str().find('e') == string::npos)
+	  string tmp_value = rep.str();
+          if (tmp_value.find('.') == string::npos
+              && tmp_value.find('e') == string::npos
+	      && tmp_value.find('E') == string::npos
+	      && tmp_value.find("nan") == string::npos
+	      && tmp_value.find("NaN") == string::npos
+	      && tmp_value.find("NAN") == string::npos)
                 rep << ".";
           return rep.str();
       }
@@ -140,10 +145,15 @@ print_attr(nc_type type, int loc, void *vals)
           rep << std::showpoint;
           rep << std::setprecision(17);
           rep << *(gp.dp+loc);
-          if (rep.str().find('.') == string::npos
-              && rep.str().find('e') == string::npos)
-                rep << ".";
-          return rep.str();
+ 	  string tmp_value = rep.str();
+          if (tmp_value.find('.') == string::npos
+              && tmp_value.find('e') == string::npos
+	      && tmp_value.find('E') == string::npos
+	      && tmp_value.find("nan") == string::npos
+	      && tmp_value.find("NaN") == string::npos
+	      && tmp_value.find("NAN") == string::npos)
+	      rep << ".";
+	  return rep.str();
           break;
       }
       default:
