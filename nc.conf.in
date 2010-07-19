@@ -42,5 +42,9 @@ BES.Catalog.catalog.TypeMatch+=nc:.*\.nc(\.bz2|\.gz|\.Z)?$;
 #-----------------------------------------------------------------------#
 # ShowSharedDimensions: Include shared dimensions as separate variables.
 #   (true,yes|false,no, defaults to false)
-NC.ShowSharedDimensions=false
+#
+# I've reset this to the original default. Eventually this should be 'false'.
+# jhrg 7/2010
+#
+NC.ShowSharedDimensions=true
 
