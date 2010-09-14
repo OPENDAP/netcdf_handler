@@ -1,3 +1,54 @@
+2010-07-19  James Gallagher <jgallagher@opendap.org>
+
+	Changed the default setting of the handler so that datasets with
+	grids have the extra variables that were always included in the
+	past. This is needed by the current Java Netcdf library.
+
+2010-07-15  Patrick West <pwest@ucar.edu>
+
+	Added include of dependent dap.conf
+
+2010-05-25  James Gallagher <jgallagher@opendap.org>
+
+	Fix for ticket 1568. When NAN was being written to the DAS, a dot was
+	appended.  This broke Java parsers. Fixed.
+
+	M    ncdas.cc
+
+2010-05-24  Patrick West <pwest@ucar.edu>
+
+	For netcdf4, NC_CFLAGS is set, not NC_CPPFLAGS
+	M    configure.ac
+
+2010-05-12  James Gallagher <jgallagher@opendap.org>
+
+	Merged hyrax 1.6.1
+
+	_M   .
+	A  + conf/ax_path_generic.m4
+	A  + conf/ax_compare_version.m4
+	M    conf/libdap.m4
+	M    netcdf_handler.spec
+	M    NCGrid.cc
+	A  + bes-testsuite/nc/coads_climatology.nc.ddx.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	A  + bes-testsuite/nc/coads_climatology.nc.ddx.bescmd
+	M    bes-testsuite/netcdf_handlerTest.at
+	_M   bes-testsuite/besstandalone.netcdf/fnoc1.nc.3.exp
+	M    bes-testsuite/Makefile.am
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    NCSequence.cc
+	M    NCSequence.h
+	M    ChangeLog
+	M    NCGrid.h
+	M    README
+	M    NCStructure.cc
+	M    NCStructure.h
+	M    Makefile.am
+
 2010-04-30  James Gallagher <jgallagher@opendap.org>
 
 	Fixed error in script when netcdf4 was not found.
