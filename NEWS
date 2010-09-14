@@ -1,6 +1,10 @@
 
 $Id$
 
+Version 3.9.2 (14 Sept 2010)
+
+The default option is now (re)set to include those extra map/Arrays.
+
 Version 3.9.1 (5 May 2010)
 
 The handler now implements its own transfer_attributes code to merge
