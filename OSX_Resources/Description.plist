@@ -5,6 +5,6 @@
 	<key>IFPkgDescriptionDescription</key>
 	<string></string>
 	<key>IFPkgDescriptionTitle</key>
-	<string>OPeNDAP fileout_netcdf Package</string>
+	<string>OPeNDAP netcdf_handler Package</string>
 </dict>
 </plist>
