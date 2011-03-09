@@ -31,6 +31,8 @@ AC_DEFUN([AC_CHECK_NETCDF],
             [AS_HELP_STRING([--with-netcdf=ARG],[netcdf directory])],
             [NC_PATH=$withval nc_user_arg=yes], 
             [])
+            
+  AC_SUBST([NC_PATH])
 
   AC_ARG_WITH([netcdf_include],
             [AS_HELP_STRING([--with-netcdf-include=ARG],[netcdf include directory])],
