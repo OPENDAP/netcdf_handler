@@ -96,8 +96,7 @@ NCFloat64::read()
 
     if (errstat != NC_NOERR)
     {
-	string err = (string)"Could not open the dataset's file ("
-	             + dataset().c_str() + ")" ;
+	string err = "Could not open the dataset's file (" + dataset() + ")" ;
 	throw Error(errstat, err);
     }
 

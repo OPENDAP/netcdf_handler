@@ -154,10 +154,9 @@ print_attr(nc_type type, int loc, void *vals)
 	      && tmp_value.find("NAN") == string::npos)
 	      rep << ".";
 	  return rep.str();
-          break;
       }
       default:
-        return string("\"\"");
+        break;
     }
 
     return string("\"\"");
@@ -307,7 +306,7 @@ nc_read_variables(DAS &das, const string &filename)
     int ncid, errstat;
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
     if (errstat != NC_NOERR) {
-        string msg = (string)"Could not open " + path_to_filename(filename) + ".";
+        string msg = "Could not open " + path_to_filename(filename) + ".";
         throw Error(errstat, msg);
     }
 
@@ -315,26 +314,18 @@ nc_read_variables(DAS &das, const string &filename)
     int nvars, ngatts;
     errstat = nc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
     if (errstat != NC_NOERR) {
-        string msg = (string)"Could not inquire about netcdf file: "
-	+ path_to_filename(filename) + ".";
+        string msg = "Could not inquire about netcdf file: " + path_to_filename(filename) + ".";
 	throw Error(errstat, msg);
     }
-#if 0
-    nc_type datatype;           /* variable data type */
-    int vdimids[MAX_VAR_DIMS];  // variable dimension ids
-    size_t vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
-    int num_dim;                /* number of dim. in variable */
-    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdimids,
-                         (int *)0);
-#endif
+
     // for each variable
     char varname[MAX_NC_NAME];
     int natts = 0;
     nc_type var_type;
 #if 0
     int num_dim;                /* number of dim. in variable */
-#endif
     AttrTable *attr_table_ptr = NULL ;
+#endif
     for (int v = 0; v < nvars; ++v) {
         errstat = nc_inq_var(ncid, v, varname, &var_type, (int*)0, (int*)0, &natts);
 	if (errstat != NC_NOERR) {
@@ -343,7 +334,7 @@ nc_read_variables(DAS &das, const string &filename)
 	    throw Error(errstat, msg);
 	}
 
-	attr_table_ptr = das.get_table(varname);
+	AttrTable *attr_table_ptr = das.get_table(varname);
 	if (!attr_table_ptr)
 	    attr_table_ptr = das.add_table(varname, new AttrTable);
 
@@ -366,34 +357,27 @@ nc_read_variables(DAS &das, const string &filename)
                 attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
 	    }
 	    else {
-                size_t *dim_sizes = new size_t[num_dim];
-
-                for (int i = 0; i < num_dim; ++i)
+                // size_t *dim_sizes = new size_t[num_dim];
+				vector<size_t> dim_sizes(num_dim);
+                for (int i = 0; i < num_dim; ++i) {
                     if ((errstat = nc_inq_dimlen(ncid, vdimids[i], &dim_sizes[i])) != NC_NOERR) {
-                    	delete[] dim_sizes;
+                    	// delete[] dim_sizes;
                         throw Error(errstat,
                                 string("Could not read dimension information about the variable `")
                                 + varname + string("'."));
                     }
-#if 0
-                errstat = nc_inq_vardimid(ncid, v, dim_sizes);
-                if (errstat != NC_NOERR) {
-                	delete[] dim_sizes;
-                    throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
                 }
-#endif
-                // add attribute
-                string print_rep = print_attr(NC_LONG, 0, (void *) (dim_sizes + num_dim - 1));
-                attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
 
-                delete[] dim_sizes;
+                // add attribute
+                string print_rep = print_attr(NC_LONG, 0, (void *) (&dim_sizes[num_dim - 1]));
+                attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
             }
 	}
     }
 
     // global attributes
     if (ngatts > 0) {
-	attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
+	AttrTable *attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
 
 	read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
     }
@@ -406,7 +390,7 @@ nc_read_variables(DAS &das, const string &filename)
     if (xdimid != -1){
 	nc_inq_dim(ncid, xdimid, dimname, (size_t *)0);
 	string print_rep = print_attr(datatype, 0, dimname);
-	attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
+	AttrTable *attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
 	attr_table_ptr->append_attr("Unlimited_Dimension",
 				    print_type(datatype), print_rep);
     }

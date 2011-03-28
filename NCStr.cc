@@ -92,8 +92,7 @@ bool NCStr::read()
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR) {
-        string err = (string) "Could not open the dataset's file ("
-                + dataset().c_str() + ")";
+        string err = "Could not open the dataset's file (" + dataset() + ")" ;
         throw Error(errstat, err);
     }
 

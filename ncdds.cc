@@ -235,6 +235,7 @@ static bool is_grid(int ncid, int nvars, int var, int ndims, const int dim_ids[M
             map_types[d] = match_type;
             map_sizes[d] = dim_sz;
             strncpy(map_names[d], dimname, MAX_NC_NAME - 1);
+            map_names[d][MAX_NC_NAME - 1] = '\0';
         }
         else {
             return false;
@@ -416,16 +417,14 @@ void nc_read_descriptors(DDS &dds_table, const string &filename,
 
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
     if (errstat != NC_NOERR) {
-        string msg = (string)"Could not open " + path_to_filename(filename)
-                + ".";
+        string msg = "Could not open " + path_to_filename(filename) + ".";
         throw Error(errstat, msg);
     }
 
     // how many variables?
     errstat = nc_inq_nvars(ncid, &nvars);
     if (errstat != NC_NOERR) {
-        string msg = (string) "Could not inquire about netcdf file: "
-                + path_to_filename(filename) + ".";
+        string msg = "Could not inquire about netcdf file: " + path_to_filename(filename) + ".";
         throw Error(errstat, msg);
     }
 
