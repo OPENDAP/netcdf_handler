@@ -49,21 +49,23 @@ AC_CHECK_LIBDAP([3.11.0],
  [ AC_MSG_ERROR([Cannot find libdap])
 ])
 
-AX_PATH_GENERIC([nc], [4.0.0], [],
-    [
-	LIBS="$LIBS $NC_LIBS"
-	LDFLAGS="$LDFLAGS $NC_LDFLAGS"
-	CPPFLAGS="$CPPFLAGS $NC_CFLAGS"
-	netcdf4_found=1
-    ],
-    [
-	AC_MSG_WARN([Could not find netcdf 4; looking for the older library])
-	netcdf4_found=0
-    ]
-)
+dnl AX_PATH_GENERIC([nc], [4.0.0], [],
+dnl     [
+dnl 	LIBS="$LIBS $NC_LIBS"
+	dnl dnl LDFLAGS="$LDFLAGS $NC_LDFLAGS"
+dnl 	CPPFLAGS="$CPPFLAGS $NC_CFLAGS"
+dnl 	AC_MSG_WARN([found netcdf 4; NC_LIBS = $NC_LIBS])
+dnl 	AC_MSG_WARN([... and NC_CFLAGS = $NC_CFLAGS])
+dnl 	netcdf4_found=1
+dnl     ],
+dnl     [
+dnl 	AC_MSG_WARN([Could not find netcdf 4; looking for the older library])
+dnl 	netcdf4_found=0
+dnl     ]
+dnl )
 
-if test $netcdf4_found -ne 1
-then
+dnl if test $netcdf4_found -ne 1
+dnl then
     AC_CHECK_NETCDF(
        [
 	   LIBS="$LIBS $NC_LIBS"
@@ -77,7 +79,7 @@ then
 	   AC_MSG_ERROR([netcdf library and netcdf headers are required.])
        ],[3]
     )
-fi
+dnl fi
 
 AC_CHECK_BES([3.9.0],
 [
