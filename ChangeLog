@@ -1,3 +1,65 @@
+2011-04-20  James Gallagher <jgallagher@opendap.org>
+
+	Hyrax 1.7 release
+
+2011-04-20  James Gallagher <jgallagher@opendap.org>
+
+	metapackage build
+
+	M    configure.ac
+
+2011-03-28  James Gallagher <jgallagher@opendap.org>
+
+	1.7RC1
+
+2011-03-17  Nathan Potter <ndp@coas.oregonstate.edu>
+
+	netcdf_handler: Added automated version numbers to OSX Package builds
+
+2011-03-08  James Gallagher <jgallagher@opendap.org>
+
+	Merge for hyrax 1.7 from the hyrax_1.6.2_release branch of shrew
+	to the trunk
+
+	_M   .
+	M    conf/netcdf.m4
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/besstandalone.netcdf/fnoc1.nc.3.exp
+	D    OSX_Resources/InstallationCheck
+	A  + OSX_Resources/InstallationCheck.proto
+	D    OSX_Resources/Info.plist
+	A  + OSX_Resources/Info.plist.proto
+	M    OSX_Resources/Description.plist
+	M    Makefile.am
+
+2011-02-08  James Gallagher <jgallagher@opendap.org>
+
+	removed unneeded mime_util.h and util.h includes; added comments
+	about sending mime headers in our handlers (which may not be
+	needed).
+
+2010-10-29  mjohnson
+
+	MERGE from Hyrax 1.6.2 RELEASE branch (shrew)
+
+2010-09-14  James Gallagher <jgallagher@opendap.org>
+
+	version 3.9.2
+
+	M    netcdf_handler.spec
+	M    configure.ac
+	M    INSTALL
+	M    NEWS
+	M    ChangeLog
+	M    README
+
+2010-07-19  James Gallagher <jgallagher@opendap.org>
+
+	Changed the default setting of the handler so that datasets with
+	grids have the extra variables that were always included in the
+	past. This is needed by the current Java Netcdf library.
+
 2010-07-19  James Gallagher <jgallagher@opendap.org>
 
 	Changed the default setting of the handler so that datasets with
