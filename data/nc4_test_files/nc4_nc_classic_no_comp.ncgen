@@ -3,7 +3,7 @@
 // Created on: Apr 28, 2011
 //     Author: jimg
 //
-// Made the netcdf 4 file using: ncgen -l c -k4 nc4_nc_classic_no_comp.ncgen
+// Made the netcdf 4 file using: ncgen -k4 nc4_nc_classic_no_comp.ncgen
 // This builds a netcdf file that contains only variables that can be in a 
 // netcdf 3 file. Then we write it using the netcdf 4 library. The same file
 // can be used with ncgen to make source code that can write the variables
