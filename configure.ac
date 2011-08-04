@@ -7,6 +7,7 @@ AC_CONFIG_AUX_DIR([conf])
 AC_CONFIG_MACRO_DIR([conf])
 
 AM_INIT_AUTOMAKE(1.10)
+LT_INIT
 AC_CONFIG_TESTDIR(bes-testsuite, [.])
 
 PACKAGE_MAJOR_VERSION=`echo $PACKAGE_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\1@'`
@@ -25,7 +26,7 @@ AC_CONFIG_HEADER([config.h])
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -49,37 +50,19 @@ AC_CHECK_LIBDAP([3.11.0],
  [ AC_MSG_ERROR([Cannot find libdap])
 ])
 
-dnl AX_PATH_GENERIC([nc], [4.0.0], [],
-dnl     [
-dnl 	LIBS="$LIBS $NC_LIBS"
-	dnl dnl LDFLAGS="$LDFLAGS $NC_LDFLAGS"
-dnl 	CPPFLAGS="$CPPFLAGS $NC_CFLAGS"
-dnl 	AC_MSG_WARN([found netcdf 4; NC_LIBS = $NC_LIBS])
-dnl 	AC_MSG_WARN([... and NC_CFLAGS = $NC_CFLAGS])
-dnl 	netcdf4_found=1
-dnl     ],
-dnl     [
-dnl 	AC_MSG_WARN([Could not find netcdf 4; looking for the older library])
-dnl 	netcdf4_found=0
-dnl     ]
-dnl )
-
-dnl if test $netcdf4_found -ne 1
-dnl then
-    AC_CHECK_NETCDF(
-       [
-	   LIBS="$LIBS $NC_LIBS"
-	   LDFLAGS="$LDFLAGS $NC_LDFLAGS"
-	   CPPFLAGS="$CPPFLAGS $NC_CPPFLAGS"
-       ],
-       [
-	   echo "*** Use --with-netcdf for the root netcdf directory."
-	   echo "*** Otherwise use --with-netcdf-include switch for includes directory"
-	   echo "*** and --with-netcdf-libdir switch for libraries directory."
-	   AC_MSG_ERROR([netcdf library and netcdf headers are required.])
-       ],[3]
-    )
-dnl fi
+AC_CHECK_NETCDF(
+   [
+   LIBS="$LIBS $NC_LIBS"
+   LDFLAGS="$LDFLAGS $NC_LDFLAGS"
+   CPPFLAGS="$CPPFLAGS $NC_CPPFLAGS"
+   ],
+   [
+   echo "*** Use --with-netcdf for the root netcdf directory."
+   echo "*** Otherwise use --with-netcdf-include switch for includes directory"
+   echo "*** and --with-netcdf-libdir switch for libraries directory."
+   AC_MSG_ERROR([netcdf library and netcdf headers are required.])
+   ],[3]
+)
 
 AC_CHECK_BES([3.9.0],
 [
