@@ -47,3 +47,25 @@ AT_BESCMD_RESPONSE_TEST([test.nc.2a.bescmd])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([fnoc1.nc.3.bescmd])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([test.nc.3.bescmd])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([test.nc.3a.bescmd])
+
+# These are tests for netcdf4 support
+
+# Classic netcdf4 files, with no chunking compression
+
+AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.0.bescmd])
+AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.2.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.3.bescmd])
+
+# Classic netcdf4 files, _with_ chunking compression
+
+AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_compressed.nc.0.bescmd])
+AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_compressed.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_compressed.nc.2.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_nc_classic_compressed.nc.3.bescmd])
+
+# Netcdf files with ushort, uint and string variables
+
+
