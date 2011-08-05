@@ -66,9 +66,18 @@ AC_CHECK_NETCDF(
 
 # *** TODO
 # Replace this with something that tests the library found above
+NETCDF_VERSION=`nc-config --version | sed 's@.* \([[0-9]]*\.[[0-9]]*\.[[0-9]]*\)$@\1@'`
+NETCDF_MAJOR_VERSION=`echo $NETCDF_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\1@'`
+NETCDF_MINOR_VERSION=`echo $NETCDF_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\2@'`
+NETCDF_SUBMINOR_VERSION=`echo $NETCDF_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\3@'`
+AC_MSG_NOTICE(NETCDF Major Version:     $NETCDF_MAJOR_VERSION)
+AC_MSG_NOTICE(NETCDF Minor Version:     $NETCDF_MINOR_VERSION)
+AC_MSG_NOTICE(NETCDF SubMinor Version:  $NETCDF_SUBMINOR_VERSION)
+# AC_SUBST(NETCDF_MAJOR_VERSION)
+# AC_SUBST(NETCDF_MINOR_VERSION)
+# AC_SUBST(NETCDF_SUBMINOR_VERSION)
 
-AC_DEFINE(NETCDF_VERSION, 4, [What version of netcdf were we built with?])
-# AC_SUBST(NETCDF_VERSION)
+AC_DEFINE_UNQUOTED(NETCDF_VERSION, $NETCDF_MAJOR_VERSION, [What version of netcdf were we built with?])
 
 AC_CHECK_BES([3.9.0],
 [
