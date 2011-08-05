@@ -13,6 +13,12 @@ software is designed to allow any number of handlers to be configured easily.
 See the DAP Server README and INSTALL files for information about
 configuration, including how to use this handler.
 
+This version of the handler has been tested with netcdf 4 API files (not
+netcdf 4 data model files). It works with netcdf 4 API NC_CLASSIC_MODEL files
+that are either plain or compressed. To get this feature you must link the 
+handler to a copy of the netcdf 4 API library that has been built with HDF5.
+Teh INSTALL file has more details. 
+
 Special options supported by the handler: 
 * ShowSharedDimensions: Include shared dimensions as separate variables. 
 Accepted values: true,yes|false,no, defaults to false.

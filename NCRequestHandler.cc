@@ -1,4 +1,3 @@
-
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
@@ -47,18 +46,16 @@
 
 #define NC_NAME "nc"
 
-using namespace libdap ;
+using namespace libdap;
 
-bool NCRequestHandler::_show_shared_dims = false ;
-bool NCRequestHandler::_show_shared_dims_set = false ;
+bool NCRequestHandler::_show_shared_dims = false;
+bool NCRequestHandler::_show_shared_dims_set = false;
 
-extern void nc_read_variables(DAS & das,
-			      const string & filename) throw(Error);
-extern void nc_read_descriptors(DDS & dds, const string & filename,
-        bool elide_dimension_arrays);
+extern void nc_read_variables(DAS & das, const string & filename) throw (Error);
+extern void nc_read_descriptors(DDS & dds, const string & filename, bool elide_dimension_arrays);
 
-NCRequestHandler::NCRequestHandler(const string &name)
-:  BESRequestHandler(name)
+NCRequestHandler::NCRequestHandler(const string &name) :
+    BESRequestHandler(name)
 {
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
     add_handler(DDS_RESPONSE, NCRequestHandler::nc_build_dds);
@@ -66,21 +63,18 @@ NCRequestHandler::NCRequestHandler(const string &name)
     add_handler(HELP_RESPONSE, NCRequestHandler::nc_build_help);
     add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
 
-    if( NCRequestHandler::_show_shared_dims_set == false )
-    {
-        bool found = false ;
-	string key = "NC.ShowSharedDimensions" ;
-        string doset ;
-	TheBESKeys::TheKeys()->get_value( key, doset, found ) ;
-	if( found )
-	{
-	    doset = BESUtil::lowercase( doset ) ;
-	    if( doset == "true" || doset == "yes" )
-	    {
-		NCRequestHandler::_show_shared_dims = true ;
-	    }
-	}
-	NCRequestHandler::_show_shared_dims_set = true ;
+    if (NCRequestHandler::_show_shared_dims_set == false) {
+        bool found = false;
+        string key = "NC.ShowSharedDimensions";
+        string doset;
+        TheBESKeys::TheKeys()->get_value(key, doset, found);
+        if (found) {
+            doset = BESUtil::lowercase(doset);
+            if (doset == "true" || doset == "yes") {
+                NCRequestHandler::_show_shared_dims = true;
+            }
+        }
+        NCRequestHandler::_show_shared_dims_set = true;
     }
 }
 
@@ -90,32 +84,30 @@ NCRequestHandler::~NCRequestHandler()
 
 bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
-    BESResponseObject *response = dhi.response_handler->get_response_object() ;
-    BESDASResponse *bdas = dynamic_cast < BESDASResponse * >(response) ;
-    if( !bdas )
-	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+    BESResponseObject *response = dhi.response_handler->get_response_object();
+    BESDASResponse *bdas = dynamic_cast<BESDASResponse *> (response);
+    if (!bdas)
+        throw BESInternalError("cast error", __FILE__, __LINE__);
     try {
-	bdas->set_container( dhi.container->get_symbolic_name() ) ;
-	DAS *das = bdas->get_das();
-	string accessed = dhi.container->access();
+        bdas->set_container(dhi.container->get_symbolic_name());
+        DAS *das = bdas->get_das();
+        string accessed = dhi.container->access();
         nc_read_variables(*das, accessed);
-	Ancillary::read_ancillary_das( *das, accessed ) ;
-	bdas->clear_container( ) ;
+        Ancillary::read_ancillary_das(*das, accessed);
+        bdas->clear_container();
     }
-    catch( BESError &e ) {
-	throw;
+    catch (BESError &e) {
+        throw;
     }
-    catch(InternalErr & e) {
-        BESDapError ex( e.get_error_message(), true, e.get_error_code(),
-	                __FILE__, __LINE__ ) ;
+    catch (InternalErr & e) {
+        BESDapError ex(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
-    catch(Error & e) {
-        BESDapError ex( e.get_error_message(), false, e.get_error_code(),
-	                __FILE__, __LINE__ ) ;
+    catch (Error & e) {
+        BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
-    catch(...) {
+    catch (...) {
         string s = "unknown exception caught building DAS";
         BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
@@ -127,45 +119,43 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 {
     BESResponseObject *response = dhi.response_handler->get_response_object();
-    BESDDSResponse *bdds = dynamic_cast < BESDDSResponse * >(response);
-    if( !bdds )
-	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+    BESDDSResponse *bdds = dynamic_cast<BESDDSResponse *> (response);
+    if (!bdds)
+        throw BESInternalError("cast error", __FILE__, __LINE__);
     try {
-	bdds->set_container( dhi.container->get_symbolic_name() ) ;
-	DDS *dds = bdds->get_dds();
-	string accessed = dhi.container->access() ;
-        dds->filename( accessed );
+        bdds->set_container(dhi.container->get_symbolic_name());
+        DDS *dds = bdds->get_dds();
+        string accessed = dhi.container->access();
+        dds->filename(accessed);
 
         bool elide_dimension_arrays = !(NCRequestHandler::_show_shared_dims);
         nc_read_descriptors(*dds, accessed, elide_dimension_arrays);
-	Ancillary::read_ancillary_dds( *dds, accessed ) ;
+        Ancillary::read_ancillary_dds(*dds, accessed);
 
-        DAS *das = new DAS ;
-	BESDASResponse bdas( das ) ;
-	bdas.set_container( dhi.container->get_symbolic_name() ) ;
-        nc_read_variables( *das, accessed ) ;
-	Ancillary::read_ancillary_das( *das, accessed ) ;
+        DAS *das = new DAS;
+        BESDASResponse bdas(das);
+        bdas.set_container(dhi.container->get_symbolic_name());
+        nc_read_variables(*das, accessed);
+        Ancillary::read_ancillary_das(*das, accessed);
 
-        dds->transfer_attributes( das ) ;
+        dds->transfer_attributes(das);
 
-	bdds->set_constraint( dhi ) ;
+        bdds->set_constraint(dhi);
 
-	bdds->clear_container( ) ;
+        bdds->clear_container();
     }
-    catch( BESError &e ) {
-	throw;
+    catch (BESError &e) {
+        throw;
     }
-    catch(InternalErr & e) {
-        BESDapError ex( e.get_error_message(), true, e.get_error_code(),
-	                __FILE__, __LINE__ ) ;
+    catch (InternalErr & e) {
+        BESDapError ex(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
-    catch(Error & e) {
-        BESDapError ex( e.get_error_message(), false, e.get_error_code(),
-	                __FILE__, __LINE__ ) ;
+    catch (Error & e) {
+        BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
-    catch(...) {
+    catch (...) {
         string s = "unknown exception caught building DDS";
         BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
@@ -177,46 +167,44 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 {
     BESResponseObject *response = dhi.response_handler->get_response_object();
-    BESDataDDSResponse *bdds = dynamic_cast < BESDataDDSResponse * >(response);
-    if( !bdds )
-	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+    BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *> (response);
+    if (!bdds)
+        throw BESInternalError("cast error", __FILE__, __LINE__);
 
     try {
-	bdds->set_container( dhi.container->get_symbolic_name() ) ;
-	DataDDS *dds = bdds->get_dds();
-	string accessed = dhi.container->access() ;
+        bdds->set_container(dhi.container->get_symbolic_name());
+        DataDDS *dds = bdds->get_dds();
+        string accessed = dhi.container->access();
         dds->filename(accessed);
 
         bool elide_dimension_arrays = !(NCRequestHandler::_show_shared_dims);
         nc_read_descriptors(*dds, accessed, elide_dimension_arrays);
-	Ancillary::read_ancillary_dds( *dds, accessed ) ;
+        Ancillary::read_ancillary_dds(*dds, accessed);
 
-        DAS *das = new DAS ;
-	BESDASResponse bdas( das ) ;
-	bdas.set_container( dhi.container->get_symbolic_name() ) ;
-        nc_read_variables( *das, accessed ) ;
-	Ancillary::read_ancillary_das( *das, accessed ) ;
+        DAS *das = new DAS;
+        BESDASResponse bdas(das);
+        bdas.set_container(dhi.container->get_symbolic_name());
+        nc_read_variables(*das, accessed);
+        Ancillary::read_ancillary_das(*das, accessed);
 
-        dds->transfer_attributes( das ) ;
+        dds->transfer_attributes(das);
 
-	bdds->set_constraint( dhi ) ;
+        bdds->set_constraint(dhi);
 
-	bdds->clear_container( ) ;
+        bdds->clear_container();
     }
-    catch( BESError &e ) {
-	throw;
+    catch (BESError &e) {
+        throw;
     }
-    catch(InternalErr & e) {
-        BESDapError ex( e.get_error_message(), true, e.get_error_code(),
-	                __FILE__, __LINE__ ) ;
+    catch (InternalErr & e) {
+        BESDapError ex(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
-    catch(Error & e) {
-        BESDapError ex( e.get_error_message(), false, e.get_error_code(),
-	                __FILE__, __LINE__ ) ;
+    catch (Error & e) {
+        BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
-    catch(...) {
+    catch (...) {
         string s = "unknown exception caught building DAS";
         BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
@@ -228,22 +216,21 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 {
     BESResponseObject *response = dhi.response_handler->get_response_object();
-    BESInfo *info = dynamic_cast<BESInfo *>(response);
-    if( !info )
-	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
+    BESInfo *info = dynamic_cast<BESInfo *> (response);
+    if (!info)
+        throw BESInternalError("cast error", __FILE__, __LINE__);
 
-    map<string,string> attrs ;
-    attrs["name"] = PACKAGE_NAME ;
-    attrs["version"] = PACKAGE_VERSION ;
-    list<string> services ;
-    BESServiceRegistry::TheRegistry()->services_handled( NC_NAME, services );
-    if( services.size() > 0 )
-    {
-	string handles = BESUtil::implode( services, ',' ) ;
-	attrs["handles"] = handles ;
+    map < string, string > attrs;
+    attrs["name"] = PACKAGE_NAME;
+    attrs["version"] = PACKAGE_VERSION;
+    list < string > services;
+    BESServiceRegistry::TheRegistry()->services_handled(NC_NAME, services);
+    if (services.size() > 0) {
+        string handles = BESUtil::implode(services, ',');
+        attrs["handles"] = handles;
     }
-    info->begin_tag( "module", &attrs ) ;
-    info->end_tag( "module" ) ;
+    info->begin_tag("module", &attrs);
+    info->end_tag("module");
 
     return true;
 }
@@ -251,11 +238,11 @@ bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
 {
     BESResponseObject *response = dhi.response_handler->get_response_object();
-    BESVersionInfo *info = dynamic_cast < BESVersionInfo * >(response);
-    if( !info )
-	throw BESInternalError( "cast error", __FILE__, __LINE__ ) ;
-  
-    info->add_module( PACKAGE_NAME, PACKAGE_VERSION ) ;
+    BESVersionInfo *info = dynamic_cast<BESVersionInfo *> (response);
+    if (!info)
+        throw BESInternalError("cast error", __FILE__, __LINE__);
+
+    info->add_module(PACKAGE_NAME, PACKAGE_VERSION);
 
     return true;
 }

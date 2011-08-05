@@ -64,6 +64,12 @@ AC_CHECK_NETCDF(
    ],[3]
 )
 
+# *** TODO
+# Replace this with something that tests the library found above
+
+AC_DEFINE(NETCDF_VERSION, 4, [What version of netcdf were we built with?])
+# AC_SUBST(NETCDF_VERSION)
+
 AC_CHECK_BES([3.9.0],
 [
 ],
@@ -72,5 +78,5 @@ AC_CHECK_BES([3.9.0],
 
 OPENDAP_DEBUG_OPTION
 
-AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal])
+AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal data/nc4_test_files/Makefile])
 AC_OUTPUT

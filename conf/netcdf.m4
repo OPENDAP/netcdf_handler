@@ -44,7 +44,7 @@ AC_DEFUN([AC_CHECK_NETCDF],
             [NC_PATH_LIBDIR=$withval nc_user_arg=yes], 
             [])
 
-  if test $nc_user_arg = yes; then
+  if test "$nc_user_arg" = "yes"; then
   AS_IF([test "z$NC_PATH" != "z"],
   [
     AS_IF([test "z$NC_PATH_LIBDIR" = "z"],[NC_PATH_LIBDIR="$NC_PATH/lib"])
@@ -52,9 +52,9 @@ AC_DEFUN([AC_CHECK_NETCDF],
   ])
   fi
 
-  if test $nc_user_arg = no; then
+  if test "$nc_user_arg" = "no"; then
   AC_PATH_PROG([NC_CONFIG], [nc-config], [no])
-	if test "$NC_CONFIG" != 'no' ; then
+	if test "$NC_CONFIG" != "no" ; then
 		nc_ready=yes
 		NC_LIBS="`$NC_CONFIG --libs`"
 		NC_CPPFLAGS="`$NC_CONFIG --cflags`"
@@ -67,7 +67,7 @@ AC_DEFUN([AC_CHECK_NETCDF],
 	fi
   fi
 
-if test $nc_ready = no; then
+if test "$nc_ready" = "no"; then
   ac_netcdf_ok='no'
   NC_LIBS=
   NC_LDFLAGS=

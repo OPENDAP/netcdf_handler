@@ -15,7 +15,7 @@ check_err(const int stat, const int line, const char *file) {
 }
 
 int
-main() {/* create nc4_new_cardinal_types_no_comp.nc */
+main() {/* create nc4_unsigned_types.nc */
 
     int  stat;  /* return status */
     int  ncid;  /* netCDF id */
@@ -39,7 +39,6 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
     int time_id;
     int temp_id;
     int rh_id;
-    int station_id;
 
     /* rank (number of dimensions) for each variable */
 #   define RANK_lat 1
@@ -47,7 +46,6 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
 #   define RANK_time 1
 #   define RANK_temp 3
 #   define RANK_rh 3
-#   define RANK_station 2
 
     /* variable shapes */
     int lat_dims[RANK_lat];
@@ -55,10 +53,9 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
     int time_dims[RANK_time];
     int temp_dims[RANK_temp];
     int rh_dims[RANK_rh];
-    int station_dims[RANK_station];
 
     /* enter define mode */
-    stat = nc_create("nc4_new_cardinal_types_no_comp.nc", NC_CLOBBER|NC_NETCDF4, &ncid);
+    stat = nc_create("nc4_unsigned_types.nc", NC_CLOBBER|NC_NETCDF4, &ncid);
     check_err(stat,__LINE__,__FILE__);
     root_grp = ncid;
 
@@ -96,11 +93,6 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
     stat = nc_def_var(root_grp, "rh", NC_USHORT, RANK_rh, rh_dims, &rh_id);
     check_err(stat,__LINE__,__FILE__);
 
-    station_dims[0] = lat_dim;
-    station_dims[1] = lon_dim;
-    stat = nc_def_var(root_grp, "station", NC_STRING, RANK_station, station_dims, &station_id);
-    check_err(stat,__LINE__,__FILE__);
-
     /* assign global attributes */
     { /* title */
     stat = nc_put_att_text(root_grp, NC_GLOBAL, "title", 32, "Hyrax/netcdf handler test file 2");
@@ -112,7 +104,7 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
     check_err(stat,__LINE__,__FILE__);
     }
     { /* description */
-    stat = nc_put_att_text(root_grp, NC_GLOBAL, "description", 58, "This file has all of the new netcdf 4 cardinal data types.");
+    stat = nc_put_att_text(root_grp, NC_GLOBAL, "description", 58, "This file has all of the new netcdf 4 unsigned data types.");
     check_err(stat,__LINE__,__FILE__);
     }
 
@@ -131,7 +123,7 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
     check_err(stat,__LINE__,__FILE__);
     }
     { /* _FillValue */
-    static const unsigned short rh_FillValue_att[1] = {65535} ;
+    static const unsigned short rh_FillValue_att[1] = {9999} ;
     stat = nc_put_att_ushort(root_grp, rh_id, "_FillValue", NC_USHORT, 1, rh_FillValue_att);    check_err(stat,__LINE__,__FILE__);
     }
 
@@ -178,14 +170,6 @@ main() {/* create nc4_new_cardinal_types_no_comp.nc */
     size_t rh_startset[3] = {0, 0, 0} ;
     size_t rh_countset[3] = {2, 6, 5} ;
     stat = nc_put_vara(root_grp, rh_id, rh_startset, rh_countset, rh_data);
-    check_err(stat,__LINE__,__FILE__);
-    }
-
-    {
-    char* station_data[30] = {"one", "two", "three", "four", "five", "one_b", "two_b", "three_b", "four_b", "five_b", "one_c", "two_c", "three_c", "four_c", "five_c", "one", "two", "three", "four", "five", "one", "two", "three", "four", "five", "one_f", "two_f", "three_f", "four_f", "five_f"} ;
-    size_t station_startset[2] = {0, 0} ;
-    size_t station_countset[2] = {6, 5} ;
-    stat = nc_put_vara(root_grp, station_id, station_startset, station_countset, station_data);
     check_err(stat,__LINE__,__FILE__);
     }
 

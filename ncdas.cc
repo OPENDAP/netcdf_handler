@@ -1,4 +1,3 @@
-
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
@@ -43,8 +42,9 @@
 // jhrg 9/23/94
 
 #include "config_nc.h"
+// #include "config.h"
 
-static char not_used rcsid[]={"$Id$"};
+static char not_used rcsid[] = { "$Id$" };
 
 #include <iostream>
 #include <string>
@@ -53,255 +53,323 @@ static char not_used rcsid[]={"$Id$"};
 
 #include <netcdf.h>
 
-//#include <mime_util.h>
-
 #include <util.h>
 #include <escaping.h>
 #include <DAS.h>
 
 #define ATTR_STRING_QUOTE_FIX
 
-using namespace libdap ;
+using namespace libdap;
 
 // These are used as the return values for print_type().
 
-static const char STRING[]="String";
-static const char BYTE[]="Byte";
-static const char INT32[]="Int32";
-static const char INT16[]="Int16";
-static const char FLOAT64[]="Float64";
-static const char FLOAT32[]="Float32";
+static const char STRING[] = "String";
+static const char BYTE[] = "Byte";
+static const char INT32[] = "Int32";
+static const char INT16[] = "Int16";
+static const char UINT16[] = "UInt16";
+static const char FLOAT64[] = "Float64";
+static const char FLOAT32[] = "Float32";
 
 /** Given the type, array index number and pointer to the associated attribute,
-    Return the string representation of the attribute's value.
+ Return the string representation of the attribute's value.
 
-    This function is modeled on code from ncdump. I modified the original
-    version to use C++ string streams and also to call escattr() so that
-    attributes with quotes would be handled correctly.
+ This function is modeled on code from ncdump. I modified the original
+ version to use C++ string streams and also to call escattr() so that
+ attributes with quotes would be handled correctly.
 
-    @param type The nc_type of this attribute
-    @param loc The offset within \e vals
-    @param vals a void* to the array of values */
-static string
-print_attr(nc_type type, int loc, void *vals)
+ @param type The nc_type of this attribute
+ @param loc The offset within \e vals
+ @param vals a void* to the array of values */
+static string print_attr(nc_type type, int loc, void *vals)
 {
     ostringstream rep;
     union {
         char *cp;
+        char **stringp;
         short *sp;
-        nclong *lp;
+        unsigned short *usp;
+        int *i;
+        unsigned int *ui;
         float *fp;
         double *dp;
     } gp;
 
     switch (type) {
-      case NC_BYTE:
-        unsigned char uc;
-        gp.cp = (char *) vals;
-
-        uc = *(gp.cp+loc);
-        rep << (int)uc;
-        return rep.str();
-
-      case NC_CHAR:
-#ifndef ATTR_STRING_QUOTE_FIX
-        rep << "\"" << escattr(static_cast<const char*>(vals)) << "\"";
-        return rep.str();
-#else
-        return escattr(static_cast<const char*>(vals));
+#if NETCDF_VERSION >= 4
+        case NC_UBYTE:
 #endif
-      case NC_SHORT:
-        gp.sp = (short *) vals;
-        rep << *(gp.sp+loc);
-        return rep.str();
+        case NC_BYTE:
+            unsigned char uc;
+            gp.cp = (char *) vals;
 
-      case NC_LONG:
-        gp.lp = (nclong *) vals; // warning: long int format, int arg (arg 3)
-        rep << *(gp.lp+loc);
-        return rep.str();
+            uc = *(gp.cp + loc);
+            rep << (int) uc;
+            return rep.str();
 
-      case NC_FLOAT: {
-          gp.fp = (float *) vals;
-          rep << std::showpoint;
-          rep << std::setprecision(10);
-          rep << *(gp.fp+loc);
-          // If there's no decimal point and the rep does not use scientific
-          // notation, add a decimal point. This little jaunt was taken because
-          // this code is modeled after older code and that's what it did. I'm
-          // trying to keep the same behavior as the old code without it's
-          // problems. jhrg 8/11/2006
-	  string tmp_value = rep.str();
-          if (tmp_value.find('.') == string::npos
-              && tmp_value.find('e') == string::npos
-	      && tmp_value.find('E') == string::npos
-	      && tmp_value.find("nan") == string::npos
-	      && tmp_value.find("NaN") == string::npos
-	      && tmp_value.find("NAN") == string::npos)
+        case NC_CHAR:
+#ifndef ATTR_STRING_QUOTE_FIX
+            rep << "\"" << escattr(static_cast<const char*>(vals)) << "\"";
+            return rep.str();
+#else
+            return escattr(static_cast<const char*> (vals));
+#endif
+
+#if NETCDF_VERSION >= 4
+            case NC_STRING:
+            gp.stringp = (char **) vals;
+            rep << *(gp.stringp + loc);
+            return rep.str();
+#endif
+
+        case NC_SHORT:
+            gp.sp = (short *) vals;
+            rep << *(gp.sp + loc);
+            return rep.str();
+
+#if NETCDF_VERSION >= 4
+            case NC_USHORT:
+            gp.usp = (unsigned short *) vals;
+            rep << *(gp.usp + loc);
+            return rep.str();
+#endif
+        case NC_INT:
+            gp.i = (int *) vals; // warning: long int format, int arg (arg 3)
+            rep << *(gp.i + loc);
+            return rep.str();
+
+#if NETCDF_VERSION >= 4
+            case NC_UINT:
+            gp.ui = (unsigned int *) vals;
+            rep << *(gp.ui + loc);
+            return rep.str();
+#endif
+        case NC_FLOAT: {
+            gp.fp = (float *) vals;
+            rep << std::showpoint;
+            rep << std::setprecision(10);
+            rep << *(gp.fp + loc);
+            // If there's no decimal point and the rep does not use scientific
+            // notation, add a decimal point. This little jaunt was taken because
+            // this code is modeled after older code and that's what it did. I'm
+            // trying to keep the same behavior as the old code without it's
+            // problems. jhrg 8/11/2006
+            string tmp_value = rep.str();
+            if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos && tmp_value.find("NaN")
+                    == string::npos && tmp_value.find("NAN") == string::npos)
                 rep << ".";
-          return rep.str();
-      }
-      case NC_DOUBLE: {
-          gp.dp = (double *) vals;
-          rep << std::showpoint;
-          rep << std::setprecision(17);
-          rep << *(gp.dp+loc);
- 	  string tmp_value = rep.str();
-          if (tmp_value.find('.') == string::npos
-              && tmp_value.find('e') == string::npos
-	      && tmp_value.find('E') == string::npos
-	      && tmp_value.find("nan") == string::npos
-	      && tmp_value.find("NaN") == string::npos
-	      && tmp_value.find("NAN") == string::npos)
-	      rep << ".";
-	  return rep.str();
-      }
-      default:
-        break;
+            return rep.str();
+        }
+        case NC_DOUBLE: {
+            gp.dp = (double *) vals;
+            rep << std::showpoint;
+            rep << std::setprecision(17);
+            rep << *(gp.dp + loc);
+            string tmp_value = rep.str();
+            if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos && tmp_value.find("NaN")
+                    == string::npos && tmp_value.find("NAN") == string::npos)
+                rep << ".";
+            return rep.str();
+        }
+        default:
+            throw Error("While reading a netcdf file, the server encountered an attribute with a data type it did not recognize.");
     }
 
     return string("\"\"");
 }
 
 /** Return the printed representation of a netcdf type -- in a form the
-    handler can use.
+ handler can use.
 
-    @param datatype A nc_type
-    @return A string that holds the type name.
+ @param datatype A nc_type
+ @return A string that holds the type name.
  */
-static string
-print_type(nc_type datatype)
+static string print_type(nc_type datatype)
 {
     switch (datatype) {
-      case NC_CHAR:
-	return STRING;
+        case NC_CHAR:
+            return STRING;
 
-      case NC_BYTE:
-	return BYTE;
+#if NETCDF_VERSION >= 4
+            case NC_UBYTE:
+#endif
+        case NC_BYTE:
+            return BYTE;
 
-      case NC_SHORT:
-	return INT16;
+        case NC_SHORT:
+            return INT16;
 
-      case NC_LONG:
-	return INT32;
+#if NETCDF_VERSION >= 4
+            case NC_USHORT:
+            return UINT16;
+#endif
 
-      case NC_FLOAT:
-	return FLOAT32;
+        case NC_INT:
+            return INT32;
 
-      case NC_DOUBLE:
-	return FLOAT64;
+#if NETCDF_VERSION >= 4
+            case NC_UINT:
+            return INT32;
+#endif
+        case NC_FLOAT:
+            return FLOAT32;
 
-      default:
-	return STRING;
+        case NC_DOUBLE:
+            return FLOAT64;
+
+        default:
+            return STRING;
     }
 }
 
 /** Read the vector of attribute values from the netcdf file.
 
-    @param ncid The netCDF file id
-    @param varid The variable id
-    @param name THe attribute name
-    @param value A value-result parameter which will point to the vector of
-    values.
-    @see print_attr
-  */
-static int
-dap_get_att(int ncid, int varid, const char *name, void *value)
+ @param ncid The netCDF file id
+ @param varid The variable id
+ @param name THe attribute name
+ @param value A value-result parameter which will point to the vector of
+ values.
+ @see print_attr
+ */
+static int dap_get_att(int ncid, int varid, const char *name, void *value)
 {
     int status;
     nc_type attrp;
 
     status = nc_inq_atttype(ncid, varid, name, &attrp);
-    if(status != NC_NOERR)
-	return status;
+    if (status != NC_NOERR)
+        return status;
 
     switch (attrp) {
-      case NC_BYTE:
-	return nc_get_att_schar(ncid, varid, name, (signed char *)value);
-      case NC_CHAR:
-	return nc_get_att_text(ncid, varid, name, (char *)value);
-      case NC_SHORT:
-	return nc_get_att_short(ncid, varid, name, (short *)value);
-      case NC_INT:
-#if (SIZEOF_INT >= X_SIZEOF_INT)
-	return nc_get_att_int(ncid, varid, name, (int *)value);
-#elif SIZEOF_LONG == X_SIZEOF_INT
-	return nc_get_att_long(ncid, varid, name, (long *)value);
+        case NC_BYTE:
+            return nc_get_att_schar(ncid, varid, name, (signed char *) value);
+
+#if NETCDF_VERSION >= 4
+        case NC_UBYTE:
+            return nc_get_att_uchar(ncid, varid, name, (unsigned char *) value);
+
+        case NC_STRING:
+            return nc_get_att_string(ncid, varid, name, (char **) value);
+
+        case NC_USHORT:
+            return nc_get_att_ushort(ncid, varid, name, (unsigned short *) value);
+
+        case NC_UINT:
+            return nc_get_att_uint(ncid, varid, name, (unsigned int *) value);
 #endif
-      case NC_FLOAT:
-	return nc_get_att_float(ncid, varid, name, (float *)value);
-      case NC_DOUBLE:
-	return nc_get_att_double(ncid, varid, name, (double *)value);
-      default:
-	return NC_EBADTYPE;
+
+        case NC_CHAR:
+            return nc_get_att_text(ncid, varid, name, (char *) value);
+
+        case NC_SHORT:
+            return nc_get_att_short(ncid, varid, name, (short *) value);
+
+        case NC_INT:
+#if (SIZEOF_INT >= X_SIZEOF_INT)
+            return nc_get_att_int(ncid, varid, name, (int *) value);
+#elif SIZEOF_LONG == X_SIZEOF_INT
+            return nc_get_att_long(ncid, varid, name, (long *)value);
+#endif
+
+        case NC_FLOAT:
+            return nc_get_att_float(ncid, varid, name, (float *) value);
+
+        case NC_DOUBLE:
+            return nc_get_att_double(ncid, varid, name, (double *) value);
+
+        default:
+            return NC_EBADTYPE;
     }
 }
 
 /** Given the netcdf file id, variable id, number of attributes for the
-    variable, and an attribute table pointer, read the attributes and store
-    their names and values in the attribute table.
+ variable, and an attribute table pointer, read the attributes and store
+ their names and values in the attribute table.
 
-    @note Attribute values in the DAP are stored only as strings.
-    @param ncid The netcdf file id
-    @param v The netcdf variable id
-    @param natts The number of attributes
-    @param at A value-result parameter; a point to the attribute table to which
-    the new information will be added.
-*/
-static void
-read_attributes(int ncid, int v, int natts, AttrTable *at)
+ @note Attribute values in the DAP are stored only as strings.
+ @param ncid The netcdf file id
+ @param v The netcdf variable id
+ @param natts The number of attributes
+ @param at A value-result parameter; a point to the attribute table to which
+ the new information will be added.
+ */
+static void read_attributes(int ncid, int v, int natts, AttrTable *at)
 {
     char attrname[MAX_NC_NAME];
     nc_type datatype;
     size_t len;
     int errstat = NC_NOERR;
-    char *value;
 
     for (int a = 0; a < natts; ++a) {
         errstat = nc_inq_attname(ncid, v, a, attrname);
         if (errstat != NC_NOERR) {
-	    string msg = "Could not get the name for attribute ";
-	    msg += long_to_string(a);
-	    throw Error(errstat, msg);
+            string msg = "Could not get the name for attribute ";
+            msg += long_to_string(a);
+            throw Error(errstat, msg);
         }
-	errstat = nc_inq_att(ncid, v, attrname, &datatype, &len);
-	if (errstat != NC_NOERR) {
-	    string msg = "Could not get the name for attribute '";
+
+        // len is the number of values. Attributes in netcdf can be scalars or
+        // vectors
+        errstat = nc_inq_att(ncid, v, attrname, &datatype, &len);
+        if (errstat != NC_NOERR) {
+            string msg = "Could not get the name for attribute '";
             msg += attrname + string("'");
             throw Error(errstat, msg);
-	}
+        }
 
-	value = new char [(len + 1) * nctypelen(datatype)];
-	errstat = dap_get_att(ncid, v, attrname, (void *)value);
-	if (errstat != NC_NOERR) {
+        if (datatype == NC_STRING) {
+            char **value = new char* [(len + 1) * nctypelen(datatype)];
+            errstat = dap_get_att(ncid, v, attrname, (void *) value);
+            if (errstat != NC_NOERR) {
+                delete[] value;
+                string msg = "Could not get the value for attribute '";
+                msg += attrname + string("'");
+                throw Error(errstat, msg);
+            }
+
+            // add all the attributes in the array
+            for (unsigned int loc = 0; loc < len; loc++) {
+                string print_rep = print_attr(datatype, loc, (void *) value);
+                at->append_attr(attrname, print_type(datatype), print_rep);
+            }
+
             delete[] value;
-   	    throw Error(errstat, "Could not get the attribute value");
-	}
+        }
+        else {
+            char *value = new char[(len + 1) * nctypelen(datatype)];
+            errstat = dap_get_att(ncid, v, attrname, (void *) value);
+            if (errstat != NC_NOERR) {
+                delete[] value;
+                string msg = "Could not get the value for attribute '";
+                msg += attrname + string("'");
+                throw Error(errstat, msg);
+            }
 
-	// If the datatype is NC_CHAR then we have a string. netCDF
-	// represents strings as arrays of char, but we represent them as X
-	// strings. So... Add the null and set the length to 1
-	if (datatype == NC_CHAR) {
-	    *(value + len) = '\0';
-	    len = 1;
-	}
+            // If the datatype is NC_CHAR then we have a string. netCDF
+            // represents strings as arrays of char, but we represent them as X
+            // strings. So... Add the null and set the length to 1
+            if (datatype == NC_CHAR) {
+                *(value + len) = '\0';
+                len = 1;
+            }
 
-	// add all the attributes in the array
-	for (unsigned int loc=0; loc < len ; loc++) {
-	    string print_rep = print_attr(datatype, loc, (void *)value);
-	    at->append_attr(attrname, print_type(datatype), print_rep);
-	}
+            // add all the attributes in the array
+            for (unsigned int loc = 0; loc < len; loc++) {
+                string print_rep = print_attr(datatype, loc, (void *) value);
+                at->append_attr(attrname, print_type(datatype), print_rep);
+            }
 
-	delete [] value;
+            delete[] value;
+        }
     }
 }
 
 /** Given a reference to an instance of class DAS and a filename that refers
-    to a netcdf file, read the netcdf file and extract all the attributes of
-    each of its variables. Add the variables and their attributes to the
-    instance of DAS.
-*/
-void
-nc_read_variables(DAS &das, const string &filename)
+ to a netcdf file, read the netcdf file and extract all the attributes of
+ each of its variables. Add the variables and their attributes to the
+ instance of DAS.
+ */
+void nc_read_variables(DAS &das, const string &filename)
 {
     int ncid, errstat;
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
@@ -312,10 +380,10 @@ nc_read_variables(DAS &das, const string &filename)
 
     // how many variables? how many global attributes?
     int nvars, ngatts;
-    errstat = nc_inq(ncid, (int *)0, &nvars, &ngatts, (int *)0);
+    errstat = nc_inq(ncid, (int *) 0, &nvars, &ngatts, (int *) 0);
     if (errstat != NC_NOERR) {
         string msg = "Could not inquire about netcdf file: " + path_to_filename(filename) + ".";
-	throw Error(errstat, msg);
+        throw Error(errstat, msg);
     }
 
     // for each variable
@@ -323,79 +391,74 @@ nc_read_variables(DAS &das, const string &filename)
     int natts = 0;
     nc_type var_type;
 #if 0
-    int num_dim;                /* number of dim. in variable */
-    AttrTable *attr_table_ptr = NULL ;
+    int num_dim; /* number of dim. in variable */
+    AttrTable *attr_table_ptr = NULL;
 #endif
     for (int v = 0; v < nvars; ++v) {
-        errstat = nc_inq_var(ncid, v, varname, &var_type, (int*)0, (int*)0, &natts);
-	if (errstat != NC_NOERR) {
-	    string msg = "Could not get information for variable ";
-	    msg += long_to_string(v);
-	    throw Error(errstat, msg);
-	}
+        errstat = nc_inq_var(ncid, v, varname, &var_type, (int*) 0, (int*) 0, &natts);
+        if (errstat != NC_NOERR) {
+            string msg = "Could not get information for variable ";
+            msg += long_to_string(v);
+            throw Error(errstat, msg);
+        }
 
-	AttrTable *attr_table_ptr = das.get_table(varname);
-	if (!attr_table_ptr)
-	    attr_table_ptr = das.add_table(varname, new AttrTable);
+        AttrTable *attr_table_ptr = das.get_table(varname);
+        if (!attr_table_ptr)
+            attr_table_ptr = das.add_table(varname, new AttrTable);
 
-	read_attributes(ncid, v, natts, attr_table_ptr);
+        read_attributes(ncid, v, natts, attr_table_ptr);
 
         // Add a special attribute for string lengths
-	if (var_type == NC_CHAR) {
-	    // number of dimensions and size of Nth dimension
-	    int num_dim;
-	    int vdimids[MAX_VAR_DIMS];  // variable dimension ids
-	    errstat = nc_inq_var(ncid, v, (char *)0, (nc_type *)0, &num_dim,
-	            vdimids, (int *)0);
-	    if (errstat != NC_NOERR)
-	        throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
+        if (var_type == NC_CHAR) {
+            // number of dimensions and size of Nth dimension
+            int num_dim;
+            int vdimids[MAX_VAR_DIMS]; // variable dimension ids
+            errstat = nc_inq_var(ncid, v, (char *) 0, (nc_type *) 0, &num_dim, vdimids, (int *) 0);
+            if (errstat != NC_NOERR)
+                throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
 
-	    if (num_dim == 0) {
-	        // a scalar NC_CHAR is stuffed into a string of length 1
-	        int size = 1;
-                string print_rep = print_attr(NC_LONG, 0, (void *)&size);
-                attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
-	    }
-	    else {
+            if (num_dim == 0) {
+                // a scalar NC_CHAR is stuffed into a string of length 1
+                int size = 1;
+                string print_rep = print_attr(NC_INT, 0, (void *) &size);
+                attr_table_ptr->append_attr("string_length", print_type(NC_INT), print_rep);
+            }
+            else {
                 // size_t *dim_sizes = new size_t[num_dim];
-				vector<size_t> dim_sizes(num_dim);
+                vector<size_t> dim_sizes(num_dim);
                 for (int i = 0; i < num_dim; ++i) {
                     if ((errstat = nc_inq_dimlen(ncid, vdimids[i], &dim_sizes[i])) != NC_NOERR) {
-                    	// delete[] dim_sizes;
-                        throw Error(errstat,
-                                string("Could not read dimension information about the variable `")
-                                + varname + string("'."));
+                        // delete[] dim_sizes;
+                        throw Error(errstat, string("Could not read dimension information about the variable `") + varname + string("'."));
                     }
                 }
 
                 // add attribute
-                string print_rep = print_attr(NC_LONG, 0, (void *) (&dim_sizes[num_dim - 1]));
-                attr_table_ptr->append_attr("string_length", print_type(NC_LONG), print_rep);
+                string print_rep = print_attr(NC_INT, 0, (void *) (&dim_sizes[num_dim - 1]));
+                attr_table_ptr->append_attr("string_length", print_type(NC_INT), print_rep);
             }
-	}
+        }
     }
 
     // global attributes
     if (ngatts > 0) {
-	AttrTable *attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
+        AttrTable *attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
 
-	read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
+        read_attributes(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
     }
 
     // Add unlimited dimension name in DODS_EXTRA attribute table
     int xdimid;
     char dimname[MAX_NC_NAME];
     nc_type datatype = NC_CHAR;
-    nc_inq(ncid, (int *)0, (int *)0, (int *)0, &xdimid);
-    if (xdimid != -1){
-	nc_inq_dim(ncid, xdimid, dimname, (size_t *)0);
-	string print_rep = print_attr(datatype, 0, dimname);
-	AttrTable *attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
-	attr_table_ptr->append_attr("Unlimited_Dimension",
-				    print_type(datatype), print_rep);
+    nc_inq(ncid, (int *) 0, (int *) 0, (int *) 0, &xdimid);
+    if (xdimid != -1) {
+        nc_inq_dim(ncid, xdimid, dimname, (size_t *) 0);
+        string print_rep = print_attr(datatype, 0, dimname);
+        AttrTable *attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
+        attr_table_ptr->append_attr("Unlimited_Dimension", print_type(datatype), print_rep);
     }
 
     if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__,
-	                  "ncdds: Could not close the dataset!");
+        throw InternalErr(__FILE__, __LINE__, "ncdds: Could not close the dataset!");
 }

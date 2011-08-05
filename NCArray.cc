@@ -286,6 +286,41 @@ bool NCArray::read()
             break;
         }
 
+#if NETCDF_VERSION >= 4
+    case NC_USHORT: {
+
+            unsigned short *shtbuf = (unsigned short *)new char [(nels*nctypelen(datatype))];
+
+            if (has_stride)
+                errstat = nc_get_vars_ushort(ncid, varid, cor, edg, step, shtbuf);
+            else
+                errstat = nc_get_vara_ushort(ncid, varid, cor, edg, shtbuf);
+
+            if (errstat != NC_NOERR) {
+                delete[] shtbuf;
+                throw Error(errstat,
+                            string("Could not read the variable `") + name() + string("'."));
+            }
+
+            if (nctypelen(datatype) != sizeof(dods_uint16)) {
+                dods_int16 *intg16 = new dods_int16 [nels];
+
+                for (int id = 0; id < nels; id++)
+                    *(intg16 + id) = (dods_int16) * (shtbuf + id);
+
+                val2buf((void *)intg16);
+                delete [] intg16;
+            }
+            else {
+                val2buf((void *)shtbuf);
+            }
+            set_read_p(true);
+            delete [] shtbuf;
+
+            break;
+        }
+#endif
+
     case NC_INT: {
             int *lngbuf = (int *)new char [(nels*nctypelen(datatype))];
 
@@ -319,6 +354,41 @@ bool NCArray::read()
             break;
         }
 
+#if NETCDF_VERSION >= 4
+    case NC_UINT: {
+            unsigned int *lngbuf = (unsigned int *)new char [(nels*nctypelen(datatype))];
+
+            if (has_stride)
+                errstat = nc_get_vars_uint(ncid, varid, cor, edg, step, lngbuf);
+            else
+                errstat = nc_get_vara_uint(ncid, varid, cor, edg, lngbuf);
+
+            if (errstat != NC_NOERR) {
+                delete[] lngbuf;
+                throw Error(errstat, string("Could not read the variable `")
+                            + name() + string("'."));
+            }
+
+            if (nctypelen(datatype) != sizeof(dods_uint32)) {
+                dods_int32 *intg32 = new dods_int32 [nels];
+
+                for (int id = 0; id < nels; id++)
+                    *(intg32 + id) = (dods_int32) * (lngbuf + id);
+
+                val2buf((void *) intg32);
+                delete [] intg32;
+            }
+            else {
+                val2buf((void*)lngbuf);
+            }
+
+            set_read_p(true);
+            delete [] lngbuf;
+
+            break;
+        }
+
+#endif
     case NC_CHAR: {
             // Use the dimension info from netcdf since that's the place where
             // this variable has N-dims. In the DAP representation it's a N-1
@@ -374,6 +444,9 @@ bool NCArray::read()
             break;
         }
 
+#if NETCDF_VERSION >= 4
+    case NC_UBYTE:
+#endif
     case NC_BYTE: {
             //default (no type conversion needed and the type Byte)
             char *convbuf = new char [(nels*nctypelen(datatype))];
@@ -396,6 +469,42 @@ bool NCArray::read()
 
             break;
         }
+
+#if NETCDF_VERSION >= 4
+    case NC_STRING: {
+        char **chrbuf = new char* [(nels*nctypelen(datatype))];
+
+        // read the values in from the local netCDF file.
+        if (has_stride)
+            errstat = nc_get_vars_string(ncid, varid, cor, edg, step, chrbuf);
+        else
+            errstat = nc_get_vara_string(ncid, varid, cor, edg, chrbuf);
+
+        if (errstat != NC_NOERR) {
+            delete[] chrbuf;
+            throw Error(errstat, string("Could not read the variable `") + name()
+                    + string("'."));
+        }
+
+        string *strg = new string[nels]; // array of strings
+
+        // put the char values in the string array
+        for (int i = 0; i < nels; i++) {
+            strg[i] = chrbuf[i];
+        }
+
+        // reading is done (don't need to read each individual array value)
+        set_read_p(true);
+        // put values in the buffers
+        val2buf(strg);
+
+        // clean up
+        delete [] strg;
+        delete [] chrbuf;
+
+        break;
+    }
+#endif
 
     default:
         throw InternalErr(__FILE__, __LINE__,
