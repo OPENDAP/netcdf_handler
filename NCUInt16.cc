@@ -103,9 +103,6 @@ bool NCUInt16::read()
 
 #if NETCDF_VERSION >= 4
     if (datatype == NC_USHORT) {
-#else
-    if (datatype == NC_SHORT) {
-#endif
         unsigned short usht;
 
         errstat = nc_get_var1_ushort(ncid, varid, cor, &usht);
@@ -119,7 +116,23 @@ bool NCUInt16::read()
 
         if (nc_close(ncid) != NC_NOERR)
             throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+#else
+    if (datatype == NC_SHORT) {
+        short sht;
+
+        errstat = nc_get_var1_short(ncid, varid, cor, &sht);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+
+        set_read_p(true);
+
+        uintg16 = (dods_uint16)sht;
+        val2buf(&uintg16);
+
+        if (nc_close(ncid) != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
     }
+#endif
     else
         throw InternalErr(__FILE__, __LINE__, "Entered NCUInt16::read() with non-short variable!");
 

@@ -161,7 +161,7 @@ bool NCStr::read()
                 throw Error(string("Multidimensional character array found in string class while reading '") + name() + string("'."));
 
             break;
-
+#if NETCDF_VERSION >= 4
         case NC_STRING: {
             size_t cor[MAX_NC_DIMS]; /* corner coordinates */
             for (int id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
@@ -182,6 +182,10 @@ bool NCStr::read()
 
             break;
         }
+#endif
+        default:
+            throw InternalErr(__FILE__, __LINE__, "Entered String read method with an unrecognized datatype!");
+
     }
 
     return false;

@@ -103,9 +103,6 @@ bool NCUInt32::read()
 
 #if NETCDF_VERSION >= 4
     if (datatype == NC_UINT) {
-#else
-    if (datatype == NC_INT) {
-#endif
         unsigned int ulng;
         errstat = nc_get_var1_uint(ncid, varid, cor, &ulng);
         if (errstat != NC_NOERR)
@@ -119,6 +116,22 @@ bool NCUInt32::read()
         if (nc_close(ncid) != NC_NOERR)
             throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
     }
+#else
+    if (datatype == NC_INT) {
+        int lng;
+        errstat = nc_get_var1_int(ncid, varid, cor, &lng);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+
+        set_read_p(true);
+
+        uintg32 = (dods_uint32)lng;
+        val2buf(&uintg32);
+
+        if (nc_close(ncid) != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+    }
+#endif
     else
         throw InternalErr(__FILE__, __LINE__, "Entered NCUInt32::read() with non-long variable!");
 

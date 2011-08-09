@@ -317,6 +317,7 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
             throw Error(errstat, msg);
         }
 
+#if NETCDF_VERSION >= 4
         if (datatype == NC_STRING) {
             char **value = new char* [(len + 1) * nctypelen(datatype)];
             errstat = dap_get_att(ncid, v, attrname, (void *) value);
@@ -335,7 +336,9 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
 
             delete[] value;
         }
-        else {
+        else 
+#endif
+	{
             char *value = new char[(len + 1) * nctypelen(datatype)];
             errstat = dap_get_att(ncid, v, attrname, (void *) value);
             if (errstat != NC_NOERR) {
