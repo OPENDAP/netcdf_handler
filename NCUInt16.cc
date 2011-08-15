@@ -116,6 +116,7 @@ bool NCUInt16::read()
 
         if (nc_close(ncid) != NC_NOERR)
             throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+    }
 #else
     if (datatype == NC_SHORT) {
         short sht;
