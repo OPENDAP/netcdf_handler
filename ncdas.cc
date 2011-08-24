@@ -61,6 +61,7 @@ static char not_used rcsid[] = { "$Id$" };
 
 using namespace libdap;
 
+#if 0
 // These are used as the return values for print_type().
 
 static const char STRING[] = "String";
@@ -70,6 +71,7 @@ static const char INT16[] = "Int16";
 static const char UINT16[] = "UInt16";
 static const char FLOAT64[] = "Float64";
 static const char FLOAT32[] = "Float32";
+#endif
 
 /** Given the type, array index number and pointer to the associated attribute,
  Return the string representation of the attribute's value.
@@ -116,7 +118,7 @@ static string print_attr(nc_type type, int loc, void *vals)
 #endif
 
 #if NETCDF_VERSION >= 4
-            case NC_STRING:
+        case NC_STRING:
             gp.stringp = (char **) vals;
             rep << *(gp.stringp + loc);
             return rep.str();
@@ -128,22 +130,24 @@ static string print_attr(nc_type type, int loc, void *vals)
             return rep.str();
 
 #if NETCDF_VERSION >= 4
-            case NC_USHORT:
+        case NC_USHORT:
             gp.usp = (unsigned short *) vals;
             rep << *(gp.usp + loc);
             return rep.str();
 #endif
-        case NC_INT:
+
+            case NC_INT:
             gp.i = (int *) vals; // warning: long int format, int arg (arg 3)
             rep << *(gp.i + loc);
             return rep.str();
 
 #if NETCDF_VERSION >= 4
-            case NC_UINT:
+        case NC_UINT:
             gp.ui = (unsigned int *) vals;
             rep << *(gp.ui + loc);
             return rep.str();
 #endif
+
         case NC_FLOAT: {
             gp.fp = (float *) vals;
             rep << std::showpoint;
@@ -155,27 +159,35 @@ static string print_attr(nc_type type, int loc, void *vals)
             // trying to keep the same behavior as the old code without it's
             // problems. jhrg 8/11/2006
             string tmp_value = rep.str();
-            if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos && tmp_value.find("NaN")
-                    == string::npos && tmp_value.find("NAN") == string::npos)
+            if (tmp_value.find('.') == string::npos
+                    && tmp_value.find('e') == string::npos
+                    && tmp_value.find('E') == string::npos
+                    && tmp_value.find("nan") == string::npos
+                    && tmp_value.find("NaN") == string::npos
+                    && tmp_value.find("NAN") == string::npos)
                 rep << ".";
             return rep.str();
         }
+
         case NC_DOUBLE: {
             gp.dp = (double *) vals;
             rep << std::showpoint;
             rep << std::setprecision(17);
             rep << *(gp.dp + loc);
             string tmp_value = rep.str();
-            if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos && tmp_value.find("NaN")
-                    == string::npos && tmp_value.find("NAN") == string::npos)
+            if (tmp_value.find('.') == string::npos
+                    && tmp_value.find('e') == string::npos
+                    && tmp_value.find('E') == string::npos
+                    && tmp_value.find("nan") == string::npos
+                    && tmp_value.find("NaN")  == string::npos
+                    && tmp_value.find("NAN") == string::npos)
                 rep << ".";
             return rep.str();
         }
-        default:
-            throw Error("While reading a netcdf file, the server encountered an attribute with a data type it did not recognize.");
-    }
 
-    return string("\"\"");
+        default:
+            throw InternalErr(__FILE__, __LINE__, "The netcdf handler tried to print an attribute that has an unrecognized type. (1)");
+    }
 }
 
 /** Return the printed representation of a netcdf type -- in a form the
@@ -187,41 +199,65 @@ static string print_attr(nc_type type, int loc, void *vals)
 static string print_type(nc_type datatype)
 {
     switch (datatype) {
+        case NC_STRING:
+            return "String";
+
         case NC_CHAR:
-            return STRING;
+            return "String";
 
 #if NETCDF_VERSION >= 4
-            case NC_UBYTE:
+        case NC_UBYTE:
 #endif
         case NC_BYTE:
-            return BYTE;
+            return "Byte";
 
         case NC_SHORT:
-            return INT16;
+            return "Int16";
 
 #if NETCDF_VERSION >= 4
-            case NC_USHORT:
-            return UINT16;
+        case NC_USHORT:
+            return "UInt16";
 #endif
 
         case NC_INT:
-            return INT32;
+            return "Int32";
 
 #if NETCDF_VERSION >= 4
-            case NC_UINT:
-            return INT32;
+        case NC_UINT:
+            return "UInt32";
 #endif
+
         case NC_FLOAT:
-            return FLOAT32;
+            return "Float32";
 
         case NC_DOUBLE:
-            return FLOAT64;
+            return "Float64";
 
-        default:
-            return STRING;
+#if NETCDF_VERSION >= 4
+            // These are all new netcdf 4 types that we don't support yet
+            // as attributes. It's useful to have a print representation for
+            // them so that we can return useful information about why some
+            // information was elided or an exception thrown.
+        case NC_INT64:
+            return "NC_INT64";
+
+        case NC_UINT64:
+            return "NC_UINT64";
+
+        case NC_COMPOUND:
+            return "NC_COMPOUND";
+
+        case NC_VLEN:
+            return "NC_VLEN";
+        case NC_OPAQUE:
+            return "NC_OPAQUE";
+        case NC_ENUM:
+            return "NC_ENUM";
+#endif
     }
 }
 
+#if 0
 /** Read the vector of attribute values from the netcdf file.
 
  @param ncid The netCDF file id
@@ -281,6 +317,7 @@ static int dap_get_att(int ncid, int varid, const char *name, void *value)
             return NC_EBADTYPE;
     }
 }
+#endif
 
 /** Given the netcdf file id, variable id, number of attributes for the
  variable, and an attribute table pointer, read the attributes and store
@@ -317,7 +354,85 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
             throw Error(errstat, msg);
         }
 
+        switch (datatype) {
+            case NC_STRING:
+#if 0
+                {
+                vector<char> value((len + 1) * nctypelen(datatype));
+                errstat = nc_get_att(ncid, v, attrname, (void *)&value[0]);
+                // char **value = new char* [(len + 1) * nctypelen(datatype)];
+                // errstat = dap_get_att(ncid, v, attrname, (void *) value);
+                if (errstat != NC_NOERR) {
+                    //delete[] value;
+                    string msg = "Could not get the value for attribute '";
+                    msg += attrname + string("'");
+                    throw Error(errstat, msg);
+                }
+
+                // add all the attributes in the array
+                for (unsigned int loc = 0; loc < len; loc++) {
+                    string print_rep = print_attr(datatype, loc, (void *)&value[0]);
+                    at->append_attr(attrname, print_type(datatype), print_rep);
+                }
+
+                // delete[] value;
+                break;
+            }
+#endif
+            case NC_BYTE:
+            case NC_CHAR:
+            case NC_SHORT:
+            case NC_INT:
+            case NC_FLOAT:
+            case NC_DOUBLE:
 #if NETCDF_VERSION >= 4
+            case NC_UBYTE:
+            case NC_USHORT:
+            case NC_UINT:
+#endif
+            {
+                vector<char> value((len + 1) * nctypelen(datatype));
+                errstat = nc_get_att(ncid, v, attrname, (void *)&value[0]);
+                if (errstat != NC_NOERR) {
+                    string msg = "Could not get the value for attribute '";
+                    msg += attrname + string("'");
+                    throw Error(errstat, msg);
+                }
+
+                // If the datatype is NC_CHAR then we have a string. netCDF 3
+                // represents strings as arrays of char, but we represent them as X
+                // strings. So... Add the null and set the length to 1
+                if (datatype == NC_CHAR) {
+                    value[len] = '\0';
+                    len = 1;
+                }
+
+                // add all the attributes in the array
+                for (unsigned int loc = 0; loc < len; loc++) {
+                    string print_rep = print_attr(datatype, loc, (void *)&value[0]);
+                    at->append_attr(attrname, print_type(datatype), print_rep);
+                }
+
+                break;
+            }
+
+#if NETCDF_VERSION >= 4
+            case NC_INT64:
+            case NC_UINT64:
+            case NC_COMPOUND:
+            case NC_VLEN:
+            case NC_OPAQUE:
+            case NC_ENUM: {
+                string note = "Attribute edlided: Unsupported attribute type ";
+                note += "(" + print_type(datatype) + ")";
+                at->append_attr(attrname, "String", note);
+                break;
+            }
+#endif
+            default:
+                throw InternalErr(__FILE__, __LINE__, "Unrecognized attribute type.");
+        }
+#if 0
         if (datatype == NC_STRING) {
             char **value = new char* [(len + 1) * nctypelen(datatype)];
             errstat = dap_get_att(ncid, v, attrname, (void *) value);
@@ -364,6 +479,7 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
 
             delete[] value;
         }
+#endif
     }
 }
 
@@ -371,8 +487,12 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
  to a netcdf file, read the netcdf file and extract all the attributes of
  each of its variables. Add the variables and their attributes to the
  instance of DAS.
+
+ @param das A reference to the DAS object where the attribute information
+ should be stored.
+ @param filename The name of the source file.
  */
-void nc_read_variables(DAS &das, const string &filename)
+void nc_read_dataset_attributes(DAS &das, const string &filename)
 {
     int ncid, errstat;
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);

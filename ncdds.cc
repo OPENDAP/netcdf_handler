@@ -433,7 +433,7 @@ static void read_class(DDS &dds_table, const string &filename, int ncid,
 
     @param elide_dimension_arrays If true, don't include an array if it's
     really a dimension used by a Grid. */
-void nc_read_descriptors(DDS &dds_table, const string &filename,
+void nc_read_dataset_variables(DDS &dds_table, const string &filename,
         bool elide_dimension_arrays)
 {
     ncopts = 0;

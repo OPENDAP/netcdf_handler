@@ -25,6 +25,7 @@
 // NCRequestHandler.cc
 
 #include "NCRequestHandler.h"
+
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
 #include <BESDapNames.h>
@@ -41,6 +42,7 @@
 #include <Ancillary.h>
 #include <BESServiceRegistry.h>
 #include <BESUtil.h>
+#include <BESContextManager.h>
 
 #include "config_nc.h"
 
@@ -51,8 +53,27 @@ using namespace libdap;
 bool NCRequestHandler::_show_shared_dims = false;
 bool NCRequestHandler::_show_shared_dims_set = false;
 
-extern void nc_read_variables(DAS & das, const string & filename) throw (Error);
-extern void nc_read_descriptors(DDS & dds, const string & filename, bool elide_dimension_arrays);
+extern void nc_read_dataset_attributes(DAS & das, const string & filename) throw (Error);
+extern void nc_read_dataset_variables(DDS & dds, const string & filename, bool elide_dimension_arrays);
+
+/** Is the version number string greater than or equal to the value.
+ * @note Works only for versions with zero or one dot. If the conversion of
+ * the string to a float fails for any reason, this returns false.
+ * @param version The string value (e.g., 3.2)
+ * @param value A floating point value.
+ */
+static bool version_ge(const string &version, float value)
+{
+    try {
+        float v;
+        istringstream iss(version);
+        iss >> v;
+        return (v >= value);
+    }
+    catch (...) {
+        return false;
+    }
+}
 
 NCRequestHandler::NCRequestHandler(const string &name) :
     BESRequestHandler(name)
@@ -64,16 +85,28 @@ NCRequestHandler::NCRequestHandler(const string &name) :
     add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
 
     if (NCRequestHandler::_show_shared_dims_set == false) {
-        bool found = false;
-        string key = "NC.ShowSharedDimensions";
+        bool key_found = false, context_found = false;
+        // string key = "NC.ShowSharedDimensions";
         string doset;
-        TheBESKeys::TheKeys()->get_value(key, doset, found);
-        if (found) {
+        TheBESKeys::TheKeys()->get_value("NC.ShowSharedDimensions", doset, key_found);
+        // TODO Use correct string for the dap context
+        string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
+        if (key_found) {
             doset = BESUtil::lowercase(doset);
             if (doset == "true" || doset == "yes") {
                 NCRequestHandler::_show_shared_dims = true;
             }
         }
+        else if (context_found) {
+            if (version_ge(context_value, 3.2))
+                NCRequestHandler::_show_shared_dims = false;
+            else
+                NCRequestHandler::_show_shared_dims = true;
+        }
+        else {
+            NCRequestHandler::_show_shared_dims = true;
+        }
+
         NCRequestHandler::_show_shared_dims_set = true;
     }
 }
@@ -92,7 +125,7 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         bdas->set_container(dhi.container->get_symbolic_name());
         DAS *das = bdas->get_das();
         string accessed = dhi.container->access();
-        nc_read_variables(*das, accessed);
+        nc_read_dataset_attributes(*das, accessed);
         Ancillary::read_ancillary_das(*das, accessed);
         bdas->clear_container();
     }
@@ -129,13 +162,14 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         dds->filename(accessed);
 
         bool elide_dimension_arrays = !(NCRequestHandler::_show_shared_dims);
-        nc_read_descriptors(*dds, accessed, elide_dimension_arrays);
+
+        nc_read_dataset_variables(*dds, accessed, elide_dimension_arrays);
         Ancillary::read_ancillary_dds(*dds, accessed);
 
         DAS *das = new DAS;
         BESDASResponse bdas(das);
         bdas.set_container(dhi.container->get_symbolic_name());
-        nc_read_variables(*das, accessed);
+        nc_read_dataset_attributes(*das, accessed);
         Ancillary::read_ancillary_das(*das, accessed);
 
         dds->transfer_attributes(das);
@@ -178,13 +212,14 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         dds->filename(accessed);
 
         bool elide_dimension_arrays = !(NCRequestHandler::_show_shared_dims);
-        nc_read_descriptors(*dds, accessed, elide_dimension_arrays);
+
+        nc_read_dataset_variables(*dds, accessed, elide_dimension_arrays);
         Ancillary::read_ancillary_dds(*dds, accessed);
 
         DAS *das = new DAS;
         BESDASResponse bdas(das);
         bdas.set_container(dhi.container->get_symbolic_name());
-        nc_read_variables(*das, accessed);
+        nc_read_dataset_attributes(*das, accessed);
         Ancillary::read_ancillary_das(*das, accessed);
 
         dds->transfer_attributes(das);
