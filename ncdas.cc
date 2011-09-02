@@ -58,6 +58,7 @@ static char not_used rcsid[] = { "$Id$" };
 #include <DAS.h>
 
 #define ATTR_STRING_QUOTE_FIX
+#define NETCDF_VERSION 4
 
 using namespace libdap;
 
@@ -244,6 +245,7 @@ static string print_type(nc_type datatype)
         case NC_UINT64:
             return "NC_UINT64";
 
+            // TODO: Adding support now...
         case NC_COMPOUND:
             return "NC_COMPOUND";
 
@@ -319,6 +321,35 @@ static int dap_get_att(int ncid, int varid, const char *name, void *value)
 }
 #endif
 
+/** Build and append values for attributes. The value are limited to
+ * cardinal types; compound, ..., values are built by calling this once for
+ * each of the subordinate types. Vectors of values are handled here, however,
+ */
+static void append_values(int ncid, int v, int len, nc_type datatype, char *attrname, AttrTable *at)
+{
+    vector<char> value((len + 1) * nctypelen(datatype));
+    int errstat = nc_get_att(ncid, v, attrname, (void *)&value[0]);
+    if (errstat != NC_NOERR) {
+        throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
+    }
+
+    // If the datatype is NC_CHAR then we have a string. netCDF 3
+    // represents strings as arrays of char, but we represent them as X
+    // strings. So... Add the null and set the length to 1
+    if (datatype == NC_CHAR) {
+        value[len] = '\0';
+        len = 1;
+    }
+
+    // add all the attributes in the array
+    for (unsigned int loc = 0; loc < len; loc++) {
+        string print_rep = print_attr(datatype, loc, (void *)&value[0]);
+        at->append_attr(attrname, print_type(datatype), print_rep);
+    }
+}
+
+
+
 /** Given the netcdf file id, variable id, number of attributes for the
  variable, and an attribute table pointer, read the attributes and store
  their names and values in the attribute table.
@@ -354,6 +385,55 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
             throw Error(errstat, msg);
         }
 
+        if (datatype >= NC_FIRSTUSERTYPEID) {
+            char type_name[NC_MAX_NAME];
+            size_t size;
+            nc_type base_type;
+            size_t nfields;
+            int class_type;
+            int status = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
+            if (status != NC_NOERR) {
+                throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(status) + ")."));
+            }
+
+            switch (class_type) {
+                case NC_COMPOUND: {
+                    cerr << "in read_attributes; found a compound attribute." << endl;
+                    char attr_name[NC_MAX_NAME];
+                    nc_inq_compound_name(ncid, datatype, attr_name);
+                    // Make an attribute container
+                    AttrTable *container =  at->append_container(attr_name);
+                    for (int i = 0; i < nfields; ++i) {
+                        char field_name[NC_MAX_NAME];
+                        //size_t offset;
+                        nc_type field_typeid;
+                        int field_ndims;
+                        int field_sizes[MAX_NC_DIMS];
+                        nc_inq_compound_field(ncid, datatype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
+                        // If the field_ndims is > 1 then we have issues since
+                        // DAP2 does not grok attributes with rank > 1.
+                        int len = (field_ndims >= 1) ? field_sizes[0]: 1;
+                        append_values(ncid, v, len, field_typeid, field_name, container);
+                    }
+
+                    break;
+                }
+
+                case NC_VLEN:
+                    cerr << "in build_user_defined; found a vlen." << endl;
+                    break;
+                case NC_OPAQUE:
+                    cerr << "in build_user_defined; found a opaque." << endl;
+                    break;
+                case NC_ENUM:
+                    cerr << "in build_user_defined; found a enum." << endl;
+                    break;
+                default:
+                    throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+            }
+
+        }
+        else {
         switch (datatype) {
             case NC_STRING:
 #if 0
@@ -390,7 +470,11 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
             case NC_USHORT:
             case NC_UINT:
 #endif
-            {
+                append_values(ncid, v, len, datatype, attrname, at);
+                break;
+
+#if 0
+                {
                 vector<char> value((len + 1) * nctypelen(datatype));
                 errstat = nc_get_att(ncid, v, attrname, (void *)&value[0]);
                 if (errstat != NC_NOERR) {
@@ -415,6 +499,7 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
 
                 break;
             }
+#endif
 
 #if NETCDF_VERSION >= 4
             case NC_INT64:
@@ -453,6 +538,7 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
         }
         else 
 #endif
+#if 0
 	{
             char *value = new char[(len + 1) * nctypelen(datatype)];
             errstat = dap_get_att(ncid, v, attrname, (void *) value);
@@ -480,6 +566,7 @@ static void read_attributes(int ncid, int v, int natts, AttrTable *at)
             delete[] value;
         }
 #endif
+    }
     }
 }
 
