@@ -58,7 +58,7 @@ static char not_used rcsid[] = { "$Id$" };
 #include <DAS.h>
 
 #define ATTR_STRING_QUOTE_FIX
-#define NETCDF_VERSION 4
+//#define NETCDF_VERSION 4
 
 using namespace libdap;
 
