@@ -24,6 +24,9 @@
 
 // NCRequestHandler.cc
 
+#include <string>
+#include <sstream>
+
 #include "NCRequestHandler.h"
 
 #include <BESResponseHandler.h>
@@ -68,6 +71,7 @@ static bool version_ge(const string &version, float value)
         float v;
         istringstream iss(version);
         iss >> v;
+        //cerr << "version: " << v << ", value: " << value << endl;
         return (v >= value);
     }
     catch (...) {
@@ -89,21 +93,26 @@ NCRequestHandler::NCRequestHandler(const string &name) :
         // string key = "NC.ShowSharedDimensions";
         string doset;
         TheBESKeys::TheKeys()->get_value("NC.ShowSharedDimensions", doset, key_found);
-        // TODO Use correct string for the dap context
+        // TODO Fix this so it works
         string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
+        //cerr << "context value: " << context_value << endl;
+        //cerr << "Testing values..." << endl;
         if (key_found) {
+            //cerr << " Key found" << endl;
             doset = BESUtil::lowercase(doset);
             if (doset == "true" || doset == "yes") {
                 NCRequestHandler::_show_shared_dims = true;
             }
         }
         else if (context_found) {
+            //cerr << "context found" << endl;
             if (version_ge(context_value, 3.2))
                 NCRequestHandler::_show_shared_dims = false;
             else
                 NCRequestHandler::_show_shared_dims = true;
         }
         else {
+            //cerr << "Set default value" << endl;
             NCRequestHandler::_show_shared_dims = true;
         }
 
@@ -165,7 +174,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
         nc_read_dataset_variables(*dds, accessed, elide_dimension_arrays);
         Ancillary::read_ancillary_dds(*dds, accessed);
-
+#if 1
         DAS *das = new DAS;
         BESDASResponse bdas(das);
         bdas.set_container(dhi.container->get_symbolic_name());
@@ -173,7 +182,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         Ancillary::read_ancillary_das(*das, accessed);
 
         dds->transfer_attributes(das);
-
+#endif
         bdds->set_constraint(dhi);
 
         bdds->clear_container();

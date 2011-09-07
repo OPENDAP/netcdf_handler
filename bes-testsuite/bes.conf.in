@@ -268,4 +268,4 @@ BES.DefaultResponseMethod=POST
 # Data Handler Specific key/value parameters                            #
 #                                                                       #
 #-----------------------------------------------------------------------#
-
+NC.ShowSharedDimensions=false

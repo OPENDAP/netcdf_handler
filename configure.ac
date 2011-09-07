@@ -64,37 +64,15 @@ AC_CHECK_NETCDF(
    ],[3]
 )
 
-AC_MSG_NOTICE([Checking the netCDF library version number])
+AC_MSG_CHECKING([Checking the netCDF library version number])
 
-# Look for nc-config and ncgen; if nc-config exists, use it to get the netcdf
-# version. Otherwise, if ncgen exists, use it to get the netcdf version.
-AC_CHECK_PROG(nc_config_found, nc-config, "yes", "no")
-AC_CHECK_PROG(ncgen_found, ncgen, "yes", "no")
-
-if test "$nc_config_found" = "yes"
-then
-	NETCDF_VERSION=`nc-config --version | sed 's@.* \([[0-9]]*\.[[0-9]]*\.[[0-9]]*\)$@\1@'`
-elif test "$ncgen_found" = "yes"
-then
-	ncgen_info=`ncgen -? 2>&1 | grep 'netcdf library version'`
-	NETCDF_VERSION=`echo $ncgen_info | sed 's@.*"\([[0-9]]*\.[[0-9]]*\.[[0-9]]*\)".*$@\1@'`
-else
-	AC_MSG_WARN([Could not find nc-config nor ncgen.])
-	NETCDF_VERSION=3.0.0
-fi
-
-NETCDF_MAJOR_VERSION=`echo $NETCDF_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\1@'`
-NETCDF_MINOR_VERSION=`echo $NETCDF_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\2@'`
-NETCDF_SUBMINOR_VERSION=`echo $NETCDF_VERSION | sed 's@^\([[0-9]]\)*\.\([[0-9]]*\)\.\([[0-9]]*\)$@\3@'`
-#AC_MSG_NOTICE(NETCDF Major Version:     $NETCDF_MAJOR_VERSION)
-#AC_MSG_NOTICE(NETCDF Minor Version:     $NETCDF_MINOR_VERSION)
-#AC_MSG_NOTICE(NETCDF SubMinor Version:  $NETCDF_SUBMINOR_VERSION)
-# AC_SUBST(NETCDF_MAJOR_VERSION)
-# AC_SUBST(NETCDF_MINOR_VERSION)
-# AC_SUBST(NETCDF_SUBMINOR_VERSION)
-
-AC_MSG_NOTICE(Setting netCDF library version number to $NETCDF_MAJOR_VERSION)
+AC_EGREP_HEADER(nc_inq_user_type, netcdf.h, 
+        NETCDF_MAJOR_VERSION=4, NETCDF_MAJOR_VERSION=3)
 AC_DEFINE_UNQUOTED(NETCDF_VERSION, $NETCDF_MAJOR_VERSION, [What version of netcdf were we built with?])
+
+AC_MSG_RESULT($NETCDF_MAJOR_VERSION)
+
+AM_CONDITIONAL([NETCDF4_TESTS], [test "$NETCDF_MAJOR_VERSION" = "4"])
 
 AC_CHECK_BES([3.9.0],
 [

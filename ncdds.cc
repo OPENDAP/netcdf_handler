@@ -67,12 +67,15 @@ static char not_used rcsid[]={"$Id$"};
 #include "NCGrid.h"
 #include "NCStr.h"
 
+#include "NCStructure.h"
+
 using namespace libdap ;
+
 
 /** This function returns the appropriate DODS BaseType for the given
     netCDF data type. */
 static BaseType *
-Get_bt(const string &varname, const string &dataset, nc_type datatype)
+build_scalar(const string &varname, const string &dataset, nc_type datatype)
 {
     switch (datatype) {
 #if NETCDF_VERSION >= 4
@@ -110,7 +113,7 @@ Get_bt(const string &varname, const string &dataset, nc_type datatype)
             return (new NCFloat64(varname, dataset));
 
         default: // Maybe this should be an error? jhrg 1/12/09
-            throw Error("netcdf: Unknown type for variable '" + varname + "'");
+            throw Error("Unknown type (" + long_to_string(datatype) + ") for variable '" + varname + "'");
     }
 }
 
@@ -149,7 +152,7 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
 
     // Build and add BaseType/Array instances for the maps
     for (int d = 0; d < ndims; ++d) {
-        BaseType *local_bt = Get_bt(map_names[d], filename, map_types[d]);
+        BaseType *local_bt = build_scalar(map_names[d], filename, map_types[d]);
         NCArray *local_ar = new NCArray(local_bt->name(), filename, local_bt);
         delete local_bt;
         local_ar->append_dim(map_sizes[d], map_names[d]);
@@ -159,6 +162,89 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
 
     return gr;
 }
+
+#if NETCDF_VERSION >= 4
+/** Build an instance of a user defined type. These can be recursively
+ * defined.
+ */
+static BaseType *build_user_defined(int ncid, nc_type xtype, const string &dataset,
+        int ndims, int dim_ids[MAX_VAR_DIMS])
+{
+    char name[NC_MAX_NAME];
+    size_t size;
+    nc_type base_type;
+    size_t nfields;
+    int class_type;
+    int status = nc_inq_user_type(ncid, xtype, name, &size, &base_type, &nfields, &class_type);
+    if (status != NC_NOERR) {
+        throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(status) + ")."));
+    }
+
+    switch (class_type) {
+        case NC_COMPOUND: {
+            cerr << "in build_user_defined; found a compound." << endl;
+            char var_name[NC_MAX_NAME];
+            nc_inq_compound_name(ncid, xtype, var_name);
+            NCStructure *ncs = new NCStructure(var_name, dataset);
+            for (int i = 0; i < nfields; ++i) {
+                char field_name[NC_MAX_NAME];
+                //size_t offset;
+                nc_type field_typeid;
+                int field_ndims;
+                int field_sizes[MAX_NC_DIMS];
+                nc_inq_compound_field(ncid, xtype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
+                BaseType *field = build_scalar(field_name, dataset, field_typeid);
+                // is this a scalar of an array? Note that an array of CHAR is
+                // a scalar string in netcdf3.
+                if (field_ndims == 0 || field_ndims == 1 && field_typeid == NC_CHAR) {
+                    ncs->add_var(field);
+                }
+                else {
+                    NCArray *ar = new NCArray(field_name, dataset, field);
+                    for (int i = 0; i < field_ndims; ++i) {
+                        ar->append_dim(field_sizes[i]);
+                    }
+                    ncs->add_var(ar);
+                }
+            }
+            // Is this an array of a compound (DAP Structure)?
+            if (ndims > 0) {
+                NCArray *ar = new NCArray(var_name, dataset, ncs);
+                for (int i = 0; i < ndims; ++i) {
+                    char dimname[NC_MAX_NAME];
+                    size_t dim_sz;
+                    int errstat = nc_inq_dim(ncid, dim_ids[i], dimname, &dim_sz);
+                    if (errstat != NC_NOERR) {
+                        delete ar;
+                        throw InternalErr(__FILE__, __LINE__, string("Failed to read dimension information for the compound variable ") + var_name);
+                    }
+
+                    ar->append_dim(dim_sz, dimname);
+                }
+
+                return ar;
+            }
+            else {
+                return ncs;
+            }
+        }
+
+        case NC_VLEN:
+            cerr << "in build_user_defined; found a vlen." << endl;
+            break;
+        case NC_OPAQUE:
+            cerr << "in build_user_defined; found a opaque." << endl;
+            break;
+        case NC_ENUM:
+            cerr << "in build_user_defined; found a enum." << endl;
+            break;
+
+        default:
+            throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+    }
+
+}
+#endif
 
 /**  Iterate over all of the variables in the data set looking for a one
      dimensional variable whose name and size match the name and size of the
@@ -267,6 +353,15 @@ static bool is_grid(int ncid, int var, int ndims, const int dim_ids[MAX_VAR_DIMS
     return true;
 }
 
+static bool is_user_defined(nc_type type)
+{
+#if NETCDF_VERSION >= 4
+    return type >= NC_FIRSTUSERTYPEID;
+#else
+    return false;
+#endif
+}
+
 static bool is_dimension(const string &name, vector<string> maps)
 {
     vector<string>::iterator i = find(maps.begin(), maps.end(), name);
@@ -284,10 +379,6 @@ static NCArray *build_array(BaseType *bt, int ncid, int var,
 
     if (array_type == NC_CHAR)
         --ndims;
-#if 0
-    if (ar->var()->type() == dods_str_c)
-        --ndims;
-#endif
 
     char dimname[MAX_NC_NAME];
     size_t dim_sz;
@@ -347,8 +438,7 @@ static void read_class(DDS &dds_table, const string &filename, int ncid,
     // only scalars and Grids (Arrays are added in the following loop). If
     // false, all variables are added in this loop.
     for (int var = 0; var < nvars; ++var) {
-        int errstat = nc_inq_var(ncid, var, name, &nctype, &ndims, dim_ids,
-                (int *) 0);
+        int errstat = nc_inq_var(ncid, var, name, &nctype, &ndims, dim_ids, (int *) 0);
         if (errstat != NC_NOERR) {
             string msg = "netcdf: could not get name or dimension number for variable ";
             msg += long_to_string(var);
@@ -363,18 +453,24 @@ static void read_class(DDS &dds_table, const string &filename, int ncid,
 
         // a scalar? NB a one-dim NC_CHAR array will have DAP type of
         // dods_str_c because it's really a scalar string, not an array.
-        if (ndims == 0 || (ndims == 1 && nctype == NC_CHAR)) {
-            BaseType *bt = Get_bt(name, filename, nctype);
+        if (is_user_defined(nctype)) {
+#if NETCDF_VERSION >= 4
+            cerr << "Found compound" << endl;
+            BaseType *bt = build_user_defined(ncid, nctype, filename, ndims, dim_ids);
+            dds_table.add_var(bt);
+            delete bt;
+#endif
+        }
+        else if (ndims == 0 || (ndims == 1 && nctype == NC_CHAR)) {
+            BaseType *bt = build_scalar(name, filename, nctype);
             dds_table.add_var(bt);
             delete bt;
         }
-        else if (is_grid(ncid, var, ndims, dim_ids, map_sizes,
-                map_names, map_types)) {
-            BaseType *bt = Get_bt(name, filename, nctype);
+        else if (is_grid(ncid, var, ndims, dim_ids, map_sizes, map_names, map_types)) {
+            BaseType *bt = build_scalar(name, filename, nctype);
             Array *ar = new NCArray(name, filename, bt);
             delete bt;
-            Grid *gr = build_grid(ar, ndims, nctype, map_names, map_types, map_sizes,
-                    &all_maps);
+            Grid *gr = build_grid(ar, ndims, nctype, map_names, map_types, map_sizes, &all_maps);
             delete ar;
             dds_table.add_var(gr);
             delete gr;
@@ -383,7 +479,7 @@ static void read_class(DDS &dds_table, const string &filename, int ncid,
             if (elide_dimension_arrays)
                 array_vars.push_back(var);
             else {
-                BaseType *bt = Get_bt(name, filename, nctype);
+                BaseType *bt = build_scalar(name, filename, nctype);
                 NCArray *ar = build_array(bt, ncid, var, nctype, ndims, dim_ids);
                 delete bt;
                 dds_table.add_var(ar);
@@ -392,7 +488,7 @@ static void read_class(DDS &dds_table, const string &filename, int ncid,
         }
     }
 
-    // This code is only run if elide_grid_map is true and in that case the
+    // This code is only run if elide_dimension_arrays is true and in that case the
     // loop above did not create any simple arrays. Instead it pushed the
     // var ids of things that look like simple arrays onto a vector. This code
     // will add all of those that really are arrays and not the ones that are
@@ -417,7 +513,7 @@ static void read_class(DDS &dds_table, const string &filename, int ncid,
             if (is_dimension(string(name), all_maps))
                 continue;
 
-            BaseType *bt = Get_bt(name, filename, nctype);
+            BaseType *bt = build_scalar(name, filename, nctype);
             Array *ar = build_array(bt, ncid, var, nctype, ndims, dim_ids);
             delete bt;
             dds_table.add_var(ar);
@@ -456,7 +552,7 @@ void nc_read_dataset_variables(DDS &dds_table, const string &filename,
     // dataset name
     dds_table.set_dataset_name(name_path(filename));
 
-    // read variables class
+    // read variables' classes
     read_class(dds_table, filename, ncid, nvars, elide_dimension_arrays);
 
     if (nc_close(ncid) != NC_NOERR)

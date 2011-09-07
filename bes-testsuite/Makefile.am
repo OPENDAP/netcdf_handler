@@ -35,25 +35,35 @@ bes.conf: bes.conf.in ../config.status
 ############## Autotest follows #####################
 
 AUTOM4TE = autom4te
- 
-TESTSUITE = $(srcdir)/netcdf_handlerTest
 
-check-local: atconfig atlocal $(TESTSUITE)
-	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
+TESTSUITE_3 = netcdf_handlerTest
+
+if NETCDF4_TESTS
+TESTSUITE_4 = nc4_netcdf_handler_tests
+else
+TESTSUITE_4 =
+endif
+
+# TESTSUITE_3 is always built, but not TESTSUITE_4
+
+check-local: atconfig atlocal package.m4 $(TESTSUITE_3) $(TESTSUITE_4)
+	$(SHELL) '$(TESTSUITE_3)' $(TESTSUITEFLAGS)
+	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' $(TESTSUITEFLAGS)
 
 clean-local:
-	test ! -f '$(TESTSUITE)' || $(SHELL) '$(TESTSUITE)' --clean
+	test ! -f '$(TESTSUITE_3)' || $(SHELL) '$(TESTSUITE_3)' --clean
+	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' --clean
 
 distclean-local:
 	-rm atconfig
 
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(TESTSUITE): $(srcdir)/netcdf_handlerTest.at $(srcdir)/package.m4
-	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
-	mv $@.tmp $@
 
+% : %.at
+	$(AUTOTEST) -I '$(srcdir)' -o $@ $@.at
+	
 # The `:;' works around a Bash 3.2 bug when the output is not writeable.
-$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+package.m4: $(top_srcdir)/configure.ac
 	:;{ \
 	echo '# Signature of the current package.' && \
 	echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])' && \
@@ -62,5 +72,3 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])' && \
 	echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
 	} >'$(srcdir)/package.m4'
-
-

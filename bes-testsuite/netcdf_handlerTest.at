@@ -1,37 +1,6 @@
 # Process with autom4te to create an -*- Autotest -*- test suite.
 
-
-# ------------------------------
-#
-
-AT_INIT([bes.conf besstandalone getdap])
-# AT_COPYRIGHT([])
-
-AT_TESTED([besstandalone])
-
-# Usage: _AT_TEST_*(<bescmd source>, <baseline file>)
-
-m4_define([_AT_BESCMD_TEST],   
-[AT_SETUP([BESCMD $1])
-AT_KEYWORDS([bescmd])
-AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $1 || true], [], [stdout], [stderr])
-AT_CHECK([diff -b -B $2 stdout || diff -b -B $2 stderr], [], [ignore],[],[])
-AT_CLEANUP])
-
-m4_define([_AT_BESCMD_BINARYDATA_TEST],   
-[AT_SETUP([BESCMD $1])
-AT_KEYWORDS([bescmd])
-AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $1 | getdap -M - || true], [], [stdout], [stderr])
-AT_CHECK([diff -b -B $2 stdout || diff -b -B $2 stderr], [], [ignore],[],[])
-AT_CLEANUP])
-
-m4_define([AT_BESCMD_RESPONSE_TEST],
-[_AT_BESCMD_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
-])
-
-m4_define([AT_BESCMD_BINARYDATA_RESPONSE_TEST],
-[_AT_BESCMD_BINARYDATA_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
-])
+m4_include([handler_tests_macros.m4])
 
 AT_BESCMD_RESPONSE_TEST([coads_climatology.nc.0.bescmd])
 AT_BESCMD_RESPONSE_TEST([coads_climatology.nc.ddx.bescmd])
@@ -47,56 +16,3 @@ AT_BESCMD_RESPONSE_TEST([test.nc.2a.bescmd])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([fnoc1.nc.3.bescmd])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([test.nc.3.bescmd])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([test.nc.3a.bescmd])
-
-# These are tests for netcdf4 support
-
-# Classic netcdf4 files, with no chunking compression
-
-AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.0.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.1.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.2.bescmd])
-
-AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_nc_classic_no_comp.nc.3.bescmd])
-
-# Classic netcdf4 files, _with_ chunking compression
-
-AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_compressed.nc.0.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_compressed.nc.1.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_nc_classic_compressed.nc.2.bescmd])
-
-AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_nc_classic_compressed.nc.3.bescmd])
-
-# Netcdf files with ushort, uint variables
-
-AT_BESCMD_RESPONSE_TEST([nc4_unsigned_types.nc.0.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_unsigned_types.nc.1.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_unsigned_types.nc.2.bescmd])
-
-AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_unsigned_types.nc.3.bescmd])
-
-# Netcdf files with ushort, uint variables
-
-AT_BESCMD_RESPONSE_TEST([nc4_unsigned_types_comp.nc.0.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_unsigned_types_comp.nc.1.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_unsigned_types_comp.nc.2.bescmd])
-
-AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_unsigned_types_comp.nc.3.bescmd])
-
-# Netcdf files with string attributes and variables
-
-AT_BESCMD_RESPONSE_TEST([nc4_strings.nc.0.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_strings.nc.1.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_strings.nc.2.bescmd])
-
-AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_strings.nc.3.bescmd])
-
-# Netcdf files with string attributes and variables
-
-AT_BESCMD_RESPONSE_TEST([nc4_strings_comp.nc.0.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_strings_comp.nc.1.bescmd])
-AT_BESCMD_RESPONSE_TEST([nc4_strings_comp.nc.2.bescmd])
-
-AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_strings_comp.nc.3.bescmd])
-
-
-
