@@ -43,6 +43,8 @@ static char rcsid[] not_used ={"$Id$"};
 #include <algorithm>
 
 #include <netcdf.h>
+
+#include <util.h>
 #include <InternalErr.h>
 
 #include "NCStructure.h"
@@ -124,6 +126,95 @@ void NCStructure::transfer_attributes(AttrTable *at)
             var++;
         }
     }
+}
+
+void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, int nfields, size_t size)
+{
+    vector<unsigned char> values(size);
+    int errstat = nc_get_var(ncid, varid, &values[0]);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+
+    for (int i = 0; i < nfields; ++i) {
+        char field_name[NC_MAX_NAME];
+        nc_type field_typeid;
+        size_t field_offset;
+        // TODO: these are unused... should they be used?
+        int field_ndims;
+        int field_sizes[MAX_NC_DIMS];
+        nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
+        //cerr << "filed_name: " << field_name << ", ";
+        var(field_name)->val2buf(&values[field_offset]);
+        var(field_name)->set_read_p(true);
+        // In *this, look up field_name and add &values[field_offset]
+    }
+}
+
+// TODO: hack; make it work with structures, then add support for arrays of
+// structures.
+bool NCStructure::read()
+{
+    //cerr << "In NCStructure::read" << endl;
+#if 0
+    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
+    dods_uint16 uintg16;
+    int id;
+#endif
+    if (read_p()) // nothing to do
+        return false;
+
+    int ncid, errstat;
+    errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not open the dataset's file (" + dataset() + ")");
+
+    int varid; /* variable Id */
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
+
+    nc_type datatype; /* variable data type */
+    //int num_dim; /* number of dim. in variable */
+    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, (int *)0/*&num_dim*/, (int *) 0, (int *) 0);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+
+    if (datatype >= NC_FIRSTUSERTYPEID) {
+        char type_name[NC_MAX_NAME];
+        size_t size;
+        nc_type base_type;
+        size_t nfields;
+        int class_type;
+        errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
+        //cerr << "User-defined attribute type size: " << size << ", nfields: " << nfields << endl;
+        if (errstat != NC_NOERR)
+            throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
+
+        switch (class_type) {
+            case NC_COMPOUND: {
+                //cerr << "in read_attributes_netcdf4; found a compound attribute. (" << type_name << ")" << endl;
+                append_compound_values(ncid, varid, datatype, nfields, size);
+                break;
+            }
+
+            case NC_VLEN:
+                cerr << "in build_user_defined; found a vlen." << endl;
+                break;
+            case NC_OPAQUE:
+                cerr << "in build_user_defined; found a opaque." << endl;
+                break;
+            case NC_ENUM:
+                cerr << "in build_user_defined; found a enum." << endl;
+                break;
+            default:
+                throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+        }
+    }
+
+
+    //int nc_get_var1(int ncid, int varid,  const size_t *indexp, void *ip);
+
+    return false;
 }
 
 

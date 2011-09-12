@@ -58,7 +58,15 @@ static char not_used rcsid[] = { "$Id$" };
 #include <DAS.h>
 
 #define ATTR_STRING_QUOTE_FIX
-//#define NETCDF_VERSION 4
+
+//TODO Remove before check in!
+#define NETCDF_VERSION 4
+
+#if NETCDF_VERSION >= 4
+#define read_attributes_macro read_attributes_netcdf4
+#else
+#define read_attributes_macro read_attributes_netcdf3
+#endif
 
 using namespace libdap;
 
@@ -125,7 +133,7 @@ static string print_attr(nc_type type, int loc, void *vals)
             return rep.str();
 #endif
 
-            case NC_INT:
+        case NC_INT:
             gp.i = (int *) vals; // warning: long int format, int arg (arg 3)
             rep << *(gp.i + loc);
             return rep.str();
@@ -325,6 +333,75 @@ static void read_attributes_netcdf3(int ncid, int v, int natts, AttrTable *at)
     }
 }
 
+// TODO: modify so that this works for recursive types
+// This may be a bogus way to compute the size - maybe use the value from
+// nc_inq_user_type? jhrg 9/8/11
+static int compound_type_size(int ncid, nc_type xtype)
+{
+    char name[NC_MAX_NAME];
+    size_t size;
+    nc_type base_type;
+    size_t nfields;
+    int class_type;
+    int status = nc_inq_user_type(ncid, xtype, &name[0], &size, &base_type, &nfields, &class_type);
+    if (status != NC_NOERR) {
+        throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(status) + ")."));
+    }
+
+    switch (class_type) {
+        case NC_COMPOUND: {
+            //cerr << "in compound_type_size; found a compound." << endl;
+            int size = 0;
+            for (int i = 0; i < nfields; ++i) {
+                char field_name[NC_MAX_NAME];
+                //size_t offset;
+                nc_type field_typeid;
+
+                // TODO: these are unused... should they be used?
+                int field_ndims;
+                int field_sizes[MAX_NC_DIMS];
+                nc_inq_compound_field(ncid, xtype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
+                //cerr << "field[" << i << "]: " << nctypelen(field_typeid) << endl;
+                size += nctypelen(field_typeid);
+                // is this a scalar of an array? Note that an array of CHAR is
+                // a scalar string in netcdf3.
+            }
+
+            return size;
+        }
+
+        default:
+            throw InternalErr(__FILE__, __LINE__, "Uknown type (not a NC_COMPOUND");
+    }
+}
+
+// TODO: This does not handle nested compound types
+static void append_compound_values(int ncid, int varid, int len, nc_type datatype, char *attrname, int nfields, size_t attr_size, AttrTable *at)
+{
+    vector<unsigned char> values((len + 1) * attr_size);
+
+    //cerr << "getting values for '" << attrname << "'." << endl;
+    int errstat = nc_get_att(ncid, varid, attrname, (void *) &values[0]);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
+
+    for (int i = 0; i < nfields; ++i) {
+        char field_name[NC_MAX_NAME];
+        nc_type field_typeid;
+        size_t field_offset;
+        // TODO: these are unused... should they be used?
+        int field_ndims;
+        int field_sizes[MAX_NC_DIMS];
+        nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
+
+        //cerr << "Attribute type: " << print_type(field_typeid) << ", ";
+        //cerr << "name: " << field_name << " ";
+        //cerr << "value : " << print_attr(field_typeid, 0, &values[field_offset]) << endl;
+
+        at->append_attr(field_name, print_type(field_typeid), print_attr(field_typeid, 0, &values[field_offset]));
+    }
+}
+
 #if NETCDF_VERSION >= 4
 /** Given the netcdf file id, variable id, number of attributes for the
  variable, and an attribute table pointer, read the attributes and store
@@ -337,29 +414,23 @@ static void read_attributes_netcdf3(int ncid, int v, int natts, AttrTable *at)
  @param at A value-result parameter; a point to the attribute table to which
  the new information will be added.
  */
-static void read_attributes_netcdf4(int ncid, int v, int natts, AttrTable *at)
+static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *at)
 {
-    char attrname[MAX_NC_NAME];
-    nc_type datatype;
-    size_t len;
-    int errstat = NC_NOERR;
 
-    for (int a = 0; a < natts; ++a) {
-        errstat = nc_inq_attname(ncid, v, a, attrname);
-        if (errstat != NC_NOERR) {
-            string msg = "Could not get the name for attribute ";
-            msg += long_to_string(a);
-            throw Error(errstat, msg);
-        }
+    for (int attr_num = 0; attr_num < natts; ++attr_num) {
+        int errstat = NC_NOERR;
+        // Get the attribute name
+        char attrname[MAX_NC_NAME];
+        errstat = nc_inq_attname(ncid, varid, attr_num, attrname);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, "Could not get the name for attribute " + long_to_string(attr_num));
 
-        // len is the number of values. Attributes in netcdf can be scalars or
-        // vectors
-        errstat = nc_inq_att(ncid, v, attrname, &datatype, &len);
-        if (errstat != NC_NOERR) {
-            string msg = "Could not get the name for attribute '";
-            msg += attrname + string("'");
-            throw Error(errstat, msg);
-        }
+        // Get datatype and len; len is the number of values.
+        nc_type datatype;
+        size_t len;
+        errstat = nc_inq_att(ncid, varid, attrname, &datatype, &len);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, "Could not get the name for attribute '" + string(attrname) + "'");
 
         if (datatype >= NC_FIRSTUSERTYPEID) {
             char type_name[NC_MAX_NAME];
@@ -367,18 +438,22 @@ static void read_attributes_netcdf4(int ncid, int v, int natts, AttrTable *at)
             nc_type base_type;
             size_t nfields;
             int class_type;
-            int status = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
-            if (status != NC_NOERR) {
-                throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(status) + ")."));
-            }
+            errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
+            //cerr << "User-defined attribute type size: " << size << ", nfields: " << nfields << endl;
+            if (errstat != NC_NOERR)
+                throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
 
             switch (class_type) {
                 case NC_COMPOUND: {
-                    cerr << "in read_attributes; found a compound attribute." << endl;
+                    //cerr << "in read_attributes_netcdf4; found a compound attribute. (" << type_name << ")" << endl;
+#if 0
                     char attr_name[NC_MAX_NAME];
-                    nc_inq_compound_name(ncid, datatype, attr_name);
-                    // Make an attribute container
-                    AttrTable *container = at->append_container(attr_name);
+                    errstat = nc_inq_attname(ncid, varid, attr_num, attr_name);
+                    if (errstat != NC_NOERR)
+                        throw(InternalErr(__FILE__, __LINE__, "Could not get the name of a user-defined type attribute (" + long_to_string(errstat) + ")."));
+#endif
+                    append_compound_values(ncid, varid, len, datatype, attrname, nfields, size, at);
+#if 0
                     for (int i = 0; i < nfields; ++i) {
                         char field_name[NC_MAX_NAME];
                         //size_t offset;
@@ -391,7 +466,7 @@ static void read_attributes_netcdf4(int ncid, int v, int natts, AttrTable *at)
                         int len = (field_ndims >= 1) ? field_sizes[0] : 1;
                         append_values(ncid, v, len, field_typeid, field_name, container);
                     }
-
+#endif
                     break;
                 }
 
@@ -407,7 +482,6 @@ static void read_attributes_netcdf4(int ncid, int v, int natts, AttrTable *at)
                 default:
                     throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
             }
-
         }
         else {
             switch (datatype) {
@@ -418,23 +492,26 @@ static void read_attributes_netcdf4(int ncid, int v, int natts, AttrTable *at)
                 case NC_INT:
                 case NC_FLOAT:
                 case NC_DOUBLE:
-                    case NC_UBYTE:
-                    case NC_USHORT:
-                    case NC_UINT:
-                    append_values(ncid, v, len, datatype, attrname, at);
+                case NC_UBYTE:
+                case NC_USHORT:
+                case NC_UINT:
+                    append_values(ncid, varid, len, datatype, attrname, at);
                     break;
 
-                    case NC_INT64:
-                    case NC_UINT64:
-                    case NC_COMPOUND:
-                    case NC_VLEN:
-                    case NC_OPAQUE:
-                    case NC_ENUM: {
-                        string note = "Attribute edlided: Unsupported attribute type ";
-                        note += "(" + print_type(datatype) + ")";
-                        at->append_attr(attrname, "String", note);
-                        break;
-                    }
+                case NC_INT64:
+                case NC_UINT64: {
+                    string note = "Attribute edlided: Unsupported attribute type ";
+                    note += "(" + print_type(datatype) + ")";
+                    at->append_attr(attrname, "String", note);
+                    break;
+                }
+
+                case NC_COMPOUND:
+                case NC_VLEN:
+                case NC_OPAQUE:
+                case NC_ENUM:
+                    throw InternalErr(__FILE__, __LINE__, "user-defined attribute type not recognized as such!");
+
                 default:
                     throw InternalErr(__FILE__, __LINE__, "Unrecognized attribute type.");
             }
@@ -456,46 +533,36 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
 {
     int ncid, errstat;
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
-    if (errstat != NC_NOERR) {
-        string msg = "Could not open " + path_to_filename(filename) + ".";
-        throw Error(errstat, msg);
-    }
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not open " + path_to_filename(filename) + ".");
 
     // how many variables? how many global attributes?
     int nvars, ngatts;
     errstat = nc_inq(ncid, (int *) 0, &nvars, &ngatts, (int *) 0);
-    if (errstat != NC_NOERR) {
-        string msg = "Could not inquire about netcdf file: " + path_to_filename(filename) + ".";
-        throw Error(errstat, msg);
-    }
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not inquire about netcdf file: " + path_to_filename(filename) + ".");
 
     // for each variable
     char varname[MAX_NC_NAME];
     int natts = 0;
     nc_type var_type;
-    for (int v = 0; v < nvars; ++v) {
-        errstat = nc_inq_var(ncid, v, varname, &var_type, (int*) 0, (int*) 0, &natts);
-        if (errstat != NC_NOERR) {
-            string msg = "Could not get information for variable ";
-            msg += long_to_string(v);
-            throw Error(errstat, msg);
-        }
+    for (int varid = 0; varid < nvars; ++varid) {
+        errstat = nc_inq_var(ncid, varid, varname, &var_type, (int*) 0, (int*) 0, &natts);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, "Could not get information for variable: " + long_to_string(varid));
 
         AttrTable *attr_table_ptr = das.get_table(varname);
         if (!attr_table_ptr)
             attr_table_ptr = das.add_table(varname, new AttrTable);
 
-#if NETCDF_VERSION >= 4
-        read_attributes_netcdf4(ncid, v, natts, attr_table_ptr);
-#else
-        read_attributes_netcdf3(ncid, v, natts, attr_table_ptr);
-#endif
+        read_attributes_macro(ncid, varid, natts, attr_table_ptr);
+
         // Add a special attribute for string lengths
         if (var_type == NC_CHAR) {
             // number of dimensions and size of Nth dimension
             int num_dim;
             int vdimids[MAX_VAR_DIMS]; // variable dimension ids
-            errstat = nc_inq_var(ncid, v, (char *) 0, (nc_type *) 0, &num_dim, vdimids, (int *) 0);
+            errstat = nc_inq_var(ncid, varid, (char *) 0, (nc_type *) 0, &num_dim, vdimids, (int *) 0);
             if (errstat != NC_NOERR)
                 throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
 
@@ -510,7 +577,6 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                 vector<size_t> dim_sizes(num_dim);
                 for (int i = 0; i < num_dim; ++i) {
                     if ((errstat = nc_inq_dimlen(ncid, vdimids[i], &dim_sizes[i])) != NC_NOERR) {
-                        // delete[] dim_sizes;
                         throw Error(errstat, string("Could not read dimension information about the variable `") + varname + string("'."));
                     }
                 }
@@ -525,12 +591,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
     // global attributes
     if (ngatts > 0) {
         AttrTable *attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
-
-#if NETCDF_VERSION >= 4
-        read_attributes_netcdf4(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
-#else
-        read_attributes_netcdf3(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
-#endif
+        read_attributes_macro(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
     }
 
     // Add unlimited dimension name in DODS_EXTRA attribute table

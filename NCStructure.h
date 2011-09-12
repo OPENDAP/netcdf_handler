@@ -47,7 +47,9 @@
 using namespace libdap ;
 
 class NCStructure: public Structure {
-        
+private:
+    void append_compound_values(int ncid, int varid, nc_type datatype, int nfields, size_t size);
+
 public:
     NCStructure(const string &n, const string &d);
     NCStructure(const NCStructure &rhs);
@@ -57,6 +59,7 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual void transfer_attributes(AttrTable *at);
+    virtual bool read();
 };
 
 /* 

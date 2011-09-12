@@ -42,6 +42,7 @@ static char rcsid[] not_used = { "$Id$" };
 #include <netcdf.h>
 
 #include <InternalErr.h>
+#include <util.h>
 
 #include "NCByte.h"
 
@@ -114,7 +115,7 @@ bool NCByte::read()
 
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
-        throw Error(errstat, "Could not get variable ID.");
+        throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
 
     errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim, (int *) 0, (int *) 0);
     if (errstat != NC_NOERR)
