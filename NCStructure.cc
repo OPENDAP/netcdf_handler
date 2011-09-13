@@ -128,13 +128,8 @@ void NCStructure::transfer_attributes(AttrTable *at)
     }
 }
 
-void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, int nfields, size_t size)
+void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, int nfields, vector<unsigned char> &values)
 {
-    vector<unsigned char> values(size);
-    int errstat = nc_get_var(ncid, varid, &values[0]);
-    if (errstat != NC_NOERR)
-        throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
-
     for (int i = 0; i < nfields; ++i) {
         char field_name[NC_MAX_NAME];
         nc_type field_typeid;
@@ -193,7 +188,12 @@ bool NCStructure::read()
         switch (class_type) {
             case NC_COMPOUND: {
                 //cerr << "in read_attributes_netcdf4; found a compound attribute. (" << type_name << ")" << endl;
-                append_compound_values(ncid, varid, datatype, nfields, size);
+                vector<unsigned char> values(size);
+                int errstat = nc_get_var(ncid, varid, &values[0]);
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+
+                append_compound_values(ncid, varid, datatype, nfields, values);
                 break;
             }
 

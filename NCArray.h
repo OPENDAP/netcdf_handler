@@ -45,6 +45,9 @@
 using namespace libdap ;
 
 class NCArray: public Array {
+private:
+    void append_compound_values(int ncid, int varid, nc_type datatype, int nfields, int nels, size_t size, vector<unsigned char> &values);
+
 public:
     NCArray(const string &n, const string &d, BaseType *v);
     NCArray(const NCArray &nc_array);

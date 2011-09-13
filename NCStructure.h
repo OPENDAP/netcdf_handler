@@ -48,7 +48,7 @@ using namespace libdap ;
 
 class NCStructure: public Structure {
 private:
-    void append_compound_values(int ncid, int varid, nc_type datatype, int nfields, size_t size);
+    void append_compound_values(int ncid, int varid, nc_type datatype, int nfields, vector<unsigned char> &values);//size_t size);
 
 public:
     NCStructure(const string &n, const string &d);

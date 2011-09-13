@@ -19,6 +19,22 @@ that are either plain or compressed. To get this feature you must link the
 handler to a copy of the netcdf 4 API library that has been built with HDF5.
 Teh INSTALL file has more details. 
 
+Note: Netcdf3 and NetCDF4 define the following:
+NC_BYTE         8-bit signed integer
+NC_CHAR         8-bit unsigned integer
+NC_SHORT        16-bit signed integer
+NC_USHORT       16-bit unsigned integer *
+NC_INT (or NC_LONG)     32-bit signed integer
+NC_UINT         32-bit unsigned integer *
+NC_INT64        64-bit signed integer *
+NC_UINT64       64-bit unsigned integer *
+NC_FLOAT        32-bit floating point
+NC_DOUBLE       64-bit floating point
+NC_STRING       variable length character string * 
+
+And DAP defines cardinals using the same bit-widths. This handler assumes this
+when it reads data.
+
 Special options supported by the handler: 
 * ShowSharedDimensions: Include shared dimensions as separate variables. 
 Accepted values: true,yes|false,no, defaults to false.

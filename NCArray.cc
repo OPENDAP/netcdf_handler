@@ -52,10 +52,11 @@ static char rcsid[] not_used =
 
 #include <Error.h>
 #include <InternalErr.h>
+#include <util.h>
+#include <debug.h>
 
 #include "NCArray.h"
-
-#include <debug.h>
+#include "NCStructure.h"
 
 BaseType *
 NCArray::ptr_duplicate()
@@ -79,7 +80,6 @@ NCArray::NCArray(const NCArray &rhs) : Array(rhs)
 
 NCArray::~NCArray()
 {
-    DBG(cerr << "delete d_source " << d_source << endl);
 }
 
 NCArray &
@@ -141,6 +141,32 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
     return nels;
 }
 
+void NCArray::append_compound_values(int ncid, int varid, nc_type datatype,
+        int nfields, int nels, size_t size, vector<unsigned char> &values)
+{
+    for (int element; element < nels; ++element) {
+        try {
+            NCStructure *ncs = dynamic_cast<NCStructure*> (var()->ptr_duplicate());
+            for (int i = 0; i < nfields; ++i) {
+                char field_name[NC_MAX_NAME];
+                nc_type field_typeid;
+                size_t field_offset;
+                // TODO: these are unused... should they be used?
+                int field_ndims;
+                int field_sizes[MAX_NC_DIMS];
+                nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
+                ncs->var(field_name)->val2buf(&values[(element * size) + field_offset]);
+                ncs->var(field_name)->set_read_p(true);
+            }
+            ncs->set_read_p(true);
+            set_vec(element, ncs);
+        }
+        catch (std::exception &e) {
+            throw InternalErr(__FILE__, __LINE__, e.what());
+        }
+    }
+}
+
 bool NCArray::read()
 {
     DBG(cerr << "In NCArray::read" << endl);
@@ -160,14 +186,13 @@ bool NCArray::read()
     int varid;                  /* variable Id */
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
-        throw Error(errstat, "Could not get variable ID.");
+        throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
 
     nc_type datatype;           /* variable data type */
     int vdimids[MAX_VAR_DIMS];  // variable dimension ids
     size_t vdims[MAX_VAR_DIMS];    /* variable dimension sizes */
     int num_dim;                /* number of dim. in variable */
-    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdimids,
-                         (int *)0);
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, vdimids, (int *)0);
     if (errstat != NC_NOERR)
         throw Error(errstat,
                     string("Could not read information about the variable `")
@@ -185,9 +210,78 @@ bool NCArray::read()
     bool has_stride;
     long nels = format_constraint(cor, step, edg, &has_stride);
 
+    if (datatype >= NC_FIRSTUSERTYPEID) {
+        char type_name[NC_MAX_NAME];
+        size_t size;
+        nc_type base_type;
+        size_t nfields;
+        int class_type;
+        errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
+        //cerr << "User-defined attribute type size: " << size << ", nfields: " << nfields << endl;
+        if (errstat != NC_NOERR)
+            throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
+
+        switch (class_type) {
+            case NC_COMPOUND: {
+                //cerr << "in read_attributes_netcdf4; found a compound attribute. (" << type_name << ")" << endl;
+                vector<unsigned char> values(nels * size);
+                if (has_stride)
+                    errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
+                else
+                    errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
+
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+
+                append_compound_values(ncid, varid, datatype, nfields, nels, size, values);
+
+                set_read_p(true);
+                break;
+            }
+
+            case NC_VLEN:
+                cerr << "in build_user_defined; found a vlen." << endl;
+                break;
+            case NC_OPAQUE:
+                cerr << "in build_user_defined; found a opaque." << endl;
+                break;
+            case NC_ENUM:
+                cerr << "in build_user_defined; found a enum." << endl;
+                break;
+            default:
+                throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+        }
+
+    }
+    else {
     // Correct data types to match with the local machine data types
     switch (datatype) {
-    case NC_FLOAT: {
+    case NC_FLOAT:
+    case NC_DOUBLE:
+    case NC_SHORT:
+    case NC_INT:
+    case NC_BYTE:
+#if NETCDF_VERSION >= 4
+    case NC_USHORT:
+    case NC_UINT:
+    case NC_UBYTE:
+#endif
+    {
+#if 1
+        vector<unsigned char> values(nels * nctypelen(datatype));
+        if (has_stride)
+            errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
+        else
+            errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
+
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+
+        val2buf((void *) &values[0]);
+        set_read_p(true);
+        break;
+
+#else
             float *fltbuf = (float *) new char[(nels * nctypelen(datatype))];
 
             if (has_stride)
@@ -202,6 +296,7 @@ bool NCArray::read()
             }
 
             if (nctypelen(datatype) != sizeof(dods_float32)) {
+                cerr << "Differeences in the type sizes" << endl;
                 dods_float32 *flt32 = new dods_float32[nels];
 
                 for (int id = 0; id < nels; id++)
@@ -218,8 +313,9 @@ bool NCArray::read()
             delete[]fltbuf;
 
             break;
-        }
-
+#endif
+    }
+#if 0
     case NC_DOUBLE: {
 
             double *dblbuf = (double *) new char [(nels*nctypelen(datatype))];
@@ -389,13 +485,15 @@ bool NCArray::read()
         }
 
 #endif
+#endif
     case NC_CHAR: {
             // Use the dimension info from netcdf since that's the place where
             // this variable has N-dims. In the DAP representation it's a N-1
             // dimensional variable.
             int nth_dim_size = vdims[num_dim - 1];
 
-            char *chrbuf = (char *)new char [(nels*nth_dim_size*nctypelen(datatype))];
+            //char *chrbuf = (char *)new char [(nels*nth_dim_size*nctypelen(datatype))];
+            vector<char> chrbuf(nels*nth_dim_size*nctypelen(datatype));
 
             cor[num_dim-1] = 0;
             edg[num_dim-1] = nth_dim_size;
@@ -404,46 +502,48 @@ bool NCArray::read()
 
             // read the values in from the local netCDF file.
             if (has_stride)
-                errstat = nc_get_vars_text(ncid, varid, cor, edg, step, chrbuf);
+                errstat = nc_get_vars_text(ncid, varid, cor, edg, step, &chrbuf[0]);
             else
-                errstat = nc_get_vara_text(ncid, varid, cor, edg, chrbuf);
+                errstat = nc_get_vara_text(ncid, varid, cor, edg, &chrbuf[0]);
 
             if (errstat != NC_NOERR) {
-            	delete[] chrbuf;
+            	// delete[] chrbuf;
                 throw Error(errstat, string("Could not read the variable `") + name()
                         + string("'."));
             }
 
             if (num_dim < 2) { // one-dim --> DAP String and we should not be here
-                delete[] chrbuf;
+                // delete[] chrbuf;
                 throw Error(string("A one-dimensional NC_CHAR array should now map to a DAP string: '")
                         + name() + string("'."));
             }
 
             // How large is the Nth dimension? Allocate space for the N-1 dims.
-            string *strg = new string[nels]; // array of strings
-            char *buf = new char[nth_dim_size+1];
-
+            // string *strg = new string[nels]; // array of strings
+            vector<string> strg(nels);
+            //char *buf = new char[nth_dim_size+1];
+            vector<char> buf(nth_dim_size + 1);
             // put the char values in the string array
             for (int i = 0; i < nels; i++) {
-                strncpy(buf, (chrbuf + (i * nth_dim_size)), nth_dim_size);
+                //strncpy(buf, (chrbuf + (i * nth_dim_size)), nth_dim_size);
+                strncpy(&buf[0], &chrbuf[(i * nth_dim_size)], nth_dim_size);
                 buf[nth_dim_size] = '\0';
-                strg[i] = (string)buf;
+                strg[i] = (string)&buf[0];
             }
 
             // reading is done (don't need to read each individual array value)
             set_read_p(true);
             // put values in the buffers
-            val2buf(strg);
+            val2buf(&strg[0]);
 
             // clean up
-            delete [] buf;
-            delete [] strg;
-            delete [] chrbuf;
+            //delete [] buf;
+            //delete [] strg;
+            //delete [] chrbuf;
 
             break;
         }
-
+#if 0
 #if NETCDF_VERSION >= 4
     case NC_UBYTE:
 #endif
@@ -469,24 +569,25 @@ bool NCArray::read()
 
             break;
         }
-
+#endif
 #if NETCDF_VERSION >= 4
     case NC_STRING: {
-        char **chrbuf = new char* [(nels*nctypelen(datatype))];
+        //char **chrbuf = new char* [(nels*nctypelen(datatype))];
+        vector<char*> chrbuf(nels*nctypelen(datatype));
 
         // read the values in from the local netCDF file.
         if (has_stride)
-            errstat = nc_get_vars_string(ncid, varid, cor, edg, step, chrbuf);
+            errstat = nc_get_vars_string(ncid, varid, cor, edg, step, &chrbuf[0]);
         else
-            errstat = nc_get_vara_string(ncid, varid, cor, edg, chrbuf);
+            errstat = nc_get_vara_string(ncid, varid, cor, edg, &chrbuf[0]);
 
         if (errstat != NC_NOERR) {
-            delete[] chrbuf;
-            throw Error(errstat, string("Could not read the variable `") + name()
-                    + string("'."));
+            //delete[] chrbuf;
+            throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
         }
 
-        string *strg = new string[nels]; // array of strings
+        //string *strg = new string[nels]; // array of strings
+        vector<string> strg(nels);
 
         // put the char values in the string array
         for (int i = 0; i < nels; i++) {
@@ -496,11 +597,11 @@ bool NCArray::read()
         // reading is done (don't need to read each individual array value)
         set_read_p(true);
         // put values in the buffers
-        val2buf(strg);
+        val2buf(&strg[0]);
 
         // clean up
-        delete [] strg;
-        delete [] chrbuf;
+        //delete [] strg;
+        //delete [] chrbuf;
 
         break;
     }
@@ -510,6 +611,7 @@ bool NCArray::read()
         throw InternalErr(__FILE__, __LINE__,
                           string("Unknown data type for the variable '")
                           + name() + string("'."));
+    }
     }
 
     if (nc_close(ncid) != NC_NOERR)
