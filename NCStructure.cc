@@ -127,7 +127,7 @@ void NCStructure::transfer_attributes(AttrTable *at)
         }
     }
 }
-
+#if 0
 void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, int nfields, vector<unsigned char> &values)
 {
 
@@ -145,9 +145,10 @@ void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, 
         // In *this, look up field_name and add &values[field_offset]
     }
 }
+#endif
 
-void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype)//,
-        //vector<unsigned char> &values, bool has_values, int values_offset)
+void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
+        vector<unsigned char> &values, bool has_values, int values_offset)
 {
     if (datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME];
@@ -161,11 +162,6 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype)//,
 
         switch (class_type) {
             case NC_COMPOUND: {
-                vector<unsigned char> values(size);
-                int errstat = nc_get_var(ncid, varid, &values[0]);
-                if (errstat != NC_NOERR)
-                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
-#if 0
                 if (!has_values) {
                     values.resize(size);
                     int errstat = nc_get_var(ncid, varid, &values[0]);
@@ -173,8 +169,30 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype)//,
                         throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
                     has_values = true;
                 }
-#endif
-                append_compound_values(ncid, varid, datatype, nfields, values);
+
+                for (int i = 0; i < nfields; ++i) {
+                    char field_name[NC_MAX_NAME];
+                    nc_type field_typeid;
+                    size_t field_offset;
+                    // TODO: these are unused... should they be used?
+                    int field_ndims;
+                    int field_sizes[MAX_NC_DIMS];
+                    nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
+                    if (field_typeid >= NC_FIRSTUSERTYPEID) {
+                        // Interior user defined types have names, but not field_names
+                        // so use the type name as the field name (matches the
+                        // behavior of the ncdds.cc code).
+                        nc_inq_compound_name(ncid, field_typeid, field_name);
+                        //cerr << "Found interior structure " << field_name << endl;
+                        //cerr << "fields ndims: " << field_ndims << endl;
+                        NCStructure &ncs = dynamic_cast<NCStructure&>(*var(field_name));
+                        ncs.do_structure_read(ncid, varid, field_typeid, values, has_values, field_offset + values_offset);
+                    }
+                    else {
+                        var(field_name)->val2buf(&values[field_offset + values_offset]);
+                    }
+                    var(field_name)->set_read_p(true);
+                }
                 break;
             }
 
@@ -216,11 +234,15 @@ bool NCStructure::read()
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not read data type information about : " + name() + ". (error: " + long_to_string(errstat) + ").");
 
-    // At this point we have the ncid of the open file, the varid and the datatype
-    // also *this has a fair amount of other info (name(), ...)
-    do_structure_read(ncid, varid, datatype);
+    // For Compound types, netcdf's nc_get_var() reads all of the structure's
+    // values in one shot, including values for nested structures. Pass the
+    // (reference to the) space for these in at the start of what may be a
+    // series of recursive calls.
+    vector<unsigned char> values;
+    do_structure_read(ncid, varid, datatype, values, false /*has_values*/, 0 /*values_offset*/);
 
     set_read_p(true);
+
 #if 0
     if (datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME];
