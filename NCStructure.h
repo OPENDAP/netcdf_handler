@@ -42,7 +42,9 @@
 
 #include <list>
 
-#include "Structure.h"
+#include <Structure.h>
+
+#include "NCArray.h"
 
 using namespace libdap ;
 
@@ -51,7 +53,8 @@ private:
 #if 0
     void append_compound_values(int ncid, int varid, nc_type datatype, int nfields, vector<unsigned char> &values);//size_t size);
 #endif
-    void do_structure_read(int ncid, int varid, nc_type datatype, vector<unsigned char> &values, bool has_values, int values_offset);
+    void do_structure_read(int ncid, int varid, nc_type datatype, vector<char> &values, bool has_values, int values_offset);
+    friend class NCArray;
 
 public:
     NCStructure(const string &n, const string &d);

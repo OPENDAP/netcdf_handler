@@ -127,28 +127,9 @@ void NCStructure::transfer_attributes(AttrTable *at)
         }
     }
 }
-#if 0
-void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, int nfields, vector<unsigned char> &values)
-{
-
-    for (int i = 0; i < nfields; ++i) {
-        char field_name[NC_MAX_NAME];
-        nc_type field_typeid;
-        size_t field_offset;
-        // TODO: these are unused... should they be used?
-        int field_ndims;
-        int field_sizes[MAX_NC_DIMS];
-        nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
-        //cerr << "filed_name: " << field_name << ", ";
-        var(field_name)->val2buf(&values[field_offset]);
-        var(field_name)->set_read_p(true);
-        // In *this, look up field_name and add &values[field_offset]
-    }
-}
-#endif
 
 void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
-        vector<unsigned char> &values, bool has_values, int values_offset)
+        vector<char> &values, bool has_values, int values_offset)
 {
     if (datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME];
@@ -164,7 +145,7 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
             case NC_COMPOUND: {
                 if (!has_values) {
                     values.resize(size);
-                    int errstat = nc_get_var(ncid, varid, &values[0]);
+                    int errstat = nc_get_var(ncid, varid, values.data() /*&values[0]*/);
                     if (errstat != NC_NOERR)
                         throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
                     has_values = true;
@@ -183,12 +164,13 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
                         // so use the type name as the field name (matches the
                         // behavior of the ncdds.cc code).
                         nc_inq_compound_name(ncid, field_typeid, field_name);
-                        //cerr << "Found interior structure " << field_name << endl;
-                        //cerr << "fields ndims: " << field_ndims << endl;
                         NCStructure &ncs = dynamic_cast<NCStructure&>(*var(field_name));
                         ncs.do_structure_read(ncid, varid, field_typeid, values, has_values, field_offset + values_offset);
                     }
                     else {
+                        // Because the netcdf api reads data 'atomically' from
+                        // compounds, this call works for both cardinal and
+                        // array variables.
                         var(field_name)->val2buf(&values[field_offset + values_offset]);
                     }
                     var(field_name)->set_read_p(true);
@@ -213,14 +195,13 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
         throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
 }
 
-// TODO: support recursive types in netcdf4
 bool NCStructure::read()
 {
     if (read_p()) // nothing to do
         return false;
 
-    int ncid, errstat;
-    errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    int ncid;
+    int errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not open the dataset's file (" + dataset() + ")");
 
@@ -230,7 +211,7 @@ bool NCStructure::read()
         throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
 
     nc_type datatype; /* variable data type */
-    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, (int *)0, (int *) 0, (int *) 0);
+    errstat = nc_inq_vartype(ncid, varid, &datatype);
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not read data type information about : " + name() + ". (error: " + long_to_string(errstat) + ").");
 
@@ -238,49 +219,14 @@ bool NCStructure::read()
     // values in one shot, including values for nested structures. Pass the
     // (reference to the) space for these in at the start of what may be a
     // series of recursive calls.
-    vector<unsigned char> values;
+    vector<char> values;
     do_structure_read(ncid, varid, datatype, values, false /*has_values*/, 0 /*values_offset*/);
 
     set_read_p(true);
 
-#if 0
-    if (datatype >= NC_FIRSTUSERTYPEID) {
-        char type_name[NC_MAX_NAME];
-        size_t size;
-        nc_type base_type;
-        size_t nfields;
-        int class_type;
-        errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
-        if (errstat != NC_NOERR)
-            throw InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ").");
+    if (nc_close(ncid) != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
-        switch (class_type) {
-            case NC_COMPOUND: {
-                vector<unsigned char> values(size);
-                int errstat = nc_get_var(ncid, varid, &values[0]);
-                if (errstat != NC_NOERR)
-                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
-
-                append_compound_values(ncid, varid, datatype, nfields, values);
-                break;
-            }
-
-            case NC_VLEN:
-                cerr << "in build_user_defined; found a vlen." << endl;
-                break;
-            case NC_OPAQUE:
-                cerr << "in build_user_defined; found a opaque." << endl;
-                break;
-            case NC_ENUM:
-                cerr << "in build_user_defined; found a enum." << endl;
-                break;
-            default:
-                throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
-        }
-    }
-    else
-        throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
-#endif
     return false;
 }
 
