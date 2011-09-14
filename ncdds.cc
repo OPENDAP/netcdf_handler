@@ -88,22 +88,20 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
         case NC_BYTE:
             return (new NCByte(varname, dataset));
 
-#if NETCDF_VERSION >= 4
-        case NC_UBYTE:
-            // NB: the dods_byte type is unsigned
-            return (new NCByte(varname, dataset));
-#endif
         case NC_SHORT:
             return (new NCInt16(varname, dataset));
 
-#if NETCDF_VERSION >= 4
-        case NC_USHORT:
-            return (new NCUInt16(varname, dataset));
-#endif
        case NC_INT:
             return (new NCInt32(varname, dataset));
 
 #if NETCDF_VERSION >= 4
+        case NC_UBYTE:
+            // NB: the dods_byte type is unsigned
+            return (new NCByte(varname, dataset));
+
+        case NC_USHORT:
+            return (new NCUInt16(varname, dataset));
+
         case NC_UINT:
             return (new NCUInt32(varname, dataset));
 #endif
@@ -149,12 +147,6 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
     // dimension (the char vector) becomes the string.
     if (array_type == NC_CHAR)
         --ndims;
-#if 0
-    // If this is a String (NC_CHAR Array), or an Array of String,
-    // add all but the Nth dim
-    if (ar->var()->type() == dods_str_c)
-        --ndims;
-#endif
 
     for (int d = 0; d < ndims; ++d) {
         ar->append_dim(map_sizes[d], map_names[d]);
@@ -197,14 +189,12 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
 
     switch (class_type) {
         case NC_COMPOUND: {
-            //cerr << "in build_user_defined; found a compound." << endl;
             char var_name[NC_MAX_NAME];
-            // This call gets the type name, not tha var name
-            // nc_inq_compound_name(ncid, xtype, var_name);
+            // char type_name[NC_MAX_NAME];
             nc_inq_varname(ncid, varid, var_name);
-            //cerr << "var_name: " << var_name << endl;
+
             NCStructure *ncs = new NCStructure(var_name, dataset);
-            //cerr << "Build NCStructure: " << ncs << endl;
+
             for (int i = 0; i < nfields; ++i) {
                 char field_name[NC_MAX_NAME];
                 nc_type field_typeid;
@@ -213,9 +203,12 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
                 nc_inq_compound_field(ncid, xtype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
                 BaseType *field;
                 if (is_user_defined(field_typeid)) {
-                    //TODO using 'varid' here is likely wrong. find out from unidata
-                    //cerr << "Found a child field" << endl;
+                    // Odd: 'varid' here seems wrong, but works.
                     field = build_user_defined(ncid, varid, field_typeid, dataset, field_ndims, field_sizes);
+                    // Child compound types become anonymous variables but DAP
+                    // requires names, so use the type name.
+                    nc_inq_compound_name(ncid, field_typeid, var_name);
+                    field->set_name(var_name);
                 }
                 else {
                     field = build_scalar(field_name, dataset, field_typeid);

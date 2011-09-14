@@ -130,6 +130,7 @@ void NCStructure::transfer_attributes(AttrTable *at)
 
 void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, int nfields, vector<unsigned char> &values)
 {
+
     for (int i = 0; i < nfields; ++i) {
         char field_name[NC_MAX_NAME];
         nc_type field_typeid;
@@ -145,16 +146,58 @@ void NCStructure::append_compound_values(int ncid, int varid, nc_type datatype, 
     }
 }
 
-// TODO: hack; make it work with structures, then add support for arrays of
-// structures.
+void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype)//,
+        //vector<unsigned char> &values, bool has_values, int values_offset)
+{
+    if (datatype >= NC_FIRSTUSERTYPEID) {
+        char type_name[NC_MAX_NAME];
+        size_t size;
+        nc_type base_type;
+        size_t nfields;
+        int class_type;
+        int errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
+        if (errstat != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ").");
+
+        switch (class_type) {
+            case NC_COMPOUND: {
+                vector<unsigned char> values(size);
+                int errstat = nc_get_var(ncid, varid, &values[0]);
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+#if 0
+                if (!has_values) {
+                    values.resize(size);
+                    int errstat = nc_get_var(ncid, varid, &values[0]);
+                    if (errstat != NC_NOERR)
+                        throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+                    has_values = true;
+                }
+#endif
+                append_compound_values(ncid, varid, datatype, nfields, values);
+                break;
+            }
+
+            case NC_VLEN:
+                cerr << "in build_user_defined; found a vlen." << endl;
+                break;
+            case NC_OPAQUE:
+                cerr << "in build_user_defined; found a opaque." << endl;
+                break;
+            case NC_ENUM:
+                cerr << "in build_user_defined; found a enum." << endl;
+                break;
+            default:
+                throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+        }
+    }
+    else
+        throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
+}
+
+// TODO: support recursive types in netcdf4
 bool NCStructure::read()
 {
-    //cerr << "In NCStructure::read" << endl;
-#if 0
-    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
-    dods_uint16 uintg16;
-    int id;
-#endif
     if (read_p()) // nothing to do
         return false;
 
@@ -169,11 +212,16 @@ bool NCStructure::read()
         throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
 
     nc_type datatype; /* variable data type */
-    //int num_dim; /* number of dim. in variable */
-    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, (int *)0/*&num_dim*/, (int *) 0, (int *) 0);
+    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, (int *)0, (int *) 0, (int *) 0);
     if (errstat != NC_NOERR)
-        throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+        throw Error(errstat, "Could not read data type information about : " + name() + ". (error: " + long_to_string(errstat) + ").");
 
+    // At this point we have the ncid of the open file, the varid and the datatype
+    // also *this has a fair amount of other info (name(), ...)
+    do_structure_read(ncid, varid, datatype);
+
+    set_read_p(true);
+#if 0
     if (datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME];
         size_t size;
@@ -181,13 +229,11 @@ bool NCStructure::read()
         size_t nfields;
         int class_type;
         errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
-        //cerr << "User-defined attribute type size: " << size << ", nfields: " << nfields << endl;
         if (errstat != NC_NOERR)
-            throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
+            throw InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ").");
 
         switch (class_type) {
             case NC_COMPOUND: {
-                //cerr << "in read_attributes_netcdf4; found a compound attribute. (" << type_name << ")" << endl;
                 vector<unsigned char> values(size);
                 int errstat = nc_get_var(ncid, varid, &values[0]);
                 if (errstat != NC_NOERR)
@@ -210,10 +256,9 @@ bool NCStructure::read()
                 throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
         }
     }
-
-
-    //int nc_get_var1(int ncid, int varid,  const size_t *indexp, void *ip);
-
+    else
+        throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
+#endif
     return false;
 }
 

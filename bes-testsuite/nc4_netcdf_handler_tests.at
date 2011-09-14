@@ -52,5 +52,30 @@ AT_BESCMD_RESPONSE_TEST([nc4_strings_comp.nc.2.bescmd])
 
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([nc4_strings_comp.nc.3.bescmd])
 
+# Structures
+
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound.nc.0.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound.nc.2.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([ref_tst_compound.nc.3.bescmd])
+
+# Arrays of Structures
+
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound2.nc.0.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound2.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound2.nc.2.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([ref_tst_compound2.nc.3.bescmd])
+
+# Structures of Structures
+
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound3.nc.0.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound3.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound3.nc.2.bescmd])
+
+# AT_BESCMD_BINARYDATA_RESPONSE_TEST([ref_tst_compound3.nc.3.bescmd])
+
+
 
 

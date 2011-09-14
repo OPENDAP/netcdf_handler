@@ -334,7 +334,7 @@ bool NCArray::read()
                         errstat = nc_get_vara_string(ncid, varid, cor, edg, &chrbuf[0]);
 
                     if (errstat != NC_NOERR)
-                    throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+                        throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 
                     vector<string> strg(nels);
 
