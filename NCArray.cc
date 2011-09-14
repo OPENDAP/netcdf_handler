@@ -369,7 +369,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
         }
     }
 
-    cerr << "Leaving do_arry_read()" << endl;
+    // cerr << "Leaving do_arry_read()" << endl;
 }
 
 bool NCArray::read()
@@ -410,7 +410,7 @@ bool NCArray::read()
     vector<char> values;
     do_array_read(ncid, varid, datatype, values, false /*has_values*/, 0 /*values_offset*/,
             nels, cor, edg, step, has_stride);
-    cerr << "After do_array_read" <<endl;
+    //cerr << "After do_array_read" <<endl;
     // set_read_p(true);
 #if 0
     if (datatype >= NC_FIRSTUSERTYPEID) {
@@ -563,7 +563,7 @@ bool NCArray::read()
     if (nc_close(ncid) != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
-    cerr << "Leaving NCArrary::read()" << endl;
+    //cerr << "Leaving NCArrary::read()" << endl;
 
     return false;
 }
