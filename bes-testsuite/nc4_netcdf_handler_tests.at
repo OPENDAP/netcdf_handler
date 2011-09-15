@@ -76,6 +76,20 @@ AT_BESCMD_RESPONSE_TEST([ref_tst_compound3.nc.2.bescmd])
 
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([ref_tst_compound3.nc.3.bescmd])
 
+# Structures of Structures with child arrays
+
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound4.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound4.nc.2.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([ref_tst_compound4.nc.3.bescmd])
+
+# Array of Structures of Structures with child arrays
+
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound5.nc.1.bescmd])
+AT_BESCMD_RESPONSE_TEST([ref_tst_compound5.nc.2.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([ref_tst_compound5.nc.3.bescmd])
+
 
 
 

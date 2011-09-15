@@ -155,10 +155,8 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
                     char field_name[NC_MAX_NAME];
                     nc_type field_typeid;
                     size_t field_offset;
-                    // TODO: these are unused... should they be used?
                     int field_ndims;
-                    int field_sizes[MAX_NC_DIMS];
-                    nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
+                    nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, 0);
                     if (field_typeid >= NC_FIRSTUSERTYPEID) {
                         // Interior user defined types have names, but not field_names
                         // so use the type name as the field name (matches the
@@ -167,12 +165,27 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
                         NCStructure &ncs = dynamic_cast<NCStructure&>(*var(field_name));
                         ncs.do_structure_read(ncid, varid, field_typeid, values, has_values, field_offset + values_offset);
                     }
-                    else {
+                    else if (var(field_name)->is_vector_type()) {
                         // Because the netcdf api reads data 'atomically' from
                         // compounds, this call works for both cardinal and
                         // array variables.
-                        var(field_name)->val2buf(&values[field_offset + values_offset]);
+                        NCArray &child_array = dynamic_cast<NCArray&>(*var(field_name));
+                        vector<size_t> cor(field_ndims);
+                        vector<size_t> edg(field_ndims);
+                        vector<ptrdiff_t> step(field_ndims);
+                        bool has_stride;
+                        long nels = child_array.format_constraint(cor.data(), step.data(), edg.data(), &has_stride);
+                        child_array.do_array_read(ncid, varid, field_typeid,
+                                values, has_values, field_offset + values_offset,
+                                nels, cor.data(), edg.data(), step.data(), has_stride);
                     }
+                    else if (var(field_name)->is_simple_type()) {
+                        var(field_name)->val2buf(values.data()  + field_offset + values_offset);
+                    }
+                    else {
+                        throw InternalErr(__FILE__, __LINE__, "Expecting a netcdf user defined type or an array or a scalar.");
+                    }
+
                     var(field_name)->set_read_p(true);
                 }
                 break;

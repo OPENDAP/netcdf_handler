@@ -42,15 +42,24 @@
 
 #include <Array.h>
 
+#include <NCStructure.h>
+
 using namespace libdap ;
 
 class NCArray: public Array {
 private:
-    void append_compound_values(int ncid, int varid, nc_type datatype,
-            int nfields, int nels, size_t size, vector<char> &values);
+    long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_stride);
+
+    void do_cardinal_array_read(int ncid, int varid, nc_type datatype,
+            vector<char> &values, bool has_values, int values_offset,
+            int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride);
+
     void do_array_read(int ncid, int varid, nc_type datatype,
             vector<char> &values, bool has_values, int values_offset,
             int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride);
+
+    friend class NCStructure;
+
 public:
     NCArray(const string &n, const string &d, BaseType *v);
     NCArray(const NCArray &nc_array);
@@ -60,9 +69,10 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read();
-
+#if 0
     virtual long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
 			bool *has_stride);
+#endif
 };
 
 /*

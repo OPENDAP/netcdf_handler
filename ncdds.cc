@@ -455,7 +455,6 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid,
         // dods_str_c because it's really a scalar string, not an array.
         if (is_user_defined(nctype)) {
 #if NETCDF_VERSION >= 4
-            //cerr << "Found compound" << endl;
             BaseType *bt = build_user_defined(ncid, varid, nctype, filename, ndims, dim_ids);
             dds_table.add_var(bt);
             delete bt;
