@@ -58,8 +58,6 @@ static char rcsid[] not_used =
 #include "NCArray.h"
 #include "NCStructure.h"
 
-#define NETCDF_VERSION 4
-
 BaseType *
 NCArray::ptr_duplicate()
 {

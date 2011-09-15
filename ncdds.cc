@@ -70,8 +70,6 @@ static char not_used rcsid[]={"$Id$"};
 #include "NCStructure.h"
 
 using namespace libdap ;
-// TODO: Remove
-#define NETCDF_VERSION 4
 
 /** This function returns the appropriate DODS BaseType for the given
     netCDF data type. */

@@ -59,13 +59,10 @@ static char not_used rcsid[] = { "$Id$" };
 
 #define ATTR_STRING_QUOTE_FIX
 
-//TODO Remove before check in!
-#define NETCDF_VERSION 4
-
 #if NETCDF_VERSION >= 4
-#define read_attributes_macro read_attributes_netcdf4
+#define READ_ATTRIBUTES_MACRO read_attributes_netcdf4
 #else
-#define read_attributes_macro read_attributes_netcdf3
+#define READ_ATTRIBUTES_MACRO read_attributes_netcdf3
 #endif
 
 using namespace libdap;
@@ -211,15 +208,13 @@ static string print_type(nc_type datatype)
         case NC_SHORT:
             return "Int16";
 
-#if NETCDF_VERSION >= 4
-        case NC_USHORT:
-            return "UInt16";
-#endif
-
         case NC_INT:
             return "Int32";
 
 #if NETCDF_VERSION >= 4
+        case NC_USHORT:
+            return "UInt16";
+
         case NC_UINT:
             return "UInt32";
 #endif
@@ -229,6 +224,9 @@ static string print_type(nc_type datatype)
 
         case NC_DOUBLE:
             return "Float64";
+
+        case NC_COMPOUND:
+            return "NC_COMPOUND";
 
 #if NETCDF_VERSION >= 4
             // These are all new netcdf 4 types that we don't support yet
@@ -240,10 +238,6 @@ static string print_type(nc_type datatype)
 
         case NC_UINT64:
             return "NC_UINT64";
-
-            // TODO: Adding support now...
-        case NC_COMPOUND:
-            return "NC_COMPOUND";
 
         case NC_VLEN:
             return "NC_VLEN";
@@ -262,7 +256,7 @@ static string print_type(nc_type datatype)
 static void append_values(int ncid, int v, int len, nc_type datatype, char *attrname, AttrTable *at)
 {
     vector<char> value((len + 1) * nctypelen(datatype));
-    int errstat = nc_get_att(ncid, v, attrname, (void *)&value[0]);
+    int errstat = nc_get_att(ncid, v, attrname, value.data());
     if (errstat != NC_NOERR) {
         throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
     }
@@ -277,7 +271,7 @@ static void append_values(int ncid, int v, int len, nc_type datatype, char *attr
 
     // add all the attributes in the array
     for (unsigned int loc = 0; loc < len; loc++) {
-        string print_rep = print_attr(datatype, loc, (void *)&value[0]);
+        string print_rep = print_attr(datatype, loc, value.data());
         at->append_attr(attrname, print_type(datatype), print_rep);
     }
 }
@@ -333,6 +327,9 @@ static void read_attributes_netcdf3(int ncid, int v, int natts, AttrTable *at)
     }
 }
 
+#if NETCDF_VERSION >= 4
+
+#if 0
 // TODO: modify so that this works for recursive types
 // This may be a bogus way to compute the size - maybe use the value from
 // nc_inq_user_type? jhrg 9/8/11
@@ -374,14 +371,15 @@ static int compound_type_size(int ncid, nc_type xtype)
             throw InternalErr(__FILE__, __LINE__, "Uknown type (not a NC_COMPOUND");
     }
 }
+#endif
 
 // TODO: This does not handle nested compound types
-static void append_compound_values(int ncid, int varid, int len, nc_type datatype, char *attrname, int nfields, size_t attr_size, AttrTable *at)
+static void append_compound_values(int ncid, int varid, int len, nc_type datatype,
+        char *attrname, int nfields, size_t attr_size, AttrTable *at)
 {
     vector<unsigned char> values((len + 1) * attr_size);
 
-    //cerr << "getting values for '" << attrname << "'." << endl;
-    int errstat = nc_get_att(ncid, varid, attrname, (void *) &values[0]);
+    int errstat = nc_get_att(ncid, varid, attrname, values.data());
     if (errstat != NC_NOERR)
         throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
@@ -389,20 +387,12 @@ static void append_compound_values(int ncid, int varid, int len, nc_type datatyp
         char field_name[NC_MAX_NAME];
         nc_type field_typeid;
         size_t field_offset;
-        // TODO: these are unused... should they be used?
-        int field_ndims;
-        int field_sizes[MAX_NC_DIMS];
-        nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, &field_sizes[0]);
+        nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, 0, 0);
 
-        //cerr << "Attribute type: " << print_type(field_typeid) << ", ";
-        //cerr << "name: " << field_name << " ";
-        //cerr << "value : " << print_attr(field_typeid, 0, &values[field_offset]) << endl;
-
-        at->append_attr(field_name, print_type(field_typeid), print_attr(field_typeid, 0, &values[field_offset]));
+        at->append_attr(field_name, print_type(field_typeid), print_attr(field_typeid, 0, values.data() + field_offset));
     }
 }
 
-#if NETCDF_VERSION >= 4
 /** Given the netcdf file id, variable id, number of attributes for the
  variable, and an attribute table pointer, read the attributes and store
  their names and values in the attribute table.
@@ -439,34 +429,12 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
             size_t nfields;
             int class_type;
             errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
-            //cerr << "User-defined attribute type size: " << size << ", nfields: " << nfields << endl;
             if (errstat != NC_NOERR)
                 throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
 
             switch (class_type) {
                 case NC_COMPOUND: {
-                    //cerr << "in read_attributes_netcdf4; found a compound attribute. (" << type_name << ")" << endl;
-#if 0
-                    char attr_name[NC_MAX_NAME];
-                    errstat = nc_inq_attname(ncid, varid, attr_num, attr_name);
-                    if (errstat != NC_NOERR)
-                        throw(InternalErr(__FILE__, __LINE__, "Could not get the name of a user-defined type attribute (" + long_to_string(errstat) + ")."));
-#endif
                     append_compound_values(ncid, varid, len, datatype, attrname, nfields, size, at);
-#if 0
-                    for (int i = 0; i < nfields; ++i) {
-                        char field_name[NC_MAX_NAME];
-                        //size_t offset;
-                        nc_type field_typeid;
-                        int field_ndims;
-                        int field_sizes[MAX_NC_DIMS];
-                        nc_inq_compound_field(ncid, datatype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
-                        // If the field_ndims is > 1 then we have issues since
-                        // DAP2 does not grok attributes with rank > 1.
-                        int len = (field_ndims >= 1) ? field_sizes[0] : 1;
-                        append_values(ncid, v, len, field_typeid, field_name, container);
-                    }
-#endif
                     break;
                 }
 
@@ -555,7 +523,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
         if (!attr_table_ptr)
             attr_table_ptr = das.add_table(varname, new AttrTable);
 
-        read_attributes_macro(ncid, varid, natts, attr_table_ptr);
+        READ_ATTRIBUTES_MACRO(ncid, varid, natts, attr_table_ptr);
 
         // Add a special attribute for string lengths
         if (var_type == NC_CHAR) {
@@ -591,7 +559,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
     // global attributes
     if (ngatts > 0) {
         AttrTable *attr_table_ptr = das.add_table("NC_GLOBAL", new AttrTable);
-        read_attributes_macro(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
+        READ_ATTRIBUTES_MACRO(ncid, NC_GLOBAL, ngatts, attr_table_ptr);
     }
 
     // Add unlimited dimension name in DODS_EXTRA attribute table
