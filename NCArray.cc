@@ -55,6 +55,7 @@ static char rcsid[] not_used =
 #include <util.h>
 #include <debug.h>
 
+#include "NCRequestHandler.h"
 #include "NCArray.h"
 #include "NCStructure.h"
 
@@ -167,7 +168,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
                 else
                     errstat = nc_get_vara(ncid, varid, cor, edg, values.data());
                 if (errstat != NC_NOERR)
-                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NCArray::do_cardinal_array_read)"));
                 // Do not set has_values to true here because the 'true' state
                 // indicates that the values for an entire compound have been
                 // read.
@@ -245,6 +246,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
                 strg[i] = *((char**)(values.data() + values_offset) + i);
             }
 
+            nc_free_string(nels, (char**)values.data());
             set_read_p(true);
             val2buf(strg.data());
             break;
@@ -332,14 +334,64 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
             }
 
             case NC_VLEN:
-                cerr << "in build_user_defined; found a vlen." << endl;
+                if (NCRequestHandler::get_ignore_unknown_types())
+                    cerr << "in build_user_defined; found a vlen." << endl;
+                else
+                    throw Error("The netCDF handler does not currently support NC_VLEN attributes.");
                 break;
-            case NC_OPAQUE:
-                cerr << "in build_user_defined; found a opaque." << endl;
+
+            case NC_OPAQUE: {
+#if 0
+                do_cardinal_array_read(ncid, varid, NC_BYTE,
+                        values, has_values, values_offset,
+                        nels, cor, edg, step, has_stride);
+#endif
+                // Use the dimension info from netcdf since that's the place where
+                // this variable has N-dims. In the DAP representation it's a N-1
+                // dimensional variable.
+                int num_dim;                // number of dim. in variable
+                int vdimids[MAX_VAR_DIMS];  // variable dimension ids
+                errstat = nc_inq_var(ncid, varid, (char *)0, (nc_type*)0, &num_dim, vdimids, (int *)0);
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+                if (num_dim < 1)    // one-dim --> DAP String and we should not be here
+                    throw Error(string("A one-dimensional NC_OPAQUE array should now map to a DAP Byte: '") + name() + string("'."));
+
+                size_t vdims[MAX_VAR_DIMS]; // variable dimension sizes
+                for (int i = 0; i < num_dim; ++i)
+                    if ((errstat = nc_inq_dimlen(ncid, vdimids[i], &vdims[i])) != NC_NOERR)
+                        throw Error(errstat, string("Could not read dimension information about the variable `") + name() + string("'."));
+
+                int nth_dim_size = vdims[num_dim - 1];
+                cor[num_dim - 1] = 0;
+                edg[num_dim - 1] = nth_dim_size;
+                if (has_stride)
+                    step[num_dim - 1] = 1;
+
+                if (!has_values) {
+                     values.resize(size * nels);
+                     if (has_stride)
+                         errstat = nc_get_vars(ncid, varid, cor, edg, step, values.data());
+                     else
+                         errstat = nc_get_vara(ncid, varid, cor, edg, values.data());
+                     if (errstat != NC_NOERR)
+                         throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NC_OPAQUE)"));
+                     has_values = true;
+                 }
+
+                 val2buf(values.data() + values_offset);
+
+                set_read_p(true);
                 break;
+            }
+
             case NC_ENUM:
-                cerr << "in build_user_defined; found a enum." << endl;
+                if (NCRequestHandler::get_ignore_unknown_types())
+                    cerr << "in build_user_defined; found a enum." << endl;
+                else
+                    throw Error("The netCDF handler does not currently support NC_ENUM attributes.");
                 break;
+
             default:
                 throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
         }

@@ -34,6 +34,10 @@ class NCRequestHandler : public BESRequestHandler {
 private:
     static bool		_show_shared_dims ;
     static bool		_show_shared_dims_set ;
+
+    static bool     _ignore_unknown_types ;
+    static bool     _ignore_unknown_types_set ;
+
 public:
 			NCRequestHandler( const string &name ) ;
     virtual		~NCRequestHandler( void ) ;
@@ -43,6 +47,10 @@ public:
     static bool		nc_build_data( BESDataHandlerInterface &dhi ) ;
     static bool		nc_build_help( BESDataHandlerInterface &dhi ) ;
     static bool		nc_build_version( BESDataHandlerInterface &dhi ) ;
+
+    static bool get_show_shared_dims() { return _show_shared_dims; }
+    static bool get_ignore_unknown_types() { return _ignore_unknown_types; }
+
 };
 
 #endif

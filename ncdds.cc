@@ -56,6 +56,8 @@ static char not_used rcsid[]={"$Id$"};
 #include <mime_util.h>
 #include <util.h>
 
+#include "NCRequestHandler.h"
+
 #include "NCInt32.h"
 #include "NCUInt32.h"
 #include "NCInt16.h"
@@ -112,11 +114,15 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
 #if NETCDF_VERSION >= 4
         case NC_INT64:
         case NC_UINT64:
-            throw Error("The netCDF handler does not currently support 64 bit integers.");
+            if (NCRequestHandler::get_ignore_unknown_types())
+                cerr << "The netCDF handler does not currently support 64 bit integers.";
+            else
+                throw Error("The netCDF handler does not currently support 64 bit integers.");
+            break;
 #endif
 
-        default: // Maybe this should be an error? jhrg 1/12/09
-            throw Error("Unknown type (" + long_to_string(datatype) + ") for variable '" + varname + "'");
+        default:
+            throw InternalErr(__FILE__, __LINE__, "Unknown type (" + long_to_string(datatype) + ") for variable '" + varname + "'");
     }
 }
 
@@ -176,19 +182,18 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
 static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const string &dataset,
         int ndims, int dim_ids[MAX_VAR_DIMS])
 {
-    char name[NC_MAX_NAME];
+    //char name[NC_MAX_NAME];
     size_t size;
     nc_type base_type;
     size_t nfields;
     int class_type;
-    int status = nc_inq_user_type(ncid, xtype, name, &size, &base_type, &nfields, &class_type);
+    int status = nc_inq_user_type(ncid, xtype, 0/*name*/, &size, &base_type, &nfields, &class_type);
     if (status != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(status) + ").");
 
     switch (class_type) {
         case NC_COMPOUND: {
             char var_name[NC_MAX_NAME];
-            // char type_name[NC_MAX_NAME];
             nc_inq_varname(ncid, varid, var_name);
 
             NCStructure *ncs = new NCStructure(var_name, dataset);
@@ -205,6 +210,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
                     field = build_user_defined(ncid, varid, field_typeid, dataset, field_ndims, field_sizes);
                     // Child compound types become anonymous variables but DAP
                     // requires names, so use the type name.
+                    char var_name[NC_MAX_NAME];
                     nc_inq_compound_name(ncid, field_typeid, var_name);
                     field->set_name(var_name);
                 }
@@ -244,17 +250,48 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
             else {
                 return ncs;
             }
+
+            break;
         }
 
         case NC_VLEN:
-            cerr << "in build_user_defined; found a vlen." << endl;
+            if (NCRequestHandler::get_ignore_unknown_types())
+                cerr << "in build_user_defined; found a vlen." << endl;
+            else
+                throw Error("The netCDF handler does not yet suppor the NC_VLEN type.");
             break;
-        case NC_OPAQUE:
-            cerr << "in build_user_defined; found a opaque." << endl;
+
+        case NC_OPAQUE: {
+            vector<char> name(NC_MAX_NAME);
+            status = nc_inq_varname(ncid, varid, name.data());
+            if (status != NC_NOERR)
+                throw InternalErr(__FILE__, __LINE__, "Could not get name of an opaque (" + long_to_string(status) + ").");
+
+            NCArray *opaque = new NCArray(name.data(), dataset, new NCByte(name.data(), dataset));
+
+            if (ndims > 0) {
+                for (int i = 0; i < ndims; ++i) {
+                    char dimname[NC_MAX_NAME];
+                    size_t dim_sz;
+                    int errstat = nc_inq_dim(ncid, dim_ids[i], dimname, &dim_sz);
+                    if (errstat != NC_NOERR) {
+                        delete opaque;
+                        throw InternalErr(__FILE__, __LINE__, string("Failed to read dimension information for the compound variable ") + name.data());
+                    }
+                    opaque->append_dim(dim_sz, dimname);
+                }
+            }
+            opaque->append_dim(size);
+            return opaque;
             break;
+        }
+
         case NC_ENUM:
-            cerr << "in build_user_defined; found a enum." << endl;
-            break;
+            if (NCRequestHandler::get_ignore_unknown_types())
+                cerr << "in build_user_defined; found a enum." << endl;
+            else
+                throw Error("The netCDF handler does not yet suppor the NC_ENUM type.");
+           break;
 
         default:
             throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
@@ -411,8 +448,7 @@ static NCArray *build_array(BaseType *bt, int ncid, int var,
      @param ncid The id of the netcdf file
      @param nvars The number of variables in the opened file
  */
-static void read_variables(DDS &dds_table, const string &filename, int ncid,
-        int nvars, bool elide_dimension_arrays)
+static void read_variables(DDS &dds_table, const string &filename, int ncid, int nvars)
 {
     // How this function works: The variables are scanned once but because
     // netCDF includes shared dimensions as variables there are two versions
@@ -473,7 +509,7 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid,
             delete gr;
         }
         else {
-            if (elide_dimension_arrays)
+            if (!NCRequestHandler::get_show_shared_dims())
                 array_vars.push_back(varid);
             else {
                 BaseType *bt = build_scalar(name, filename, nctype);
@@ -490,7 +526,7 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid,
     // var ids of things that look like simple arrays onto a vector. This code
     // will add all of those that really are arrays and not the ones that are
     // dimensions used by a Grid.
-    if (elide_dimension_arrays) {
+    if (!NCRequestHandler::get_show_shared_dims()) {
         // Now just loop through the saved array variables, writing out only
         // those that are not Grid Maps
         nvars = array_vars.size();
@@ -526,8 +562,7 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid,
 
     @param elide_dimension_arrays If true, don't include an array if it's
     really a dimension used by a Grid. */
-void nc_read_dataset_variables(DDS &dds_table, const string &filename,
-        bool elide_dimension_arrays)
+void nc_read_dataset_variables(DDS &dds_table, const string &filename)
 {
     ncopts = 0;
     int ncid, errstat;
@@ -546,7 +581,7 @@ void nc_read_dataset_variables(DDS &dds_table, const string &filename,
     dds_table.set_dataset_name(name_path(filename));
 
     // read variables' classes
-    read_variables(dds_table, filename, ncid, nvars, elide_dimension_arrays);
+    read_variables(dds_table, filename, ncid, nvars);
 
     if (nc_close(ncid) != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__, "ncdds: Could not close the dataset!");
