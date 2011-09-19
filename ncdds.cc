@@ -175,6 +175,7 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
     return gr;
 }
 
+#define NETCDF_VERSION 4
 #if NETCDF_VERSION >= 4
 /** Build an instance of a user defined type. These can be recursively
  * defined.
@@ -193,13 +194,13 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
 
     switch (class_type) {
         case NC_COMPOUND: {
-            char var_name[NC_MAX_NAME];
+            char var_name[NC_MAX_NAME+1];
             nc_inq_varname(ncid, varid, var_name);
 
             NCStructure *ncs = new NCStructure(var_name, dataset);
 
             for (int i = 0; i < nfields; ++i) {
-                char field_name[NC_MAX_NAME];
+                char field_name[NC_MAX_NAME+1];
                 nc_type field_typeid;
                 int field_ndims;
                 int field_sizes[MAX_NC_DIMS];
@@ -210,7 +211,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
                     field = build_user_defined(ncid, varid, field_typeid, dataset, field_ndims, field_sizes);
                     // Child compound types become anonymous variables but DAP
                     // requires names, so use the type name.
-                    char var_name[NC_MAX_NAME];
+                    char var_name[NC_MAX_NAME+1];
                     nc_inq_compound_name(ncid, field_typeid, var_name);
                     field->set_name(var_name);
                 }
@@ -234,7 +235,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
             if (ndims > 0) {
                 NCArray *ar = new NCArray(var_name, dataset, ncs);
                 for (int i = 0; i < ndims; ++i) {
-                    char dimname[NC_MAX_NAME];
+                    char dimname[NC_MAX_NAME+1];
                     size_t dim_sz;
                     int errstat = nc_inq_dim(ncid, dim_ids[i], dimname, &dim_sz);
                     if (errstat != NC_NOERR) {
@@ -262,7 +263,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
             break;
 
         case NC_OPAQUE: {
-            vector<char> name(NC_MAX_NAME);
+            vector<char> name(NC_MAX_NAME+1);
             status = nc_inq_varname(ncid, varid, name.data());
             if (status != NC_NOERR)
                 throw InternalErr(__FILE__, __LINE__, "Could not get name of an opaque (" + long_to_string(status) + ").");
@@ -271,7 +272,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
 
             if (ndims > 0) {
                 for (int i = 0; i < ndims; ++i) {
-                    char dimname[NC_MAX_NAME];
+                    char dimname[NC_MAX_NAME+1];
                     size_t dim_sz;
                     int errstat = nc_inq_dim(ncid, dim_ids[i], dimname, &dim_sz);
                     if (errstat != NC_NOERR) {
@@ -286,12 +287,43 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
             break;
         }
 
-        case NC_ENUM:
-            if (NCRequestHandler::get_ignore_unknown_types())
-                cerr << "in build_user_defined; found a enum." << endl;
-            else
-                throw Error("The netCDF handler does not yet suppor the NC_ENUM type.");
-           break;
+        case NC_ENUM: {
+            nc_type base_nc_type;
+            size_t base_size;
+            status = nc_inq_enum(ncid, xtype, 0 /*name.data()*/, &base_nc_type, &base_size, 0/*&num_members*/);
+            if (status != NC_NOERR)
+                throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum(" + long_to_string(status) + ")."));
+
+            // get the name here - we want the var name and not the type name
+            vector<char> name(MAX_NC_NAME + 1);
+            status = nc_inq_varname(ncid, varid, name.data());
+            if (status != NC_NOERR)
+                throw InternalErr(__FILE__, __LINE__, "Could not get name of an opaque (" + long_to_string(status) + ").");
+
+
+            BaseType *enum_var = build_scalar(name.data(), dataset, base_nc_type);
+
+            if (ndims > 0) {
+                NCArray *ar = new NCArray(name.data(), dataset, enum_var);
+
+                for (int i = 0; i < ndims; ++i) {
+                    char dimname[NC_MAX_NAME + 1];
+                    size_t dim_sz;
+                    int errstat = nc_inq_dim(ncid, dim_ids[i], dimname, &dim_sz);
+                    if (errstat != NC_NOERR) {
+                        delete ar;
+                        throw InternalErr(__FILE__, __LINE__, string("Failed to read dimension information for the compound variable ") + name.data());
+                    }
+                    ar->append_dim(dim_sz, dimname);
+                }
+
+                return ar;
+            }
+            else {
+                return enum_var;
+            }
+            break;
+        }
 
         default:
             throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");

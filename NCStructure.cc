@@ -132,7 +132,7 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
         vector<char> &values, bool has_values, int values_offset)
 {
     if (datatype >= NC_FIRSTUSERTYPEID) {
-        char type_name[NC_MAX_NAME];
+        char type_name[NC_MAX_NAME+1];
         size_t size;
         nc_type base_type;
         size_t nfields;
@@ -152,7 +152,7 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
                 }
 
                 for (int i = 0; i < nfields; ++i) {
-                    char field_name[NC_MAX_NAME];
+                    char field_name[NC_MAX_NAME+1];
                     nc_type field_typeid;
                     size_t field_offset;
                     int field_ndims;

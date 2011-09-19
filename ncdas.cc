@@ -352,7 +352,7 @@ static void read_attributes_netcdf3(int ncid, int v, int natts, AttrTable *at)
 // nc_inq_user_type? jhrg 9/8/11
 static int compound_type_size(int ncid, nc_type xtype)
 {
-    char name[NC_MAX_NAME];
+    char name[NC_MAX_NAME+1];
     size_t size;
     nc_type base_type;
     size_t nfields;
@@ -367,7 +367,7 @@ static int compound_type_size(int ncid, nc_type xtype)
             //cerr << "in compound_type_size; found a compound." << endl;
             int size = 0;
             for (int i = 0; i < nfields; ++i) {
-                char field_name[NC_MAX_NAME];
+                char field_name[NC_MAX_NAME+1];
                 //size_t offset;
                 nc_type field_typeid;
 
@@ -401,7 +401,7 @@ static void append_compound_values(int ncid, int varid, int len, nc_type datatyp
         throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
     for (int i = 0; i < nfields; ++i) {
-        char field_name[NC_MAX_NAME];
+        char field_name[NC_MAX_NAME+1];
         nc_type field_typeid;
         size_t field_offset;
         nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, 0, 0);
@@ -440,7 +440,7 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
             throw Error(errstat, "Could not get the name for attribute '" + string(attrname) + "'");
 
         if (datatype >= NC_FIRSTUSERTYPEID) {
-            char type_name[NC_MAX_NAME];
+            char type_name[NC_MAX_NAME+1];
             size_t size;
             nc_type base_type;
             size_t nfields;
@@ -459,7 +459,7 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                         throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
                     for (int i = 0; i < nfields; ++i) {
-                        char field_name[NC_MAX_NAME];
+                        char field_name[NC_MAX_NAME+1];
                         nc_type field_typeid;
                         size_t field_offset;
                         nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, 0, 0);
@@ -489,12 +489,24 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                     break;
                 }
 
-                case NC_ENUM:
-                    if (NCRequestHandler::get_ignore_unknown_types())
-                        cerr << "in build_user_defined; found a enum." << endl;
-                    else
-                        throw Error("The netCDF handler does not yet support the NC_ENUM type.");
+                case NC_ENUM:{
+                    vector<unsigned char> values((len + 1) * size);
+
+                    int errstat = nc_get_att(ncid, varid, attrname, values.data());
+                    if (errstat != NC_NOERR)
+                        throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
+
+                    nc_type basetype;
+                    errstat = nc_inq_enum(ncid, datatype, 0/*char *name*/, &basetype,
+                            0/*size_t *base_sizep*/, 0/*size_t *num_membersp*/);
+                    if (errstat != NC_NOERR)
+                          throw Error(errstat, string("Could not get the size of the enum base type for '") + attrname + string("'"));
+
+                    for (int i = 0; i < size; ++i)
+                         at->append_attr(attrname, print_type(basetype), print_attr(basetype, i, values.data()));
+
                     break;
+                }
 
                 default:
                     throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
@@ -611,9 +623,44 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
 
             switch (class_type) {
                 case NC_OPAQUE: {
-                    attr_table_ptr->append_attr("OriginalNetCDFType", print_type(NC_STRING), "NC_OPAQUE");
+                    attr_table_ptr->append_attr("DAP2_OriginalNetCDFBaseType", print_type(NC_STRING), "NC_OPAQUE");
                     break;
                 }
+
+                case NC_ENUM: {
+                    vector<char> name(MAX_NC_NAME + 1);
+                    nc_type base_nc_type;
+                    size_t base_size, num_members;
+                    errstat = nc_inq_enum(ncid, var_type, name.data(), &base_nc_type, &base_size, &num_members);
+                    if (errstat != NC_NOERR)
+                        throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum(" + long_to_string(errstat) + ")."));
+
+                    // If the base type is a 64-bit int, bail with an error or
+                    // a message about unsupported types
+                    if (base_nc_type == NC_INT64 || base_nc_type == NC_UINT64) {
+                        if (NCRequestHandler::get_ignore_unknown_types())
+                            cerr << "An Enum uses 64-bit integers, but this handler does not support that type." << endl;
+                        else
+                            throw Error("An Enum uses 64-bit integers, but this handler does not support that type.");
+                        break;
+                    }
+
+                    for (int i = 0; i < num_members; ++i) {
+                        vector<char> member_name(MAX_NC_NAME + 1);
+                        vector<char> member_value(base_size);
+                        errstat = nc_inq_enum_member(ncid, var_type, i, member_name.data(), member_value.data());
+                        if (errstat != NC_NOERR)
+                            throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum value (" + long_to_string(errstat) + ")."));
+                        attr_table_ptr->append_attr("DAP2_EnumValues", print_type(base_nc_type), print_attr(base_nc_type, 0, member_value.data()));
+                        attr_table_ptr->append_attr("DAP2_EnumNames", print_type(NC_STRING), member_name.data());
+                    }
+
+                    attr_table_ptr->append_attr("DAP2_OriginalNetCDFBaseType", print_type(NC_STRING), "NC_ENUM");
+                    attr_table_ptr->append_attr("DAP2_OriginalNetCDFTypeName", print_type(NC_STRING), name.data());
+
+                    break;
+                }
+
                 default:
                     break;
             }

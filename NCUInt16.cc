@@ -93,15 +93,16 @@ bool NCUInt16::read()
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not get variable ID.");
-
+#if 0
     errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim, (int *) 0, (int *) 0);
     if (errstat != NC_NOERR)
         throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
 
     for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
         cor[id] = 0;
-
-#if NETCDF_VERSION >= 4
+#endif
+#if 0
+// #if NETCDF_VERSION >= 4
     if (datatype == NC_USHORT) {
         unsigned short usht;
 
@@ -117,11 +118,20 @@ bool NCUInt16::read()
         if (nc_close(ncid) != NC_NOERR)
             throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
     }
-#else
-    if (datatype == NC_SHORT) {
+// #else
+#endif
+    if (datatype == NC_SHORT
+#if NETCDF_VERSION >= 4
+        || datatype == NC_USHORT
+        || datatype >= NC_FIRSTUSERTYPEID
+#endif
+    ) {
         short sht;
-
+#if 0
         errstat = nc_get_var1_short(ncid, varid, cor, &sht);
+
+#endif
+        errstat = nc_get_var(ncid, varid, &sht);
         if (errstat != NC_NOERR)
             throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 
@@ -133,7 +143,7 @@ bool NCUInt16::read()
         if (nc_close(ncid) != NC_NOERR)
             throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
     }
-#endif
+// #endif
     else
         throw InternalErr(__FILE__, __LINE__, "Entered NCUInt16::read() with non-short variable!");
 

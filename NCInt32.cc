@@ -101,17 +101,25 @@ bool NCInt32::read()
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not get variable ID.");
 
+#if 0
     errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim, (int *) 0, (int *) 0);
     if (errstat != NC_NOERR)
-        throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+    throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
 
     for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
-        cor[id] = 0;
+    cor[id] = 0;
+#endif
 
-    if (datatype == NC_INT) {
+    if (datatype == NC_INT
+#if NETCDF_VERSION >= 4
+        || datatype >= NC_FIRSTUSERTYPEID
+#endif
+        ) {
         long lht;
-
+#if 0
         errstat = nc_get_var1_long(ncid, varid, cor, &lht);
+#endif
+        errstat = nc_get_var(ncid, varid, &lht);
         if (errstat != NC_NOERR)
             throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 

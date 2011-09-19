@@ -160,7 +160,6 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
         case NC_UBYTE:
 #endif
         {
-            //vector<char> values(nels * nctypelen(datatype));
             if (!has_values) {
                 values.resize(nels * nctypelen(datatype));
                 if (has_stride)
@@ -263,7 +262,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
 {
     int errstat;
     if (datatype >= NC_FIRSTUSERTYPEID) {
-        char type_name[NC_MAX_NAME];
+        char type_name[NC_MAX_NAME+1];
         size_t size;
         nc_type base_type;
         size_t nfields;
@@ -289,7 +288,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                 for (int element = 0; element < nels; ++element) {
                     NCStructure *ncs = dynamic_cast<NCStructure*> (var()->ptr_duplicate());
                     for (int i = 0; i < nfields; ++i) {
-                        char field_name[NC_MAX_NAME];
+                        char field_name[NC_MAX_NAME+1];
                         nc_type field_typeid;
                         size_t field_offset;
                         // These are unused... should they be used?
@@ -385,12 +384,19 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                 break;
             }
 
-            case NC_ENUM:
-                if (NCRequestHandler::get_ignore_unknown_types())
-                    cerr << "in build_user_defined; found a enum." << endl;
-                else
-                    throw Error("The netCDF handler does not currently support NC_ENUM attributes.");
+            case NC_ENUM: {
+                nc_type base_nc_type;
+                errstat = nc_inq_enum(ncid, datatype, 0 /*name.data()*/, &base_nc_type, 0/*&base_size*/, 0/*&num_members*/);
+                if (errstat != NC_NOERR)
+                    throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum(" + long_to_string(errstat) + ")."));
+
+                do_cardinal_array_read(ncid, varid, base_nc_type,
+                        values, has_values, values_offset,
+                        nels, cor, edg, step, has_stride);
+
+                set_read_p(true);
                 break;
+            }
 
             default:
                 throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");

@@ -19,7 +19,7 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
             <value>254</value>
             <value>186</value>
         </Attribute>
-        <Attribute name="OriginalNetCDFType" type="String">
+        <Attribute name="DAP2_OriginalNetCDFBaseType" type="String">
             <value>NC_OPAQUE</value>
         </Attribute>
         <Byte/>
