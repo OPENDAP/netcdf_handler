@@ -550,22 +550,24 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
             }
         }
         else if (var_type >= NC_FIRSTUSERTYPEID) {
+            vector<char> name(MAX_NC_NAME + 1);
             int class_type;
-            errstat = nc_inq_user_type(ncid, var_type, 0, 0, 0, 0, &class_type);
+            errstat = nc_inq_user_type(ncid, var_type, name.data(), 0, 0, 0, &class_type);
             if (errstat != NC_NOERR)
                 throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
 
             switch (class_type) {
                 case NC_OPAQUE: {
                     attr_table_ptr->append_attr("DAP2_OriginalNetCDFBaseType", print_type(NC_STRING), "NC_OPAQUE");
-                    break;
+                    attr_table_ptr->append_attr("DAP2_OriginalNetCDFTypeName", print_type(NC_STRING), name.data());
+                   break;
                 }
 
                 case NC_ENUM: {
-                    vector<char> name(MAX_NC_NAME + 1);
+                    //vector<char> name(MAX_NC_NAME + 1);
                     nc_type base_nc_type;
                     size_t base_size, num_members;
-                    errstat = nc_inq_enum(ncid, var_type, name.data(), &base_nc_type, &base_size, &num_members);
+                    errstat = nc_inq_enum(ncid, var_type, 0/*name.data()*/, &base_nc_type, &base_size, &num_members);
                     if (errstat != NC_NOERR)
                         throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum(" + long_to_string(errstat) + ")."));
 

@@ -22,6 +22,9 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
         <Attribute name="DAP2_OriginalNetCDFBaseType" type="String">
             <value>NC_OPAQUE</value>
         </Attribute>
+        <Attribute name="DAP2_OriginalNetCDFTypeName" type="String">
+            <value>raw_obs_t</value>
+        </Attribute>
         <Byte/>
         <dimension name="time" size="5"/>
         <dimension size="11"/>
