@@ -340,11 +340,6 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                 break;
 
             case NC_OPAQUE: {
-#if 0
-                do_cardinal_array_read(ncid, varid, NC_BYTE,
-                        values, has_values, values_offset,
-                        nels, cor, edg, step, has_stride);
-#endif
                 // Use the dimension info from netcdf since that's the place where
                 // this variable has N-dims. In the DAP representation it's a N-1
                 // dimensional variable.

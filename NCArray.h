@@ -69,10 +69,6 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read();
-#if 0
-    virtual long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
-			bool *has_stride);
-#endif
 };
 
 /*

@@ -78,61 +78,33 @@ NCInt32::ptr_duplicate()
 
 bool NCInt32::read()
 {
-    int varid; /* variable Id */
-    nc_type datatype; /* variable data type */
-    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
-    int num_dim; /* number of dim. in variable */
-    dods_int32 intg32;
-    int id;
-
     if (read_p()) // nothing to do
         return false;
 
     int ncid, errstat;
-
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
-
     if (errstat != NC_NOERR) {
         string err = "Could not open the dataset's file (" + dataset() + ")";
         throw Error(errstat, err);
     }
 
+    int varid; /* variable Id */
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not get variable ID.");
 
-#if 0
-    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim, (int *) 0, (int *) 0);
+    long lht;
+    errstat = nc_get_var(ncid, varid, &lht);
     if (errstat != NC_NOERR)
-    throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+        throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 
-    for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
-    cor[id] = 0;
-#endif
+    set_read_p(true);
 
-    if (datatype == NC_INT
-#if NETCDF_VERSION >= 4
-        || datatype >= NC_FIRSTUSERTYPEID
-#endif
-        ) {
-        long lht;
-#if 0
-        errstat = nc_get_var1_long(ncid, varid, cor, &lht);
-#endif
-        errstat = nc_get_var(ncid, varid, &lht);
-        if (errstat != NC_NOERR)
-            throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+    dods_int32 intg32 = (dods_int32) lht;
+    val2buf(&intg32);
 
-        set_read_p(true);
-
-        intg32 = (dods_int32) lht;
-        val2buf(&intg32);
-
-        if (nc_close(ncid) != NC_NOERR)
-            throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
-    }
-    else
-        throw InternalErr(__FILE__, __LINE__, "Entered NCInt32::read() with non-short variable!");
+    if (nc_close(ncid) != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
     return false;
 }

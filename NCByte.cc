@@ -95,65 +95,32 @@ NCByte::ptr_duplicate()
 
 bool NCByte::read()
 {
-    int varid; /* variable Id */
-    nc_type datatype; /* variable data type */
-    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
-    int num_dim; /* number of dim. in variable */
-    int id;
-
     if (read_p()) // already done
         return false;
 
     int ncid, errstat;
-
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
-
     if (errstat != NC_NOERR) {
         string err = "Could not open the dataset's file (" + dataset() + ")";
         throw Error(errstat, err);
     }
 
+    int varid; /* variable Id */
     errstat = nc_inq_varid(ncid, name().c_str(), &varid);
     if (errstat != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
-#if 0
-    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim, (int *) 0, (int *) 0);
+
+    dods_byte Dbyte;
+    errstat = nc_get_var(ncid, varid, &Dbyte);
     if (errstat != NC_NOERR)
-        throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+        throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 
-    for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
-        cor[id] = 0;
-#endif
-    // Because the dods_byte typedef is an unsigned 8-bit integer, this is
-    // an acceptable solution for DAP2
-    if (datatype == NC_BYTE
-#if NETCDF_VERSION >= 4
-        || datatype == NC_UBYTE
-        || datatype >= NC_FIRSTUSERTYPEID
-#endif
-        ) {
-        dods_byte Dbyte;
-        errstat = nc_get_var(ncid, varid, &Dbyte);
-#if 0
-        errstat = nc_get_var1_uchar(ncid, varid, cor, &Dbyte);
-#endif
-        if (errstat != NC_NOERR)
-            throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+    set_read_p(true);
 
-        set_read_p(true);
+    val2buf(&Dbyte);
 
-        val2buf(&Dbyte);
-
-        if (nc_close(ncid) != NC_NOERR)
-            throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
-    }
-    else if (datatype == NC_ENUM) {
-        // Assume that the DDS/DDX was built correctly and that this integral
-        // type can hold the enum's value and that it is a scalar.
-
-    }
-    else
-        throw InternalErr(__FILE__, __LINE__, "Entered NCByte::read() with non-byte variable!");
+    if (nc_close(ncid) != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
     return false;
 }

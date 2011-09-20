@@ -80,65 +80,55 @@ NCFloat32::ptr_duplicate()
 }
 
 
-bool
-NCFloat32::read()
+bool NCFloat32::read()
 {
-  int varid;                  /* variable Id */
-  nc_type datatype;           /* variable data type */
-  size_t cor[MAX_NC_DIMS];      /* corner coordinates */
-  int num_dim;                /* number of dim. in variable */
-  dods_float32 flt32;
-  int id;
+    int varid; /* variable Id */
+    nc_type datatype; /* variable data type */
+    size_t cor[MAX_NC_DIMS]; /* corner coordinates */
+    int num_dim; /* number of dim. in variable */
+    dods_float32 flt32;
+    int id;
 
-  if (read_p()) // nothing to do here
+    if (read_p()) // nothing to do here
+        return false;
+
+    int ncid, errstat;
+    errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    if (errstat != NC_NOERR) {
+        string err = "Could not open the dataset's file (" + dataset() + ")";
+        throw Error(errstat, err);
+    }
+
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not get variable ID.");
+
+    errstat = nc_inq_var(ncid, varid, (char *) 0, &datatype, &num_dim, (int *) 0, (int *) 0);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, string("Could not read information about the variable `") + name() + string("'."));
+
+    for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
+        cor[id] = 0;
+
+    if (datatype == NC_FLOAT) {
+        float flt;
+
+        errstat = nc_get_var1_float(ncid, varid, cor, &flt);
+        if (errstat != NC_NOERR)
+            throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+
+        set_read_p(true);
+
+        flt32 = (dods_float32) flt;
+        val2buf(&flt32);
+
+        if (nc_close(ncid) != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+    }
+    else
+        throw InternalErr(__FILE__, __LINE__, "Entered NCFloat32::read() with non-float variable!");
+
     return false;
-
-  int ncid, errstat;
-
-  errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
-  if (errstat != NC_NOERR)
-    {
-	string err = "Could not open the dataset's file (" + dataset() + ")" ;
-	throw Error(errstat, err);
-    }
-
-  errstat = nc_inq_varid(ncid, name().c_str(), &varid);
-  if (errstat != NC_NOERR)
-    throw Error(errstat, "Could not get variable ID.");
-
-  errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
-			(int *)0);
-  if (errstat != NC_NOERR)
-    throw Error(errstat,string("Could not read information about the variable `") 
-		+ name() + string("'."));
-
-  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++) 
-    cor[id] = 0;
-
-  if (datatype == NC_FLOAT) 
-    {
-      float flt;
-
-      errstat = nc_get_var1_float(ncid, varid, cor, &flt);
-      if(errstat != NC_NOERR)
-	throw Error(errstat, 
-		    string("Could not read the variable `") + name() 
-		    + string("'."));
-
-      set_read_p(true);
-
-      flt32 = (dods_float32) flt;
-      val2buf( &flt32 );
-
-      if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__, 
-			  "Could not close the dataset!");
-    }
-  else
-    throw InternalErr(__FILE__, __LINE__,
-		      "Entered NCFloat32::read() with non-float variable!");
-
-  return false;
 }
 
 // $Log: NCFloat32.cc,v $

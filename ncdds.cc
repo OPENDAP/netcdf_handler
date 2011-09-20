@@ -175,7 +175,6 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
     return gr;
 }
 
-#define NETCDF_VERSION 4
 #if NETCDF_VERSION >= 4
 /** Build an instance of a user defined type. These can be recursively
  * defined.
