@@ -1,26 +1,12 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<response xmlns="http://xml.opendap.org/ns/bes/1.0#">
-    <BES>
-        <BESError>
-            <Type>3</Type>
-            <Message>Problem parsing the request xml document:
-Entity: line 1: parser error : StartTag: invalid element name
-&lt;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;request reqID =&quot;some_unique_value&quot; &gt;    
- ^
-
-Entity: line 1: parser error : XML declaration allowed only at the start of the document
-&lt;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;request reqID =&quot;some_unique_value&quot; &gt;    
-      ^
-
-Entity: line 1: parser error : Extra content at the end of the document
-&lt;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;request reqID =&quot;some_unique_value&quot; &gt;    
-                                       ^
-</Message>
-            <Administrator>admin.email.address@your.domain.name</Administrator>
-            <Location>
-                <File>BESXMLInterface.cc</File>
-                <Line>126</Line>
-            </Location>
-        </BESError>
-    </BES>
-</response>
+Dataset {
+    Structure {
+        Structure {
+            Int16 i;
+            Int32 j;
+        } cmp1;
+        Structure {
+            Float32 x;
+            Float64 y[3][2];
+        } cmp2;
+    } phony_compound_var;
+} ref_tst_compounds4.nc;
