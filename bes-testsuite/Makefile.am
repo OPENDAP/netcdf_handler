@@ -17,7 +17,9 @@ noinst_DATA = bes.conf
 
 CLEANFILES = *.log *.sum site.exp
 
-EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE) atlocal.in $(srcdir)/package.m4 bes.conf.in
+EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE_3) $(TESTSUITE_4) \
+        atlocal.in $(srcdir)/package.m4 bes.conf.in handler_tests_macros.m4 \
+        nc4_netcdf_handler_tests.at
 
 DISTCLEANFILES = bes.conf
 
