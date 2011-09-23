@@ -82,5 +82,5 @@ AC_CHECK_BES([3.9.0],
 
 OPENDAP_DEBUG_OPTION
 
-AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal data/nc4_test_files/Makefile])
+AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal])
 AC_OUTPUT
