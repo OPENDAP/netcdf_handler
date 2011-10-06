@@ -41,10 +41,9 @@ BES.Catalog.catalog.TypeMatch+=nc:.*\.nc(\.bz2|\.gz|\.Z)?$;
 # NetCDF handler specific parameters
 #-----------------------------------------------------------------------#
 # ShowSharedDimensions: Include shared dimensions as separate variables.
-#   (true,yes|false,no, defaults to false)
+#   (true,yes|false,no, defaults to true for DAP 3.2 clients and earlier, 
+#    false for DAP 3.3 and later)
 #
-# I've reset this to the original default. Eventually this should be 'false'.
-# jhrg 7/2010
-#
-NC.ShowSharedDimensions=true
+# Uncommenting this overrides the default behavior for all clients
+# NC.ShowSharedDimensions=true
 
