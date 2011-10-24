@@ -196,12 +196,18 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
             }
         }
 
+        BESDEBUG("nc", "Fiddled with xdap_accept" << endl);
+
         bdds->set_container(dhi.container->get_symbolic_name());
         DDS *dds = bdds->get_dds();
         string accessed = dhi.container->access();
         dds->filename(accessed);
 
+        BESDEBUG("nc", "Prior to nc_read_dataset_variables" << endl);
+
         nc_read_dataset_variables(*dds, accessed);
+
+        BESDEBUG("nc", "Prior to Ancillary::read_ancillary_dds, accessed: " << accessed << endl);
 
         Ancillary::read_ancillary_dds(*dds, accessed);
 
@@ -211,6 +217,8 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         nc_read_dataset_attributes(*das, accessed);
         Ancillary::read_ancillary_das(*das, accessed);
 
+        BESDEBUG("nc", "Prior to dds->transfer_attributes" << endl);
+
         dds->transfer_attributes(das);
 
         bdds->set_constraint(dhi);
@@ -218,7 +226,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         bdds->clear_container();
     }
     catch (BESError &e) {
-        throw;
+        throw e;
     }
     catch (InternalErr & e) {
         BESDapError ex(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);

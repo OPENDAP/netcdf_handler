@@ -2,8 +2,6 @@
 AUTOMAKE_OPTIONS = foreign 
 
 AM_CPPFLAGS = -I$(top_srcdir)
-
-# AM_CPPFLAGS =
 AM_CXXFLAGS =
 
 # These are not used by automake but are often useful for certain types of
@@ -15,7 +13,7 @@ TEST_COV_FLAGS = -ftest-coverage -fprofile-arcs
 
 noinst_DATA = bes.conf
 
-CLEANFILES = *.log *.sum site.exp
+CLEANFILES = *.log *.sum
 
 EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE_3) $(TESTSUITE_4) \
         atlocal.in $(srcdir)/package.m4 bes.conf.in handler_tests_macros.m4 \

@@ -1,9 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Dataset name="nc4_unsigned_types.nc"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xmlns="http://xml.opendap.org/ns/DAP2"
-xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/dap2.xsd">
-
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Dataset name="nc4_unsigned_types.nc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xml.opendap.org/ns/DAP2" xsi:schemaLocation="http://xml.opendap.org/ns/DAP2 http://xml.opendap.org/dap/dap2.xsd">
     <Attribute name="NC_GLOBAL" type="Container">
         <Attribute name="title" type="String">
             <value>Hyrax/netcdf handler test file 2</value>
@@ -20,7 +16,6 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
             <value>time</value>
         </Attribute>
     </Attribute>
-
     <Grid name="temp">
         <Array name="temp">
             <UInt32/>
@@ -82,6 +77,6 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
             <dimension name="lon" size="5"/>
         </Map>
     </Grid>
-
     <dataBLOB href=""/>
 </Dataset>
+
