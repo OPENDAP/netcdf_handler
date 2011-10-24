@@ -261,6 +261,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
         int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride)
 {
     int errstat;
+#if NETCDF_VERSION >= 4
     if (datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME+1];
         size_t size;
@@ -402,6 +403,10 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
         do_cardinal_array_read(ncid, varid, datatype, values, has_values, values_offset,
                 nels, cor, edg, step, has_stride);
     }
+#else
+        do_cardinal_array_read(ncid, varid, datatype, values, has_values, values_offset,
+                nels, cor, edg, step, has_stride);
+#endif
 }
 
 bool NCArray::read()

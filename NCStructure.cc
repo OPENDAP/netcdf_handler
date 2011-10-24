@@ -131,6 +131,7 @@ void NCStructure::transfer_attributes(AttrTable *at)
 void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
         vector<char> &values, bool has_values, int values_offset)
 {
+#if NETCDF_VERSION >= 4
     if (datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME+1];
         size_t size;
@@ -206,6 +207,9 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
     }
     else
         throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
+#else
+        throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
+#endif
 }
 
 bool NCStructure::read()
