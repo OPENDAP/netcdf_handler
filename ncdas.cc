@@ -231,8 +231,10 @@ static string print_type(nc_type datatype)
         case NC_DOUBLE:
             return "Float64";
 
+#if NETCDF_VERSION >= 4
         case NC_COMPOUND:
             return "NC_COMPOUND";
+#endif
 
 #if NETCDF_VERSION >= 4
             // These are all new netcdf 4 types that we don't support yet
@@ -549,6 +551,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                 attr_table_ptr->append_attr("string_length", print_type(NC_INT), print_rep);
             }
         }
+#if NETCDF_VERSION >= 4
         else if (var_type >= NC_FIRSTUSERTYPEID) {
             vector<char> name(MAX_NC_NAME + 1);
             int class_type;
@@ -601,6 +604,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                     break;
             }
         }
+#endif // NETCDF_VERSION >= 4
     }
 
     // global attributes

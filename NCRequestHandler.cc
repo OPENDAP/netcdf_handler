@@ -27,6 +27,9 @@
 #include <string>
 #include <sstream>
 
+#include <InternalErr.h>
+#include <Ancillary.h>
+
 #include "NCRequestHandler.h"
 
 #include <BESResponseHandler.h>
@@ -36,15 +39,14 @@
 #include <BESDDSResponse.h>
 #include <BESDataDDSResponse.h>
 #include <BESVersionInfo.h>
-#include <InternalErr.h>
+
 #include <BESDapError.h>
 #include <BESInternalFatalError.h>
 #include <BESDataNames.h>
 #include <TheBESKeys.h>
-#include <BESUtil.h>
-#include <Ancillary.h>
 #include <BESServiceRegistry.h>
 #include <BESUtil.h>
+#include <BESDebug.h>
 #include <BESContextManager.h>
 
 #include "config_nc.h"
@@ -90,35 +92,27 @@ NCRequestHandler::NCRequestHandler(const string &name) :
     add_handler(HELP_RESPONSE, NCRequestHandler::nc_build_help);
     add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
 
+    // Look for the SHowSharedDims property, if it has not been set
     if (NCRequestHandler::_show_shared_dims_set == false) {
-        bool key_found = false, context_found = false;
-        // string key = "NC.ShowSharedDimensions";
+        bool key_found = false;
         string doset;
         TheBESKeys::TheKeys()->get_value("NC.ShowSharedDimensions", doset, key_found);
-        // TODO Fix this so it works
-        string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
-        //cerr << "context value: " << context_value << endl;
-        //cerr << "Testing values..." << endl;
         if (key_found) {
-            //cerr << " Key found" << endl;
+            // It was set in the conf file
+            NCRequestHandler::_show_shared_dims_set = true;
+
             doset = BESUtil::lowercase(doset);
             if (doset == "true" || doset == "yes") {
                 NCRequestHandler::_show_shared_dims = true;
             }
-        }
-        else if (context_found) {
-            //cerr << "context found" << endl;
-            if (version_ge(context_value, 3.2))
-                NCRequestHandler::_show_shared_dims = false;
             else
-                NCRequestHandler::_show_shared_dims = true;
+                NCRequestHandler::_show_shared_dims = false;
         }
         else {
-            //cerr << "Set default value" << endl;
+            // This is the default value and the _show_shared_dims_set variable is
+            // still false.
             NCRequestHandler::_show_shared_dims = true;
         }
-
-        NCRequestHandler::_show_shared_dims_set = true;
     }
 
     if (NCRequestHandler::_ignore_unknown_types_set == false) {
@@ -137,7 +131,7 @@ NCRequestHandler::NCRequestHandler(const string &name) :
             NCRequestHandler::_ignore_unknown_types = false;
         }
 
-        NCRequestHandler::_ignore_unknown_types_set = true;
+        NCRequestHandler::_ignore_unknown_types_set = false;
     }
 }
 
@@ -185,13 +179,35 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
     BESDDSResponse *bdds = dynamic_cast<BESDDSResponse *> (response);
     if (!bdds)
         throw BESInternalError("cast error", __FILE__, __LINE__);
+
     try {
+        // If there's no value for this set in the conf file, look at the context
+        // and set the default behavior based on the protocol version clients say
+        // they will accept.
+        if (NCRequestHandler::_show_shared_dims_set == false) {
+            bool context_found = false;
+            string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
+            if (context_found) {
+                BESDEBUG("nc", "xdap_accept: " << context_value << endl);
+                if (version_ge(context_value, 3.2))
+                    NCRequestHandler::_show_shared_dims = false;
+                else
+                    NCRequestHandler::_show_shared_dims = true;
+            }
+        }
+
+        BESDEBUG("nc", "Fiddled with xdap_accept" << endl);
+
         bdds->set_container(dhi.container->get_symbolic_name());
         DDS *dds = bdds->get_dds();
         string accessed = dhi.container->access();
         dds->filename(accessed);
 
+        BESDEBUG("nc", "Prior to nc_read_dataset_variables" << endl);
+
         nc_read_dataset_variables(*dds, accessed);
+
+        BESDEBUG("nc", "Prior to Ancillary::read_ancillary_dds, accessed: " << accessed << endl);
 
         Ancillary::read_ancillary_dds(*dds, accessed);
 
@@ -201,6 +217,8 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         nc_read_dataset_attributes(*das, accessed);
         Ancillary::read_ancillary_das(*das, accessed);
 
+        BESDEBUG("nc", "Prior to dds->transfer_attributes" << endl);
+
         dds->transfer_attributes(das);
 
         bdds->set_constraint(dhi);
@@ -208,7 +226,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         bdds->clear_container();
     }
     catch (BESError &e) {
-        throw;
+        throw e;
     }
     catch (InternalErr & e) {
         BESDapError ex(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);
@@ -235,6 +253,18 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         throw BESInternalError("cast error", __FILE__, __LINE__);
 
     try {
+        if (NCRequestHandler::_show_shared_dims_set == false) {
+            bool context_found = false;
+            string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
+            if (context_found) {
+                BESDEBUG("nc", "xdap_accept: " << context_value << endl);
+                if (version_ge(context_value, 3.2))
+                    NCRequestHandler::_show_shared_dims = false;
+                else
+                    NCRequestHandler::_show_shared_dims = true;
+            }
+        }
+
         bdds->set_container(dhi.container->get_symbolic_name());
         DataDDS *dds = bdds->get_dds();
         string accessed = dhi.container->access();

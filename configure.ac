@@ -7,6 +7,12 @@ AC_CONFIG_AUX_DIR([conf])
 AC_CONFIG_MACRO_DIR([conf])
 
 AM_INIT_AUTOMAKE(1.10)
+
+# The handler is a shared object library, so we don't normally need
+# the static lib. Override this default by specifying `--enable-static',
+# which can make running unit tests with valgrind far more pleasant. 
+AM_DISABLE_STATIC
+
 LT_INIT
 AC_CONFIG_TESTDIR(bes-testsuite, [.])
 
@@ -82,5 +88,5 @@ AC_CHECK_BES([3.9.0],
 
 OPENDAP_DEBUG_OPTION
 
-AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal data/nc4_test_files/Makefile])
+AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal])
 AC_OUTPUT
