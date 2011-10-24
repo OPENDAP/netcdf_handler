@@ -111,7 +111,30 @@ bool NCByte::read()
         throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
 
     dods_byte Dbyte;
+#if NETCDF_VERSION >= 4
     errstat = nc_get_var(ncid, varid, &Dbyte);
+#else
+    size_t cor[MAX_NC_DIMS];    /* corner coordinates */
+    int num_dim;                /* number of dim. in variable */
+    nc_type datatype;           /* variable data type */
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+			(int *)0);
+    if( errstat != NC_NOERR )
+    {
+	throw Error(errstat,string("Could not read information about the variable `") + name() + string("'."));
+    }
+    if( datatype != NC_BYTE )
+    {
+	throw InternalErr(__FILE__, __LINE__, "Entered NCByte::read() with non-byte variable!");
+    }
+
+    for( int id = 0; id <= num_dim && id < MAX_NC_DIMS; id++ )
+    {
+	cor[id] = 0;
+    }
+
+    errstat = nc_get_var1_uchar( ncid, varid, cor, &Dbyte ) ;
+#endif
     if (errstat != NC_NOERR)
         throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 
