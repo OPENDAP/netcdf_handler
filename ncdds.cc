@@ -540,9 +540,9 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid, int
             delete gr;
         }
         else {
-            if (!NCRequestHandler::get_show_shared_dims())
+            if (!NCRequestHandler::get_show_shared_dims()) {
                 array_vars.push_back(varid);
-            else {
+            } else {
                 BaseType *bt = build_scalar(name, filename, nctype);
                 NCArray *ar = build_array(bt, ncid, varid, nctype, ndims, dim_ids);
                 delete bt;
