@@ -55,7 +55,7 @@
 
 using namespace libdap;
 
-bool NCRequestHandler::_show_shared_dims = false;
+bool NCRequestHandler::_show_shared_dims = true;
 bool NCRequestHandler::_show_shared_dims_set = false;
 bool NCRequestHandler::_ignore_unknown_types = false;
 bool NCRequestHandler::_ignore_unknown_types_set = false;
@@ -125,13 +125,9 @@ NCRequestHandler::NCRequestHandler(const string &name) :
                 NCRequestHandler::_ignore_unknown_types = true;
             else
                 NCRequestHandler::_ignore_unknown_types = false;
-        }
-        else {
-            // if the key is not found, set the default value
-            NCRequestHandler::_ignore_unknown_types = false;
-        }
 
-        NCRequestHandler::_ignore_unknown_types_set = false;
+            NCRequestHandler::_ignore_unknown_types_set = true;
+        }
     }
 }
 
