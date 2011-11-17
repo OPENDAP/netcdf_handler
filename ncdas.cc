@@ -146,8 +146,10 @@ static string print_attr(nc_type type, int loc, void *vals)
 
         case NC_FLOAT: {
             gp.fp = (float *) vals;
+
             rep << std::showpoint;
-            rep << std::setprecision(10);
+            rep << std::setprecision(9);
+
             rep << *(gp.fp + loc);
             // If there's no decimal point and the rep does not use scientific
             // notation, add a decimal point. This little jaunt was taken because
@@ -168,7 +170,7 @@ static string print_attr(nc_type type, int loc, void *vals)
         case NC_DOUBLE: {
             gp.dp = (double *) vals;
             rep << std::showpoint;
-            rep << std::setprecision(17);
+            rep << std::setprecision(16);
             rep << *(gp.dp + loc);
             string tmp_value = rep.str();
             if (tmp_value.find('.') == string::npos
