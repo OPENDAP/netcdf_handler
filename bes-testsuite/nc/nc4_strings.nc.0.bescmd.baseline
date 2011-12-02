@@ -13,7 +13,7 @@ Attributes {
     }
     NC_GLOBAL {
         String title "Hyrax/netcdf handler test file 2";
-        Float64 version 1.0000000000000000;
+        Float64 version 1.000000000000000;
         String description "This file has all of the new netcdf 4 unsigned data types.";
     }
 }

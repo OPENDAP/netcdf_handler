@@ -11,10 +11,10 @@
             <value>-99</value>
         </Attribute>
         <Attribute name="relhum" type="Float32">
-            <value>-99.00000000</value>
+            <value>-99.0000000</value>
         </Attribute>
         <Attribute name="time" type="Float64">
-            <value>-99.000000000000000</value>
+            <value>-99.00000000000000</value>
         </Attribute>
     </Attribute>
     <Structure name="obs">
@@ -25,4 +25,3 @@
         <Float64 name="time"/>
     </Structure>
 </Dataset>
-

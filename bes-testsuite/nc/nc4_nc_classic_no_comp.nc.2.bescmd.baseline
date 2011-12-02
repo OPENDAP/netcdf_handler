@@ -5,7 +5,7 @@
             <value>Hyrax/netcdf handler test file 1</value>
         </Attribute>
         <Attribute name="version" type="Float64">
-            <value>1.0000000000000000</value>
+            <value>1.000000000000000</value>
         </Attribute>
         <Attribute name="description" type="String">
             <value>This file has all of the NC_CLASSIC_MODEL data types.</value>
@@ -22,11 +22,11 @@
                 <value>meters</value>
             </Attribute>
             <Attribute name="valid_range" type="Float64">
-                <value>0.0000000000000000</value>
-                <value>5000.0000000000000</value>
+                <value>0.000000000000000</value>
+                <value>5000.000000000000</value>
             </Attribute>
             <Attribute name="_FillValue" type="Float32">
-                <value>1.000000000</value>
+                <value>1.00000000</value>
             </Attribute>
             <Float32/>
             <dimension name="time" size="2"/>
@@ -87,7 +87,7 @@
     <Grid name="p">
         <Array name="p">
             <Attribute name="_FillValue" type="Float64">
-                <value>-9999.0000000000000</value>
+                <value>-9999.000000000000</value>
             </Attribute>
             <Float64/>
             <dimension name="time" size="2"/>
@@ -187,4 +187,3 @@
     </Grid>
     <dataBLOB href=""/>
 </Dataset>
-

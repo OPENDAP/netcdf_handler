@@ -5,7 +5,7 @@
             <value>Hyrax/netcdf handler test file 2</value>
         </Attribute>
         <Attribute name="version" type="Float64">
-            <value>1.0000000000000000</value>
+            <value>1.000000000000000</value>
         </Attribute>
         <Attribute name="description" type="String">
             <value>This file has all of the new netcdf 4 cardinal data types.</value>
@@ -79,4 +79,3 @@
     </Grid>
     <dataBLOB href=""/>
 </Dataset>
-

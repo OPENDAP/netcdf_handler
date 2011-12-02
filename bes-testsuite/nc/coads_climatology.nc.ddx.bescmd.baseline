@@ -13,10 +13,10 @@
     <Grid name="SST">
         <Array name="SST">
             <Attribute name="missing_value" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="_FillValue" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="long_name" type="String">
                 <value>SEA SURFACE TEMPERATURE</value>
@@ -72,10 +72,10 @@
     <Grid name="AIRT">
         <Array name="AIRT">
             <Attribute name="missing_value" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="_FillValue" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="long_name" type="String">
                 <value>AIR TEMPERATURE</value>
@@ -131,10 +131,10 @@
     <Grid name="UWND">
         <Array name="UWND">
             <Attribute name="missing_value" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="_FillValue" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="long_name" type="String">
                 <value>ZONAL WIND</value>
@@ -190,10 +190,10 @@
     <Grid name="VWND">
         <Array name="VWND">
             <Attribute name="missing_value" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="_FillValue" type="Float32">
-                <value>-9.999999790e+33</value>
+                <value>-9.99999979e+33</value>
             </Attribute>
             <Attribute name="long_name" type="String">
                 <value>MERIDIONAL WIND</value>
@@ -248,4 +248,3 @@
     </Grid>
     <dataBLOB href=""/>
 </Dataset>
-
