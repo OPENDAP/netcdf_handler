@@ -38,10 +38,10 @@ bes.conf: bes.conf.in ../config.status
 
 AUTOM4TE = autom4te
 
-TESTSUITE_3 = netcdf_handlerTest
+TESTSUITE_3 = $(srcdir)/netcdf_handlerTest
 
 if NETCDF4_TESTS
-TESTSUITE_4 = nc4_netcdf_handler_tests
+TESTSUITE_4 = $(srcdir)/nc4_netcdf_handler_tests
 else
 TESTSUITE_4 =
 endif

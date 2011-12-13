@@ -42,7 +42,6 @@
 // jhrg 9/23/94
 
 #include "config_nc.h"
-// #include "config.h"
 
 static char not_used rcsid[] = { "$Id$" };
 
@@ -50,6 +49,7 @@ static char not_used rcsid[] = { "$Id$" };
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
 #include <netcdf.h>
 
@@ -344,7 +344,6 @@ static void read_attributes_netcdf3(int ncid, int v, int natts, AttrTable *at)
         }
     }
 }
-
 
 #if NETCDF_VERSION >= 4
 /** Given the netcdf file id, variable id, number of attributes for the
