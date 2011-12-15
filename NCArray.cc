@@ -50,6 +50,7 @@ static char rcsid[] not_used =
 
 // #define DODS_DEBUG 1
 
+#include <BaseType.h>
 #include <Error.h>
 #include <InternalErr.h>
 #include <util.h>
@@ -153,7 +154,6 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
         case NC_DOUBLE:
         case NC_SHORT:
         case NC_INT:
-        case NC_BYTE:
 #if NETCDF_VERSION >= 4
         case NC_USHORT:
         case NC_UINT:
@@ -177,6 +177,45 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
             set_read_p(true);
             break;
         }
+
+        case NC_BYTE:{
+            if (!has_values) {
+                values.resize(nels * nctypelen(datatype));
+                if (has_stride)
+                    errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
+                else
+                    errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NCArray::do_cardinal_array_read)"));
+            }
+            if (NCRequestHandler::get_promote_byte_to_short()) {
+                // the data set's signed byte data are going to be stored in a short
+                // not an unsigned byte array. But double check that the template
+                // data type is Int16.
+                if (var()->type() != libdap::dods_int16_c) {
+                    throw Error(string("NC.PromoteByteToShort is set but the underlying array type is still a Byte: ") + name() + string("."));
+                }
+                // temporary vector for short (int16) data
+                vector<short int> tmp(nels);
+
+                // Pointer into the byte data. These values might be part of a compound and
+                // thus might have been read by a previous call (has_values is true in that
+                // case).
+                char *raw_byte_data = &values[0] + values_offset;
+                for (int i = 0; i < nels; ++i)
+                    tmp[i] = *raw_byte_data++;
+                val2buf(&tmp[0]);
+                set_read_p(true);
+            }
+            else {
+                val2buf(&values[0] + values_offset);
+                set_read_p(true);
+            }
+            break;
+        }
+
+
+
 
         case NC_CHAR: {
             // Use the dimension info from netcdf since that's the place where
@@ -288,7 +327,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
 
                 for (int element = 0; element < nels; ++element) {
                     NCStructure *ncs = dynamic_cast<NCStructure*> (var()->ptr_duplicate());
-                    for (int i = 0; i < nfields; ++i) {
+                    for (size_t i = 0; i < nfields; ++i) {
                         char field_name[NC_MAX_NAME+1];
                         nc_type field_typeid;
                         size_t field_offset;

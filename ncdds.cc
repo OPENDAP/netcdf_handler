@@ -86,7 +86,12 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
             return (new NCStr(varname, dataset));
 
         case NC_BYTE:
-            return (new NCByte(varname, dataset));
+            if (NCRequestHandler::get_promote_byte_to_short()) {
+                return (new NCInt16(varname, dataset));
+            }
+            else {
+                return (new NCByte(varname, dataset));
+            }
 
         case NC_SHORT:
             return (new NCInt16(varname, dataset));
@@ -124,6 +129,8 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
         default:
             throw InternalErr(__FILE__, __LINE__, "Unknown type (" + long_to_string(datatype) + ") for variable '" + varname + "'");
     }
+
+    return 0;
 }
 
 static bool is_user_defined(nc_type type)
@@ -182,7 +189,6 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
 static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const string &dataset,
         int ndims, int dim_ids[MAX_VAR_DIMS])
 {
-    //char name[NC_MAX_NAME];
     size_t size;
     nc_type base_type;
     size_t nfields;
@@ -198,7 +204,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
 
             NCStructure *ncs = new NCStructure(var_name, dataset);
 
-            for (int i = 0; i < nfields; ++i) {
+            for (size_t i = 0; i < nfields; ++i) {
                 char field_name[NC_MAX_NAME+1];
                 nc_type field_typeid;
                 int field_ndims;
@@ -255,8 +261,10 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
         }
 
         case NC_VLEN:
-            if (NCRequestHandler::get_ignore_unknown_types())
+            if (NCRequestHandler::get_ignore_unknown_types()) {
                 cerr << "in build_user_defined; found a vlen." << endl;
+                return 0;
+            }
             else
                 throw Error("The netCDF handler does not yet suppor the NC_VLEN type.");
             break;
@@ -328,6 +336,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
             throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
     }
 
+    return 0;
 }
 #endif
 

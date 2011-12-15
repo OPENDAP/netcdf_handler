@@ -38,6 +38,9 @@ private:
     static bool     _ignore_unknown_types ;
     static bool     _ignore_unknown_types_set ;
 
+    static bool     _promote_byte_to_short_set ;
+    static bool     _promote_byte_to_short;
+
 public:
 			NCRequestHandler( const string &name ) ;
     virtual		~NCRequestHandler( void ) ;
@@ -50,7 +53,7 @@ public:
 
     static bool get_show_shared_dims() { return _show_shared_dims; }
     static bool get_ignore_unknown_types() { return _ignore_unknown_types; }
-
+    static bool get_promote_byte_to_short() { return _promote_byte_to_short; }
 };
 
 #endif

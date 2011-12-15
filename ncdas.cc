@@ -96,14 +96,31 @@ static string print_attr(nc_type type, int loc, void *vals)
     switch (type) {
 #if NETCDF_VERSION >= 4
         case NC_UBYTE:
-#endif
-        case NC_BYTE:
             unsigned char uc;
             gp.cp = (char *) vals;
 
             uc = *(gp.cp + loc);
             rep << (int) uc;
             return rep.str();
+#endif
+
+        case NC_BYTE:
+            if (NCRequestHandler::get_promote_byte_to_short()) {
+                signed char sc;
+                gp.cp = (char *) vals;
+
+                sc = *(gp.cp + loc);
+                rep << (int) sc;
+                return rep.str();
+            }
+            else {
+                unsigned char uc;
+                gp.cp = (char *) vals;
+
+                uc = *(gp.cp + loc);
+                rep << (int) uc;
+                return rep.str();
+            }
 
         case NC_CHAR:
 #ifndef ATTR_STRING_QUOTE_FIX
@@ -190,6 +207,8 @@ static string print_attr(nc_type type, int loc, void *vals)
                 throw InternalErr(__FILE__, __LINE__, "The netcdf handler tried to print an attribute that has an unrecognized type. (1)");
             break;
     }
+
+    return "";
 }
 
 /** Return the printed representation of a netcdf type -- in a form the
@@ -209,9 +228,16 @@ static string print_type(nc_type datatype)
 
 #if NETCDF_VERSION >= 4
         case NC_UBYTE:
+            return "Byte";
 #endif
         case NC_BYTE:
-            return "Byte";
+            if (NCRequestHandler::get_promote_byte_to_short()) {
+                return "Int16";
+            }
+            else {
+                return "Byte";
+            }
+
 
         case NC_SHORT:
             return "Int16";
@@ -263,6 +289,8 @@ static string print_type(nc_type datatype)
                 throw InternalErr(__FILE__, __LINE__, "The netcdf handler tried to print an attribute that has an unrecognized type. (2)");
             break;
     }
+
+    return "";
 }
 
 /** Build and append values for attributes. The value are limited to
@@ -286,7 +314,7 @@ static void append_values(int ncid, int v, int len, nc_type datatype, char *attr
     }
 
     // add all the attributes in the array
-    for (unsigned int loc = 0; loc < len; loc++) {
+    for (int loc = 0; loc < len; loc++) {
         string print_rep = print_attr(datatype, loc, &value[0]);
         at->append_attr(attrname, print_type(datatype), print_rep);
     }
@@ -396,7 +424,7 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                     if (errstat != NC_NOERR)
                         throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
-                    for (int i = 0; i < nfields; ++i) {
+                    for (size_t i = 0; i < nfields; ++i) {
                         char field_name[NC_MAX_NAME+1];
                         nc_type field_typeid;
                         size_t field_offset;
@@ -421,7 +449,7 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                     if (errstat != NC_NOERR)
                         throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
-                    for (int i = 0; i < size; ++i)
+                    for (size_t i = 0; i < size; ++i)
                         at->append_attr(attrname, print_type(NC_BYTE), print_attr(NC_BYTE, i, &values[0]));
 
                     break;
@@ -440,7 +468,7 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                     if (errstat != NC_NOERR)
                           throw Error(errstat, string("Could not get the size of the enum base type for '") + attrname + string("'"));
 
-                    for (int i = 0; i < size; ++i)
+                    for (size_t i = 0; i < size; ++i)
                          at->append_attr(attrname, print_type(basetype), print_attr(basetype, i, &values[0]));
 
                     break;
@@ -586,7 +614,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                         break;
                     }
 
-                    for (int i = 0; i < num_members; ++i) {
+                    for (size_t i = 0; i < num_members; ++i) {
                         vector<char> member_name(MAX_NC_NAME + 1);
                         vector<char> member_value(base_size);
                         errstat = nc_inq_enum_member(ncid, var_type, i, &member_name[0], &member_value[0]);

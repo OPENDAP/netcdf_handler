@@ -57,8 +57,12 @@ using namespace libdap;
 
 bool NCRequestHandler::_show_shared_dims = true;
 bool NCRequestHandler::_show_shared_dims_set = false;
+
 bool NCRequestHandler::_ignore_unknown_types = false;
 bool NCRequestHandler::_ignore_unknown_types_set = false;
+
+bool NCRequestHandler::_promote_byte_to_short = false;
+bool NCRequestHandler::_promote_byte_to_short_set = false;
 
 extern void nc_read_dataset_attributes(DAS & das, const string & filename);
 extern void nc_read_dataset_variables(DDS & dds, const string & filename);
@@ -108,11 +112,6 @@ NCRequestHandler::NCRequestHandler(const string &name) :
             else
                 NCRequestHandler::_show_shared_dims = false;
         }
-        else {
-            // This is the default value and the _show_shared_dims_set variable is
-            // still false.
-            NCRequestHandler::_show_shared_dims = true;
-        }
     }
 
     if (NCRequestHandler::_ignore_unknown_types_set == false) {
@@ -129,6 +128,22 @@ NCRequestHandler::NCRequestHandler(const string &name) :
             NCRequestHandler::_ignore_unknown_types_set = true;
         }
     }
+
+    if (NCRequestHandler::_promote_byte_to_short_set == false) {
+        bool key_found = false;
+        string doset;
+        TheBESKeys::TheKeys()->get_value("NC.PromoteByteToShort", doset, key_found);
+        if (key_found) {
+            doset = BESUtil::lowercase(doset);
+            if (doset == "true" || doset == "yes")
+                NCRequestHandler::_promote_byte_to_short = true;
+            else
+                NCRequestHandler::_promote_byte_to_short = false;
+
+            NCRequestHandler::_promote_byte_to_short_set = true;
+        }
+    }
+
 }
 
 NCRequestHandler::~NCRequestHandler()
