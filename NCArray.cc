@@ -410,7 +410,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                          errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
                      if (errstat != NC_NOERR)
                          throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NC_OPAQUE)"));
-                     has_values = true;
+                     has_values = true; // This value may never be used. jhrg 1/9/12
                  }
 
                  val2buf(&values[0] + values_offset);
