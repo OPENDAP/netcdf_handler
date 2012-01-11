@@ -1,3 +1,318 @@
+2012-01-09  James Gallagher <jgallagher@opendap.org>
+
+	Added a comment
+
+	M    NCArray.cc
+
+2011-12-28  James Gallagher <jgallagher@opendap.org>
+
+	Added include for NCRequestHandler so that we could use it to
+	access the run-time param PromoteByteToShort.
+
+2011-12-14  James Gallagher <jgallagher@opendap.org>
+
+	Fixed missing gmon.out in bes-testsuite/Makefile.am CLEANFILES
+
+	M    bes-testsuite/Makefile.am
+
+2011-12-14  James Gallagher <jgallagher@opendap.org>
+
+	Added the NC.PromoteByteToShort option. This fixes a problem where
+	signed Byte values 'lost' their sign (see ticket 1850). This has
+	never been a big deal with Byte variables, but for attributes it
+	can be a real source of confusion because attributes' values are
+	rendered to text. If the sign is not present, it's hard for the
+	client to infer that one was originally present.
+
+2011-12-02  James Gallagher <jgallagher@opendap.org>
+
+	Fixed test baselines; I changed the number of significant digits used
+	when printing attribute values to address a bug where values were being
+	rounded to values that were off by 1 digit in the Nth place where N was
+	15 or 7 for 64- or 32-bit reals.
+
+	M    bes-testsuite/nc/nc4_strings_comp.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/coads_climatology.nc.ddx.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings_comp.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound2.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound2.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.2.bescmd
+	M    bes-testsuite/nc/test.nc.1.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_compressed.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_compressed.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.0.bescmd
+	M    bes-testsuite/nc/nc4_unsigned_types_comp.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_unsigned_types_comp.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_unsigned_types.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_unsigned_types.nc.2.bescmd.baseline
+
+2011-11-17  James Gallagher <jgallagher@opendap.org>
+
+	Fixed ticket 1788 - the code that converts floats and double
+	attribute values to strings was not handling precision correctly
+	and rounding errors were creeping into the DAS/DDX. I dropped the
+	precision of floats to 9 digits and doubles to 16 decimal digits.
+
+2011-10-26  James Gallagher <jgallagher@opendap.org>
+
+	Updates for the new DDX tests... nearly done
+
+2011-10-24  Patrick West <pwest@ucar.edu>
+
+	Added curly brace around if body so can add debug later.
+	M    ncdds.cc
+
+2011-10-24  Patrick West <pwest@ucar.edu>
+
+	Working now with netcdf 3.6.3
+	M    NCUInt32.cc
+	M    NCUInt16.cc
+	M    NCInt32.cc
+	M    NCInt16.cc
+	M    NCByte.cc
+
+2011-10-24  James Gallagher <jgallagher@opendap.org>
+
+	Fixes for netcdf 3 build - there are issues still.
+
+	M    NCArray.cc
+	M    NCStructure.cc
+	M    ncdas.cc
+
+2011-10-23  James Gallagher <jgallagher@opendap.org>
+
+	Modified configure so that this code builds only the so version of
+	the library by default. Fixed some DDX tests to work with the new
+	libdap code.
+
+2011-10-06  James Gallagher <jgallagher@opendap.org>
+
+	Fix for ticket 1558: The handler now uses the xdap_accept context
+	to switch between showing shared dimensions and not (unless that
+	parameter is explicitly set in the configuration file).
+
+2011-10-03  James Gallagher <jgallagher@opendap.org>
+
+	Added to test using the xdap_accept context to trigger various behaviors.
+
+2011-09-23  James Gallagher <jgallagher@opendap.org>
+
+	Fixed the distcheck target
+
+	M    bes-testsuite/Makefile.am
+	M    configure.ac
+
+2011-09-21  James Gallagher <jgallagher@opendap.org>
+
+	Hyrax 1.8
+
+2011-09-21  James Gallagher <jgallagher@opendap.org>
+
+	Added missing files for the distribution.
+
+2011-09-21  James Gallagher <jgallagher@opendap.org>
+
+	Added.
+
+2011-09-21  James Gallagher <jgallagher@opendap.org>
+
+	gcc/++ 4.0.x does not support the vector<>.data() method, so I
+	dropped back to using &var[0] (in place of the less hacky
+	var.data()). Also fixed a test that somehow got garbage in the
+	XML.
+
+2011-09-20  James Gallagher <jgallagher@opendap.org>
+
+	Added the TypeName attribute to NC_OPAQUEs; updated tests.
+
+2011-09-20  James Gallagher <jgallagher@opendap.org>
+
+	Added. For enum tests.
+
+2011-09-19  James Gallagher <jgallagher@opendap.org>
+
+	Removed old code - shortened most of the scalar read() mfuncs (for
+	the integral types) by assuming that the DDS is built correctly.
+	The code was testing that the datatype return by nc_inq_* matched
+	the class (NCByte, NCInt32, ...) but that's not necessary (if the
+	DDS was built correctly in the first place). Also, the code was
+	using a 'type-safe' function for each read, but the new code for
+	compound/user-defined types needs general functions, which also
+	happen to be a bit easier to use, so I switched to those in most
+	places. NB: The NCFloat32 and NCFloat64 classes use the older code
+	with the type-safe functions so they can serve as a template if I
+	need to switch back.
+
+2011-09-19  James Gallagher <jgallagher@opendap.org>
+
+	Added support for scalar and array enums, including tests. NetCDF
+	Enums are represented using integral types (byte, ..., uint32). If
+	an enum uses a 64-bit int the handler either elides the variable
+	and writes a message to stderr or throws an exception, depending
+	on the value of the NC.IgnoreUnknwonTypes parameter.
+
+2011-09-16  James Gallagher <jgallagher@opendap.org>
+
+	Added support for both scalars and arrays of the NC_OPAQUE type,
+	including regression tests. NC_OPAQUE variables are represented as
+	arrays of Bytes.
+
+2011-09-15  James Gallagher <jgallagher@opendap.org>
+
+	Removed some #define NETCDF_VERSION hackery (which made looking at
+	the code easier). These will break the netcdf 3 builds.
+
+2011-09-15  James Gallagher <jgallagher@opendap.org>
+
+	Last bit of hackery for support for nested structures with fields
+	that are arrays and arrays of nested structures with fields that
+	are arrays. Includes tests.
+
+2011-09-14  James Gallagher <jgallagher@opendap.org>
+
+	Removed instrumentation inadvertently checked in.
+
+2011-09-14  James Gallagher <jgallagher@opendap.org>
+
+	Added support for Nested structures (aka compounds) with arrays
+	and arrays of structures with nested structures with arrays in
+	them. No tests yet.
+
+2011-09-14  James Gallagher <jgallagher@opendap.org>
+
+	Added support for nested structures and included tests for the
+	same. Next Structure members that are arrays...
+
+2011-09-14  James Gallagher <jgallagher@opendap.org>
+
+	Added regression tests for the new structure (netcdf4 compound)
+	code. Still a work in progress.
+
+2011-09-13  James Gallagher <jgallagher@opendap.org>
+
+	cleaned up the NCArray refactor. This just removed #if 0... #endif
+	and commented-out lines
+
+2011-09-13  James Gallagher <jgallagher@opendap.org>
+
+	More changes for compound types - arrays are now supported.
+	Recursive compounds not so much... Also refactored NCArray.
+
+2011-09-12  James Gallagher <jgallagher@opendap.org>
+
+	Initial support for compound types. This code supports compound
+	variables (scalars, not arrays) and compound attributes (scalars
+	and vectors). Nested compounds are not supported yet. Two new data
+	files, with cdl, have been added to data/nc4_test_files and there
+	are bescmd files for them, too. The tests themselves have not been
+	added, however. Also, the tests have been partitioned into two
+	parts, one for netcdf4-only.
+
+2011-09-07  James Gallagher <jgallagher@opendap.org>
+
+	The handler now builds and passes make check using both netcdf 3
+	and netcdf 4.
+
+2011-09-06  James Gallagher <jgallagher@opendap.org>
+
+	Fixed bogus define of NETCDF_VERSION compile-time constant.
+
+2011-09-02  James Gallagher <jgallagher@opendap.org>
+
+	Fixes for the compilation problem reported by Patrick - I goofed
+	and checked in a merge that hosed some #if ... #endif stuff.
+
+2011-08-24  James Gallagher <jgallagher@opendap.org>
+
+	Merge of Hyrax 1.7.1
+
+	_M   .
+	M    ncdds.cc
+	M    NCRequestHandler.cc
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	_M   OSX_Resources/InstallationCheck.proto
+	_M   OSX_Resources/Info.plist.proto
+	M    ncdas.cc
+
+2011-08-15  James Gallagher <jgallagher@opendap.org>
+
+	Fixed missing right brace.
+
+	M    NCUInt16.cc
+
+2011-08-12  James Gallagher <jgallagher@opendap.org>
+
+	Updated the svn:ignore property for the netcdf4 data files used by
+	the netcdf handler tests
+
+2011-08-09  James Gallagher <jgallagher@opendap.org>
+
+	Fixes for builds with netcdf 3
+
+	M    NCUInt32.cc
+	M    NCUInt16.cc
+	M    configure.ac
+	M    ncdas.cc
+	M    NCStr.cc
+
+2011-08-05  James Gallagher <jgallagher@opendap.org>
+
+	The configure script now figures out the major version number of
+	the netcdf library; the support for the new datatypes uses this so
+	that the handler will still compile with an old version of the
+	library (that will lack the new constants, et c., for the new
+	netcdf 4 datatypes).
+
+	M    configure.ac
+
+2011-08-05  James Gallagher <jgallagher@opendap.org>
+
+	Completed adding support for unsigned short, int and byte types and strings. The server supports both variables and attributes of these types and has tests for the new types.
+
+2011-08-04  James Gallagher <jgallagher@opendap.org>
+
+	Added test data for those netcdf4 tests.
+
+2011-08-04  James Gallagher <jgallagher@opendap.org>
+
+	Added calls to LT_INIT and AM_PROG_LIBTOOL so that more complete libtool support is available.
+
+2011-08-04  James Gallagher <jgallagher@opendap.org>
+
+	Test files for netcdf4 features - these test for support for the 'classic nc4' stuff.
+
+2011-08-04  James Gallagher <jgallagher@opendap.org>
+
+	Removed old dejaGNU test cruft; added new tests for netcdf4.
+
+2011-06-30  Patrick West <pwest@ucar.edu>
+
+	Merge hyrax 1.7 branch to trunk
+
+2011-05-05  James Gallagher <jgallagher@opendap.org>
+
+	MOved nc4 test files to the data directory
+
+2011-05-05  James Gallagher <jgallagher@opendap.org>
+
+	Added netcdf 4 files that use the 'NC_CLASSIC_MODEL'
+
+2011-04-20  James Gallagher <jgallagher@opendap.org>
+
+	metapackage build
+
+	M    configure.ac
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
 2011-04-20  James Gallagher <jgallagher@opendap.org>
 
 	Hyrax 1.7 release

@@ -1,5 +1,14 @@
 
-$Id$
+Version 3.10.0
+
+This version introduces some major improvements to the handler. Now the handler reads netcdf 4 files and externalizes all but a very small number of its native data types (64-bit ints, vlens and groups are yet to be supported). This means that most netcdf 4 files work, not just the 'classic netcdf' files.
+
+Also added to the handler are several configuration parameters. Briefly, they are:
+* IgnoreUnknowTypes
+* ShowSharedDimensions
+* PromoteByteToShort
+
+See http://docs.opendap.org/index.php/BES_-_Modules_-_The_NetCDF_Handler for the full story.
 
 Version 3.9.3
 
