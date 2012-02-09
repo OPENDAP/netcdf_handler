@@ -8,10 +8,6 @@
 #include "config.h"
 #endif
 
-#ifndef NC_FIRSTUSERTYPEID
-#define NC_FIRSTUSERTYPEID 32
-#endif
-
 /* Shorthand for gcc's unused attribute feature */
 #if defined(__GNUG__) || defined(__GNUC__)
 #define not_used __attribute__ ((unused))

@@ -26,6 +26,7 @@
 
 #include <string>
 #include <sstream>
+#include <exception>
 
 #include <InternalErr.h>
 #include <Ancillary.h>
@@ -90,6 +91,8 @@ static bool version_ge(const string &version, float value)
 NCRequestHandler::NCRequestHandler(const string &name) :
     BESRequestHandler(name)
 {
+    BESDEBUG("nc", "In NCRequestHandler::NCRequestHandler" << endl);
+
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
     add_handler(DDS_RESPONSE, NCRequestHandler::nc_build_dds);
     add_handler(DATA_RESPONSE, NCRequestHandler::nc_build_data);
@@ -144,6 +147,7 @@ NCRequestHandler::NCRequestHandler(const string &name) :
         }
     }
 
+    BESDEBUG("nc", "Exiting NCRequestHandler::NCRequestHandler" << endl);
 }
 
 NCRequestHandler::~NCRequestHandler()
@@ -152,6 +156,8 @@ NCRequestHandler::~NCRequestHandler()
 
 bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
+    BESDEBUG("nc", "In NCRequestHandler::nc_build_das" << endl);
+
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDASResponse *bdas = dynamic_cast<BESDASResponse *> (response);
     if (!bdas)
@@ -175,12 +181,18 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
+    catch (std::exception &e) {
+        string s = string("C++ Exception: ") + e.what();
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
+        throw ex;
+    }
     catch (...) {
         string s = "unknown exception caught building DAS";
         BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
 
+    BESDEBUG("nc", "Exiting NCRequestHandler::nc_build_das" << endl);
     return true;
 }
 
@@ -192,9 +204,9 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         throw BESInternalError("cast error", __FILE__, __LINE__);
 
     try {
-        // If there's no value for this set in the conf file, look at the context
-        // and set the default behavior based on the protocol version clients say
-        // they will accept.
+        // If there's no value for this set in the conf file, look at
+        // the context and set the default behavior based on the
+        // protocol version clients say they will accept.
         if (NCRequestHandler::_show_shared_dims_set == false) {
             bool context_found = false;
             string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
@@ -245,6 +257,11 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
     }
     catch (Error & e) {
         BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
+        throw ex;
+    }
+    catch (std::exception &e) {
+        string s = string("C++ Exception: ") + e.what();
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
     catch (...) {
@@ -306,6 +323,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
     }
     catch (Error & e) {
         BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
+        throw ex;
+    }
+    catch (std::exception &e) {
+        string s = string("C++ Exception: ") + e.what();
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
     catch (...) {

@@ -57,6 +57,7 @@ static char not_used rcsid[]={"$Id$"};
 #include <util.h>
 
 #include "NCRequestHandler.h"
+#include "nc_util.h"
 
 #include "NCInt32.h"
 #include "NCUInt32.h"
@@ -133,6 +134,9 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
     return 0;
 }
 
+#if 0
+// Replaced by code in nc_util.cc. jhrg 2/9/12
+
 static bool is_user_defined(nc_type type)
 {
 #if NETCDF_VERSION >= 4
@@ -141,6 +145,7 @@ static bool is_user_defined(nc_type type)
     return false;
 #endif
 }
+#endif
 
 /** Build a grid given that one has been found. The Grid's Array is already
     allocated and is passed in along with a number of arrays containing
@@ -211,7 +216,8 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
                 int field_sizes[MAX_NC_DIMS];
                 nc_inq_compound_field(ncid, xtype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
                 BaseType *field;
-                if (is_user_defined(field_typeid)) {
+                if (is_user_defined_type(ncid, field_typeid)) {
+		    //is_user_defined(field_typeid)) {
                     // Odd: 'varid' here seems wrong, but works.
                     field = build_user_defined(ncid, varid, field_typeid, dataset, field_ndims, field_sizes);
                     // Child compound types become anonymous variables but DAP
@@ -527,7 +533,8 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid, int
 
         // a scalar? NB a one-dim NC_CHAR array will have DAP type of
         // dods_str_c because it's really a scalar string, not an array.
-        if (is_user_defined(nctype)) {
+        if (is_user_defined_type(ncid, nctype)) {
+	    // is_user_defined(nctype)) {
 #if NETCDF_VERSION >= 4
             BaseType *bt = build_user_defined(ncid, varid, nctype, filename, ndims, dim_ids);
             dds_table.add_var(bt);

@@ -59,6 +59,7 @@ static char rcsid[] not_used =
 #include "NCRequestHandler.h"
 #include "NCArray.h"
 #include "NCStructure.h"
+#include "nc_util.h"
 
 BaseType *
 NCArray::ptr_duplicate()
@@ -147,7 +148,10 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
         vector<char> &values, bool has_values, int values_offset,
         int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride)
 {
-    int errstat;
+    size_t size;
+    int errstat = nc_inq_type(ncid, datatype, 0, &size);
+    if (errstat != NC_NOERR)
+      throw Error(errstat, "Could not get the size for the type");
 
     switch (datatype) {
         case NC_FLOAT:
@@ -161,7 +165,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
 #endif
         {
             if (!has_values) {
-                values.resize(nels * nctypelen(datatype));
+                values.resize(nels * size);
                 if (has_stride)
                     errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
                 else
@@ -180,7 +184,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
 
         case NC_BYTE:{
             if (!has_values) {
-                values.resize(nels * nctypelen(datatype));
+                values.resize(nels * size);
                 if (has_stride)
                     errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
                 else
@@ -241,7 +245,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
                 step[num_dim - 1] = 1;
 
             if (!has_values) {
-                values.resize(nels * nth_dim_size * nctypelen(datatype));
+                values.resize(nels * nth_dim_size * size);
                 if (has_stride)
                     errstat = nc_get_vars_text(ncid, varid, cor, edg, step, &values[0]);
                 else
@@ -267,7 +271,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
 #if NETCDF_VERSION >= 4
         case NC_STRING: {
             if (!has_values) {
-                values.resize(nels * nctypelen(datatype));
+                values.resize(nels * size);
                 if (has_stride)
                     errstat = nc_get_vars_string(ncid, varid, cor, edg, step, (char**)(&values[0] + values_offset));
                 else
@@ -301,7 +305,8 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
 {
     int errstat;
 #if NETCDF_VERSION >= 4
-    if (datatype >= NC_FIRSTUSERTYPEID) {
+    if (is_user_defined_type(ncid, datatype)) {
+        // datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME+1];
         size_t size;
         nc_type base_type;
@@ -336,7 +341,8 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                         // int field_sizes[MAX_NC_DIMS];
                         nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, 0, 0); //&field_ndims, &field_sizes[0]);
                         BaseType *field = ncs->var(field_name);
-                        if (field_typeid >= NC_FIRSTUSERTYPEID) {
+                        if (is_user_defined_type(ncid, field_typeid)) {
+			    // field_typeid >= NC_FIRSTUSERTYPEID) {
                             // Interior user defined types have names, but not field_names
                             // so use the type name as the field name (matches the
                             // behavior of the ncdds.cc code).
