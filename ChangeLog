@@ -1,3 +1,12 @@
+2012-02-09  James Gallagher <jgallagher@opendap.org>
+
+	Fixes for netcdf-4.1.1 (Removed the NC_FIRSTUSERTYPEID hack - bad
+	idea)
+
+2012-02-07  James Gallagher <jgallagher@opendap.org>
+
+	3.10.1
+
 2012-02-07  James Gallagher <jgallagher@opendap.org>
 
 	Added a conditional definition of NC_FIRSTUSERTYPEID to

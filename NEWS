@@ -1,7 +1,10 @@
 
 Version 3.10.1
 
-Minor fix for netcdf 4.1.1: Added conditional definition of NC_FIRSTUSERTYPEID.
+Fixes for netcdf 4.1.1, which is the version in RHEL6's RPM
+package. These include _not_ using NC_FIRSTUSERTYPEID and the old
+nctypelen(). Those work with netcdf 4.1.2, but not 4.1.1 and they are
+probably not that gereat an idea anyway.
 
 Version 3.10.0
 
