@@ -303,10 +303,14 @@ static void append_values(int ncid, int v, int len, nc_type datatype, char *attr
 	     << ", nctypelen(datatype) = " <<  nctypelen(datatype) << endl);
     
     size_t size;
-
-    int errstat = nc_inq_type(ncid, datatype, 0, &size);
+    int errstat;
+#if NETCDF_VERSION >= 4
+    errstat = nc_inq_type(ncid, datatype, 0, &size);
     if (errstat != NC_NOERR)
         throw Error(errstat, "Could not get the size for the type.");
+#else
+    size = nctypelen(datatype);
+#endif
 
     BESDEBUG("nc", "But nc_inq_type(...) sez: " << size << endl);
 

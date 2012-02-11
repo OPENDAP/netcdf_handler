@@ -149,7 +149,15 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
         int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride)
 {
     size_t size;
-    int errstat = nc_inq_type(ncid, datatype, 0, &size);
+    int errstat;
+#if NETCDF_VERSION >= 4
+    errstat = nc_inq_type(ncid, datatype, 0, &size);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not get the size for the type.");
+#else
+    size = nctypelen(datatype);
+#endif
+
     if (errstat != NC_NOERR)
       throw Error(errstat, "Could not get the size for the type");
 

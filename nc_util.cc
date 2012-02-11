@@ -32,6 +32,7 @@ using namespace libdap;
 
 bool is_user_defined_type(int ncid, int type)
 {
+#if NETCDF_VERSION >= 4
     int ntypes;
     int typeids[NC_MAX_VARS];  // It's likely safe to assume there are
 			       // no more types than variables. jhrg
@@ -46,5 +47,8 @@ bool is_user_defined_type(int ncid, int type)
     }
 
     return false;
+#else
+    return false;
+#endif
 }
 
