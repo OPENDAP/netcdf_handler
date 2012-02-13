@@ -298,10 +298,6 @@ static string print_type(nc_type datatype)
  */
 static void append_values(int ncid, int v, int len, nc_type datatype, char *attrname, AttrTable *at)
 {
-    BESDEBUG("nc", "In append_values; len = " << len 
-	     << ", datatype = " << datatype 
-	     << ", nctypelen(datatype) = " <<  nctypelen(datatype) << endl);
-    
     size_t size;
     int errstat;
 #if NETCDF_VERSION >= 4
@@ -311,8 +307,6 @@ static void append_values(int ncid, int v, int len, nc_type datatype, char *attr
 #else
     size = nctypelen(datatype);
 #endif
-
-    BESDEBUG("nc", "But nc_inq_type(...) sez: " << size << endl);
 
     vector<char> value((len + 1) * size);
     errstat = nc_get_att(ncid, v, attrname, &value[0]);

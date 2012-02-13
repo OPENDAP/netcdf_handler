@@ -56,6 +56,8 @@ static char rcsid[] not_used =
 #include <util.h>
 #include <debug.h>
 
+#include <BESDebug.h>
+
 #include "NCRequestHandler.h"
 #include "NCArray.h"
 #include "NCStructure.h"
@@ -158,9 +160,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
     size = nctypelen(datatype);
 #endif
 
-    if (errstat != NC_NOERR)
-      throw Error(errstat, "Could not get the size for the type");
-
+    BESDEBUG("nc", "In NCArray::do_cardinal_array_read, size = " << size << endl);
     switch (datatype) {
         case NC_FLOAT:
         case NC_DOUBLE:
@@ -225,9 +225,6 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
             }
             break;
         }
-
-
-
 
         case NC_CHAR: {
             // Use the dimension info from netcdf since that's the place where
