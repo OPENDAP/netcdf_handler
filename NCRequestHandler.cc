@@ -26,6 +26,7 @@
 
 #include <string>
 #include <sstream>
+#include <exception>
 
 #include <InternalErr.h>
 #include <Ancillary.h>
@@ -55,10 +56,14 @@
 
 using namespace libdap;
 
-bool NCRequestHandler::_show_shared_dims = false;
+bool NCRequestHandler::_show_shared_dims = true;
 bool NCRequestHandler::_show_shared_dims_set = false;
+
 bool NCRequestHandler::_ignore_unknown_types = false;
 bool NCRequestHandler::_ignore_unknown_types_set = false;
+
+bool NCRequestHandler::_promote_byte_to_short = false;
+bool NCRequestHandler::_promote_byte_to_short_set = false;
 
 extern void nc_read_dataset_attributes(DAS & das, const string & filename);
 extern void nc_read_dataset_variables(DDS & dds, const string & filename);
@@ -86,6 +91,8 @@ static bool version_ge(const string &version, float value)
 NCRequestHandler::NCRequestHandler(const string &name) :
     BESRequestHandler(name)
 {
+    BESDEBUG("nc", "In NCRequestHandler::NCRequestHandler" << endl);
+
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
     add_handler(DDS_RESPONSE, NCRequestHandler::nc_build_dds);
     add_handler(DATA_RESPONSE, NCRequestHandler::nc_build_data);
@@ -108,11 +115,6 @@ NCRequestHandler::NCRequestHandler(const string &name) :
             else
                 NCRequestHandler::_show_shared_dims = false;
         }
-        else {
-            // This is the default value and the _show_shared_dims_set variable is
-            // still false.
-            NCRequestHandler::_show_shared_dims = true;
-        }
     }
 
     if (NCRequestHandler::_ignore_unknown_types_set == false) {
@@ -125,14 +127,27 @@ NCRequestHandler::NCRequestHandler(const string &name) :
                 NCRequestHandler::_ignore_unknown_types = true;
             else
                 NCRequestHandler::_ignore_unknown_types = false;
-        }
-        else {
-            // if the key is not found, set the default value
-            NCRequestHandler::_ignore_unknown_types = false;
-        }
 
-        NCRequestHandler::_ignore_unknown_types_set = false;
+            NCRequestHandler::_ignore_unknown_types_set = true;
+        }
     }
+
+    if (NCRequestHandler::_promote_byte_to_short_set == false) {
+        bool key_found = false;
+        string doset;
+        TheBESKeys::TheKeys()->get_value("NC.PromoteByteToShort", doset, key_found);
+        if (key_found) {
+            doset = BESUtil::lowercase(doset);
+            if (doset == "true" || doset == "yes")
+                NCRequestHandler::_promote_byte_to_short = true;
+            else
+                NCRequestHandler::_promote_byte_to_short = false;
+
+            NCRequestHandler::_promote_byte_to_short_set = true;
+        }
+    }
+
+    BESDEBUG("nc", "Exiting NCRequestHandler::NCRequestHandler" << endl);
 }
 
 NCRequestHandler::~NCRequestHandler()
@@ -141,6 +156,8 @@ NCRequestHandler::~NCRequestHandler()
 
 bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
+    BESDEBUG("nc", "In NCRequestHandler::nc_build_das" << endl);
+
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDASResponse *bdas = dynamic_cast<BESDASResponse *> (response);
     if (!bdas)
@@ -164,12 +181,18 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
+    catch (std::exception &e) {
+        string s = string("C++ Exception: ") + e.what();
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
+        throw ex;
+    }
     catch (...) {
         string s = "unknown exception caught building DAS";
         BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
 
+    BESDEBUG("nc", "Exiting NCRequestHandler::nc_build_das" << endl);
     return true;
 }
 
@@ -236,6 +259,11 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
         throw ex;
     }
+    catch (std::exception &e) {
+        string s = string("C++ Exception: ") + e.what();
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
+        throw ex;
+    }
     catch (...) {
         string s = "unknown exception caught building DDS";
         BESInternalFatalError ex(s, __FILE__, __LINE__);
@@ -295,6 +323,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
     }
     catch (Error & e) {
         BESDapError ex(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
+        throw ex;
+    }
+    catch (std::exception &e) {
+        string s = string("C++ Exception: ") + e.what();
+        BESInternalFatalError ex(s, __FILE__, __LINE__);
         throw ex;
     }
     catch (...) {

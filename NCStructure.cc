@@ -47,6 +47,7 @@ static char rcsid[] not_used ={"$Id$"};
 #include <util.h>
 #include <InternalErr.h>
 
+#include "nc_util.h"
 #include "NCStructure.h"
 
 BaseType *
@@ -132,7 +133,8 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
         vector<char> &values, bool has_values, int values_offset)
 {
 #if NETCDF_VERSION >= 4
-    if (datatype >= NC_FIRSTUSERTYPEID) {
+  if (is_user_defined_type(ncid, datatype)) {
+      //datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME+1];
         size_t size;
         nc_type base_type;
@@ -158,7 +160,8 @@ void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
                     size_t field_offset;
                     int field_ndims;
                     nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, 0);
-                    if (field_typeid >= NC_FIRSTUSERTYPEID) {
+                    if (is_user_defined_type(ncid, field_typeid)) {
+		        // field_typeid >= NC_FIRSTUSERTYPEID) {
                         // Interior user defined types have names, but not field_names
                         // so use the type name as the field name (matches the
                         // behavior of the ncdds.cc code).

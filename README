@@ -1,7 +1,5 @@
 
-$Id$
-
-Updated for version 3.9.3
+Updated for version 3.10.0
 
 This is the OPeNDAP netCDF Data Handler. It is used along with Hyrax.
 
@@ -13,38 +11,14 @@ software is designed to allow any number of handlers to be configured easily.
 See the DAP Server README and INSTALL files for information about
 configuration, including how to use this handler.
 
-This version of the handler has been tested with netcdf 4 API files (not
-netcdf 4 data model files). It works with netcdf 4 API NC_CLASSIC_MODEL files
-that are either plain or compressed. To get this feature you must link the 
-handler to a copy of the netcdf 4 API library that has been built with HDF5.
-Teh INSTALL file has more details. 
+This version of the handler has been updated to read netcdf 4 files
+and supports most of the netcdf 4 data types, not just those defined
+as part of the netcdf 'classic' data model.
 
-Note: Netcdf3 and NetCDF4 define the following:
-NC_BYTE         8-bit signed integer
-NC_CHAR         8-bit unsigned integer
-NC_SHORT        16-bit signed integer
-NC_USHORT       16-bit unsigned integer *
-NC_INT (or NC_LONG)     32-bit signed integer
-NC_UINT         32-bit unsigned integer *
-NC_INT64        64-bit signed integer *
-NC_UINT64       64-bit unsigned integer *
-NC_FLOAT        32-bit floating point
-NC_DOUBLE       64-bit floating point
-NC_STRING       variable length character string * 
-
-And DAP defines cardinals using the same bit-widths. This handler assumes this
-when it reads data.
-
-Special options supported by the handler: 
-* ShowSharedDimensions: Include shared dimensions as separate variables. 
-Accepted values: true,yes|false,no, defaults to false.
-Example: "NC.ShowSharedDimensions=false"
-
-* IgnoreUnknownTypes: When the handler reads a type that it does not 
-recognize, it will normally signal an error and stop processing. Setting this
-parameter to true will cause it to silently ignore the unknown type (an error
-message may be written to the bes log file).
-Example: NC.IgnoreUnknownTypes=true
+See http://docs.opendap.org/index.php/BES_-_Modules_-_The_NetCDF_Handler
+for the full story on the different data models and how they are
+mapped into DAP2 along with the (expanded) set of configuration
+parameters.
 
 Test data are also installed, so after installing this handler, Hyrax 
 will have data to serve providing an easy way to test your new installation

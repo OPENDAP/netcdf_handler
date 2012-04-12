@@ -50,14 +50,18 @@ static char rcsid[] not_used =
 
 // #define DODS_DEBUG 1
 
+#include <BaseType.h>
 #include <Error.h>
 #include <InternalErr.h>
 #include <util.h>
 #include <debug.h>
 
+#include <BESDebug.h>
+
 #include "NCRequestHandler.h"
 #include "NCArray.h"
 #include "NCStructure.h"
+#include "nc_util.h"
 
 BaseType *
 NCArray::ptr_duplicate()
@@ -146,14 +150,22 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
         vector<char> &values, bool has_values, int values_offset,
         int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride)
 {
+    size_t size;
     int errstat;
+#if NETCDF_VERSION >= 4
+    errstat = nc_inq_type(ncid, datatype, 0, &size);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not get the size for the type.");
+#else
+    size = nctypelen(datatype);
+#endif
 
+    BESDEBUG("nc", "In NCArray::do_cardinal_array_read, size = " << size << endl);
     switch (datatype) {
         case NC_FLOAT:
         case NC_DOUBLE:
         case NC_SHORT:
         case NC_INT:
-        case NC_BYTE:
 #if NETCDF_VERSION >= 4
         case NC_USHORT:
         case NC_UINT:
@@ -161,7 +173,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
 #endif
         {
             if (!has_values) {
-                values.resize(nels * nctypelen(datatype));
+                values.resize(nels * size);
                 if (has_stride)
                     errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
                 else
@@ -175,6 +187,42 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
 
             val2buf(&values[0] + values_offset);
             set_read_p(true);
+            break;
+        }
+
+        case NC_BYTE:{
+            if (!has_values) {
+                values.resize(nels * size);
+                if (has_stride)
+                    errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
+                else
+                    errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
+                if (errstat != NC_NOERR)
+                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NCArray::do_cardinal_array_read)"));
+            }
+            if (NCRequestHandler::get_promote_byte_to_short()) {
+                // the data set's signed byte data are going to be stored in a short
+                // not an unsigned byte array. But double check that the template
+                // data type is Int16.
+                if (var()->type() != libdap::dods_int16_c) {
+                    throw Error(string("NC.PromoteByteToShort is set but the underlying array type is still a Byte: ") + name() + string("."));
+                }
+                // temporary vector for short (int16) data
+                vector<short int> tmp(nels);
+
+                // Pointer into the byte data. These values might be part of a compound and
+                // thus might have been read by a previous call (has_values is true in that
+                // case).
+                char *raw_byte_data = &values[0] + values_offset;
+                for (int i = 0; i < nels; ++i)
+                    tmp[i] = *raw_byte_data++;
+                val2buf(&tmp[0]);
+                set_read_p(true);
+            }
+            else {
+                val2buf(&values[0] + values_offset);
+                set_read_p(true);
+            }
             break;
         }
 
@@ -202,7 +250,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
                 step[num_dim - 1] = 1;
 
             if (!has_values) {
-                values.resize(nels * nth_dim_size * nctypelen(datatype));
+                values.resize(nels * nth_dim_size * size);
                 if (has_stride)
                     errstat = nc_get_vars_text(ncid, varid, cor, edg, step, &values[0]);
                 else
@@ -228,7 +276,7 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
 #if NETCDF_VERSION >= 4
         case NC_STRING: {
             if (!has_values) {
-                values.resize(nels * nctypelen(datatype));
+                values.resize(nels * size);
                 if (has_stride)
                     errstat = nc_get_vars_string(ncid, varid, cor, edg, step, (char**)(&values[0] + values_offset));
                 else
@@ -262,7 +310,8 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
 {
     int errstat;
 #if NETCDF_VERSION >= 4
-    if (datatype >= NC_FIRSTUSERTYPEID) {
+    if (is_user_defined_type(ncid, datatype)) {
+        // datatype >= NC_FIRSTUSERTYPEID) {
         char type_name[NC_MAX_NAME+1];
         size_t size;
         nc_type base_type;
@@ -288,7 +337,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
 
                 for (int element = 0; element < nels; ++element) {
                     NCStructure *ncs = dynamic_cast<NCStructure*> (var()->ptr_duplicate());
-                    for (int i = 0; i < nfields; ++i) {
+                    for (size_t i = 0; i < nfields; ++i) {
                         char field_name[NC_MAX_NAME+1];
                         nc_type field_typeid;
                         size_t field_offset;
@@ -297,7 +346,8 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                         // int field_sizes[MAX_NC_DIMS];
                         nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, 0, 0); //&field_ndims, &field_sizes[0]);
                         BaseType *field = ncs->var(field_name);
-                        if (field_typeid >= NC_FIRSTUSERTYPEID) {
+                        if (is_user_defined_type(ncid, field_typeid)) {
+			    // field_typeid >= NC_FIRSTUSERTYPEID) {
                             // Interior user defined types have names, but not field_names
                             // so use the type name as the field name (matches the
                             // behavior of the ncdds.cc code).
@@ -371,7 +421,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
                          errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
                      if (errstat != NC_NOERR)
                          throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NC_OPAQUE)"));
-                     has_values = true;
+                     has_values = true; // This value may never be used. jhrg 1/9/12
                  }
 
                  val2buf(&values[0] + values_offset);

@@ -1,15 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Dataset name="nc4_nc_classic_comp.nc"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xmlns="http://xml.opendap.org/ns/DAP2"
-xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/dap2.xsd">
-
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Dataset name="nc4_nc_classic_comp.nc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xml.opendap.org/ns/DAP2" xsi:schemaLocation="http://xml.opendap.org/ns/DAP2 http://xml.opendap.org/dap/dap2.xsd">
     <Attribute name="NC_GLOBAL" type="Container">
         <Attribute name="title" type="String">
             <value>Hyrax/netcdf handler test file 1</value>
         </Attribute>
         <Attribute name="version" type="Float64">
-            <value>1.0000000000000000</value>
+            <value>1.000000000000000</value>
         </Attribute>
         <Attribute name="description" type="String">
             <value>This file has all of the NC_CLASSIC_MODEL data types.</value>
@@ -20,18 +16,17 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
             <value>time</value>
         </Attribute>
     </Attribute>
-
     <Grid name="z">
         <Array name="z">
             <Attribute name="units" type="String">
                 <value>meters</value>
             </Attribute>
             <Attribute name="valid_range" type="Float64">
-                <value>0.0000000000000000</value>
-                <value>5000.0000000000000</value>
+                <value>0.000000000000000</value>
+                <value>5000.000000000000</value>
             </Attribute>
             <Attribute name="_FillValue" type="Float32">
-                <value>1.000000000</value>
+                <value>1.00000000</value>
             </Attribute>
             <Float32/>
             <dimension name="time" size="2"/>
@@ -92,7 +87,7 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
     <Grid name="p">
         <Array name="p">
             <Attribute name="_FillValue" type="Float64">
-                <value>-9999.0000000000000</value>
+                <value>-9999.000000000000</value>
             </Attribute>
             <Float64/>
             <dimension name="time" size="2"/>
@@ -190,6 +185,5 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
             <dimension name="lat" size="6"/>
         </Map>
     </Grid>
-
     <dataBLOB href=""/>
 </Dataset>

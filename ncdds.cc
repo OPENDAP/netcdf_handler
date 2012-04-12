@@ -57,6 +57,7 @@ static char not_used rcsid[]={"$Id$"};
 #include <util.h>
 
 #include "NCRequestHandler.h"
+#include "nc_util.h"
 
 #include "NCInt32.h"
 #include "NCUInt32.h"
@@ -86,7 +87,12 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
             return (new NCStr(varname, dataset));
 
         case NC_BYTE:
-            return (new NCByte(varname, dataset));
+            if (NCRequestHandler::get_promote_byte_to_short()) {
+                return (new NCInt16(varname, dataset));
+            }
+            else {
+                return (new NCByte(varname, dataset));
+            }
 
         case NC_SHORT:
             return (new NCInt16(varname, dataset));
@@ -124,7 +130,12 @@ build_scalar(const string &varname, const string &dataset, nc_type datatype)
         default:
             throw InternalErr(__FILE__, __LINE__, "Unknown type (" + long_to_string(datatype) + ") for variable '" + varname + "'");
     }
+
+    return 0;
 }
+
+#if 0
+// Replaced by code in nc_util.cc. jhrg 2/9/12
 
 static bool is_user_defined(nc_type type)
 {
@@ -134,6 +145,7 @@ static bool is_user_defined(nc_type type)
     return false;
 #endif
 }
+#endif
 
 /** Build a grid given that one has been found. The Grid's Array is already
     allocated and is passed in along with a number of arrays containing
@@ -182,7 +194,6 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
 static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const string &dataset,
         int ndims, int dim_ids[MAX_VAR_DIMS])
 {
-    //char name[NC_MAX_NAME];
     size_t size;
     nc_type base_type;
     size_t nfields;
@@ -198,14 +209,15 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
 
             NCStructure *ncs = new NCStructure(var_name, dataset);
 
-            for (int i = 0; i < nfields; ++i) {
+            for (size_t i = 0; i < nfields; ++i) {
                 char field_name[NC_MAX_NAME+1];
                 nc_type field_typeid;
                 int field_ndims;
                 int field_sizes[MAX_NC_DIMS];
                 nc_inq_compound_field(ncid, xtype, i, field_name, 0, &field_typeid, &field_ndims, &field_sizes[0]);
                 BaseType *field;
-                if (is_user_defined(field_typeid)) {
+                if (is_user_defined_type(ncid, field_typeid)) {
+		    //is_user_defined(field_typeid)) {
                     // Odd: 'varid' here seems wrong, but works.
                     field = build_user_defined(ncid, varid, field_typeid, dataset, field_ndims, field_sizes);
                     // Child compound types become anonymous variables but DAP
@@ -255,8 +267,10 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
         }
 
         case NC_VLEN:
-            if (NCRequestHandler::get_ignore_unknown_types())
+            if (NCRequestHandler::get_ignore_unknown_types()) {
                 cerr << "in build_user_defined; found a vlen." << endl;
+                return 0;
+            }
             else
                 throw Error("The netCDF handler does not yet suppor the NC_VLEN type.");
             break;
@@ -328,6 +342,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
             throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
     }
 
+    return 0;
 }
 #endif
 
@@ -518,7 +533,8 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid, int
 
         // a scalar? NB a one-dim NC_CHAR array will have DAP type of
         // dods_str_c because it's really a scalar string, not an array.
-        if (is_user_defined(nctype)) {
+        if (is_user_defined_type(ncid, nctype)) {
+	    // is_user_defined(nctype)) {
 #if NETCDF_VERSION >= 4
             BaseType *bt = build_user_defined(ncid, varid, nctype, filename, ndims, dim_ids);
             dds_table.add_var(bt);
@@ -540,9 +556,9 @@ static void read_variables(DDS &dds_table, const string &filename, int ncid, int
             delete gr;
         }
         else {
-            if (!NCRequestHandler::get_show_shared_dims())
+            if (!NCRequestHandler::get_show_shared_dims()) {
                 array_vars.push_back(varid);
-            else {
+            } else {
                 BaseType *bt = build_scalar(name, filename, nctype);
                 NCArray *ar = build_array(bt, ncid, varid, nctype, ndims, dim_ids);
                 delete bt;

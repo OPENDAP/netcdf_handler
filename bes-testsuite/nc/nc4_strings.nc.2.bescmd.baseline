@@ -1,21 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Dataset name="nc4_strings.nc"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xmlns="http://xml.opendap.org/ns/DAP2"
-xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/dap2.xsd">
-
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Dataset name="nc4_strings.nc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xml.opendap.org/ns/DAP2" xsi:schemaLocation="http://xml.opendap.org/ns/DAP2 http://xml.opendap.org/dap/dap2.xsd">
     <Attribute name="NC_GLOBAL" type="Container">
         <Attribute name="title" type="String">
             <value>Hyrax/netcdf handler test file 2</value>
         </Attribute>
         <Attribute name="version" type="Float64">
-            <value>1.0000000000000000</value>
+            <value>1.000000000000000</value>
         </Attribute>
         <Attribute name="description" type="String">
             <value>This file has all of the new netcdf 4 unsigned data types.</value>
         </Attribute>
     </Attribute>
-
     <Grid name="station">
         <Array name="station">
             <Attribute name="who" type="String">
@@ -50,6 +45,5 @@ xsi:schemaLocation="http://xml.opendap.org/ns/DAP2  http://xml.opendap.org/dap/d
         </Map>
     </Grid>
     <String name="codec_name"/>
-
     <dataBLOB href=""/>
 </Dataset>
