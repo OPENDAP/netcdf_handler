@@ -131,6 +131,7 @@ bool NCByte::read() {
 
     errstat = nc_get_var1_uchar(ncid, varid, cor, &Dbyte);
 #endif
+
     if (errstat != NC_NOERR)
         throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 

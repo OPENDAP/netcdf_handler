@@ -122,6 +122,7 @@ bool NCInt16::read() {
 
     errstat = nc_get_var1_short(ncid, varid, cor, &sht);
 #endif
+
     if (errstat != NC_NOERR)
         throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
 

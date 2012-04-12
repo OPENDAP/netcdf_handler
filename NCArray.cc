@@ -309,6 +309,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
         int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride)
 {
     int errstat;
+
 #if NETCDF_VERSION >= 4
     if (is_user_defined_type(ncid, datatype)) {
         // datatype >= NC_FIRSTUSERTYPEID) {
