@@ -19,6 +19,11 @@ libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
 libnc_module_la_LDFLAGS = -avoid-version -module 
 libnc_module_la_LIBADD = $(BES_DAP_LIBS)
 
+if USING_GRIDFIELDS 
+libnc_module_la_CPPFLAGS += $(GF_CFLAGS)
+libnc_module_la_LIBADD += $(GF_LIBS)
+endif
+
 NCTYPE_SRC = ncdas.cc ncdds.cc nc_util.cc \
 	NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc		\
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc	\
@@ -31,6 +36,11 @@ NCTYPE_HDR = NCFloat64.h NCArray.h NCGrid.h NCSequence.h NCUInt16.h 	\
 SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
 SERVER_HDR = NCRequestHandler.h NCModule.h
+
+if USING_GRIDFIELDS 
+SERVER_SRC += ce_functions.cc
+SERVER_HDR += ce_functions.h
+endif
 
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
     nc.conf.in OSX_Resources

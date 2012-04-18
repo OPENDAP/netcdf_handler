@@ -38,6 +38,8 @@
 #ifndef _ncarray_h
 #define _ncarray_h 1
 
+#include <sys/types.h>
+
 #include <sstream>
 
 #include <Array.h>
@@ -45,6 +47,7 @@
 #include <NCStructure.h>
 
 using namespace libdap ;
+using namespace std ;
 
 class NCArray: public Array {
 private:
