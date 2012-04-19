@@ -1,15 +1,14 @@
 What is here:
 
-This directory contains code to test the gridfields server-side function
-interface along with a data file. In the earliest versions of the ugrid
-function, this was part of libdap. However, that made testing somewhat
-more complicated because the library had to be compiled, linked and installed
-to test even the smallest change in the function. The function has been
-moved to the netcdf_handler where the function only has to be recompiled
-to test it.
-
-To use this project, check the code out in shrew/src/modules/netcdf_handlder
-or cp/mv an already checked out copy of it to that directory.
+This directory contains code to test the gridfields server-side
+function interface along with a data file. In the earliest versions of
+the ugrid function, this was part of libdap. However, that made
+testing somewhat more complicated because the library had to be
+compiled, linked and installed to test even the smallest change in the
+function. The function has been moved to the netcdf_handler where the
+function only has to be recompiled to test it. In addtiion, the server
+no longer has to be bult or run to test changes in the function (see
+"* Testing the ugrid function" below).
 
 * Building:
 
@@ -53,15 +52,19 @@ the configure scripts.
 
 * Testing the ugrid function
 
-There are two ways to do this, both of which use the *.bes command files
-in this directory. The first way starts the BES and uses a command line
-client tool to run the commands. The second way uses the 'besstandalone'
-tool, which is a kind of client-and-sever test harness. Using this, it
-will be easy to build regression tests for the ugrid function.
+There are two ways to do test the ugrid function, both of which use
+the *.bes command files in this directory. The first way starts the
+BES and uses a command line client tool to run the commands. The
+second way uses the 'besstandalone' tool, which is a kind of
+client-and-sever test harness. Using this, it will be easy to build
+regression tests for the ugrid function and, most importantly, does
+not reqire building or running the server.
 
 Here's how to use besstandalone:
 
 besstandalone -c bes.conf -i <<some *.bes command file>>
+
+I modified the 'run_command' script to do this.
 
 Note: the bes.conf file in this directory is specially hacked for testing
 the ugrid function. It has the data root set to this directory, so all
@@ -76,3 +79,4 @@ besctl start
 bescmdln -p 10022 -h localhost -i <<some *.bes command file>>
 besctl stop
 
+jhrg 4/19/12
