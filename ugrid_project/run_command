@@ -1,0 +1,11 @@
+#
+# Usage: run_command <bes command file>
+# Assumption: You are in a shell and have run 'source spath.sh' in 
+# /usr/local/opuls/shrew before running this command.
+
+# The old way; this requires a running BES server
+# $prefix/bin/bescmdln -p 10022 -h localhost -i $1
+
+# The new way; this does not require a running server.
+
+besstandalone -c bes.conf -i $1

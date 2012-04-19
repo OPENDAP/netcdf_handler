@@ -1,0 +1,78 @@
+What is here:
+
+This directory contains code to test the gridfields server-side function
+interface along with a data file. In the earliest versions of the ugrid
+function, this was part of libdap. However, that made testing somewhat
+more complicated because the library had to be compiled, linked and installed
+to test even the smallest change in the function. The function has been
+moved to the netcdf_handler where the function only has to be recompiled
+to test it.
+
+To use this project, check the code out in shrew/src/modules/netcdf_handlder
+or cp/mv an already checked out copy of it to that directory.
+
+* Building:
+
+To build the code from the ground up:
+
+Prerequisites: You have the code checked out. The top-level directory
+will be called $prefix
+
+cd $prefix
+source spath.sh
+autoreconf -fiv
+./configure --prefix=$prefix --enable-debug
+make world
+
+This will build the entire code base (but note that the Makefile.am
+and configure.ac files in src/modules have been edited for this
+particular installation to build only a subset of the handlers). 
+
+*Note* To get libgridfields support in netcdf_handler as of 4/13/12, 
+you need to do some extra work. There are two fairly easy ways to configure
+the netcdf handler to use libgridfields. First, you can edit the top-level
+Makefile.am so that it passes the option "--with-gridfields=$prefix" 
+to configure in netcdf_handler. Alternatively, you can build all the
+code and then cd to src/modules/netcdf_handler and run ./configure again
+by hand like this:
+
+    ./configure --prefix=$prefix --with-gridfields=$prefix 
+    
+assuming that gridfields ahs been built and installed in $prefix.
+
+* To force the rebuild of all the code:
+
+Prerequisites: You have done 'make world' or the 'by hand' build of
+libdap, et c., as described above. 
+
+make daemon
+
+What it does: Builds and then installs lib dap, builds and then
+installs the BES, builds and installs the handlers. Does not rebuild
+the configure scripts.
+
+* Testing the ugrid function
+
+There are two ways to do this, both of which use the *.bes command files
+in this directory. The first way starts the BES and uses a command line
+client tool to run the commands. The second way uses the 'besstandalone'
+tool, which is a kind of client-and-sever test harness. Using this, it
+will be easy to build regression tests for the ugrid function.
+
+Here's how to use besstandalone:
+
+besstandalone -c bes.conf -i <<some *.bes command file>>
+
+Note: the bes.conf file in this directory is specially hacked for testing
+the ugrid function. It has the data root set to this directory, so all
+paths to the data can just start with '/' and the special data files 
+used for testing can be right here - no need to install the data files.
+If you use the server, you will need to install the data and edit the
+*.bes files to match its data root directory.
+
+Here's how to use the server:
+
+besctl start
+bescmdln -p 10022 -h localhost -i <<some *.bes command file>>
+besctl stop
+
