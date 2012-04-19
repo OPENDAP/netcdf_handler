@@ -159,5 +159,8 @@ fi
 OPENDAP_DEBUG_OPTION
 
 AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal 
-bes-testsuite/package.m4 ugrid_project/bes.conf])
+bes-testsuite/package.m4])
+
+AS_IF([test "$libgf_ok" = "yes"], [AC_CONFIG_FILES([ugrid_project/bes.conf])])
+
 AC_OUTPUT
