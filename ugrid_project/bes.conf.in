@@ -17,103 +17,72 @@ BES.ServerAdministrator=admin.email.address@your.domain.name
 # User and Group to run the BES as					#
 #-----------------------------------------------------------------------#
 # Notes:
-# 1. The user_name and group_name can be user and group ids. To use
+# 1. The root and root can be user and group ids. To use
 # a user or group id specify the id with the '#' character in front.
 # For example:
 # BES.User=#172
 # BES.Group=#14
-BES.User=user_name
-BES.Group=group_name
+BES.User=root
+BES.Group=root
 
 #-----------------------------------------------------------------------#
 # Where we log the stuff...and how much we log                          #
 #-----------------------------------------------------------------------#
-BES.LogName=./bes.log
+BES.LogName=/usr/local/opuls/shrew/var/bes.log
 BES.LogVerbose=no
+
+#-----------------------------------------------------------------------#
+# Setting data information
+#-----------------------------------------------------------------------#
+
+# There are two ways the BES can be used. It can serve as a standalone
+# data server or it can work with the OLFS (i.e., as one component of
+# the OPeNDAP 4 Data Server Hyrax). How you point to data differs for
+# each of the two cases. Most users will be using the BES with the OLFS
+# as part of the OPeNDAP 4 Data Server Hyrax. In this case, set the
+# parameter below, BES.Catalog.catalog.RootDirectory, to point to the
+# root directory that contains the data you want to serve. In this case
+# the value of the 'BES.Data.RootDirectory' parameter, set below to
+# /dev/null, doesn't matter, so long as it has some value.
+
+BES.Catalog.catalog.RootDirectory=/usr/local/opuls/shrew/src/modules/netcdf_handler/ugrid_project
+
+#-----------------------------------------------------------------------#
+# NOTE: It is unlikely that you will need to change anything under      #
+#       this comment.                                                   #
+#-----------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------#
 # modules to load, includes data modules and command modules            #
 #-----------------------------------------------------------------------#
 
-# Notes: 
-# 1. When the handlers are built, the handler's 'make' builds the
-# handler executable for Server3 and the shared object module for
-# Hyrax. The Hyrax shared object modules are installed (using 'make
-# install') in<prefix>/lib/bes. Make sure you point to the Hyrax
-# modules and not the Server3 'handlers'. The Hyrax modules all have
-# '_module' in their names.
-# 2. The commands that the BES responds to are also provided by modules,
-# so make sure that those are loaded in as well. Two modules are
-# required for use with Hyrax, the dap and cmd modules.
-# 3. If you want ascii, info, and html responses provided by the bes, just
-# as in the Server3 handlers, then include the ascii, usage, and www
-# modules.
-# 4. Order matters. Include the dap, cmd, ascii, usage, www first before
-# including handler modules like nc, hdf4, ff.
-# 
-# Here's an example of the configuration for three handlers (Netcdf,
-# hdf4 and FreeForm) and the DAP basic and command modules:
+# Notes:
+# 1. All module configuration files will be located under
+# <prefix>/etc/bes/modules. No modules are loaded in this configuration
+# file. The module configuration files are included at the very bottom
+# of this file. And the module configuration files add to this
+# parameter.
 #
-
-BES.modules=dap,cmd,nc,www,usage,ascii
-
-BES.module.dap=../../../../lib/bes/libdap_module.so
-BES.module.cmd=../../../../lib/bes/libdap_xml_module.so
-BES.module.nc=@abs_top_builddir@/.libs/libnc_module.so
-BES.module.www=../../../../lib/bes/libwww_module.so
-BES.module.usage=../../../../lib/bes/libusage_module.so
-BES.module.ascii=../../../../lib/bes/libascii_module.so
+BES.modules=
 
 #-----------------------------------------------------------------------#
 # Setting the data location
 #-----------------------------------------------------------------------#
- 
-# There are two ways the BES can be used. It can serve as a standalone
-# data server or it can work with the OLFS (i.e., as one component of
-# the OPeNDAP 4 Data Server). How you point to data differs for each of
-# the two cases. If you are using the BES as part of the OPeNDAP 4 Data
-# Server, then set 'BES.Catalog.catalog.RootDirectory' to point to the 
-# root directory that contains the data you want to serve. In this case
-# the value of the 'BES.Data.RootDirectory' parameter doesn't matter, so
-# long as it has some value.
-#
+
 # If you intend to use the BES as a standalone server, set the value of
 # 'BES.Data.RootDirectory' to point to your data and disregard the 
-# 'BES.Catalog.catalog.RootDirectory' parameter.
+# 'BES.Catalog.catalog.RootDirectory' parameter in dap.conf.
 #
-# The default value of RootDirectory works with the sample data we include
-# with various format handlers distributed for use with the BES. You'll need
-# to change this to point to your data! At this time the BES does not support
-# multiple RootDirectory values. 3/5/07 jhrg
+# The default value of RootDirectory is /dev/null, which means that
+# BES.Data.RootDirectory is not used and BES.Catalog.catalog.RootDirectory
+# is used from dap.conf. If you want to use this parameter instead, set
+# it to <prefix>/share/hyrax, where prefix is the installation directory
+# for the BES. This will work with the sample data we include with
+# various format handlers distributed for use with the BES. Or you'll need
+# to change this to point to your data! At this time the BES does not
+# support multiple RootDirectory values.
 
-BES.Catalog.catalog.RootDirectory=@abs_top_srcdir@/ugrid_project
 BES.Data.RootDirectory=/dev/null
-
-# The TypeMatch parameter is a list of handler/module names and a regular
-# expression separated by a colon. If the regular expression matches an item,
-# then the BES uses the associated handler/module. Each <handler>:<regular
-# expression> pair is followed by a semicolon. This is used when creating
-# containers in the BES (the 'set container' command). The example regular
-# expression says to use the 'h4' handler for any file with an extension of
-# 'hdf', 'HDF' or 'eos' which may also end in '.gz' or '.bz2'. In the latter
-# case the file will be treated as a compressed file.
-
-# BES.Catalog.catalog.TypeMatch=nc:.*\.(nc|NC)(\.gz|\.bz2|\.Z)?$;h4.*\.(hdf|HDF|eos)(\.gz|\.bz2|\.Z)?$;
-
-BES.Catalog.catalog.TypeMatch=nc:.*.nc(.bz2|.gz|.Z)?$;
-
-# Normally, when a client asks for a data catalog, all files and directories
-# are shown. Use the following two parameters to customize this behavior.
-# Each parameter is a list of regular expressions, each followed by a
-# semicolon (last one must also end with a semicolon as in the example
-# below.) First, the Include parameter is applied to the node, and
-# then the Exclude parameter is applied. All collections of nodes are shown.
-# In the default values below, all nodes with the file extension .nc
-# are included (the Include parameter) except those that begin with a dot
-# (the Exclud parameter).
-
-BES.Catalog.catalog.Include=;
-BES.Catalog.catalog.Exclude=^\..*;
 
 # Is the BES allowed to follow symbolic links when requesting catalog
 # information. The default is to not allow the BES to follow symbolic links.
@@ -125,11 +94,8 @@ BES.Catalog.catalog.Exclude=^\..*;
 #
 # BES.FollowSymLinks parameter is for non-catalog containers and is used in
 # conjunction with the BES.RootDirectory above. It is NOT a general setting.
-# BES.Catalog.catalog.FollowSymLinks is for catalog requests and data
-# containers in the catalog and is used in conjunction with the
-# BES.Catalog.catalog.RootDirectory parameter above.
+
 BES.FollowSymLinks=No
-BES.Catalog.catalog.FollowSymLinks=No
 
 #-----------------------------------------------------------------------#
 # connection information, unix socket, port number, and whether server  #
@@ -138,8 +104,19 @@ BES.Catalog.catalog.FollowSymLinks=No
 # to provide direct access to the BES for the world. In general, if     #
 # that is the case, you should configure the BES to use SSL.            #
 #-----------------------------------------------------------------------#
-BES.ServerPort=10002
+BES.ServerPort=10022
+
 # BES.ServerUnixSocket=/tmp/bes.socket
+
+#-----------------------------------------------------------------------#
+# To communicate with the besdaemon, use the port or unix socket given  #
+# below. If one of these values is not given, then the command interface#
+# will not be available (and the daemon will not listen on the port or  #
+# socket. If you do use the interface, make sure to protect it from     #
+# outside access using a firewall. Please re-read that last sentence.   #
+#-----------------------------------------------------------------------#
+
+# BES.DaemonPort=11002
 
 #-----------------------------------------------------------------------#
 # Security information for this server. ServerSecure specifies whether  #
@@ -152,20 +129,18 @@ BES.ServerPort=10002
 BES.ServerSecure=no
 BES.ServerSecurePort=10003
 BES.ServerCertFile=/full/path/to/serverside/certificate/file.pem
+BES.ServerCertAuthFile=/full/path/to/serverside/certificate/authority/file.pem
 BES.ServerKeyFile=/full/path/to/serverside/key/file.pem
 BES.ClientCertFile=/full/path/to/clientside/certificate/file.pem
+BES.ClientCertAuthFile=/full/path/to/clientside/certificate/authority/file.pem
 BES.ClientKeyFile=/full/path/to/clientside/key/file.pem
 
 #-----------------------------------------------------------------------#
 # help file locations, for text, html, and xml versions                 #
 #-----------------------------------------------------------------------#
-BES.Help.TXT=@pkgdatadir@/bes_help.txt
-BES.Help.HTML=@pkgdatadir@/bes_help.html
-BES.Help.XML=@pkgdatadir@/bes_help.txt
-
-DAP.Help.TXT=@pkgdatadir@/dap_help.txt
-DAP.Help.HTML=@pkgdatadir@/dap_help.html
-DAP.Help.XML=@pkgdatadir@/dap_help.txt
+BES.Help.TXT=/usr/local/opuls/shrew/share/bes/bes_help.txt
+BES.Help.HTML=/usr/local/opuls/shrew/share/bes/bes_help.html
+BES.Help.XML=/usr/local/opuls/shrew/share/bes/bes_help.xml
 
 #-----------------------------------------------------------------------#
 # Should informational response objects be buffered, or streamed        #
@@ -208,27 +183,68 @@ BES.Info.Type=xml
 # BES.Uncompress.NumTries: How many times should the BES try to acquire the
 # lock before it signals an error?
 
-# The BES cache directory is locked to prevent the different beslistener
-# processes from simultaneously removing files and leaving the cache in an
-# inconsistent state. Use the Retry and NumTries parameters to tune this
-# behavior. Generally, NumTries should be set to about 10. The units of Retry
-# are microseconds. To tune the NumTries and Retry, use the formula Retry =
-# (0.2s/Average_file_sizeMB)/NumTries. So if your average file size is 10MB
-# and you've settled on a NumTries of 10, (0.2s/10MB)/10 = 0.002s or 2000
-# microseconds. If you have really large files (e.g., decompressed they are
-# 500MB), try setting NumTries to 100.
+# The BES cache directory is used to store decompressed data files. This
+# directory will be shared by all of the BES processes running on a given
+# host. The directory should not be an NFS mount unless the NFS option
+# enabling fcntl(2) locking has been set. The caching software will purge
+# older files from the cache when 100% of the cache size is reached; removing
+# 20% of the files (in terms of size) using a least-recently-used test.
+# the cache size is given in megabytes. Note cached files are named using
+# the CachePrefix, so it's easy to see what's in the cache at any given
+# time, even when it's a directory like /tmp that's used by many programs. 
 
 BES.CacheDir=/tmp
 BES.CachePrefix=bes_cache
 BES.CacheSize=500
-BES.Uncompress.Retry=2000
-BES.Uncompress.NumTries=10
 
 #-----------------------------------------------------------------------#
 # If the symbolic name cannot be found in persistence, nice means simply#
 # log an error, strict means throw an exception                         #
 #-----------------------------------------------------------------------#
 BES.Container.Persistence=strict
+
+#-----------------------------------------------------------------------#
+# Defines the TCP buffer size to use in sending and receiving data in   #
+# the BES. With these parameters you will be able to maximize the       #
+# TCP capacity of the client and server communication by setting the	#
+# size of the internal BES buffers to match that of your systems TCP	#
+# window sizes. System administratos can tune the TCP window sizes in	#
+# the kernal. If this is done, set these parameters to match those	#
+# buffer sizes set in the kernel. Or, if your system supports dynamic	#
+# TCP window sizes, as many are doing these days, then leave the	#
+# SetSock*Size parameters to No and the BES will interogate the socket	#
+# for the buffer sizes.							#
+#									#
+# The TCP window size should be equal to the Bandwidth*Delay Product	#
+# (BDP). This is the number of bytes in flight to fill the entire path,	#
+# and is equal to the connection speed times the RTT( Round-Trip Time) 	#
+# divided by 2. For example, if you have a 100 Mbps path and the RTT is	#
+# 75 ms, the BDP = 100 * 0.075 / 2 = 3.75 Mbits (470 KB).		#
+#									#
+# If you are not sure what to do here, we recommend that you leave	#
+# these values set as is.						#
+#									#
+# BES.SetSockRecvSize=No|Yes - if set to no, then do not set the TCP	#
+#                              TCP receive buffer size. If set to yes	#
+#                              then set the TCP receive buffer size to	#
+#                              the value specified by BES.SockRecvSize	#
+#                              Default is No, use the system TCP window	#
+#                              size.					#
+# BES.SockRecvSize=<number> - This value should be set to the size, in	#
+#                              bytes, of the TCP receive buffer size.	#
+# BES.SetSockSendSize=No|Yes - if set to no, then do not set the TCP	#
+#                              TCP send buffer size. If set to yes	#
+#                              then set the TCP send buffer size to	#
+#                              the value specified by BES.SockSendSize.	#
+#                              Default is No, use the system TCP window	#
+#                              size.					#
+# BES.SockSendSize=<number> - This value should be set to the size, in	#
+#                              bytes, of the TCP send buffer size.	#
+#-----------------------------------------------------------------------#
+BES.SetSockRecvSize=No
+BES.SockRecvSize=65535
+BES.SetSockSendSize=No
+BES.SockSendSize=65535
 
 #-----------------------------------------------------------------------#
 # Defines size of system global memory pool                             #
@@ -259,8 +275,8 @@ BES.ProcessManagerMethod=multiple
 BES.DefaultResponseMethod=POST
 
 #-----------------------------------------------------------------------#
-#                                                                       #
-# Data Handler Specific key/value parameters                            #
-#                                                                       #
+# Include all module configuration files in the <prefix>/etc/bes/modules#
+# directory								#
 #-----------------------------------------------------------------------#
-NC.ShowSharedDimensions=false
+BES.Include=modules/.*\.conf$
+

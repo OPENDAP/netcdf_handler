@@ -4,7 +4,7 @@
    <setContainer name="c" space="catalog">/hex.nc</setContainer>
    <define name="d">
        <container name="c">
-           <constraint>ugrid_demo(0,0)</constraint>
+           <constraint>ugrid_demo(0,X)</constraint>
        </container>
    </define>
    <get type="ascii" definition="d" />

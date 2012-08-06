@@ -51,7 +51,7 @@
 #include <Ancillary.h>
 
 #include "NCRequestHandler.h"
-#include "ce_functions.h"
+#include "gridfields_functions.h"
 
 #define NC_NAME "nc"
 
@@ -247,7 +247,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
 #if GRIDFIELDS
         ConstraintEvaluator & ce = bdds->get_ce();
-        ce.add_function("ugrid_demo", function_ugrid_demo);
+        ce.add_function("ugrid_restrict", function_ugrid_restrict);
 #endif
 
         bdds->set_constraint(dhi);
@@ -318,7 +318,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
 #if GRIDFIELDS
         ConstraintEvaluator & ce = bdds->get_ce();
-        ce.add_function("ugrid_demo", function_ugrid_demo);
+        ce.add_function("ugrid_restrict", function_ugrid_restrict);
 #endif
 
         bdds->set_constraint(dhi);

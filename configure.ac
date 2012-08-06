@@ -91,11 +91,17 @@ libdap_libgridfields_module='libgridfields >= 0.7.0'
 
 libgf_ok="no"
 
-AC_WITH([gridfields],
-    [GF_LIBS="-L$withval/lib -lgridfields"
-     GF_CFLAGS="-I$withval/include"
-     AC_DEFINE([GRIDFIELDS],[1],[define if gridfields lib is present])
-     libgf_ok="yes"],
+AC_ARG_WITH([gridfields],
+    AC_HELP_STRING([--with-gridfields=path], [Use the gridfields library at this location.]),
+    [if test "$withval" = "yes"
+     then
+         AC_MSG_ERROR([You must supply a path when using --with-gridfields; try --enable-gridfields.])
+     else
+         GF_LIBS="-L$withval/lib -lgridfields"
+         GF_CFLAGS="-I$withval/include"
+         AC_DEFINE([GRIDFIELDS],[1],[define if gridfields lib is present])
+         libgf_ok="yes"
+     fi],
     [])
 
 AC_ARG_ENABLE([gridfields],

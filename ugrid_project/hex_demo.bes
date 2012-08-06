@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<request reqID="some_unique_value" >
-   <setContext name="dap_format">dap2</setContext>
-   <setContainer name="c" space="catalog">/hex.nc</setContainer>
-   <define name="d">
-       <container name="c">
-           <constraint>ugrid_demo(0,"X=0&amp;Y=0")</constraint>
-       </container>
-   </define>
-   <get type="ascii" definition="d" />
-</request>
+<bes:request reqID="some_unique_value" >
+   <bes:setContext name="dap_format">dap2</bes:setContext>
+   <bes:setContainer name="c" space="catalog">/test4.nc</bes:setContainer>
+   <bes:define name="d">
+       <bes:container name="c">
+           <bes:constraint>ugrid_restrict(0,"nodedata&gt;0.0")</bes:constraint>
+       </bes:container>
+</bes:define>
+<bes:get type="dods" definition="d" returnAs="netcdf"/>
+</bes:request>

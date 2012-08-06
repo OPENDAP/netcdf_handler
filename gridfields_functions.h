@@ -40,32 +40,31 @@
 #include "Array.h"
 #include "Error.h"
 #include "ConstraintEvaluator.h"
+#include <Str.h>
 
-namespace libdap
-{
 
-#if 0
-// These functions are use by the code in GeoConstraint
-string extract_string_argument(BaseType *arg) ;
-double extract_double_value(BaseType *arg) ;
-double *extract_double_array(Array *a) ;
-void set_array_using_double(Array *dest, double *src, int src_len) ;
 
-void func_version(int argc, BaseType *argv[], DDS &dds, BaseType **btpp) ;
-void function_grid(int argc, BaseType *argv[], DDS &dds, BaseType **btpp) ;
-void function_geogrid(int argc, BaseType *argv[], DDS &dds, BaseType **btpp) ;
-void function_linear_scale(int argc, BaseType *argv[], DDS &dds, BaseType **btpp) ;
-void function_geoarray(int argc, BaseType *argv[], DDS &dds, BaseType **btpp) ;
-#endif
 
-void function_ugrid_demo(int argc, BaseType * argv[], DDS &dds, BaseType **btpp) ;
 
-#if 0
-// Projection function used to pass DAP version information
-void function_dap(int argc, BaseType *argv[], DDS &dds, ConstraintEvaluator &ce);
 
-void register_functions(ConstraintEvaluator &ce);
-#endif
-} // namespace libdap
+
+
+
+
+
+
+
+
+
+void function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp) ;
+
+
+
+
+
+
+
+
+//void register_functions(ConstraintEvaluator &ce);
 
 #endif // _ce_functions_h

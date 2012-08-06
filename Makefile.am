@@ -38,8 +38,8 @@ SERVER_SRC = NCRequestHandler.cc NCModule.cc
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
 if USING_GRIDFIELDS 
-SERVER_SRC += ce_functions.cc
-SERVER_HDR += ce_functions.h
+SERVER_SRC += gridfields_functions.cc
+SERVER_HDR += gridfields_functions.h
 endif
 
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
