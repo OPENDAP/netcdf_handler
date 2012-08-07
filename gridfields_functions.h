@@ -36,35 +36,16 @@
 #ifndef _ce_functions_h
 #define _ce_functions_h
 
-#include "BaseType.h"
+#include <BaseType.h>
+#include <DDS.h>
+
+#if 0
 #include "Array.h"
 #include "Error.h"
 #include "ConstraintEvaluator.h"
 #include <Str.h>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
 void function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp) ;
-
-
-
-
-
-
-
-
-//void register_functions(ConstraintEvaluator &ce);
 
 #endif // _ce_functions_h

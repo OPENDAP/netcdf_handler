@@ -42,8 +42,6 @@
 
 #include "config_nc.h"
 
-static char not_used rcsid[]={"$Id$"};
-
 #include <cstdio>
 #include <cstring>
 #include <iostream>

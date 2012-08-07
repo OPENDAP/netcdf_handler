@@ -37,10 +37,6 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used =
-    {"$Id$"
-    };
-
 #include <cstring>
 #include <iostream>
 #include <sstream>
