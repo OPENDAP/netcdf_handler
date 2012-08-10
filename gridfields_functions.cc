@@ -41,9 +41,6 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
-//#include <vector>
-//#include <algorithm>
-#define GRIDFIELDS
 
 //#define DODS_DEBUG
 #undef FUNCTION_DAP	// undef so the dap() function always returns an error;
@@ -384,6 +381,7 @@ template<class T> static double *extract_double_array_helper(Array * a)
     return dest;
 }
 
+#if 0
 /** Given a pointer to an Array which holds a numeric type, extract the
  values and return in an array of doubles. This function allocates the
  array using 'new double[n]' so delete[] can be used when you are done
@@ -422,6 +420,7 @@ static double *extract_double_array(Array * a)
                     "The argument list built by the CE parser contained an unsupported numeric type.");
     }
 }
+#endif
 
 /** Given a BaseType pointer, extract the numeric value it contains and return
  it in a C++ double.
@@ -550,6 +549,7 @@ static double get_attribute_double_value(BaseType *var, const string &attribute)
     return string_to_double(remove_quotes(attribute_value).c_str());
 }
 
+#if 0
 static double get_y_intercept(BaseType *var)
 {
     vector<string> attributes;
@@ -567,6 +567,7 @@ static double get_missing_value(BaseType *var)
 {
     return get_attribute_double_value(var, "missing_value");
 }
+#endif
 
 #ifdef GRIDFIELDS
 
