@@ -1,7 +1,7 @@
 #-----------------------OPeNDAP BES Initialization file-----------------#
 #                                                                       #
 #       National Center for Atmospheric Research (NCAR)                 #
-#       High Altitude Observatory (HAO)	                                #
+#       High Altitude Observatory (HAO)                                 #
 #       Key entries for OPeNDAP BES run time behavior                   #
 #                                                                       #
 #-----------------------------------------------------------------------#
@@ -14,7 +14,7 @@
 BES.ServerAdministrator=admin.email.address@your.domain.name
 
 #-----------------------------------------------------------------------#
-# User and Group to run the BES as					#
+# User and Group to run the BES as                                      #
 #-----------------------------------------------------------------------#
 # Notes:
 # 1. The root and root can be user and group ids. To use
@@ -28,7 +28,7 @@ BES.Group=root
 #-----------------------------------------------------------------------#
 # Where we log the stuff...and how much we log                          #
 #-----------------------------------------------------------------------#
-BES.LogName=/usr/local/opuls/shrew/var/bes.log
+BES.LogName=./bes.log
 BES.LogVerbose=no
 
 #-----------------------------------------------------------------------#
@@ -45,7 +45,7 @@ BES.LogVerbose=no
 # the value of the 'BES.Data.RootDirectory' parameter, set below to
 # /dev/null, doesn't matter, so long as it has some value.
 
-BES.Catalog.catalog.RootDirectory=/usr/local/opuls/shrew/src/modules/netcdf_handler/ugrid_project
+BES.Catalog.catalog.RootDirectory=@abs_top_srcdir@/ugrid_project
 
 #-----------------------------------------------------------------------#
 # NOTE: It is unlikely that you will need to change anything under      #
@@ -63,7 +63,15 @@ BES.Catalog.catalog.RootDirectory=/usr/local/opuls/shrew/src/modules/netcdf_hand
 # of this file. And the module configuration files add to this
 # parameter.
 #
-BES.modules=
+BES.modules=dap,cmd,nc,www,usage,ascii,fonc
+
+BES.module.dap=../../../../lib/bes/libdap_module.so
+BES.module.cmd=../../../../lib/bes/libdap_xml_module.so
+BES.module.nc=@abs_top_builddir@/.libs/libnc_module.so
+BES.module.www=../../../../lib/bes/libwww_module.so
+BES.module.usage=../../../../lib/bes/libusage_module.so
+BES.module.ascii=../../../../lib/bes/libascii_module.so
+BES.module.fonc=../../../../lib/bes/libfonc_module.so
 
 #-----------------------------------------------------------------------#
 # Setting the data location
@@ -84,6 +92,21 @@ BES.modules=
 
 BES.Data.RootDirectory=/dev/null
 
+BES.Catalog.catalog.TypeMatch=nc:.*.nc(.bz2|.gz|.Z)?$;
+
+# Normally, when a client asks for a data catalog, all files and directories
+# are shown. Use the following two parameters to customize this behavior.
+# Each parameter is a list of regular expressions, each followed by a
+# semicolon (last one must also end with a semicolon as in the example
+# below.) First, the Include parameter is applied to the node, and
+# then the Exclude parameter is applied. All collections of nodes are shown.
+# In the default values below, all nodes with the file extension .nc
+# are included (the Include parameter) except those that begin with a dot
+# (the Exclud parameter).
+
+BES.Catalog.catalog.Include=;
+BES.Catalog.catalog.Exclude=^\..*;
+
 # Is the BES allowed to follow symbolic links when requesting catalog
 # information. The default is to not allow the BES to follow symbolic links.
 # The values can be either No or Yes. If set to No, and the user requests
@@ -94,8 +117,11 @@ BES.Data.RootDirectory=/dev/null
 #
 # BES.FollowSymLinks parameter is for non-catalog containers and is used in
 # conjunction with the BES.RootDirectory above. It is NOT a general setting.
-
+# BES.Catalog.catalog.FollowSymLinks is for catalog requests and data
+# containers in the catalog and is used in conjunction with the
+# BES.Catalog.catalog.RootDirectory parameter above.
 BES.FollowSymLinks=No
+BES.Catalog.catalog.FollowSymLinks=No
 
 #-----------------------------------------------------------------------#
 # connection information, unix socket, port number, and whether server  #
@@ -206,40 +232,40 @@ BES.Container.Persistence=strict
 #-----------------------------------------------------------------------#
 # Defines the TCP buffer size to use in sending and receiving data in   #
 # the BES. With these parameters you will be able to maximize the       #
-# TCP capacity of the client and server communication by setting the	#
-# size of the internal BES buffers to match that of your systems TCP	#
-# window sizes. System administratos can tune the TCP window sizes in	#
-# the kernal. If this is done, set these parameters to match those	#
-# buffer sizes set in the kernel. Or, if your system supports dynamic	#
-# TCP window sizes, as many are doing these days, then leave the	#
-# SetSock*Size parameters to No and the BES will interogate the socket	#
-# for the buffer sizes.							#
-#									#
-# The TCP window size should be equal to the Bandwidth*Delay Product	#
-# (BDP). This is the number of bytes in flight to fill the entire path,	#
-# and is equal to the connection speed times the RTT( Round-Trip Time) 	#
-# divided by 2. For example, if you have a 100 Mbps path and the RTT is	#
-# 75 ms, the BDP = 100 * 0.075 / 2 = 3.75 Mbits (470 KB).		#
-#									#
-# If you are not sure what to do here, we recommend that you leave	#
-# these values set as is.						#
-#									#
-# BES.SetSockRecvSize=No|Yes - if set to no, then do not set the TCP	#
-#                              TCP receive buffer size. If set to yes	#
-#                              then set the TCP receive buffer size to	#
-#                              the value specified by BES.SockRecvSize	#
-#                              Default is No, use the system TCP window	#
-#                              size.					#
-# BES.SockRecvSize=<number> - This value should be set to the size, in	#
-#                              bytes, of the TCP receive buffer size.	#
-# BES.SetSockSendSize=No|Yes - if set to no, then do not set the TCP	#
-#                              TCP send buffer size. If set to yes	#
-#                              then set the TCP send buffer size to	#
-#                              the value specified by BES.SockSendSize.	#
-#                              Default is No, use the system TCP window	#
-#                              size.					#
-# BES.SockSendSize=<number> - This value should be set to the size, in	#
-#                              bytes, of the TCP send buffer size.	#
+# TCP capacity of the client and server communication by setting the    #
+# size of the internal BES buffers to match that of your systems TCP    #
+# window sizes. System administratos can tune the TCP window sizes in   #
+# the kernal. If this is done, set these parameters to match those      #
+# buffer sizes set in the kernel. Or, if your system supports dynamic   #
+# TCP window sizes, as many are doing these days, then leave the        #
+# SetSock*Size parameters to No and the BES will interogate the socket  #
+# for the buffer sizes.                                                 #
+#                                                                       #
+# The TCP window size should be equal to the Bandwidth*Delay Product    #
+# (BDP). This is the number of bytes in flight to fill the entire path, #
+# and is equal to the connection speed times the RTT( Round-Trip Time)  #
+# divided by 2. For example, if you have a 100 Mbps path and the RTT is #
+# 75 ms, the BDP = 100 * 0.075 / 2 = 3.75 Mbits (470 KB).               #
+#                                                                       #
+# If you are not sure what to do here, we recommend that you leave      #
+# these values set as is.                                               #
+#                                                                       #
+# BES.SetSockRecvSize=No|Yes - if set to no, then do not set the TCP    #
+#                              TCP receive buffer size. If set to yes   #
+#                              then set the TCP receive buffer size to  #
+#                              the value specified by BES.SockRecvSize  #
+#                              Default is No, use the system TCP window #
+#                              size.                                    #
+# BES.SockRecvSize=<number> - This value should be set to the size, in  #
+#                              bytes, of the TCP receive buffer size.   #
+# BES.SetSockSendSize=No|Yes - if set to no, then do not set the TCP    #
+#                              TCP send buffer size. If set to yes      #
+#                              then set the TCP send buffer size to     #
+#                              the value specified by BES.SockSendSize. #
+#                              Default is No, use the system TCP window #
+#                              size.                                    #
+# BES.SockSendSize=<number> - This value should be set to the size, in  #
+#                              bytes, of the TCP send buffer size.      #
 #-----------------------------------------------------------------------#
 BES.SetSockRecvSize=No
 BES.SockRecvSize=65535
@@ -255,7 +281,7 @@ BES.Memory.GlobalArea.Verbose=no
 BES.Memory.GlobalArea.ControlHeap=no
 
 #-----------------------------------------------------------------------#
-# This key is set to either single or multiple mode.            	#
+# This key is set to either single or multiple mode.                    #
 #                                                                       #
 # In single mode the listener handles the client request itself, and    #
 # only one client can connect at a time                                 #
@@ -274,9 +300,4 @@ BES.ProcessManagerMethod=multiple
 #-----------------------------------------------------------------------#
 BES.DefaultResponseMethod=POST
 
-#-----------------------------------------------------------------------#
-# Include all module configuration files in the <prefix>/etc/bes/modules#
-# directory								#
-#-----------------------------------------------------------------------#
-BES.Include=modules/.*\.conf$
-
+NC.ShowSharedDimensions=false
