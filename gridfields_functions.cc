@@ -3,8 +3,10 @@
 // This file is part of libdap, A C++ implementation of the OPeNDAP Data
 // Access Protocol.
 
-// Copyright (c) 2002,2003 OPeNDAP, Inc.
-// Author: James Gallagher <jgallagher@opendap.org>
+// Copyright (c) 2002,2003,2011,2012 OPeNDAP, Inc.
+// Authors: James Gallagher <jgallagher@opendap.org>
+//         Scott Moe <smeest1@gmail.com>
+//         Bill Howe <billhowe@cs.washington.edu>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,15 +24,9 @@
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 
-// (c) COPYRIGHT URI/MIT 1999
-// Please read the full copyright statement in the file COPYRIGHT_URI.
-//
-// Authors:
-//      jhrg,jimg       James Gallagher <jgallagher@gso.uri.edu>
-
-// These functions are used by the CE evaluator
-//
-// 1/15/99 jhrg
+// NOTE: This file is built only when the gridfields library is linked with
+// the netcdf_handler (i.e., the handler's build is configured using the
+// --with-gridfields=... option to the 'configure' script).
 
 #include "config.h"
 
@@ -43,8 +39,6 @@
 #include <sstream>
 
 //#define DODS_DEBUG
-#undef FUNCTION_DAP	// undef so the dap() function always returns an error;
-// use keywords instead.
 
 #include "BaseType.h"
 #include "Byte.h"
@@ -65,8 +59,6 @@
 #include "debug.h"
 #include "util.h"
 
-// Note that this file is only compiled if we've built
-#ifdef GRIDFIELDS
 #include <gridfields/restrict.h>
 #include <gridfields/gridfield.h>
 #include <gridfields/grid.h>
@@ -75,7 +67,6 @@
 #include <gridfields/array.h>
 #include <gridfields/implicit0cells.h>
 #include <gridfields/gridfieldoperator.h>
-#endif
 
 //  We wrapped VC++ 6.x strtod() to account for a short coming
 //  in that function in regards to "NaN".  I don't know if this
@@ -89,12 +80,6 @@ double w32strtod(const char *, char **);
 using namespace std;
 using namespace libdap;
 
-/** Is \e lhs equal to \e rhs? Use epsilon to determine equality. */
-inline bool double_eq(double lhs, double rhs, double epsilon = 1.0e-5)
-{
-    return fabs(lhs - rhs) < epsilon;
-}
-
 /** Given a BaseType pointer, extract the string value it contains and return
  it.
 
@@ -102,7 +87,7 @@ inline bool double_eq(double lhs, double rhs, double epsilon = 1.0e-5)
  @return A C++ string
  @exception Error thrown if the referenced BaseType object does not contain
  a DAP String. */
-string extract_string_argument(BaseType * arg)
+static string extract_string_argument(BaseType * arg)
 {
     if (arg->type() != dods_str_c)
         throw Error(malformed_expr, "The function requires a DAP string argument.");
@@ -118,7 +103,8 @@ string extract_string_argument(BaseType * arg)
     return s;
 }
 
-template<class T> static void set_array_using_double_helper(Array * a, double *src, int src_len)
+template<class T>
+static void set_array_using_double_helper(Array * a, double *src, int src_len)
 {
     T *values = new T[src_len];
     for (int i = 0; i < src_len; ++i)
@@ -129,98 +115,40 @@ template<class T> static void set_array_using_double_helper(Array * a, double *s
     delete[] values;
 }
 
-/** Given an array that holds some sort of numeric data, load it with values
- using an array of doubles. This function makes several assumptions. First,
- it assumes the caller really wants to put the doubles into whatever types
- the array holds! Caveat emptor. Second, it assumes that if the size of
- source (\e src) array is different than the destination (\e dest) the
- caller has made a mistake. In that case it will throw an Error object.
-
- After setting the values, this method sets the \c read_p property for
- \e dest. Setting \e read_p tells the serialization methods in libdap
- that this variable already holds data values and, given that, the
- serialization code will not try to read the values.
-
- @param dest An Array. The values are written to this array, reusing
- its storage. Existing values are lost.
- @param src The source data.
- @param src_len The number of elements in the \e src array.
- @exception Error Thrown if \e dest is not a numeric-type array (Byte, ...,
- Float64) or if the number of elements in \e src does not match the number
- is \e dest. */
-void set_array_using_double(Array * dest, double *src, int src_len)
+template<typename DODS, typename T>
+static T *extract_array_helper(Array *a)
 {
-    // Simple types are Byte, ..., Float64, String and Url.
-    if ((dest->type() == dods_array_c && !dest->var()->is_simple_type()) || dest->var()->type() == dods_str_c
-            || dest->var()->type() == dods_url_c)
-        throw InternalErr(__FILE__, __LINE__, "The function requires a DAP numeric-type array argument.");
-
-    // Test sizes. Note that Array::length() takes any constraint into account
-    // when it returns the length. Even if this was removed, the 'helper'
-    // function this uses calls Vector::val2buf() which uses Vector::width()
-    // which in turn uses length().
-    if (dest->length() != src_len)
-        throw InternalErr(__FILE__, __LINE__,
-                "The source and destination array sizes don't match (" + long_to_string(src_len) + " versus "
-                        + long_to_string(dest->length()) + ").");
-
-    // The types of arguments that the CE Parser will build for numeric
-    // constants are limited to Uint32, Int32 and Float64. See ce_expr.y.
-    // Expanded to work for any numeric type so it can be used for more than
-    // just arguments.
-    switch (dest->var()->type()) {
-        case dods_byte_c:
-            set_array_using_double_helper<dods_byte>(dest, src, src_len);
-            break;
-        case dods_uint16_c:
-            set_array_using_double_helper<dods_uint16>(dest, src, src_len);
-            break;
-        case dods_int16_c:
-            set_array_using_double_helper<dods_int16>(dest, src, src_len);
-            break;
-        case dods_uint32_c:
-            set_array_using_double_helper<dods_uint32>(dest, src, src_len);
-            break;
-        case dods_int32_c:
-            set_array_using_double_helper<dods_int32>(dest, src, src_len);
-            break;
-        case dods_float32_c:
-            set_array_using_double_helper<dods_float32>(dest, src, src_len);
-            break;
-        case dods_float64_c:
-            set_array_using_double_helper<dods_float64>(dest, src, src_len);
-            break;
-        default:
-            throw InternalErr(__FILE__, __LINE__,
-                    "The argument list built by the CE parser contained an unsupported numeric type.");
-    }
-
-    // Set the read_p property.
-    dest->set_read_p(true);
-}
-
-#ifdef GRIDFIELDS
-template<typename DODS, typename T> T *extract_array_helper(Array *a)
-{
-    DBG(cerr << "Extracting array values..." << endl);
     int length = a->length();
 
     DBG(cerr << "Allocating..." << length << endl);
     DODS *b = new DODS[length];
+
     DBG(cerr << "Assigning value..." << endl);
     a->value(b);
+
     DBG(cerr << "array values extracted.  Casting..." << endl);
     T *dest = new T[length];
+
     for (int i = 0; i < length; ++i)
-    dest[i] = (T) b[i];
+        dest[i] = (T) b[i];
     delete[]b;
+
     DBG(cerr << "Returning extracted values." << endl);
 
     return dest;
 }
-#endif // GRIDFIELDS
-#ifdef GRIDFIELDS
-GF::Array *extract_gridfield_array(Array *a) {
+
+/**
+ * Extract data from a DAP array and return those values in a gridfields
+ * array. This function sets the \e send_p property of the DAP Array and
+ * uses its \e read() member function to get values. Thus, it should work
+ * for values stored in any type of data source (e.g., file) for which the
+ * Array class has been specialized.
+ *
+ * @param a The DAP Array. Extract values from this array
+ * @return A GF::Array
+ */
+static GF::Array *extract_gridfield_array(Array *a) {
     if ((a->type() == dods_array_c && !a->var()->is_simple_type())
             || a->var()->type() == dods_str_c || a->var()->type() == dods_url_c)
     throw Error(malformed_expr,
@@ -234,47 +162,45 @@ GF::Array *extract_gridfield_array(Array *a) {
 
     switch (a->var()->type()) {
         case dods_byte_c:
-        gfa = new GF::Array(a->var()->name(), GF::INT);
-        gfa->shareIntData(extract_array_helper<dods_byte, int>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::INT);
+            gfa->shareIntData(extract_array_helper<dods_byte, int>(a), a->length());
+            break;
         case dods_uint16_c:
-        gfa = new GF::Array(a->var()->name(), GF::INT);
-        gfa->shareIntData(extract_array_helper<dods_uint16, int>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::INT);
+            gfa->shareIntData(extract_array_helper<dods_uint16, int>(a), a->length());
+            break;
         case dods_int16_c:
-        gfa = new GF::Array(a->var()->name(), GF::INT);
-        gfa->shareIntData(extract_array_helper<dods_int16, int>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::INT);
+            gfa->shareIntData(extract_array_helper<dods_int16, int>(a), a->length());
+            break;
         case dods_uint32_c:
-        gfa = new GF::Array(a->var()->name(), GF::INT);
-        gfa->shareIntData(extract_array_helper<dods_uint32, int>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::INT);
+            gfa->shareIntData(extract_array_helper<dods_uint32, int>(a), a->length());
+            break;
         case dods_int32_c:
-        gfa = new GF::Array(a->var()->name(), GF::INT);
-        gfa->shareIntData(extract_array_helper<dods_int32, int>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::INT);
+            gfa->shareIntData(extract_array_helper<dods_int32, int>(a), a->length());
+            break;
         case dods_float32_c:
-        gfa = new GF::Array(a->var()->name(), GF::FLOAT);
-        gfa->shareFloatData(extract_array_helper<dods_float32, float>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::FLOAT);
+            gfa->shareFloatData(extract_array_helper<dods_float32, float>(a), a->length());
+            break;
         case dods_float64_c:
-        gfa = new GF::Array(a->var()->name(), GF::FLOAT);
-        gfa->shareFloatData(extract_array_helper<dods_float64, float>(a), a->length());
-        break;
+            gfa = new GF::Array(a->var()->name(), GF::FLOAT);
+            gfa->shareFloatData(extract_array_helper<dods_float64, float>(a), a->length());
+            break;
         default:
-        throw InternalErr(__FILE__, __LINE__,
-                "Unknown DDS type encountered when converting to gridfields array");
+            throw InternalErr(__FILE__, __LINE__, "Unknown DDS type encountered when converting to gridfields array");
     }
     return gfa;
 };
-#endif // GRIDFIELDS
-#ifdef GRIDFIELDS
+
 /*
  If the array has the exact dimensions in the vector dims, in the same order,
  return true.  Otherwise return false.
 
  */
-bool same_dimensions(Array *arr, vector<Array::dimension> &dims) {
+static bool same_dimensions(Array *arr, vector<Array::dimension> &dims) {
     vector<Array::dimension>::iterator dit;
     Array::Dim_iter ait;
     DBG(cerr << "same_dimensions test for array " << arr->name() << endl);
@@ -300,14 +226,13 @@ bool same_dimensions(Array *arr, vector<Array::dimension> &dims) {
     }
     return true;
 }
-#endif // GRIDFIELDS
-#ifdef GRIDFIELDS
-/** Given a pointer to an Array which holds a numeric type, extract the
+
+/** Given a pointer to an Array that holds a numeric type, extract the
  values and return in an array of T. This function allocates the
  array using 'new T[n]' so delete[] can be used when you are done
  the data. */
 template<typename T>
-T *extract_array(Array * a)
+static T *extract_array(Array * a)
 {
     // Simple types are Byte, ..., Float64, String and Url.
     if ((a->type() == dods_array_c && !a->var()->is_simple_type())
@@ -364,63 +289,6 @@ T *extract_array(Array * a)
                 "The argument list built by the CE parser contained an unsupported numeric type.");
     }
 }
-#endif // GRIDFIELDS
-
-template<class T> static double *extract_double_array_helper(Array * a)
-{
-    int length = a->length();
-
-    T *b = new T[length];
-    a->value(b);
-
-    double *dest = new double[length];
-    for (int i = 0; i < length; ++i)
-        dest[i] = (double) b[i];
-    delete[] b;
-
-    return dest;
-}
-
-#if 0
-/** Given a pointer to an Array which holds a numeric type, extract the
- values and return in an array of doubles. This function allocates the
- array using 'new double[n]' so delete[] can be used when you are done
- the data. */
-static double *extract_double_array(Array * a)
-{
-    // Simple types are Byte, ..., Float64, String and Url.
-    if ((a->type() == dods_array_c && !a->var()->is_simple_type()) || a->var()->type() == dods_str_c
-            || a->var()->type() == dods_url_c)
-        throw Error(malformed_expr, "The function requires a DAP numeric-type array argument.");
-
-    if (!a->read_p())
-        throw InternalErr(__FILE__, __LINE__, string("The Array '") + a->name() + "'does not contain values.");
-
-    // The types of arguments that the CE Parser will build for numeric
-    // constants are limited to Uint32, Int32 and Float64. See ce_expr.y.
-    // Expanded to work for any numeric type so it can be used for more than
-    // just arguments.
-    switch (a->var()->type()) {
-        case dods_byte_c:
-            return extract_double_array_helper<dods_byte>(a);
-        case dods_uint16_c:
-            return extract_double_array_helper<dods_uint16>(a);
-        case dods_int16_c:
-            return extract_double_array_helper<dods_int16>(a);
-        case dods_uint32_c:
-            return extract_double_array_helper<dods_uint32>(a);
-        case dods_int32_c:
-            return extract_double_array_helper<dods_int32>(a);
-        case dods_float32_c:
-            return extract_double_array_helper<dods_float32>(a);
-        case dods_float64_c:
-            return extract_double_array_helper<dods_float64>(a);
-        default:
-            throw InternalErr(__FILE__, __LINE__,
-                    "The argument list built by the CE parser contained an unsupported numeric type.");
-    }
-}
-#endif
 
 /** Given a BaseType pointer, extract the numeric value it contains and return
  it in a C++ double.
@@ -464,9 +332,14 @@ static double extract_double_value(BaseType * arg)
     }
 }
 
+#if 0
 // These static functions could be moved to a class that provides a more
 // general interface for COARDS/CF someday. Assume each BaseType comes bundled
 // with an attribute table.
+
+// These are included here because the ugrid code might want to use attribute
+// values bound to various variables and this illustrates how that could be
+// done. jhrg 8/20/12
 
 // This was ripped from parser-util.cc
 static double string_to_double(const char *val)
@@ -549,7 +422,7 @@ static double get_attribute_double_value(BaseType *var, const string &attribute)
     return string_to_double(remove_quotes(attribute_value).c_str());
 }
 
-#if 0
+
 static double get_y_intercept(BaseType *var)
 {
     vector<string> attributes;
@@ -568,8 +441,6 @@ static double get_missing_value(BaseType *var)
     return get_attribute_double_value(var, "missing_value");
 }
 #endif
-
-#ifdef GRIDFIELDS
 
 /** This is a stub Constraint Expression (i.e., server-side) function
  that will evolve into an interface for Unstructured Grid
@@ -624,18 +495,16 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
     // Check number of arguments; DBG is a macro. Use #define
     // DODS_DEBUG to activate the debugging stuff.
     if (argc != 2)
-    throw Error(malformed_expr,"Wrong number of arguments to ugrid_demo. ugrid_demo(dim:int32, condition:string); was passed " + long_to_string(argc) + " argument(s)");
+        throw Error(malformed_expr,"Wrong number of arguments to ugrid_demo. ugrid_demo(dim:int32, condition:string); was passed " + long_to_string(argc) + " argument(s)");
 
-    if (argv[0]->type() != dods_int32_c) {
+    if (argv[0]->type() != dods_int32_c)
         throw Error(malformed_expr,"Wrong type for first argument. ugrid_demo(dim:int32, condition:string); was passed a/an " + argv[0]->type_name());
-    }
-    if (argv[1]->type() != dods_str_c) {
+
+    if (argv[1]->type() != dods_str_c)
         throw Error(malformed_expr,"Wrong type for second argument. ugrid_demo(dim:int32, condition:string); was passed a/an " + argv[1]->type_name());
-    }
 
     // keep track of which DDS dimensions correspond to GF dimensions
 
-    // TODO Can a simple(r) vector< vector<Array::dimension> > be used?
     map<GF::Dim_t, vector<Array::dimension> > rank_dimensions;
 
     GF::Grid *G = new GF::Grid("result");
@@ -647,7 +516,7 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
     for (DDS::Vars_iter vi = dds.var_begin(); vi != dds.var_end(); vi++) {
 
         BaseType *bt = *vi;
-        // TODO allow variable that are not arrays; just ignore them
+        // TODO allow variables that are not arrays; just ignore them
         Array &arr = dynamic_cast<Array&>(*bt);
         AttrTable &at = arr.get_attr_table();
         DBG(cerr << "Array: " << arr.name() << endl);
@@ -810,7 +679,7 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
     int nodenumber=input->Card(0);
 
     GF::RestrictOp op = GF::RestrictOp(projection, dim, input);
-    GF::GridField *R=new GF::GridField(op.getResult());
+    GF::GridField *R = new GF::GridField(op.getResult());
 
     // 4) Convert back to a DDS BaseType
 
@@ -819,7 +688,7 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
 
     R->GetGrid()->normalize();
 
-    Structure *construct=new Structure("construct");
+    Structure *construct = new Structure("construct");
     for (DDS::Vars_iter vi = dds.var_begin(); vi != dds.var_end(); vi++) {
         BaseType *bt = *vi;
         if (bt->type() == dods_array_c) {
@@ -876,14 +745,15 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
 
                         GF::Array* gfa=R->GetAttribute(iter->first, arr->name());
 
-                        vector<dods_float64> GFA=gfa->makeArrayf();
+                        vector<dods_float64> GFA = gfa->makeArrayf();
 
-                        Array *Nodes=new Array(arr->name(),witness2);
-                        Nodes->append_dim(GFA.size(),"nodes");
+                        Array *Nodes = new Array(arr->name(), witness2);
+                        Nodes->append_dim(GFA.size(), "nodes");
                         Nodes->set_value(GFA,GFA.size());
+
                         AttrTable &arrattr1 = arr->get_attr_table();
                         Nodes->set_attr_table(arrattr1);
-                        AttrTable &arrattr = Nodes->get_attr_table();
+                        // AttrTable &arrattr = Nodes->get_attr_table();
                         construct->add_var_nocopy(Nodes);
                     }
                     else {
@@ -896,6 +766,7 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
         }
     }
 
+#if 0
     for (DDS::Vars_iter vi = dds.var_begin(); vi != dds.var_end(); vi++) {
         BaseType *bt = *vi;
         if (bt->type() == dods_array_c) {
@@ -904,7 +775,7 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
             for( iter = rank_dimensions.begin(); iter != rank_dimensions.end(); ++iter ) {
                 bool same = same_dimensions(arr, iter->second);
                 if (same) {
-                    GF::Array* gfa=R->GetAttribute(iter->first, arr->name());
+                    GF::Array* gfa = R->GetAttribute(iter->first, arr->name());
                 }
                 else {
                     //This array does not appear to be associated with any
@@ -915,16 +786,13 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
             }
         }
     }
-
-    GF::Grid * newgrid = R->GetGrid();
-#if 0
-    BaseType *result = construct; // This will hold the result
-    *btpp = result;
 #endif
+    // TODO Needed?
+    //GF::Grid *newgrid = R->GetGrid();
 
     *btpp = construct;
 
     return;
 }
 
-#endif
+//#endif

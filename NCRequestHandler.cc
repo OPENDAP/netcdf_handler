@@ -87,6 +87,8 @@ static bool version_ge(const string &version, float value)
     catch (...) {
         return false;
     }
+
+    return false; // quiet warnings...
 }
 
 NCRequestHandler::NCRequestHandler(const string &name) :
