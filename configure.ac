@@ -164,8 +164,10 @@ fi
 
 OPENDAP_DEBUG_OPTION
 
-AC_CONFIG_FILES([Makefile bes-testsuite/Makefile bes-testsuite/atlocal 
-bes-testsuite/package.m4])
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([bes-testsuite/Makefile bes-testsuite/atlocal bes-testsuite/package.m4])
+AC_CONFIG_FILES([bes-testsuite/generate_metadata_baseline.sh], [chmod +x bes-testsuite/generate_metadata_baseline.sh])
+AC_CONFIG_FILES([bes-testsuite/generate_data_baseline.sh], [chmod +x bes-testsuite/generate_data_baseline.sh])
 
 AS_IF([test "$libgf_ok" = "yes"], [AC_CONFIG_FILES([ugrid_project/bes.conf])])
 
