@@ -24,14 +24,11 @@
 
 // NCRequestHandler.cc
 
+#include "config_nc.h"
+
 #include <string>
 #include <sstream>
 #include <exception>
-
-#include <InternalErr.h>
-#include <Ancillary.h>
-
-#include "NCRequestHandler.h"
 
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
@@ -50,7 +47,11 @@
 #include <BESDebug.h>
 #include <BESContextManager.h>
 
-#include "config_nc.h"
+#include <InternalErr.h>
+#include <Ancillary.h>
+
+#include "NCRequestHandler.h"
+#include "gridfields_functions.h"
 
 #define NC_NAME "nc"
 
@@ -86,6 +87,8 @@ static bool version_ge(const string &version, float value)
     catch (...) {
         return false;
     }
+
+    return false; // quiet warnings...
 }
 
 NCRequestHandler::NCRequestHandler(const string &name) :
@@ -244,6 +247,11 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
         dds->transfer_attributes(das);
 
+#if GRIDFIELDS
+        ConstraintEvaluator & ce = bdds->get_ce();
+        ce.add_function("ugrid_restrict", function_ugrid_restrict);
+#endif
+
         bdds->set_constraint(dhi);
 
         bdds->clear_container();
@@ -309,6 +317,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         Ancillary::read_ancillary_das(*das, accessed);
 
         dds->transfer_attributes(das);
+
+#if GRIDFIELDS
+        ConstraintEvaluator & ce = bdds->get_ce();
+        ce.add_function("ugrid_restrict", function_ugrid_restrict);
+#endif
 
         bdds->set_constraint(dhi);
 
