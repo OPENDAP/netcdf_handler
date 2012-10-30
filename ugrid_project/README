@@ -129,7 +129,7 @@ that the data should be returned in a netCDF 3 data file:
     ncdump -h output.nc
 
 Other *.bes commands in the ugrid_project directory do other things,
-like perform regular reads from the two ample data files included
+like perform regular reads from the two sample data files included
 here.
 
 The two command files are pretty easy to understand. A running instance of
