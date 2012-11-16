@@ -190,7 +190,7 @@ static GF::Array *extract_gridfield_array(Array *a) {
             gfa->shareFloatData(extract_array_helper<dods_float64, float>(a), a->length());
             break;
         default:
-            throw InternalErr(__FILE__, __LINE__, "Unknown DDS type encountered when converting to gridfields array");
+            throw InternalErr(__FILE__, __LINE__, "Unknown DAP type encountered when converting to gridfields array");
     }
     return gfa;
 };
@@ -442,13 +442,8 @@ static double get_missing_value(BaseType *var)
 }
 #endif
 
-/** This is a stub Constraint Expression (i.e., server-side) function
- that will evolve into an interface for Unstructured Grid
- operations.
-
- The function takes a single variable that should be a one
- dimensional array variable and scales it by a factor of ten. The
- result is returned as the value of the CE expression.
+/**
+ Subset an irregular mesh (aka unstructured grid).
 
  @param argc Count of the function's arguments
  @param argv Array of pointers to the functions arguments
@@ -558,7 +553,7 @@ function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp)
 
     for (DDS::Vars_iter vi = dds.var_begin(); vi != dds.var_end(); vi++) {
         BaseType *bt = *vi;
-        // TODO Allow variables that are note Arrays; ignore as above
+        // TODO Allow variables that are not Arrays; ignore as above
         Array &arr = dynamic_cast<Array&>(*bt);
         DBG(cerr << "Array: " << arr.name() << endl);
 

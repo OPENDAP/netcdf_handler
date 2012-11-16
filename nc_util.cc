@@ -34,16 +34,16 @@ bool is_user_defined_type(int ncid, int type)
 {
 #if NETCDF_VERSION >= 4
     int ntypes;
-    int typeids[NC_MAX_VARS];  // It's likely safe to assume there are
-			       // no more types than variables. jhrg
-			       // 2/9/12
+    int typeids[NC_MAX_VARS];   // It's likely safe to assume there are
+                                // no more types than variables. jhrg
+                                // 2/9/12
     int err = nc_inq_typeids(ncid, &ntypes, typeids);
     if (err != NC_NOERR)
-	throw Error(err, "Could not get the user defined type information.");
+        throw Error(err, "Could not get the user defined type information.");
 
     for (int i = 0; i < ntypes; ++i) {
-	if (type == typeids[i])
-	    return true;
+        if (type == typeids[i])
+            return true;
     }
 
     return false;
