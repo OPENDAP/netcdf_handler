@@ -1,0 +1,8 @@
+Dataset {
+    Structure {
+        Float64 X[nodes = 165];
+        Float64 Y[nodes = 165];
+        Float64 nodedata[nodes = 165];
+        Int32 element[three = 3][tris = 230];
+    } construct;
+} function_result_test4.nc;

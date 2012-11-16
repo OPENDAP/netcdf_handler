@@ -46,33 +46,26 @@ endif
 
 # TESTSUITE_3 is always built, but not TESTSUITE_4
 
+TESTSUITE_UGRID = $(srcdir)/ugrid_tests
+# TODO Make this conditional
+
 # package.m4 was in the list of deps, but now it's built by configure.
 # jhrg 1/11/12
 
-check-local: atconfig atlocal $(TESTSUITE_3) $(TESTSUITE_4)
+check-local: atconfig atlocal $(TESTSUITE_3) $(TESTSUITE_4) $(TESTSUITE_UGRID)
 	$(SHELL) '$(TESTSUITE_3)' $(TESTSUITEFLAGS)
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' $(TESTSUITEFLAGS)
+	test ! -f '$(TESTSUITE_UGRID)' || $(SHELL) '$(TESTSUITE_UGRID)' $(TESTSUITEFLAGS)
 
 clean-local:
 	test ! -f '$(TESTSUITE_3)' || $(SHELL) '$(TESTSUITE_3)' --clean
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' --clean
+	test ! -f '$(TESTSUITE_UGRID)' || $(SHELL) '$(TESTSUITE_UGRID)' --clean
 
 distclean-local:
 	-rm atconfig
 
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
-% : %.at
+% : %.at handler_tests_macros.m4
 	$(AUTOTEST) -I '$(srcdir)' -o $@ $@.at
-
-# The `:;' works around a Bash 3.2 bug when the output is not writable.
-# Replaced with a *.in file and built by configure. jhrg 1/11/12
-#package.m4: $(top_srcdir)/configure.ac
-#	:;{ \
-#	echo '# Signature of the current package.' && \
-#	echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])' && \
-#	echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])' && \
-#	echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])' && \
-#	echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])' && \
-#	echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
-#	} >'$(srcdir)/package.m4'

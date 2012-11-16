@@ -1,0 +1,19 @@
+Attributes {
+    X {
+        String grid "element";
+        String grid_location "node";
+    }
+    Y {
+        String grid "element";
+        String grid_location "node";
+    }
+    nodedata {
+        String grid "element";
+        String grid_location "node";
+    }
+    element {
+        String cell_type "tri_ccw";
+        Int32 index_origin 1;
+        String coordinates_node "X Y";
+    }
+}

@@ -1,0 +1,14 @@
+# Process with autom4te to create an -*- Autotest -*- test suite.
+
+m4_include([handler_tests_macros.m4])
+
+# These are tests for the ugrid_restrict server function
+
+AT_BESCMD_RESPONSE_TEST([ugrid/ugrid_1_das.bescmd])
+AT_BESCMD_RESPONSE_TEST([ugrid/ugrid_2_das.bescmd])
+
+AT_BESCMD_RESPONSE_TEST([ugrid/ugrid_1_dds.bescmd])
+AT_BESCMD_RESPONSE_TEST([ugrid/ugrid_2_dds.bescmd])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([ugrid/ugrid_1_data.bescmd])
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([ugrid/ugrid_2_data.bescmd])

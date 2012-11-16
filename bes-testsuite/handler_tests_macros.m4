@@ -16,12 +16,12 @@ AT_ARG_OPTION_ARG([generate g],
      fi     
      exit],[])
 
-AT_ARG_OPTION_ARG([generate-data a],
-    [  -a arg, --generate-data=arg   Build the baseline file for test 'arg'],
-    [if ./generate_data_baseline.sh $at_arg_generate_data; then
-         echo "Built baseline for $at_arg_generate_data"
+AT_ARG_OPTION_ARG([data a],
+    [  -a arg, --data=arg   Build the baseline file for test 'arg'],
+    [if ./generate_data_baseline.sh $at_arg_data; then
+         echo "Built baseline for $at_arg_data"
      else
-         echo "Could not generate baseline for $at_arg_generate_data"
+         echo "Could not generate baseline for $at_arg_data"
      fi     
      exit],[])
 
@@ -42,9 +42,9 @@ AT_CHECK([diff -b -B $2 stdout || diff -b -B $2 stderr], [], [ignore],[],[])
 AT_CLEANUP])
 
 m4_define([AT_BESCMD_RESPONSE_TEST],
-[_AT_BESCMD_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
+[_AT_BESCMD_TEST([$abs_srcdir/$1], [$abs_srcdir/$1.baseline])
 ])
 
 m4_define([AT_BESCMD_BINARYDATA_RESPONSE_TEST],
-[_AT_BESCMD_BINARYDATA_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
+[_AT_BESCMD_BINARYDATA_TEST([$abs_srcdir/$1], [$abs_srcdir/$1.baseline])
 ])

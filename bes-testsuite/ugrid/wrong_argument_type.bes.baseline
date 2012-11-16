@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<response reqID="some_unique_value" xmlns="http://xml.opendap.org/ns/bes/1.0#">
+    <getDODS>
+        <BESError>
+            <Type>3</Type>
+            <Message>libdap exception building response: error_code = 1005: libdap error transmitting DataDDS: Wrong type for second argument. ugrid_demo(dim:int32, condition:string); was passed a/an Array</Message>
+            <Administrator>admin.email.address@your.domain.name</Administrator>
+        </BESError>
+    </getDODS>
+</response>
