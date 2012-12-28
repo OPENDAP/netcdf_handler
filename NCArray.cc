@@ -44,7 +44,7 @@
 
 #include <netcdf.h>
 
-// #define DODS_DEBUG 1
+//#define DODS_DEBUG 1
 
 #include <BaseType.h>
 #include <Error.h>
