@@ -608,6 +608,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                 attr_table_ptr->append_attr("string_length", print_type(NC_INT), print_rep);
             }
         }
+
 #if NETCDF_VERSION >= 4
         else if (is_user_defined_type(ncid, var_type)) {
 	    //var_type >= NC_FIRSTUSERTYPEID) {
