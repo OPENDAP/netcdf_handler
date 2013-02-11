@@ -247,7 +247,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
         dds->transfer_attributes(das);
 
-#if GRIDFIELDS
+#if 0
         ConstraintEvaluator & ce = bdds->get_ce();
         ce.add_function("ugrid_restrict", function_ugrid_restrict);
 #endif
@@ -318,7 +318,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
         dds->transfer_attributes(das);
 
-#if GRIDFIELDS
+#if 0
         ConstraintEvaluator & ce = bdds->get_ce();
         ce.add_function("ugrid_restrict", function_ugrid_restrict);
 #endif
