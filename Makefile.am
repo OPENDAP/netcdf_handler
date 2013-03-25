@@ -19,10 +19,13 @@ libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
 libnc_module_la_LDFLAGS = -avoid-version -module 
 libnc_module_la_LIBADD = $(BES_DAP_LIBS)
 
+#if 0 // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
 #if USING_GRIDFIELDS 
 #libnc_module_la_CPPFLAGS += $(GF_CFLAGS)
 #libnc_module_la_LIBADD += $(GF_LIBS)
 #endif
+#endif // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
+
 
 NCTYPE_SRC = ncdas.cc ncdds.cc nc_util.cc \
 	NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc		\
@@ -37,10 +40,12 @@ SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
+#if 0 // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
 #if USING_GRIDFIELDS 
 #SERVER_SRC += gridfields_functions.cc
 #SERVER_HDR += gridfields_functions.h
 #endif
+#endif // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
 
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
     nc.conf.in OSX_Resources

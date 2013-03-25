@@ -32,7 +32,7 @@
 // Declarations for CE functions.
 //
 // 1/15/99 jhrg
-
+#if 0 // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
 #ifndef _ce_functions_h
 #define _ce_functions_h
 
@@ -49,3 +49,5 @@
 void function_ugrid_restrict(int argc, BaseType * argv[], DDS &dds, BaseType **btpp) ;
 
 #endif // _ce_functions_h
+
+#endif // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
