@@ -1,3 +1,224 @@
+2013-04-30  James Gallagher <jgallagher@opendap.org>
+
+	Removed gridfields files (moved to the ugrid_functions dir, which holds only old code that's never used) and removed an include of gridfields.h from NCRequestHandler.cc. This should fix the distcheck target.
+
+2013-03-25  Nathan Potter <ndp@coas.oregonstate.edu>
+
+	netcdf_handler: Disabling cruft code from earlier ugrid work.
+
+2013-02-10  Nathan Potter <ndp@coas.oregonstate.edu>
+
+	netcdf_handler: Disabing gridfields code...
+
+2013-01-25  Patrick West <pwest@ucar.edu>
+
+	Need 2.61 autoconf, not 2.63
+	M    configure.ac
+
+2013-01-22  James Gallagher <jgallagher@opendap.org>
+
+	Removed the eclipse .project and .cproject files.
+
+	D    .project
+	D    .cproject
+
+2013-01-21  James Gallagher <jgallagher@opendap.org>
+
+	Merge of the hyrax 1.8 branch
+
+	_M   .
+	A  + .project
+	_M   conf
+	A  + .cproject
+	_M   bes-testsuite
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	A  + bes-testsuite/nc/nc4_nc_classic_compressed.nc.2.bescm.baseline
+	A  + bes-testsuite/nc/nc4_nc_classic_compressed.nc.0.bescm.baseline
+	M    NCByte.cc
+	_M   data/nc4_test_files
+	M    NCArray.cc
+	_M   OSX_Resources
+	_M   OSX_Resources/InstallationCheck.proto
+	_M   OSX_Resources/Info.plist.proto
+	M    ncdas.cc
+
+2012-09-28  James Gallagher <jgallagher@opendap.org>
+
+	Test hacks... This now passes its tests with the latest version of
+	libdap. The fixes were for the schema URL, etc., in the root element
+	of the DDX responses. The code is also using the latest/best stuff for
+	autotest - spec. baseline generation from teh test driver.
+
+	M    bes-testsuite/nc/ref_tst_compound5.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound2.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_enum_data.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound4.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_opaque_data.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound3.nc.2.bescmd.baseline
+	M    bes-testsuite/handler_tests_macros.m4
+	A    bes-testsuite/generate_data_baseline.sh.in
+	M    bes-testsuite/Makefile.am
+	A    bes-testsuite/generate_metadata_baseline.sh.in
+	M    configure.ac
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	more refactoring of the gridfields function code.
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	cleaning...
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	Updated README
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	cleaning...
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	cleaning...
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	cleaning...
+
+2012-08-20  James Gallagher <jgallagher@opendap.org>
+
+	Cleanup in the ugrid_project directory.
+
+2012-08-16  James Gallagher <jgallagher@opendap.org>
+
+	hacked the README
+
+2012-08-10  James Gallagher <jgallagher@opendap.org>
+
+	Check point
+
+	M    gridfields_functions.cc
+	A    ugrid_project/bes.conf.jhrg.in
+
+2012-08-10  James Gallagher <jgallagher@opendap.org>
+
+	Added the test4.nc data file for the nascent ugrid_restrict tests
+
+2012-08-07  James Gallagher <jgallagher@opendap.org>
+
+	More clean up in the gridfields interface code.
+
+2012-08-06  smoe
+
+	added gridfields_functions.h
+
+2012-04-19  James Gallagher <jgallagher@opendap.org>
+
+	Removed more non-ugrid code from ce_functions.cc in the netcdf_handler
+
+2012-04-19  James Gallagher <jgallagher@opendap.org>
+
+	Updated the README with soem more info
+
+2012-04-19  James Gallagher <jgallagher@opendap.org>
+
+	Moved the ugrid_project code into the netcdf_handler. There's no place
+	else where this little bit of test code makes sense.
+
+	A    http://scm.opendap.org/svn/trunk/netcdf_handler/ugrid_project
+	D    http://scm.opendap.org/svn/trunk/ugrid_project
+
+2012-04-19  James Gallagher <jgallagher@opendap.org>
+
+	Fixed an issue with the optional ugrid_project code - now configure.ac
+	will only make the bes.conf that code needs if the --with-gridfields
+	option is used and libgridfields is found.
+
+	M    configure.ac
+
+2012-04-18  James Gallagher <jgallagher@opendap.org>
+
+	Added the ugrid function to the netcdf_handler
+
+	M    NCRequestHandler.cc
+	M    configure.ac
+	M    NCArray.h
+	A    ce_functions.cc
+	A    ce_functions.h
+	M    Makefile.am
+
+2012-04-17  James Gallagher <jgallagher@opendap.org>
+
+	Merge/version update.
+
+	_M   .
+	M    netcdf_handler.spec
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	M    configure.ac
+	M    NEWS
+	_M   OSX_Resources/InstallationCheck.proto
+	_M   OSX_Resources/Info.plist.proto
+
+2012-04-12  James Gallagher <jgallagher@opendap.org>
+
+	Result of the merge with version 3.10.2 fromt eh h 1.8 branch.
+
+	_M   .
+	M    ncdds.cc
+	M    netcdf_handler.spec
+	M    NCRequestHandler.cc
+	M    NCRequestHandler.h
+	A  + bes-testsuite/package.m4.in
+	M    bes-testsuite/nc/nc4_strings_comp.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/coads_climatology.nc.ddx.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings_comp.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.2.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd
+	M    bes-testsuite/nc/ref_tst_compound5.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound2.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound2.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/fnoc1.nc.2.bescmd.baseline
+	_M   bes-testsuite/nc/fnoc1.nc.3.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_enum_data.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_compound.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.2.bescmd
+	M    bes-testsuite/nc/ref_tst_compound4.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/test.nc.1.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_compressed.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_nc_classic_compressed.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_strings.nc.0.bescmd
+	M    bes-testsuite/nc/nc4_unsigned_types_comp.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_unsigned_types_comp.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/nc4_unsigned_types.nc.0.bescmd.baseline
+	M    bes-testsuite/nc/nc4_unsigned_types.nc.2.bescmd.baseline
+	M    bes-testsuite/nc/ref_tst_opaque_data.nc.2.bescmd.baseline
+	A  + bes-testsuite/nc/fnoc1.nc.1.1.bescmd
+	M    bes-testsuite/nc/ref_tst_compound3.nc.2.bescmd.baseline
+	M    bes-testsuite/Makefile.am
+	M    configure.ac
+	M    INSTALL
+	M    NCInt16.cc
+	M    NCByte.cc
+	M    NEWS
+	A  + nc_util.cc
+	M    NCArray.cc
+	A  + nc_util.h
+	M    ChangeLog
+	M    nc.conf.in
+	M    README
+	_M   OSX_Resources/InstallationCheck.proto
+	_M   OSX_Resources/Info.plist.proto
+	M    NCStructure.cc
+	M    Makefile.am
+	M    ncdas.cc
+
 2012-02-09  James Gallagher <jgallagher@opendap.org>
 
 	Fixes for netcdf-4.1.1 (Removed the NC_FIRSTUSERTYPEID hack - bad
