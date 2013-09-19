@@ -53,7 +53,7 @@ EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
 CLEANFILES = *~ nc.conf
 
 sample_datadir = $(datadir)/hyrax/data/nc
-sample_data_DATA = data/bears.nc data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
+sample_data_DATA = data/bears.nc data/bears.nc.das data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
 
 install-data-local: nc.conf
 	@currdate=`date +"%y%m%d%H%M"`; \
