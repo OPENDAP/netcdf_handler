@@ -459,7 +459,7 @@ void NCArray::do_array_read(int ncid, int varid, nc_type datatype,
 bool NCArray::read()
 {
     if (read_p())  // Nothing to do
-        return false;
+        return true;
 
     int ncid;
     int errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
@@ -490,5 +490,5 @@ bool NCArray::read()
     if (nc_close(ncid) != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
-    return false;
+    return true;
 }

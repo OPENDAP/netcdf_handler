@@ -73,7 +73,7 @@ NCUInt16::ptr_duplicate()
 bool NCUInt16::read()
 {
     if (read_p()) // nothing to do
-        return false;
+        return true;
 
     int ncid, errstat;
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
@@ -123,5 +123,5 @@ bool NCUInt16::read()
     if (nc_close(ncid) != NC_NOERR)
         throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
 
-    return false;
+    return true;
 }

@@ -90,7 +90,7 @@ bool NCFloat32::read()
     int id;
 
     if (read_p()) // nothing to do here
-        return false;
+        return true;
 
     int ncid, errstat;
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
@@ -128,7 +128,7 @@ bool NCFloat32::read()
     else
         throw InternalErr(__FILE__, __LINE__, "Entered NCFloat32::read() with non-float variable!");
 
-    return false;
+    return true;
 }
 
 // $Log: NCFloat32.cc,v $
