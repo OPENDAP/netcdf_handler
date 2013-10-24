@@ -84,7 +84,7 @@ NCStr::ptr_duplicate()
 bool NCStr::read()
 {
     if (read_p()) //has been done
-        return false;
+        return true;
 
     int ncid, errstat;
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
@@ -191,5 +191,5 @@ bool NCStr::read()
 
     }
 
-    return false;
+    return true;
 }

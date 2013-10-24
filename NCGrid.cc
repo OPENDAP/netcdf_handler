@@ -94,7 +94,7 @@ NCGrid::read()
     DBG(cerr << "In NCGrid::read" << endl);
 
     if (read_p()) // nothing to do
-        return false;
+        return true;
 
     DBG(cerr << "In NCGrid, reading components for " << name() << endl);
 
@@ -109,7 +109,7 @@ NCGrid::read()
 
     set_read_p(true);
 
-    return false;
+    return true;
 }
 
 /**
