@@ -15,9 +15,13 @@ lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
 
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
-libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
-libnc_module_la_LDFLAGS = -avoid-version -module 
-libnc_module_la_LIBADD = $(BES_DAP_LIBS)
+#libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
+libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS) -I$(top_srcdir)/dispatch -I$(top_srcdir)/dap $(DAP_CFLAGS) $(NC_CPPFLAGS)
+libnc_module_la_LDFLAGS = -avoid-version -module $(NC_LDFLAGS)
+#libnc_module_la_LIBADD = $(BES_DAP_LIBS)
+#libnc_module_la_LIBADD = $(DAP_SERVER_LIBS) $(DAP_CLIENT_LIBS) $(NC_LIBS)
+#libnc_module_la_LIBADD = $(BES_DAP_LIBS) $(DAP_SERVER_LIBS) $(NC_LIBS)
+libnc_module_la_LIBADD = $(NC_LIBS)
 
 #if 0 // Disabling cruft code from earlier ugrid work - ndp 03/25/2013
 #if USING_GRIDFIELDS 
@@ -65,7 +69,7 @@ install-data-local: nc.conf
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf
 
-nc.conf: nc.conf.in config.status
+nc.conf: nc.conf.in $(top_builddir)/config.status
 	sed -e "s%[@]bes_modules_dir[@]%${lib_besdir}%" $< > nc.conf
 
 # Not nearly as clean as it could be, but this removes .svn directories

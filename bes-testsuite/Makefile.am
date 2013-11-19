@@ -21,7 +21,7 @@ EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE_3) $(TESTSUITE_4) \
 
 DISTCLEANFILES = bes.conf
 
-bes.conf: bes.conf.in ../config.status
+bes.conf: bes.conf.in $(top_builddir)/config.status
 	@my_topdir=`echo ${abs_top_srcdir} | sed 's/\(.*\)\/\(.[^\/]*\)\/\.\./\1/g'`; \
 	sed -e "s%[@]pkgdatadir[@]%${pkgdatadir}%" \
 		-e "s%[@]modulesdir[@]%${BES_MODULE_DIR}%" \

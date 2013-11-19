@@ -65,9 +65,15 @@ BES.LogVerbose=no
 # BES.module.ff=@modulesdir@/libff_module.so
 
 BES.modules=dap,cmd,nc
-BES.module.dap=@modulesdir@/libdap_module.so
-BES.module.cmd=@modulesdir@/libdap_xml_module.so
-BES.module.nc=@abs_top_builddir@/.libs/libnc_module.so
+
+# BES.module.dap=@modulesdir@/libdap_module.so
+# BES.module.cmd=@modulesdir@/libdap_xml_module.so
+# BES.module.nc=@abs_top_builddir@/.libs/libnc_module.so
+
+BES.module.dap=@abs_top_builddir@/dap/.libs/libdap_module.so
+BES.module.cmd=@abs_top_builddir@/xmlcommand/.libs/libdap_xml_module.so
+
+BES.module.nc=@abs_top_builddir@/dap_modules/netcdf_handler/.libs/libnc_module.so
 
 #-----------------------------------------------------------------------#
 # Setting the data location
@@ -91,7 +97,9 @@ BES.module.nc=@abs_top_builddir@/.libs/libnc_module.so
 # to change this to point to your data! At this time the BES does not support
 # multiple RootDirectory values. 3/5/07 jhrg
 
-BES.Catalog.catalog.RootDirectory=@abs_top_srcdir@
+# BES.Catalog.catalog.RootDirectory=@abs_top_srcdir@
+BES.Catalog.catalog.RootDirectory=@abs_top_srcdir@/dap_modules/netcdf_handler
+
 BES.Data.RootDirectory=/dev/null
 
 # The TypeMatch parameter is a list of handler/module names and a regular
