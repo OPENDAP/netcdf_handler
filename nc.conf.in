@@ -44,12 +44,11 @@ BES.Catalog.catalog.TypeMatch+=nc:.*\.nc(\.bz2|\.gz|\.Z)?$;
 #   (true,yes|false,no, defaults to true for DAP 3.2 clients and earlier, 
 #    false for DAP 3.3 and later)
 #
-# Uncommenting this overrides the default behavior for all clients. The
-# DAP2 Grid type will no longer have 'coordinate variables' added outside
-# its scope. Not doing this make logical sense, but adding those CVs easier
-# for clients like Ferret, GrADS, etc.
+# When set tot true, the DAP2 Grid type will no longer have 'coordinate 
+# variables' added outside its scope. Not doing this makes logical sense, 
+# but adding those CVs makes it easier for clients like Ferret, GrADS, etc.
 #
-# NC.ShowSharedDimensions=false
+NC.ShowSharedDimensions=true
 
 # In previous versions of this handler, we used the unsigned DAP2 type
 # Byte for signed bytes in netcdf. This can be confusing for client programs
