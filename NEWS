@@ -1,3 +1,8 @@
+Version 3.10.4 (23 April 2014)
+
+Changed default behavior for handelr so that it is explicitly set
+to ShowSharedDimensions=true
+
 Version 3.10.3 (10 September 2013)
 
 Minor organizational changes.

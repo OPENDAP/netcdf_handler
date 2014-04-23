@@ -1,3 +1,42 @@
+2014-03-24  Nathan Potter <ndp@opendap.org>
+
+	netcdf_handler: Altered the prototype config file so thet the default behavior for the handler when it's shipped is to ShowSharedDimensions=true
+
+2013-10-23  James Gallagher <jgallagher@opendap.org>
+
+	updated baselines for the new escaping behavior of libdap
+
+2013-10-11  James Gallagher <jgallagher@opendap.org>
+
+	Edits to match the new, sane, semantics for BaseType::read(). True now means done/eof and flase means more data to read (more instances for a sequence). All the tests pass.
+
+2013-10-01  James Gallagher <jgallagher@opendap.org>
+
+	Updated the FSF address in the copyright headers
+
+2013-09-26  James Gallagher <jgallagher@opendap.org>
+
+	removed -fno-defer-pop from all copies of Makefile.am since the new OSX compiler prints warnings about it and it seems to not make a difference with newer g++ versions.
+
+2013-09-18  Nathan Potter <ndp@opendap.org>
+
+	netcdf_handler: Add DAS file for the bears.nc dataset.
+
+2013-09-18  Nathan Potter <ndp@opendap.org>
+
+	netcdf_handler: Add DAS file for the bears.nc dataset.
+
+2013-09-10  Nathan Potter <ndp@opendap.org>
+
+	netcdf_handler: Updated ChangeLog, NEWS, INSTALL, etc. for Hyrax 1.9
+
+2013-04-30  James Gallagher <jgallagher@opendap.org>
+
+	Removed gridfields files (moved to the ugrid_functions dir, which holds only old code that's never used) and removed an include of gridfields.h from NCRequestHandler.cc. This should fix the distcheck target.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
 2013-04-30  James Gallagher <jgallagher@opendap.org>
 
 	Removed gridfields files (moved to the ugrid_functions dir, which holds only old code that's never used) and removed an include of gridfields.h from NCRequestHandler.cc. This should fix the distcheck target.

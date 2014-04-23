@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(netcdf_handler, 3.10.3, opendap-tech@opendap.org)
+AC_INIT(netcdf_handler, 3.10.4, opendap-tech@opendap.org)
 AC_CONFIG_AUX_DIR([conf])
 AC_CONFIG_MACRO_DIR([conf])
 
@@ -48,7 +48,7 @@ AC_CHECK_TYPES([ptrdiff_t])
 AC_CHECK_FUNCS([strchr])
 
 dnl Checks for specific libraries
-AC_CHECK_LIBDAP([3.11.0],
+AC_CHECK_LIBDAP([3.13.0],
  [
   LIBS="$LIBS $DAP_SERVER_LIBS"
   CPPFLAGS="$CPPFLAGS $DAP_CFLAGS"
@@ -80,7 +80,7 @@ AC_MSG_RESULT($NETCDF_MAJOR_VERSION)
 
 AM_CONDITIONAL([NETCDF4_TESTS], [test "$NETCDF_MAJOR_VERSION" = "4"])
 
-AC_CHECK_BES([3.9.0],
+AC_CHECK_BES([3.13.0],
 [
 ],
 [ AC_MSG_ERROR([Cannot find bes])
