@@ -1,15 +1,19 @@
 Summary:         NetCDF 3 data handler for the OPeNDAP Data server
 Name:            netcdf_handler
-Version:         3.8.3
+Version:         3.10.4
 Release:         1
 License:         LGPLv2+
 Group:           System Environment/Daemons 
 Source0:         http://www.opendap.org/pub/source/%{name}-%{version}.tar.gz
 URL:             http://www.opendap.org/
+Requires:        libdap >= 3.13.0
+Requires:        netcdf >= 4.1
+Requires:        bes >= 3.13.0
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:   libdap-devel >= 3.9.0 netcdf-devel
-BuildRequires:   bes-devel >= 3.7.0
+BuildRequires:   libdap-devel >= 3.13.0 
+BuildRequires:   netcdf-devel >= 4.1
+BuildRequires:   bes-devel >= 3.13.0
 
 %description
 This is the netcdf data handler for our data server. It reads netcdf 3
@@ -27,9 +31,7 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install INSTALL="install -p"
 
-rm $RPM_BUILD_ROOT%{_libdir}/*.la
-rm $RPM_BUILD_ROOT%{_libdir}/*.so
-rm $RPM_BUILD_ROOT%{_libdir}/bes/*.la
+rm $RPM_BUILD_ROOT%{_libdir}/bes/libnc_module.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -40,8 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/bes-nc-data.sh
-%{_libdir}/libnc_handler.so.*
+%dir %{_sysconfdir}/bes/
+%dir %{_sysconfdir}/bes/modules
+%config(noreplace) %{_sysconfdir}/bes/modules/nc.conf
 %{_libdir}/bes/libnc_module.so
 %{_datadir}/hyrax/
 %doc COPYING COPYRIGHT NEWS README

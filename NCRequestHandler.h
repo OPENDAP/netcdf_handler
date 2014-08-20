@@ -19,7 +19,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
  
@@ -34,6 +34,13 @@ class NCRequestHandler : public BESRequestHandler {
 private:
     static bool		_show_shared_dims ;
     static bool		_show_shared_dims_set ;
+
+    static bool     _ignore_unknown_types ;
+    static bool     _ignore_unknown_types_set ;
+
+    static bool     _promote_byte_to_short_set ;
+    static bool     _promote_byte_to_short;
+
 public:
 			NCRequestHandler( const string &name ) ;
     virtual		~NCRequestHandler( void ) ;
@@ -43,6 +50,10 @@ public:
     static bool		nc_build_data( BESDataHandlerInterface &dhi ) ;
     static bool		nc_build_help( BESDataHandlerInterface &dhi ) ;
     static bool		nc_build_version( BESDataHandlerInterface &dhi ) ;
+
+    static bool get_show_shared_dims() { return _show_shared_dims; }
+    static bool get_ignore_unknown_types() { return _ignore_unknown_types; }
+    static bool get_promote_byte_to_short() { return _promote_byte_to_short; }
 };
 
 #endif

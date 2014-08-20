@@ -1,4 +1,3 @@
-
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
@@ -19,10 +18,10 @@
 // 
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 
 // (c) COPYRIGHT URI/MIT 1994-1996
 // Please read the full copyright statement in the file COPYRIGHT.
@@ -38,19 +37,20 @@
 
 #include "config_nc.h"
 
-static char rcsid[] not_used ={"$Id$"};
+static char rcsid[] not_used = { "$Id$" };
 
 #include <netcdf.h>
 #include <InternalErr.h>
 
 #include "NCInt32.h"
 
-
-NCInt32::NCInt32(const string &n, const string &d) : Int32(n, d)
+NCInt32::NCInt32(const string &n, const string &d) :
+    Int32(n, d)
 {
 }
 
-NCInt32::NCInt32(const NCInt32 &rhs) : Int32(rhs)
+NCInt32::NCInt32(const NCInt32 &rhs) :
+    Int32(rhs)
 {
 }
 
@@ -64,81 +64,73 @@ NCInt32::operator=(const NCInt32 &rhs)
     if (this == &rhs)
         return *this;
 
-    dynamic_cast<NCInt32&>(*this) = rhs;
-
+    dynamic_cast<NCInt32&> (*this) = rhs;
 
     return *this;
 }
 
-
 BaseType *
-NCInt32::ptr_duplicate(){
+NCInt32::ptr_duplicate()
+{
 
     return new NCInt32(*this);
 }
 
-
-bool
-NCInt32::read()
+bool NCInt32::read()
 {
-  int varid;                  /* variable Id */
-  nc_type datatype;           /* variable data type */
-  size_t cor[MAX_NC_DIMS];      /* corner coordinates */
-  int num_dim;                /* number of dim. in variable */
-  dods_int32 intg32;
-  int id;
+    if (read_p()) // nothing to do
+        return true;
 
-  if (read_p()) // nothing to do
-    return false;
-
-  int ncid, errstat;
-
-  errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
-
-  if (errstat != NC_NOERR)
-    {
-	string err = (string)"Could not open the dataset's file ("
-	             + dataset().c_str() + ")" ;
-	throw Error(errstat, err);
+    int ncid, errstat;
+    errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    if (errstat != NC_NOERR) {
+        string err = "Could not open the dataset's file (" + dataset() + ")";
+        throw Error(errstat, err);
     }
- 
-  errstat = nc_inq_varid(ncid, name().c_str(), &varid);
-  if (errstat != NC_NOERR)
-    throw Error(errstat, "Could not get variable ID.");
 
-  errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, 
-			&num_dim, (int *)0, (int *)0);
-  if (errstat != NC_NOERR)
-    throw Error(errstat, string("Could not read information about the variable `") 
-		+ name() + string("'."));
+    int varid; /* variable Id */
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not get variable ID.");
 
-  for (id = 0; id <= num_dim && id < MAX_NC_DIMS; id++) 
-    cor[id] = 0;
-
-  if (datatype == NC_LONG)
+    long lht;
+#if NETCDF_VERSION >= 4
+    errstat = nc_get_var(ncid, varid, &lht);
+#else
+    long int lng ;
+    size_t cor[MAX_NC_DIMS];    /* corner coordinates */
+    int num_dim;                /* number of dim. in variable */
+    nc_type datatype;           /* variable data type */
+    errstat = nc_inq_var(ncid, varid, (char *)0, &datatype, &num_dim, (int *)0,
+			(int *)0);
+    if( errstat != NC_NOERR )
     {
-      long lht;
-
-      errstat = nc_get_var1_long (ncid, varid, cor, &lht);
-      if (errstat != NC_NOERR)
-	throw Error(errstat, 
-		    string("Could not read the variable `") + name() 
-		    + string("'."));
-
-      set_read_p(true);
-
-      intg32 = (dods_int32) lht;
-      val2buf( &intg32 );
-
-      if (nc_close(ncid) != NC_NOERR)
-	throw InternalErr(__FILE__, __LINE__, 
-			  "Could not close the dataset!");
+	throw Error(errstat,string("Could not read information about the variable `") + name() + string("'."));
     }
-  else
-    throw InternalErr(__FILE__, __LINE__,
-		      "Entered NCInt32::read() with non-short variable!");
+    if( datatype != NC_LONG )
+    {
+	throw InternalErr(__FILE__, __LINE__, "Entered NCInt32::read() with non-Int32 variable!");
+    }
 
-  return false;
+    for( int id = 0; id <= num_dim && id < MAX_NC_DIMS; id++ )
+    {
+	cor[id] = 0;
+    }
+
+    errstat = nc_get_var1_long( ncid, varid, cor, &lht ) ;
+#endif
+    if (errstat != NC_NOERR)
+        throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+
+    set_read_p(true);
+
+    dods_int32 intg32 = (dods_int32) lht;
+    val2buf(&intg32);
+
+    if (nc_close(ncid) != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+
+    return true;
 }
 
 // $Log: NCInt32.cc,v $

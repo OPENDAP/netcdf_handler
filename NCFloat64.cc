@@ -19,7 +19,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
  
@@ -89,15 +89,14 @@ NCFloat64::read()
     int id;
 
     if (read_p()) // nothing to do here
-        return false;
+        return true;
 
     int ncid, errstat;
     errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
 
     if (errstat != NC_NOERR)
     {
-	string err = (string)"Could not open the dataset's file ("
-	             + dataset().c_str() + ")" ;
+	string err = "Could not open the dataset's file (" + dataset() + ")" ;
 	throw Error(errstat, err);
     }
 
@@ -137,7 +136,7 @@ NCFloat64::read()
       throw InternalErr(__FILE__, __LINE__,
 			"Entered NCFloat64::read() with non-float64 variable!");
 
-    return false;
+    return true;
 }
 
 // $Log: NCFloat64.cc,v $

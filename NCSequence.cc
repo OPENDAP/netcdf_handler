@@ -19,7 +19,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
  
@@ -77,6 +77,17 @@ NCSequence::operator=(const NCSequence &rhs)
     dynamic_cast<Sequence &>(*this) = rhs; // run Sequence assignment
         
     return *this;
+}
+
+void NCSequence::transfer_attributes(AttrTable *at)
+{
+    if (at) {
+	Vars_iter var = var_begin();
+	while (var != var_end()) {
+	    (*var)->transfer_attributes(at);
+	    var++;
+	}
+    }
 }
 
 

@@ -19,7 +19,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
  
@@ -43,10 +43,12 @@ static char rcsid[] not_used ={"$Id$"};
 #include <algorithm>
 
 #include <netcdf.h>
+
+#include <util.h>
 #include <InternalErr.h>
 
+#include "nc_util.h"
 #include "NCStructure.h"
-
 
 BaseType *
 NCStructure::ptr_duplicate()
@@ -73,8 +75,7 @@ NCStructure::operator=(const NCStructure &rhs)
         return *this;
 
     dynamic_cast<Structure&>(*this) = rhs; // run Structure assignment
-        
-    
+
     return *this;
 }
 
@@ -97,105 +98,156 @@ public:
     }
 };
 
+/**
+ * Transfer attributes from a separately built DAS to the DDS. This method
+ * overrides the implementation found in libdap to accommodate the special
+ * characteristics of the NC handler's DAS object. The noteworthy feature
+ * of this handler's DAS is that it lacks the specified structure that
+ * provides an easy way to match DAS and DDS items. Instead this DAS is
+ * flat.
+ *
+ * Because this handler produces a flat DAS, the nested structures (like
+ * NCStructure) pass the entire top level AttrTable to each of their children
+ * so that they can search for their attribute table. The default implementation
+ * of this method would find the Structure's table and pass only that to the
+ * children since it 'knows' that their tables would all be found within it.
+ *
+ * @param at An AttrTable for the entire DAS. Search this for attributes
+ * by name.
+ * @see NCSequence::transfer_attributes
+ * @see NCGrid::transfer_attributes
+ * @see NCArray::transfer_attributes
+ */
+void NCStructure::transfer_attributes(AttrTable *at)
+{
+    if (at) {
+        Vars_iter var = var_begin();
+        while (var != var_end()) {
+            (*var)->transfer_attributes(at);
+            var++;
+        }
+    }
+}
+
+void NCStructure::do_structure_read(int ncid, int varid, nc_type datatype,
+        vector<char> &values, bool has_values, int values_offset)
+{
+#if NETCDF_VERSION >= 4
+  if (is_user_defined_type(ncid, datatype)) {
+      //datatype >= NC_FIRSTUSERTYPEID) {
+        char type_name[NC_MAX_NAME+1];
+        size_t size;
+        nc_type base_type;
+        size_t nfields;
+        int class_type;
+        int errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
+        if (errstat != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ").");
+
+        switch (class_type) {
+            case NC_COMPOUND: {
+                if (!has_values) {
+                    values.resize(size);
+                    int errstat = nc_get_var(ncid, varid, &values[0] /*&values[0]*/);
+                    if (errstat != NC_NOERR)
+                        throw Error(errstat, string("Could not get the value for variable '") + name() + string("'"));
+                    has_values = true;
+                }
+
+                for (int i = 0; i < nfields; ++i) {
+                    char field_name[NC_MAX_NAME+1];
+                    nc_type field_typeid;
+                    size_t field_offset;
+                    int field_ndims;
+                    nc_inq_compound_field(ncid, datatype, i, field_name, &field_offset, &field_typeid, &field_ndims, 0);
+                    if (is_user_defined_type(ncid, field_typeid)) {
+		        // field_typeid >= NC_FIRSTUSERTYPEID) {
+                        // Interior user defined types have names, but not field_names
+                        // so use the type name as the field name (matches the
+                        // behavior of the ncdds.cc code).
+                        nc_inq_compound_name(ncid, field_typeid, field_name);
+                        NCStructure &ncs = dynamic_cast<NCStructure&>(*var(field_name));
+                        ncs.do_structure_read(ncid, varid, field_typeid, values, has_values, field_offset + values_offset);
+                    }
+                    else if (var(field_name)->is_vector_type()) {
+                        // Because the netcdf api reads data 'atomically' from
+                        // compounds, this call works for both cardinal and
+                        // array variables.
+                        NCArray &child_array = dynamic_cast<NCArray&>(*var(field_name));
+                        vector<size_t> cor(field_ndims);
+                        vector<size_t> edg(field_ndims);
+                        vector<ptrdiff_t> step(field_ndims);
+                        bool has_stride;
+                        long nels = child_array.format_constraint(&cor[0], &step[0], &edg[0], &has_stride);
+                        child_array.do_array_read(ncid, varid, field_typeid,
+                                values, has_values, field_offset + values_offset,
+                                nels, &cor[0], &edg[0], &step[0], has_stride);
+                    }
+                    else if (var(field_name)->is_simple_type()) {
+                        var(field_name)->val2buf(&values[0]  + field_offset + values_offset);
+                    }
+                    else {
+                        throw InternalErr(__FILE__, __LINE__, "Expecting a netcdf user defined type or an array or a scalar.");
+                    }
+
+                    var(field_name)->set_read_p(true);
+                }
+                break;
+            }
+
+            case NC_VLEN:
+                cerr << "in build_user_defined; found a vlen." << endl;
+                break;
+            case NC_OPAQUE:
+                cerr << "in build_user_defined; found a opaque." << endl;
+                break;
+            case NC_ENUM:
+                cerr << "in build_user_defined; found a enum." << endl;
+                break;
+            default:
+                throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+        }
+    }
+    else
+        throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
+#else
+        throw InternalErr(__FILE__, __LINE__, "Found a DAP Structure bound to a non-user-defined type in the netcdf file " + dataset());
+#endif
+}
+
+bool NCStructure::read()
+{
+    if (read_p()) // nothing to do
+        return true;
+
+    int ncid;
+    int errstat = nc_open(dataset().c_str(), NC_NOWRITE, &ncid); /* netCDF id */
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not open the dataset's file (" + dataset() + ")");
+
+    int varid; /* variable Id */
+    errstat = nc_inq_varid(ncid, name().c_str(), &varid);
+    if (errstat != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not get variable ID for: " + name() + ". (error: " + long_to_string(errstat) + ").");
+
+    nc_type datatype; /* variable data type */
+    errstat = nc_inq_vartype(ncid, varid, &datatype);
+    if (errstat != NC_NOERR)
+        throw Error(errstat, "Could not read data type information about : " + name() + ". (error: " + long_to_string(errstat) + ").");
+
+    // For Compound types, netcdf's nc_get_var() reads all of the structure's
+    // values in one shot, including values for nested structures. Pass the
+    // (reference to the) space for these in at the start of what may be a
+    // series of recursive calls.
+    vector<char> values;
+    do_structure_read(ncid, varid, datatype, values, false /*has_values*/, 0 /*values_offset*/);
+
+    set_read_p(true);
+
+    if (nc_close(ncid) != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, "Could not close the dataset!");
+
+    return true;
+}
 
 
-// $Log: NCStructure.cc,v $
-// Revision 1.13  2005/04/19 23:16:18  jimg
-// Removed client side parts; the client library is now in libnc-dap.
-//
-// Revision 1.12  2005/04/11 18:38:20  jimg
-// Fixed a problem with NCSequence where nested sequences were not flagged
-// but instead were translated. The extract_values software cannot process a
-// nested sequence yet. Now the code inserts an attribute that notes that a
-// nested sequence has been elided.
-//
-// Revision 1.11  2005/04/08 17:08:47  jimg
-// Removed old 'virtual ctor' functions which have now been replaced by the
-// factory class code in libdap++.
-//
-// Revision 1.10  2005/04/07 23:35:36  jimg
-// Changed the value of the translation attribute from "translated" to "flatten".
-//
-// Revision 1.9  2005/03/31 00:04:51  jimg
-// Modified to use the factory class in libdap++ 3.5.
-//
-// Revision 1.8  2005/02/26 00:43:20  jimg
-// Check point: This version of the CL can now translate strings from the
-// server into char arrays. This is controlled by two things: First a
-// compile-time directive STRING_AS_ARRAY can be used to remove/include
-// this feature. When included in the code, only Strings associated with
-// variables created by the translation process will be turned into char
-// arrays. Other String variables are assumed to be single character strings
-// (although there may be a bug with the way these are handled, see
-// NCAccess::extract_values()).
-//
-// Revision 1.7  2005/01/26 23:25:51  jimg
-// Implemented a fix for Sequence access by row number when talking to a
-// 3.4 or earlier server (which contains a bug in is_end_of_rows()).
-//
-// Revision 1.6  2004/11/30 22:11:35  jimg
-// I replaced the flatten_*() functions with a flatten() method in
-// NCAccess. The default version of this method is in NCAccess and works
-// for the atomic types; constructors must provide a specialization.
-// Then I removed the code that copied the variables from vectors to
-// lists. The translation code in NCConnect was modified to use the
-// new method.
-//
-// Revision 1.5  2004/11/05 17:13:57  jimg
-// Added code to copy the BaseType pointers from the vector container into
-// a list. This will enable more efficient translation software to be
-// written.
-//
-// Revision 1.4  2004/09/08 22:08:22  jimg
-// More Massive changes: Code moved from the files that clone the netCDF
-// function calls into NCConnect, NCAccess or nc_util.cc. Much of the
-// translation functions are now methods. The netCDF type classes now
-// inherit from NCAccess in addition to the DAP type classes.
-//
-// Revision 1.3  2003/12/08 18:06:37  edavis
-// Merge release-3-4 into trunk
-//
-// Revision 1.2  2000/10/06 01:22:02  jimg
-// Moved the CVS Log entries to the ends of files.
-// Modified the read() methods to match the new definition in the dap library.
-// Added exception handlers in various places to catch exceptions thrown
-// by the dap library.
-//
-// Revision 1.1  1999/07/28 00:22:44  jimg
-// Added
-//
-// Revision 1.6  1999/05/07 23:45:32  jimg
-// String --> string fixes
-//
-// Revision 1.5  1998/08/06 16:33:25  jimg
-// Fixed misuse of the read(...) member function. Return true if more data
-// is to be read, false is if not and error if an error is detected
-//
-// Revision 1.4  1996/09/17 17:06:43  jimg
-// Merge the release-2-0 tagged files (which were off on a branch) back into
-// the trunk revision.
-//
-// Revision 1.3.4.3  1996/09/17 00:26:32  jimg
-// Merged changes from a side branch which contained various changes from
-// Reza and Charles.
-// Removed ncdump and netexec since ncdump is now in its own directory and
-// netexec is no longer used.
-//
-// Revision 1.3.4.2  1996/07/10 21:44:25  jimg
-// Changes for version 2.06. These fixed lingering problems from the migration
-// from version 1.x to version 2.x.
-// Removed some (but not all) warning generated with gcc's -Wall option.
-//
-// Revision 1.3.4.1  1996/06/25 22:04:46  jimg
-// Version 2.0 from Reza.
-//
-// Revision 1.3  1995/07/09  21:33:51  jimg
-// Added copyright notice.
-//
-// Revision 1.2  1995/03/16  16:56:45  reza
-// Updated for the new DAP. All the read_val mfunc. and their memory management
-// are now moved to their parent class.
-// Data transfers are now in binary while DAS and DDS are still sent in ASCII.
-//
-// Revision 1.1  1995/02/10  04:57:53  reza
-// Added read and read_val functions.

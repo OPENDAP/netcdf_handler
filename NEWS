@@ -1,5 +1,60 @@
+Version 3.10.4 (23 April 2014)
 
-$Id$
+Changed default behavior for handelr so that it is explicitly set
+to ShowSharedDimensions=true
+
+Version 3.10.3 (10 September 2013)
+
+Minor organizational changes.
+
+Version 3.10.2
+
+Merged to trunk; tagged.
+
+Version 3.10.1
+
+Fixes for netcdf 4.1.1, which is the version in RHEL6's RPM
+package. These include _not_ using NC_FIRSTUSERTYPEID and the old
+nctypelen(). Those work with netcdf 4.1.2, but not 4.1.1 and they are
+probably not that gereat an idea anyway.
+
+Version 3.10.0
+
+This version introduces some major improvements to the handler. Now the handler reads netcdf 4 files and externalizes all but a very small number of its native data types (64-bit ints, vlens and groups are yet to be supported). This means that most netcdf 4 files work, not just the 'classic netcdf' files.
+
+Also added to the handler are several configuration parameters. Briefly, they are:
+* IgnoreUnknowTypes
+* ShowSharedDimensions
+* PromoteByteToShort
+
+See http://docs.opendap.org/index.php/BES_-_Modules_-_The_NetCDF_Handler for the full story.
+
+Version 3.9.3
+
+Build fixes.
+
+Version 3.9.2 (14 Sept 2010)
+
+The default option is now (re)set to include those extra map/Arrays.
+
+Version 3.9.1 (5 May 2010)
+
+The handler now implements its own transfer_attributes code to merge
+attributes from its DAS response into the DDS.
+
+The handler now builds with netcdf 4.1
+
+Version 3.9.0 (3 Feb 2010)
+
+Removed dejagnu tests and added autotool tests.
+RPM to use nc.conf instead of bes-nc-data.sh.
+API changes to BESKeys. 
+Added some Shrew build changes for the shrew hyrax project. 
+Minor libdap changes.
+Removed server 3 code.
+Added comd file that gets the DataDDX.
+Made a few DAP macro changes.
+Added info about the shared dimension special option.
 
 Version 3.8.3 (9 June 2009)
 

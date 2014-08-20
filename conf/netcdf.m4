@@ -20,27 +20,54 @@ dnl )
 # NC_CPPFLAGS and maybe NC_NETCDF_3_CPPFLAG
 AC_DEFUN([AC_CHECK_NETCDF],
 [
+  nc_ready=no
+  nc_user_arg=no
+
+  NC_PATH=
+  NC_PATH_INC=
+  NC_PATH_LIBDIR=
+
   AC_ARG_WITH([netcdf],
             [AS_HELP_STRING([--with-netcdf=ARG],[netcdf directory])],
-            [NC_PATH=$withval], 
-            [NC_PATH=""])
+            [NC_PATH=$withval nc_user_arg=yes], 
+            [])
+            
+  AC_SUBST([NC_PATH])
 
   AC_ARG_WITH([netcdf_include],
             [AS_HELP_STRING([--with-netcdf-include=ARG],[netcdf include directory])],
-            [NC_PATH_INC=$withval], 
-            [NC_PATH_INC=""])
+            [NC_PATH_INC=$withval nc_user_arg=yes], 
+            [])
 
   AC_ARG_WITH([netcdf_libdir],
             [AS_HELP_STRING([--with-netcdf-libdir=ARG],[netcdf library directory])],
-            [NC_PATH_LIBDIR=$withval], 
-            [NC_PATH_LIBDIR=""])
+            [NC_PATH_LIBDIR=$withval nc_user_arg=yes], 
+            [])
 
+  if test "$nc_user_arg" = "yes"; then
   AS_IF([test "z$NC_PATH" != "z"],
   [
     AS_IF([test "z$NC_PATH_LIBDIR" = "z"],[NC_PATH_LIBDIR="$NC_PATH/lib"])
     AS_IF([test "z$NC_PATH_INC" = "z"],[NC_PATH_INC="$NC_PATH/include"])
   ])
+  fi
 
+  if test "$nc_user_arg" = "no"; then
+  AC_PATH_PROG([NC_CONFIG], [nc-config], [no])
+	if test "$NC_CONFIG" != "no" ; then
+		nc_ready=yes
+		NC_LIBS="`$NC_CONFIG --libs`"
+		NC_CPPFLAGS="`$NC_CONFIG --cflags`"
+		NC_LDFLAGS="`$NC_CONFIG --cflags`"
+		NC_VERSION="`$NC_CONFIG --version`"
+		AC_SUBST([NC_CPPFLAGS])
+		AC_SUBST([NC_LDFLAGS])
+		AC_SUBST([NC_LIBS])
+		m4_if([$1], [], [:], [$1])
+	fi
+  fi
+
+if test "$nc_ready" = "no"; then
   ac_netcdf_ok='no'
   NC_LIBS=
   NC_LDFLAGS=
@@ -145,4 +172,5 @@ dnl we have to avoid the autoconf internal cache in that case
   AS_IF([test "$ac_netcdf_ok" = 'no' -o "$ac_netcdf_header" = 'no'],
     [m4_if([$2], [], [:], [$2])],
     [m4_if([$1], [], [:], [$1])])
+fi
 ])

@@ -13,52 +13,55 @@ SUBDIRS = bes-testsuite
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
-dist_bin_SCRIPTS = bes-nc-data.sh
 
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
 libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
 libnc_module_la_LDFLAGS = -avoid-version -module 
 libnc_module_la_LIBADD = $(BES_DAP_LIBS)
 
-NCTYPE_SRC = ncdas.cc ncdds.cc \
+NCTYPE_SRC = ncdas.cc ncdds.cc nc_util.cc \
 	NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc		\
 	NCInt32.cc NCSequence.cc NCStr.cc NCStructure.cc NCUrl.cc	\
 	NCUInt16.cc NCInt16.cc NCFloat32.cc
 
 NCTYPE_HDR = NCFloat64.h NCArray.h NCGrid.h NCSequence.h NCUInt16.h 	\
 	NCByte.h NCInt16.h NCStr.h NCUInt32.h NCFloat32.h NCInt32.h	\
-	NCStructure.h NCUrl.h config_nc.h
+	NCStructure.h NCUrl.h nc_util.h config_nc.h
 
 SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
 EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
-    bes-nc-data.sh.in OSX_Resources
+    nc.conf.in OSX_Resources
 
-CLEANFILES = *~ bes-nc-data.sh
+CLEANFILES = *~ nc.conf
 
 sample_datadir = $(datadir)/hyrax/data/nc
-sample_data_DATA = data/bears.nc data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
+sample_data_DATA = data/bears.nc data/bears.nc.das data/coads_climatology.nc data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html
 
-do_subst = sed -e 's,[@]sysconfdir[@],$(sysconfdir),g' \
-		   	   -e 's,[@]libdir[@],$(libdir),g' \
-		   	   -e 's,[@]datadir[@],$(datadir),g'
+install-data-local: nc.conf
+	@currdate=`date +"%y%m%d%H%M"`; \
+	test -d $(DESTDIR)$(sysconfdir)/bes || $(MKDIR_P) $(DESTDIR)$(sysconfdir)/bes; \
+	test -d $(DESTDIR)$(sysconfdir)/bes/modules || $(MKDIR_P) $(DESTDIR)$(sysconfdir)/bes/modules; \
+	test -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf && mv -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf.$$currdate; \
+	$(INSTALL_DATA) nc.conf $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf
 
-bes-nc-data.sh: bes-nc-data.sh.in config.status
-	$(do_subst) < $(srcdir)/bes-nc-data.sh.in > bes-nc-data.sh
-	chmod +x bes-nc-data.sh
+uninstall-local:
+	rm -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf
 
-# This makes sure that the handler modifies the bes which configure found
-# even when distcheck is run.
-bes-conf: bes-nc-data.sh
-	(bes_prefix=`bes-config --prefix` ; \
-	if test "$$bes_prefix" = "/usr" ; \
-	 then \
-	    ./bes-nc-data.sh /etc/bes/bes.conf /usr/lib/bes ;\
-	else \
-	    ./bes-nc-data.sh $$bes_prefix/etc/bes/bes.conf $$bes_prefix/lib/bes ; \
-	fi)
+nc.conf: nc.conf.in config.status
+	sed -e "s%[@]bes_modules_dir[@]%${lib_besdir}%" $< > nc.conf
+
+# Not nearly as clean as it could be, but this removes .svn directories
+# in subdirs.
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
+
+C4_DIR=./cccc
+.PHONY: cccc
+cccc:	
+	cccc --outdir=$(C4_DIR) $(libnc_module_la_SOURCES)
 
 ###########################################################################
 
@@ -79,47 +82,52 @@ fortifyclean:
 # Build linux RPMs
 
 srpm: dist
-	rpmbuild -ts netcdf_handler-@PACKAGE_VERSION@.tar.gz
+	rpmbuild -ts --clean $(RPM_OPTIONS) @PACKAGE@-@PACKAGE_VERSION@.tar.gz
 
 rpm: dist
-	rpmbuild -tb netcdf_handler-@PACKAGE_VERSION@.tar.gz
+	rpmbuild -tb --clean $(RPM_OPTIONS) @PACKAGE@-@PACKAGE_VERSION@.tar.gz
 
 ###########################################################################
 
-# Build OS/X Packages.
+# Build OS/X Packages. The strange operations with configure and make
+# are there so that the values built into bes-config will match the mac
+# osx install dirs and not the temp directory used to build the packages
 
-PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker*
-
-UNIV_ARCH=-arch ppc -arch i386
-MAC_SYSROOT=Developer/SDKs/MacOSX10.4u.sdk
-
+PACKAGEMAKER=/Developer/usr/bin/packagemaker
 PKG_CONF_FLAGS=
 
 clean-pkg:
 	-rm -rf mac_osx @PACKAGE@-@PACKAGE_VERSION@.pkg @PACKAGE@-@PACKAGE_VERSION@
 
-pkg-build:
-	./configure --prefix=/usr --disable-dependency-tracking $(PKG_CONF_FLAGS)
+pkg-build: clean-pkg
+	./configure --prefix=$(prefix) --with-netcdf=$(NC_PATH) --disable-dependency-tracking $(PKG_CONF_FLAGS)
 	make clean all
-	DESTDIR=${PWD}/mac_osx make install
+	DESTDIR=`pwd`/mac_osx make install
 
-pkg-main:
-	./OSX_Resources/update_mac_package_contents.pl README "configure.ac" "mac_osx/usr"
-	${PACKAGEMAKER} -build -p @PACKAGE@-@PACKAGE_VERSION@.pkg \
-		-f mac_osx/usr \
-		-ds -r OSX_Resources \
-		-i OSX_Resources/Info.plist \
-		-d OSX_Resources/Description.plist
-	-rm -rf mac_osx
+pkg-main: pkg-build
+	./OSX_Resources/update_mac_package_contents.pl README
+	cat ./OSX_Resources/InstallationCheck.proto | sed -e "s^_PREFIX_^$(prefix)^g" > foo
+	mv foo ./OSX_Resources/InstallationCheck
+	chmod 755 ./OSX_Resources/InstallationCheck
+	cat ./OSX_Resources/Info.plist.proto | \
+	   sed -e "s^_PREFIX_^$(prefix)^g" \
+	       -e "s^_FULL_VERSION_^@PACKAGE_VERSION@^g" \
+	       -e "s^_MAJOR_VERSION_^@PACKAGE_MAJOR_VERSION@^g" \
+	       -e "s^_MINOR_VERSION_^@PACKAGE_MINOR_VERSION@^g" \
+	       > foo
+	mv foo ./OSX_Resources/Info.plist
+	${PACKAGEMAKER} --root mac_osx --id org.opendap.@PACKAGE@ \
+		--title "@PACKAGE@ @PACKAGE_VERSION@" --version @PACKAGE_VERSION@ \
+		--out @PACKAGE@-@PACKAGE_VERSION@.pkg --resources OSX_Resources
 
-pkg-dmg:
+pkg-dmg: pkg-main
 	-rm -rf @PACKAGE@-@PACKAGE_VERSION@
 	-rm -rf @PACKAGE@-@PACKAGE_VERSION@.dmg
 	mkdir @PACKAGE@-@PACKAGE_VERSION@
-	mv @PACKAGE@-@PACKAGE_VERSION@.pkg @PACKAGE@-@PACKAGE_VERSION@
+	cp -R @PACKAGE@-@PACKAGE_VERSION@.pkg @PACKAGE@-@PACKAGE_VERSION@
 	cp README NEWS @PACKAGE@-@PACKAGE_VERSION@
 	dropdmg -i --sanitize-for-servers --format zlib @PACKAGE@-@PACKAGE_VERSION@
 	-rm -rf @PACKAGE@-@PACKAGE_VERSION@
 
-pkg: clean-pkg pkg-build pkg-main pkg-dmg
+pkg: pkg-main
 

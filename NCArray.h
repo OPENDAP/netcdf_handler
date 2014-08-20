@@ -19,7 +19,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
 
@@ -38,13 +38,31 @@
 #ifndef _ncarray_h
 #define _ncarray_h 1
 
+#include <sys/types.h>
+
 #include <sstream>
 
 #include <Array.h>
 
+#include <NCStructure.h>
+
 using namespace libdap ;
+using namespace std ;
 
 class NCArray: public Array {
+private:
+    long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg, bool *has_stride);
+
+    void do_cardinal_array_read(int ncid, int varid, nc_type datatype,
+            vector<char> &values, bool has_values, int values_offset,
+            int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride);
+
+    void do_array_read(int ncid, int varid, nc_type datatype,
+            vector<char> &values, bool has_values, int values_offset,
+            int nels, size_t cor[], size_t edg[], ptrdiff_t step[], bool has_stride);
+
+    friend class NCStructure;
+
 public:
     NCArray(const string &n, const string &d, BaseType *v);
     NCArray(const NCArray &nc_array);
@@ -54,9 +72,6 @@ public:
     virtual BaseType *ptr_duplicate();
 
     virtual bool read();
-
-    virtual long format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
-			bool *has_stride);
 };
 
 /*

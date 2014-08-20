@@ -19,7 +19,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
  
@@ -42,12 +42,17 @@
 
 #include <list>
 
-#include "Structure.h"
+#include <Structure.h>
+
+#include "NCArray.h"
 
 using namespace libdap ;
 
 class NCStructure: public Structure {
-        
+private:
+    void do_structure_read(int ncid, int varid, nc_type datatype, vector<char> &values, bool has_values, int values_offset);
+    friend class NCArray;
+
 public:
     NCStructure(const string &n, const string &d);
     NCStructure(const NCStructure &rhs);
@@ -55,6 +60,9 @@ public:
 
     NCStructure &operator=(const NCStructure &rhs);
     virtual BaseType *ptr_duplicate();
+
+    virtual void transfer_attributes(AttrTable *at);
+    virtual bool read();
 };
 
 /* 
