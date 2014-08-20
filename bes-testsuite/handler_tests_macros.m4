@@ -41,10 +41,21 @@ AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $1 | getdap -M - || true], 
 AT_CHECK([diff -b -B $2 stdout || diff -b -B $2 stderr], [], [ignore],[],[])
 AT_CLEANUP])
 
+m4_define([_AT_BESCMD_DAP4DATA_TEST],   
+[AT_SETUP([BESCMD $1])
+AT_KEYWORDS([bescmd])
+AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $1 | getdap4 -D -M - || true], [], [stdout], [stderr])
+AT_CHECK([diff -b -B $2 stdout || diff -b -B $2 stderr], [], [ignore],[],[])
+AT_CLEANUP])
+
 m4_define([AT_BESCMD_RESPONSE_TEST],
 [_AT_BESCMD_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
 ])
 
 m4_define([AT_BESCMD_BINARYDATA_RESPONSE_TEST],
 [_AT_BESCMD_BINARYDATA_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
+])
+
+m4_define([AT_BESCMD_DAP4DATA_RESPONSE_TEST],
+[_AT_BESCMD_DAP4DATA_TEST([$abs_srcdir/nc/$1], [$abs_srcdir/nc/$1.baseline])
 ])

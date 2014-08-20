@@ -30,6 +30,10 @@
 #include <sstream>
 #include <exception>
 
+#include <DMR.h>
+#include <mime_util.h>
+#include <D4BaseTypeFactory.h>
+
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
 #include <BESDapNames.h>
@@ -46,6 +50,7 @@
 #include <BESUtil.h>
 #include <BESDebug.h>
 #include <BESContextManager.h>
+#include <BESDMRResponse.h>
 
 #include <InternalErr.h>
 #include <Ancillary.h>
@@ -101,6 +106,10 @@ NCRequestHandler::NCRequestHandler(const string &name) :
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
     add_handler(DDS_RESPONSE, NCRequestHandler::nc_build_dds);
     add_handler(DATA_RESPONSE, NCRequestHandler::nc_build_data);
+
+    add_handler(DMR_RESPONSE, NCRequestHandler::nc_build_dmr);
+    add_handler(DAP4DATA_RESPONSE, NCRequestHandler::nc_build_dmr);
+
     add_handler(HELP_RESPONSE, NCRequestHandler::nc_build_help);
     add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
 
@@ -352,6 +361,60 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
     }
 
     return true;
+}
+
+bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
+{
+	// Because this code does not yet know how to build a DMR directly, use
+	// the DMR ctor that builds a DMR using a 'full DDS' (a DDS with attributes).
+	// First step, build the 'full DDS'
+	string data_path = dhi.container->access();
+
+	BaseTypeFactory factory;
+	DDS dds(&factory, name_path(data_path), "3.2");
+	dds.filename(data_path);
+
+	try {
+		nc_read_dataset_variables(dds, data_path);
+
+		DAS das;
+		nc_read_dataset_attributes(das, data_path);
+		Ancillary::read_ancillary_das(das, data_path);
+		dds.transfer_attributes(&das);
+	}
+	catch (InternalErr &e) {
+		throw BESDapError(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);
+	}
+	catch (Error &e) {
+		throw BESDapError(e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
+	}
+	catch (...) {
+		throw BESDapError("Caught unknown error build NC DMR response", true, unknown_error, __FILE__, __LINE__);
+	}
+
+	// Extract the DMR Response object - this holds the DMR used by the
+	// other parts of the framework.
+	BESResponseObject *response = dhi.response_handler->get_response_object();
+	BESDMRResponse &bdmr = dynamic_cast<BESDMRResponse &>(*response);
+
+	// Get the DMR made by the BES in the BES/dap/BESDMRResponseHandler, make sure there's a
+	// factory we can use and then dump the DAP2 variables and attributes in using the
+	// BaseType::transform_to_dap4() method that transforms individual variables
+	DMR *dmr = bdmr.get_dmr();
+	dmr->set_factory(new D4BaseTypeFactory);
+	dmr->build_using_dds(dds);
+
+	// Instead of fiddling with the internal storage of the DHI object,
+	// (by setting dhi.data[DAP4_CONSTRAINT], etc., directly) use these
+	// methods to set the constraints. But, why? Ans: from Patrick is that
+	// in the 'container' mode of BES each container can have a different
+	// CE.
+	bdmr.set_dap4_constraint(dhi);
+	bdmr.set_dap4_function(dhi);
+
+	// What about async and store_result? See BESDapTransmit::send_dap4_data()
+
+	return true;
 }
 
 bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
