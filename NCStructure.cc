@@ -147,26 +147,9 @@ void NCStructure::transfer_attributes(AttrTable *at)
 BaseType *
 NCStructure::transform_to_dap4(D4Group *root, Constructor *container)
 {
-	// For this class, ptr_duplicate() calls the const ctor which calls
-	// Constructor's const ctor which calls Constructor::m_duplicate().
-	// Here we replicate some of that functionality, but instead call
-	// transform_to_dap4() on the contained variables.
-
-	// Structure *dest = static_cast<Structure*>(ptr_duplicate());
 	Structure *dest = new NCStructure(name(), dataset());
 
-    for (Constructor::Vars_citer i = var_begin(), e = var_end(); i != e; ++i) {
-    	BaseType *new_var = (*i)->transform_to_dap4(root, dest);
-    	if (new_var) {	// Might be a Grid; see the comment in BaseType::transform_to_dap4()
-    		new_var->set_parent(dest);
-    		dest->add_var_nocopy(new_var);
-    	}
-    }
-
-    // Add attributes
-	dest->attributes()->transform_to_dap4(get_attr_table());
-
-    dest->set_is_dap4(true);
+	Constructor::transform_to_dap4(root, dest);
 	dest->set_parent(container);
 
 	return dest;
