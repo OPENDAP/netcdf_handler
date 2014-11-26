@@ -9,15 +9,22 @@ AUTOMAKE_OPTIONS = foreign check-news
 
 ACLOCAL_AMFLAGS = -I conf
 
-SUBDIRS = bes-testsuite
+if DAP_MODULES
+AM_CPPFLAGS = -I$(top_srcdir)/dispatch -I$(top_srcdir)/dap $(NC_CPPFLAGS) $(DAP_CFLAGS)
+LIBADD = $(NC_LDFLAGS) $(NC_LIBS) $(DAP_SERVER_LIBS) $(DAP_CLIENT_LIBS)
+else
+AM_CPPFLAGS = $(BES_CPPFLAGS) # or wahtever was set here or in ..._CPPFLAGS
+LIBADD = $(BES_DAP_LIBS)      # and ..._LIBADD
+endif
+SUBDIRS = . bes-testsuite
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libnc_module.la
 
 libnc_module_la_SOURCES = $(NCTYPE_SRC) $(NCTYPE_HDR) $(SERVER_SRC) $(SERVER_HDR)
-libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
+# libnc_module_la_CPPFLAGS = $(BES_CPPFLAGS)
 libnc_module_la_LDFLAGS = -avoid-version -module 
-libnc_module_la_LIBADD = $(BES_DAP_LIBS)
+libnc_module_la_LIBADD = $(LIBADD)
 
 NCTYPE_SRC = ncdas.cc ncdds.cc nc_util.cc \
 	NCArray.cc NCByte.cc NCFloat64.cc NCGrid.cc NCUInt32.cc		\
@@ -50,7 +57,7 @@ install-data-local: nc.conf
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/bes/modules/nc.conf
 
-nc.conf: nc.conf.in config.status
+nc.conf: nc.conf.in $(top_srcdir)config.status
 	sed -e "s%[@]bes_modules_dir[@]%${lib_besdir}%" $< > nc.conf
 
 # Not nearly as clean as it could be, but this removes .svn directories

@@ -14,10 +14,13 @@ dnl   ]
 dnl )
 
 # Check for the netcdf library.
-# AC_CHECK_NETCDF([ACTION-IF-FOUND],[ACTION-IF-NOT-FOUND],[INTERFACE-NR])
+# AC_CHECK_NETCDF([ACTION-IF-FOUND],[ACTION-IF-NOT-FOUND],[INTERFACE-NR],[BES_DEPS_PATH])
 # if interface number is given, check for a specific interface
 # sets NC_LDFLAGS, NC_LIBS, and, by calling other macros
 # NC_CPPFLAGS and maybe NC_NETCDF_3_CPPFLAG
+#
+# NB: Added BES_DEPS_PATH for the BES modules build. jhrg 11/15/14
+#
 AC_DEFUN([AC_CHECK_NETCDF],
 [
   nc_ready=no
@@ -27,6 +30,11 @@ AC_DEFUN([AC_CHECK_NETCDF],
   NC_PATH_INC=
   NC_PATH_LIBDIR=
 
+  BES_DEPS_PATH=$4
+  
+  # Hack for the bes 'modules' build
+  AS_IF([test -n "$BES_DEPS_PATH"],	[NC_PATH=$BES_DEPS_PATH; nc_user_arg=yes])
+  echo "NC_PATH=$NC_PATH"
   AC_ARG_WITH([netcdf],
             [AS_HELP_STRING([--with-netcdf=ARG],[netcdf directory])],
             [NC_PATH=$withval nc_user_arg=yes], 
