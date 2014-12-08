@@ -362,8 +362,12 @@ bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
         throw BESInternalError("cast error", __FILE__, __LINE__);
 
     map < string, string > attrs;
+    attrs["name"] = MODULE_NAME ;
+    attrs["version"] = MODULE_VERSION ;
+#if 0
     attrs["name"] = PACKAGE_NAME;
     attrs["version"] = PACKAGE_VERSION;
+#endif
     list < string > services;
     BESServiceRegistry::TheRegistry()->services_handled(NC_NAME, services);
     if (services.size() > 0) {
@@ -383,7 +387,10 @@ bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
     if (!info)
         throw BESInternalError("cast error", __FILE__, __LINE__);
 
+#if 0
     info->add_module(PACKAGE_NAME, PACKAGE_VERSION);
+#endif
+    info->add_module(MODULE_NAME, MODULE_VERSION);
 
     return true;
 }
