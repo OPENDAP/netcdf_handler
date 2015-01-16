@@ -10,12 +10,12 @@
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2.1 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -31,11 +31,7 @@
 
 #include <iostream>
 
-using std::endl;
-
-#include "NCModule.h"
 #include <BESRequestHandlerList.h>
-#include "NCRequestHandler.h"
 #include <BESDapService.h>
 #include <BESContainerStorageList.h>
 #include <BESContainerStorageCatalog.h>
@@ -43,65 +39,53 @@ using std::endl;
 #include <BESCatalogList.h>
 #include <BESDebug.h>
 
+#include "NCModule.h"
+#include "NCRequestHandler.h"
+
+using std::endl;
+
 #define NC_CATALOG "catalog"
 
-void NCModule::initialize( const string & modname )
+void NCModule::initialize(const string & modname)
 {
-    BESDEBUG( "nc", "Initializing NC module " << modname << endl ) ;
+	BESDEBUG("nc", "Initializing NC module " << modname << endl);
 
-    BESDEBUG( "nc", "    adding " << modname << " request handler" << endl ) ;
-    BESRequestHandler *handler = new NCRequestHandler( modname ) ;
-    BESRequestHandlerList::TheList()->add_handler( modname, handler ) ;
+	BESRequestHandler *handler = new NCRequestHandler(modname);
+	BESRequestHandlerList::TheList()->add_handler(modname, handler);
 
-    BESDEBUG( "nc", modname << " handles dap services" << endl ) ;
-    BESDapService::handle_dap_service( modname ) ;
+	BESDapService::handle_dap_service(modname);
 
-    BESDEBUG( "nc", "    adding " << NC_CATALOG << " catalog" << endl ) ;
-    if( !BESCatalogList::TheCatalogList()->ref_catalog( NC_CATALOG ) )
-    {
-	BESCatalogList::TheCatalogList()->
-	    add_catalog( new BESCatalogDirectory( NC_CATALOG ) ) ;
-    }
-    else
-    {
-	BESDEBUG( "nc", "    catalog already exists, skipping" << endl ) ;
-    }
+	if (!BESCatalogList::TheCatalogList()->ref_catalog( NC_CATALOG)) {
+		BESCatalogList::TheCatalogList()->add_catalog(new BESCatalogDirectory( NC_CATALOG));
+	}
+	else {
+		BESDEBUG("nc", "    catalog already exists, skipping" << endl);
+	}
 
-    BESDEBUG( "nc", "    adding catalog container storage " << NC_CATALOG
-		    << endl ) ;
-    if( !BESContainerStorageList::TheList()->ref_persistence( NC_CATALOG ) )
-    {
-	BESContainerStorageCatalog *csc =
-	    new BESContainerStorageCatalog( NC_CATALOG ) ;
-	BESContainerStorageList::TheList()->add_persistence( csc ) ;
-    }
-    else
-    {
-	BESDEBUG( "nc", "    storage already exists, skipping" << endl ) ;
-    }
+	if (!BESContainerStorageList::TheList()->ref_persistence( NC_CATALOG)) {
+		BESContainerStorageList::TheList()->add_persistence(new BESContainerStorageCatalog( NC_CATALOG));
+	}
+	else {
+		BESDEBUG("nc", "    storage already exists, skipping" << endl);
+	}
 
-    BESDEBUG( "nc", "    adding nc debug context" << endl ) ;
-    BESDebug::Register( "nc" ) ;
+	BESDebug::Register("nc");
 
-    BESDEBUG( "nc", "Done Initializing NC module " << modname << endl ) ;
+	BESDEBUG("nc", "Done Initializing NC module " << modname << endl);
 }
 
-void NCModule::terminate( const string & modname )
+void NCModule::terminate(const string & modname)
 {
-    BESDEBUG( "nc", "Cleaning NC module " << modname << endl ) ;
+	BESDEBUG("nc", "Cleaning NC module " << modname << endl);
 
-    BESDEBUG( "nc", "    removing NC Handler" << modname << endl ) ;
-    BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler( modname ) ;
-    if( rh ) delete rh ;
+	BESRequestHandler *rh = BESRequestHandlerList::TheList()->remove_handler(modname);
+	if (rh) delete rh;
 
-    BESDEBUG( "nc", "    removing catalog container storage"
-                    << NC_CATALOG << endl ) ;
-    BESContainerStorageList::TheList()->deref_persistence( NC_CATALOG ) ;
+	BESContainerStorageList::TheList()->deref_persistence( NC_CATALOG);
 
-    BESDEBUG( "nc", "    removing " << NC_CATALOG << " catalog" << endl ) ;
-    BESCatalogList::TheCatalogList()->deref_catalog( NC_CATALOG ) ;
+	BESCatalogList::TheCatalogList()->deref_catalog( NC_CATALOG);
 
-    BESDEBUG( "nc", "Done Cleaning NC module " << modname << endl ) ;
+	BESDEBUG("nc", "Done Cleaning NC module " << modname << endl);
 }
 
 /** @brief dumps information about this object
@@ -110,14 +94,13 @@ void NCModule::terminate( const string & modname )
  *
  * @param strm C++ i/o stream to dump the information to
  */
-void NCModule::dump( ostream & strm ) const
+void NCModule::dump(ostream & strm) const
 {
-    strm << BESIndent::LMarg << "NCModule::dump - (" << (void *) this << ")" 
-	 << endl;
+	strm << BESIndent::LMarg << "NCModule::dump - (" << (void *) this << ")" << endl;
 }
 
 extern "C" BESAbstractModule * maker()
 {
-    return new NCModule ;
+	return new NCModule;
 }
 

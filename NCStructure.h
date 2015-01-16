@@ -2,7 +2,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,18 +11,18 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 
 // (c) COPYRIGHT URI/MIT 1994-1996
 // Please read the full copyright statement in the file COPYRIGHT.
@@ -31,7 +31,7 @@
 //      reza            Reza Nekovei (reza@intcomm.net)
 
 // netCDF sub-class implementation for NCByte,...NCGrid.
-// The files are patterned after the subcalssing examples 
+// The files are patterned after the subcalssing examples
 // Test<type>.c,h files.
 //
 // ReZa 1/12/95
@@ -40,17 +40,18 @@
 #define _ncstructure_h 1
 
 
-#include <list>
+#include <vector>
 
 #include <Structure.h>
 
-#include "NCArray.h"
-
 using namespace libdap ;
+
+class NCArray;
 
 class NCStructure: public Structure {
 private:
     void do_structure_read(int ncid, int varid, nc_type datatype, vector<char> &values, bool has_values, int values_offset);
+    // NCArray calls the above
     friend class NCArray;
 
 public:
@@ -61,11 +62,13 @@ public:
     NCStructure &operator=(const NCStructure &rhs);
     virtual BaseType *ptr_duplicate();
 
+    virtual BaseType *transform_to_dap4(D4Group *root, Constructor *container);
+
     virtual void transfer_attributes(AttrTable *at);
     virtual bool read();
 };
 
-/* 
+/*
  * $Log: NCStructure.h,v $
  * Revision 1.13  2005/04/19 23:16:18  jimg
  * Removed client side parts; the client library is now in libnc-dap.

@@ -229,7 +229,7 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
                 }
                 // is this a scalar or an array? Note that an array of CHAR is
                 // a scalar string in netcdf3.
-                if (field_ndims == 0 || field_ndims == 1 && field_typeid == NC_CHAR) {
+                if (field_ndims == 0 || (field_ndims == 1 && field_typeid == NC_CHAR)) {
                     ncs->add_var(field);
                 }
                 else {

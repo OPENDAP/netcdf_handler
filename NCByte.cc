@@ -1,7 +1,7 @@
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -10,12 +10,12 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
 //      reza            Reza Nekovei (reza@intcomm.net)
 
 // netCDF sub-class implementation for NCByte,...NCGrid.
-// The files are patterned after the subcalssing examples 
+// The files are patterned after the subcalssing examples
 // Test<type>.c,h files.
 //
 // ReZa 1/12/95
@@ -59,7 +59,7 @@ static char rcsid[] not_used = { "$Id$" };
 // names changes, that will break.
 //
 // The declarations for these fuctions (in util.h) should *not* need
-// changing. 
+// changing.
 
 
 NCByte::NCByte(const string &n, const string &d) :
@@ -133,7 +133,7 @@ bool NCByte::read() {
 #endif
 
     if (errstat != NC_NOERR)
-        throw Error(errstat, string("Could not read the variable `") + name() + string("'."));
+        throw Error(errstat, string("Could not read the variable '") + name() + string("'."));
 
     set_read_p(true);
 

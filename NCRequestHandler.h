@@ -1,8 +1,7 @@
-
 // -*- mode: c++; c-basic-offset:4 -*-
 
 // This file is part of nc_handler, a data handler for the OPeNDAP data
-// server. 
+// server.
 
 // Copyright (c) 2002,2003 OPeNDAP, Inc.
 // Author: James Gallagher <jgallagher@opendap.org>
@@ -11,18 +10,18 @@
 // terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation; either version 2.1 of the License, or (at your
 // option) any later version.
-// 
+//
 // This software is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 // or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 // License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 // You can contact OPeNDAP, Inc. at PO Box 112, Saunderstown, RI. 02874-0112.
- 
+
 // CDFRequestHandler.h
 
 #ifndef I_NCRequestHandler_H
@@ -30,30 +29,40 @@
 
 #include <BESRequestHandler.h>
 
-class NCRequestHandler : public BESRequestHandler {
+class NCRequestHandler: public BESRequestHandler {
 private:
-    static bool		_show_shared_dims ;
-    static bool		_show_shared_dims_set ;
+	static bool _show_shared_dims;
+	static bool _show_shared_dims_set;
 
-    static bool     _ignore_unknown_types ;
-    static bool     _ignore_unknown_types_set ;
+	static bool _ignore_unknown_types;
+	static bool _ignore_unknown_types_set;
 
-    static bool     _promote_byte_to_short_set ;
-    static bool     _promote_byte_to_short;
+	static bool _promote_byte_to_short_set;
+	static bool _promote_byte_to_short;
 
 public:
-			NCRequestHandler( const string &name ) ;
-    virtual		~NCRequestHandler( void ) ;
+	NCRequestHandler(const string &name);
+	virtual ~NCRequestHandler(void);
 
-    static bool		nc_build_das( BESDataHandlerInterface &dhi ) ;
-    static bool		nc_build_dds( BESDataHandlerInterface &dhi ) ;
-    static bool		nc_build_data( BESDataHandlerInterface &dhi ) ;
-    static bool		nc_build_help( BESDataHandlerInterface &dhi ) ;
-    static bool		nc_build_version( BESDataHandlerInterface &dhi ) ;
+	static bool nc_build_das(BESDataHandlerInterface &dhi);
+	static bool nc_build_dds(BESDataHandlerInterface &dhi);
+	static bool nc_build_data(BESDataHandlerInterface &dhi);
+	static bool nc_build_dmr(BESDataHandlerInterface &dhi);
+	static bool nc_build_help(BESDataHandlerInterface &dhi);
+	static bool nc_build_version(BESDataHandlerInterface &dhi);
 
-    static bool get_show_shared_dims() { return _show_shared_dims; }
-    static bool get_ignore_unknown_types() { return _ignore_unknown_types; }
-    static bool get_promote_byte_to_short() { return _promote_byte_to_short; }
+	static bool get_show_shared_dims()
+	{
+		return _show_shared_dims;
+	}
+	static bool get_ignore_unknown_types()
+	{
+		return _ignore_unknown_types;
+	}
+	static bool get_promote_byte_to_short()
+	{
+		return _promote_byte_to_short;
+	}
 };
 
 #endif
