@@ -67,11 +67,6 @@ uninstall-local:
 nc.conf: nc.conf.in $(top_srcdir)/config.status
 	sed -e "s%[@]bes_modules_dir[@]%${lib_besdir}%" $< > nc.conf
 
-# Not nearly as clean as it could be, but this removes .svn directories
-# in subdirs.
-dist-hook:
-	rm -rf `find $(distdir) -name .svn`
-
 C4_DIR=./cccc
 .PHONY: cccc
 cccc:	
