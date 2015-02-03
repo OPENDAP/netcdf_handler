@@ -233,20 +233,17 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
             }
         }
 
-        BESDEBUG("nc", "Fiddled with xdap_accept" << endl);
-
         bdds->set_container(dhi.container->get_symbolic_name());
         DDS *dds = bdds->get_dds();
         string accessed = dhi.container->access();
         dds->filename(accessed);
 
-        BESDEBUG("nc", "Prior to nc_read_dataset_variables" << endl);
-
         nc_read_dataset_variables(*dds, accessed);
 
-        BESDEBUG("nc", "Prior to Ancillary::read_ancillary_dds, accessed: " << accessed << endl);
-
+        BESDEBUG("nc", "NCRequestHandler::nc_build_dds, accessed: " << accessed << endl);
+#if 0
         Ancillary::read_ancillary_dds(*dds, accessed);
+#endif
 
         DAS *das = new DAS;
         BESDASResponse bdas(das);
