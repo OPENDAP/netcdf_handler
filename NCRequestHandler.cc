@@ -316,8 +316,9 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
         nc_read_dataset_variables(*dds, accessed);
 
+#if 0
         Ancillary::read_ancillary_dds(*dds, accessed);
-
+#endif
         DAS *das = new DAS;
         BESDASResponse bdas(das);
         bdas.set_container(dhi.container->get_symbolic_name());
@@ -332,7 +333,6 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 #endif
 
         bdds->set_constraint(dhi);
-
         bdds->clear_container();
     }
     catch (BESError &e) {
