@@ -1,3 +1,167 @@
+2015-03-19  James Gallagher  <jgallagher@opendap.org>
+
+	Fix for	distclean and the modules build.
+
+2015-03-05  James Gallagher  <jgallagher@opendap.org>
+
+	Minor cleanup in NCRequestHandler.cc
+
+2015-02-03  James Gallagher  <jgallagher@opendap.org>
+
+	Added nc.conf to gitignore; RequestHandler cleanup.
+
+2015-01-16  James Gallagher  <jgallagher@opendap.org>
+
+	Removed dist-hook which as a hack for SVN
+
+	Merge remote-tracking branch 'origin/dap4'
+	Conflicts:
+		Makefile.am
+		configure.ac
+
+2014-12-12  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed configure.ac after merging with the modules branch
+
+	Merge remote-tracking branch 'origin/modules'
+
+2014-12-07  James Gallagher  <jgallagher@opendap.org>
+
+	Added module name and version info to Makefile.am
+	This change was made to support the modules build where the autoconf
+	symbols PACKAGE_NAME and _MODULE are defined by the bes configure
+	script. This meant that the version response from the bes was useless
+	since it listed every module as 'bes' and gave the bes' version
+	number.
+
+2014-12-04  James Gallagher  <jgallagher@opendap.org>
+
+	Updated	the spec file to release 2.
+
+	Updated spec file for 1.10 release.
+
+2014-11-29  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed Makefile.am nc-conf target
+
+2014-11-26  James Gallagher  <jgallagher@opendap.org>
+
+	Changes to support the 'modules' build of the bes.
+	Added bes.conf.modules.in and changed both the configure.ac and
+	the Makefile.am files.
+
+2014-09-18  James Gallagher  <jgallagher@opendap.org>
+
+	Added.
+	A    bes-testsuite/README
+
+	Added.
+	A    bes-testsuite/get_coads_dap.bescmd
+	A    bes-testsuite/get_coads_dods.bescmd
+	A    bes-testsuite/get_fnoc1_dap.bescmd
+	A    bes-testsuite/get_fnoc1_dods.bescmd
+
+2014-09-16  James Gallagher  <jgallagher@opendap.org>
+
+	Removed the old OPENDAP_DEBUG_OPTIONS macro from many configure.ac
+	files. Fixed some param initializations; method overloads (virtual
+	methods that lacked 'const'). Other warnings.
+
+2014-09-03  James Gallagher  <jgallagher@opendap.org>
+
+	Modified the code in NCStructure so that it uses the transform_to_dap4() in Constructor.
+
+2014-08-21  James Gallagher  <jgallagher@opendap.org>
+
+	Added NCStructure::transform_to_dap4() so that the NCStructure object gets built correctly. I also had to undo a change made some time ago to libdap's Constructor::serialize() method where Constructor::read() was _not_ called. To get NCStrucutre to work on compound nested structures, I had to uncomment that call to Constructor::read() (NB: I could have specialized the serialize() method here in NCStructure, but I thought maybe my commenting out Constructor::read() was a bit to hasty a decision). So, for right now, Constructor::serialize() calls Constructor::read() and the code here (and in the other handlers I've worked on so far) works. Some tests are broken in libdap, but I wonder if the test code might be at fault...
+
+	Added tests for the DAP4 Data response
+	A    bes-testsuite/nc/nc4_nc_classic_compressed.nc.dap.bescmd
+	A    bes-testsuite/nc/nc4_nc_classic_compressed.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.dap.bescmd
+	A    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/nc4_strings.nc.dap.bescmd
+	A    bes-testsuite/nc/nc4_strings.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/nc4_strings_comp.nc.dap.bescmd
+	A    bes-testsuite/nc/nc4_strings_comp.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/nc4_unsigned_types.nc.dap.bescmd
+	A    bes-testsuite/nc/nc4_unsigned_types.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/nc4_unsigned_types_comp.nc.dap.bescmd
+	A    bes-testsuite/nc/nc4_unsigned_types_comp.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_compound.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound2.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_compound2.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound3.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_compound3.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound4.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_compound4.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound5.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_compound5.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_enum_data.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_enum_data.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_enum_data_1.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_enum_data_1.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_enum_data_2.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_enum_data_2.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_opaque_data.nc.dap.bescmd
+	A    bes-testsuite/nc/ref_tst_opaque_data.nc.dap.bescmd.baseline
+	A    bes-testsuite/nc/stringtest.nc.dap.bescmd
+	A    bes-testsuite/nc/stringtest.nc.dap.bescmd.baseline
+	M    bes-testsuite/nc4_netcdf_handler_tests.at
+
+2014-08-20  James Gallagher  <jgallagher@opendap.org>
+
+	Added tests for DAP4 DMR
+
+	Added DMR tests and baselines - still need to be added to the test driver.
+	A    bes-testsuite/nc/nc4_nc_classic_compressed.nc.dmr.bescmd
+	A    bes-testsuite/nc/nc4_nc_classic_compressed.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.dmr.bescmd
+	A    bes-testsuite/nc/nc4_nc_classic_no_comp.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/nc4_strings.nc.dmr.bescmd
+	A    bes-testsuite/nc/nc4_strings.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/nc4_strings_comp.nc.dmr.bescmd
+	A    bes-testsuite/nc/nc4_strings_comp.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/nc4_unsigned_types.nc.dmr.bescmd
+	A    bes-testsuite/nc/nc4_unsigned_types.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/nc4_unsigned_types_comp.nc.dmr.bescmd
+	A    bes-testsuite/nc/nc4_unsigned_types_comp.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_compound.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound2.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_compound2.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound3.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_compound3.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound4.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_compound4.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_compound5.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_compound5.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_enum_data.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_enum_data.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_enum_data_1.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_enum_data_1.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_enum_data_2.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_enum_data_2.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/ref_tst_opaque_data.nc.dmr.bescmd
+	A    bes-testsuite/nc/ref_tst_opaque_data.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/stringtest.nc.dmr.bescmd
+	A    bes-testsuite/nc/stringtest.nc.dmr.bescmd.baseline
+	A    bes-testsuite/nc/test.nc.dmr.bescmd.baseline.baseline
+
+	Added DAP4 responses and some preliminary tests - using netcdf3 files but not yet netcdf4 files.
+
+	A branch for the dap4 changes
+	A    https://scm.opendap.org/svn/branch/netcdf_handler/dap4
+
+2014-05-05  James Gallagher  <jgallagher@opendap.org>
+
+	Removed old lines for now ancient ugrid functions
+	M    Makefile.am
+
+2014-04-23  Nathan Potter  <ndp@opendap.org>
+
+	netcdf_handler: Checking software version update and associated release changes.
 2014-03-24  Nathan Potter <ndp@opendap.org>
 
 	netcdf_handler: Altered the prototype config file so thet the default behavior for the handler when it's shipped is to ShowSharedDimensions=true
