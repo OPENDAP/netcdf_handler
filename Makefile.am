@@ -11,7 +11,7 @@ ACLOCAL_AMFLAGS = -I conf
 
 # Set the module version here, in the spec file and in configure.ac
 M_NAME=netcdf_handler
-M_VER=3.10.4
+M_VER=3.11.0
 
 if DAP_MODULES
 AM_CPPFLAGS = -I$(top_srcdir)/dispatch -I$(top_srcdir)/dap $(NC_CPPFLAGS) $(DAP_CFLAGS)
@@ -46,8 +46,12 @@ SERVER_SRC = NCRequestHandler.cc NCModule.cc
 
 SERVER_HDR = NCRequestHandler.h NCModule.h
 
-EXTRA_DIST = data COPYRIGHT COPYING netcdf_handler.spec \
+EXTRA_DIST = data COPYRIGHT COPYING \
     nc.conf.in OSX_Resources
+
+if !DAP_MODULES
+EXTRA_DIST += netcdf_handler.spec
+endif
 
 CLEANFILES = *~ nc.conf
 
