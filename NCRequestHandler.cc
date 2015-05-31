@@ -49,6 +49,7 @@
 #include <BESServiceRegistry.h>
 #include <BESUtil.h>
 #include <BESDebug.h>
+#include <BESStopWatch.h>
 #include <BESContextManager.h>
 #include <BESDMRResponse.h>
 
@@ -167,6 +168,10 @@ NCRequestHandler::~NCRequestHandler()
 
 bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
+	BESStopWatch sw;
+	if (BESISDEBUG( TIMING_LOG ))
+		sw.start("BESInterface::nc_build_das", dhi.data[REQUEST_ID]);
+
     BESDEBUG("nc", "In NCRequestHandler::nc_build_das" << endl);
 
     BESResponseObject *response = dhi.response_handler->get_response_object();
@@ -209,6 +214,11 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 {
+
+	BESStopWatch sw;
+	if (BESISDEBUG( TIMING_LOG ))
+		sw.start("BESInterface::nc_build_dds", dhi.data[REQUEST_ID]);
+
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDDSResponse *bdds = dynamic_cast<BESDDSResponse *> (response);
     if (!bdds)
@@ -288,6 +298,10 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 {
+	BESStopWatch sw;
+	if (BESISDEBUG( TIMING_LOG ))
+		sw.start("BESInterface::nc_build_data", dhi.data[REQUEST_ID]);
+
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *> (response);
     if (!bdds)
@@ -359,6 +373,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 {
+
+	BESStopWatch sw;
+	if (BESISDEBUG( TIMING_LOG ))
+		sw.start("BESInterface::nc_build_dmr", dhi.data[REQUEST_ID]);
+
 	// Because this code does not yet know how to build a DMR directly, use
 	// the DMR ctor that builds a DMR using a 'full DDS' (a DDS with attributes).
 	// First step, build the 'full DDS'
@@ -413,6 +432,10 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 
 bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 {
+	BESStopWatch sw;
+	if (BESISDEBUG( TIMING_LOG ))
+		sw.start("BESInterface::nc_build_help", dhi.data[REQUEST_ID]);
+
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESInfo *info = dynamic_cast<BESInfo *> (response);
     if (!info)
@@ -439,6 +462,10 @@ bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
 {
+	BESStopWatch sw;
+	if (BESISDEBUG( TIMING_LOG ))
+		sw.start("BESInterface::nc_build_version", dhi.data[REQUEST_ID]);
+
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESVersionInfo *info = dynamic_cast<BESVersionInfo *> (response);
     if (!info)
