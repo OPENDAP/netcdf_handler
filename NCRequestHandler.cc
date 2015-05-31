@@ -56,9 +56,6 @@
 #include <Ancillary.h>
 
 #include "NCRequestHandler.h"
-#if 0
-#include "gridfields_functions.h"
-#endif
 
 #define NC_NAME "nc"
 
