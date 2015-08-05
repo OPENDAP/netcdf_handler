@@ -50,17 +50,15 @@ endif
 
 # TESTSUITE_3 is always built, but not TESTSUITE_4
 
-# package.m4 was in the list of deps, but now it's built by configure.
-# jhrg 1/11/12
-
-check-local: atconfig atlocal $(TESTSUITE_3) $(TESTSUITE_4)
+check-local: atconfig atlocal $(srcdir)/package.m4 $(TESTSUITE_3) $(TESTSUITE_4)
 	$(SHELL) '$(TESTSUITE_3)' $(TESTSUITEFLAGS)
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' $(TESTSUITEFLAGS)
 
 clean-local:
 	test ! -f '$(TESTSUITE_3)' || $(SHELL) '$(TESTSUITE_3)' --clean
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' --clean
-
+	-rm $(srcdir)/package.m4
+	
 distclean-local:
 	-rm atconfig
 
