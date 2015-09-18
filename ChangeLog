@@ -1,3 +1,42 @@
+2015-09-11  James Gallagher  <jgallagher@opendap.org>
+
+	Modified Makefile.am to support distcheck
+
+2015-08-28  James Gallagher  <jgallagher@opendap.org>
+
+	Added some bescmd files to help with profiling parallel_io code in libdap.
+
+2015-08-05  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/netcdf_handler
+
+	Delete package.m4.in
+
+2015-08-04  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed package.m4 in the autoconf dirs Makefile.am files
+
+2015-05-31  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/netcdf_handler
+
+	Removed unused code
+
+2015-05-22  Nathan Potter  <ndp@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/netcdf_handler
+
+	Added new BESStopWatch support.
+
+2015-04-09  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/netcdf_handler
+
+	Modified Makefile.am to support bes distcheck
+
+2015-04-06  James Gallagher  <jgallagher@opendap.org>
+
+	Version 3.11.0
 2015-03-19  James Gallagher  <jgallagher@opendap.org>
 
 	Fix for	distclean and the modules build.
