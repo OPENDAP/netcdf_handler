@@ -13,14 +13,14 @@ TEST_COV_FLAGS = -ftest-coverage -fprofile-arcs
 
 noinst_DATA = bes.conf
 
-CLEANFILES = *.log *.sum gmon.out $(TESTSUITE_3) $(TESTSUITE_4) $(srcdir)/package.m4
+CLEANFILES = bes.conf
 
 EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE_3) $(TESTSUITE_4) \
         atlocal.in $(srcdir)/package.m4 bes.conf.in \
         bes.conf.modules.in handler_tests_macros.m4 \
         nc4_netcdf_handler_tests.at
 
-DISTCLEANFILES = bes.conf atconfig
+DISTCLEANFILES = atconfig
 
 if DAP_MODULES
 BES_CONF_IN = bes.conf.modules.in
@@ -57,7 +57,8 @@ check-local: atconfig atlocal $(srcdir)/package.m4 $(TESTSUITE_3) $(TESTSUITE_4)
 clean-local:
 	test ! -f '$(TESTSUITE_3)' || $(SHELL) '$(TESTSUITE_3)' --clean
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' --clean
-
+	-rm -f $(TESTSUITE_3) $(TESTSUITE_4) $(srcdir)/package.m4
+	
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
 % : %.at
