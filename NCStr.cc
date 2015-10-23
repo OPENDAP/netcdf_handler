@@ -167,21 +167,21 @@ bool NCStr::read()
             for (int id = 0; id <= num_dim && id < MAX_NC_DIMS; id++)
                 cor[id] = 0;
 
-            //char **strpp = new char*[2];
-            vector<char> strpp(sizeof(char*));
+            // before using vector<>, this code used 'char **strpp = new char*[2];'
+            // replaced this 'vector<char> strpp(sizeof(char*));' with...
+            vector<char*> strpp(1);
 
             // get the data
-            errstat = nc_get_var1_string(ncid, varid, cor, (char**)&strpp[0]);
+            errstat = nc_get_var1_string(ncid, varid, cor, &strpp[0]);
             if (errstat != NC_NOERR) {
-                //delete[] strpp;
                 throw Error(errstat, string("Could not read data from the variable `") + name() + string("'."));
             }
 
             // poke the data into the DAP string
-            set_value(string(*(char**)&strpp[0]));
+            // replaced this 'set_value(string(*(char**)&strpp[0]));' with ...
+            set_value(string(strpp[0]));
 
-            nc_free_string(1, (char**)&strpp[0]);
-            //delete[] strpp;
+            nc_free_string(1, &strpp[0]);
 
             break;
         }

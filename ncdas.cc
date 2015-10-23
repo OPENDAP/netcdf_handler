@@ -95,117 +95,110 @@ static string print_attr(nc_type type, int loc, void *vals)
 
     switch (type) {
 #if NETCDF_VERSION >= 4
-        case NC_UBYTE:
+    case NC_UBYTE:
+    unsigned char uc;
+    gp.cp = (char *) vals;
+
+    uc = *(gp.cp + loc);
+    rep << (int) uc;
+    return rep.str();
+#endif
+
+    case NC_BYTE:
+        if (NCRequestHandler::get_promote_byte_to_short()) {
+            signed char sc;
+            gp.cp = (char *) vals;
+
+            sc = *(gp.cp + loc);
+            rep << (int) sc;
+            return rep.str();
+        }
+        else {
             unsigned char uc;
             gp.cp = (char *) vals;
 
             uc = *(gp.cp + loc);
             rep << (int) uc;
             return rep.str();
-#endif
+        }
 
-        case NC_BYTE:
-            if (NCRequestHandler::get_promote_byte_to_short()) {
-                signed char sc;
-                gp.cp = (char *) vals;
-
-                sc = *(gp.cp + loc);
-                rep << (int) sc;
-                return rep.str();
-            }
-            else {
-                unsigned char uc;
-                gp.cp = (char *) vals;
-
-                uc = *(gp.cp + loc);
-                rep << (int) uc;
-                return rep.str();
-            }
-
-        case NC_CHAR:
+    case NC_CHAR:
 #ifndef ATTR_STRING_QUOTE_FIX
-            rep << "\"" << escattr(static_cast<const char*>(vals)) << "\"";
-            return rep.str();
+        rep << "\"" << escattr(static_cast<const char*>(vals)) << "\"";
+        return rep.str();
 #else
-            return escattr(static_cast<const char*> (vals));
+        return escattr(static_cast<const char*>(vals));
 #endif
 
 #if NETCDF_VERSION >= 4
         case NC_STRING:
-            gp.stringp = (char **) vals;
-            rep << *(gp.stringp + loc);
-            return rep.str();
+        gp.stringp = (char **) vals;
+        rep << *(gp.stringp + loc);
+        return rep.str();
 #endif
 
-        case NC_SHORT:
-            gp.sp = (short *) vals;
-            rep << *(gp.sp + loc);
-            return rep.str();
+    case NC_SHORT:
+        gp.sp = (short *) vals;
+        rep << *(gp.sp + loc);
+        return rep.str();
 
 #if NETCDF_VERSION >= 4
         case NC_USHORT:
-            gp.usp = (unsigned short *) vals;
-            rep << *(gp.usp + loc);
-            return rep.str();
+        gp.usp = (unsigned short *) vals;
+        rep << *(gp.usp + loc);
+        return rep.str();
 #endif
 
-        case NC_INT:
-            gp.i = (int *) vals; // warning: long int format, int arg (arg 3)
-            rep << *(gp.i + loc);
-            return rep.str();
+    case NC_INT:
+        gp.i = (int *) vals; // warning: long int format, int arg (arg 3)
+        rep << *(gp.i + loc);
+        return rep.str();
 
 #if NETCDF_VERSION >= 4
         case NC_UINT:
-            gp.ui = (unsigned int *) vals;
-            rep << *(gp.ui + loc);
-            return rep.str();
+        gp.ui = (unsigned int *) vals;
+        rep << *(gp.ui + loc);
+        return rep.str();
 #endif
 
-        case NC_FLOAT: {
-            gp.fp = (float *) vals;
+    case NC_FLOAT: {
+        gp.fp = (float *) vals;
 
-            rep << std::showpoint;
-            rep << std::setprecision(9);
+        rep << std::showpoint;
+        rep << std::setprecision(9);
 
-            rep << *(gp.fp + loc);
-            // If there's no decimal point and the rep does not use scientific
-            // notation, add a decimal point. This little jaunt was taken because
-            // this code is modeled after older code and that's what it did. I'm
-            // trying to keep the same behavior as the old code without it's
-            // problems. jhrg 8/11/2006
-            string tmp_value = rep.str();
-            if (tmp_value.find('.') == string::npos
-                    && tmp_value.find('e') == string::npos
-                    && tmp_value.find('E') == string::npos
-                    && tmp_value.find("nan") == string::npos
-                    && tmp_value.find("NaN") == string::npos
-                    && tmp_value.find("NAN") == string::npos)
-                rep << ".";
-            return rep.str();
-        }
+        rep << *(gp.fp + loc);
+        // If there's no decimal point and the rep does not use scientific
+        // notation, add a decimal point. This little jaunt was taken because
+        // this code is modeled after older code and that's what it did. I'm
+        // trying to keep the same behavior as the old code without it's
+        // problems. jhrg 8/11/2006
+        string tmp_value = rep.str();
+        if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos
+            && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos
+            && tmp_value.find("NaN") == string::npos && tmp_value.find("NAN") == string::npos) rep << ".";
+        return rep.str();
+    }
 
-        case NC_DOUBLE: {
-            gp.dp = (double *) vals;
-            rep << std::showpoint;
-            rep << std::setprecision(16);
-            rep << *(gp.dp + loc);
-            string tmp_value = rep.str();
-            if (tmp_value.find('.') == string::npos
-                    && tmp_value.find('e') == string::npos
-                    && tmp_value.find('E') == string::npos
-                    && tmp_value.find("nan") == string::npos
-                    && tmp_value.find("NaN")  == string::npos
-                    && tmp_value.find("NAN") == string::npos)
-                rep << ".";
-            return rep.str();
-        }
+    case NC_DOUBLE: {
+        gp.dp = (double *) vals;
+        rep << std::showpoint;
+        rep << std::setprecision(16);
+        rep << *(gp.dp + loc);
+        string tmp_value = rep.str();
+        if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos
+            && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos
+            && tmp_value.find("NaN") == string::npos && tmp_value.find("NAN") == string::npos) rep << ".";
+        return rep.str();
+    }
 
-        default:
-            if (NCRequestHandler::get_ignore_unknown_types())
-                cerr << "The netcdf handler tried to print an attribute that has an unrecognized type. (1)" << endl;
-            else
-                throw InternalErr(__FILE__, __LINE__, "The netcdf handler tried to print an attribute that has an unrecognized type. (1)");
-            break;
+    default:
+        if (NCRequestHandler::get_ignore_unknown_types())
+            cerr << "The netcdf handler tried to print an attribute that has an unrecognized type. (1)" << endl;
+        else
+            throw InternalErr(__FILE__, __LINE__,
+                "The netcdf handler tried to print an attribute that has an unrecognized type. (1)");
+        break;
     }
 
     return "";
@@ -221,73 +214,73 @@ static string print_type(nc_type datatype)
 {
     switch (datatype) {
 #if NETCDF_VERSION >= 4
-        case NC_STRING:
+    case NC_STRING:
 #endif
-        case NC_CHAR:
-            return "String";
+    case NC_CHAR:
+        return "String";
 
 #if NETCDF_VERSION >= 4
         case NC_UBYTE:
-            return "Byte";
+        return "Byte";
 #endif
-        case NC_BYTE:
-            if (NCRequestHandler::get_promote_byte_to_short()) {
-                return "Int16";
-            }
-            else {
-                return "Byte";
-            }
-
-
-        case NC_SHORT:
+    case NC_BYTE:
+        if (NCRequestHandler::get_promote_byte_to_short()) {
             return "Int16";
+        }
+        else {
+            return "Byte";
+        }
 
-        case NC_INT:
-            return "Int32";
+    case NC_SHORT:
+        return "Int16";
+
+    case NC_INT:
+        return "Int32";
 
 #if NETCDF_VERSION >= 4
         case NC_USHORT:
-            return "UInt16";
+        return "UInt16";
 
         case NC_UINT:
-            return "UInt32";
+        return "UInt32";
 #endif
 
-        case NC_FLOAT:
-            return "Float32";
+    case NC_FLOAT:
+        return "Float32";
 
-        case NC_DOUBLE:
-            return "Float64";
+    case NC_DOUBLE:
+        return "Float64";
 
 #if NETCDF_VERSION >= 4
         case NC_COMPOUND:
-            return "NC_COMPOUND";
+        return "NC_COMPOUND";
 #endif
 
 #if NETCDF_VERSION >= 4
-            // These are all new netcdf 4 types that we don't support yet
-            // as attributes. It's useful to have a print representation for
-            // them so that we can return useful information about why some
-            // information was elided or an exception thrown.
+        // These are all new netcdf 4 types that we don't support yet
+        // as attributes. It's useful to have a print representation for
+        // them so that we can return useful information about why some
+        // information was elided or an exception thrown.
         case NC_INT64:
-            return "NC_INT64";
+        return "NC_INT64";
 
         case NC_UINT64:
-            return "NC_UINT64";
+        return "NC_UINT64";
 
         case NC_VLEN:
-            return "NC_VLEN";
+        return "NC_VLEN";
         case NC_OPAQUE:
-            return "NC_OPAQUE";
+        return "NC_OPAQUE";
         case NC_ENUM:
-            return "NC_ENUM";
+        return "NC_ENUM";
 #endif
-        default:
-            if (NCRequestHandler::get_ignore_unknown_types())
-                cerr << "The netcdf handler tried to print an attribute that has an unrecognized type. (2)" << endl;
-            else
-                throw InternalErr(__FILE__, __LINE__, "The netcdf handler tried to print an attribute that has an unrecognized type. (2)");
-            break;
+    default:
+        if (NCRequestHandler::get_ignore_unknown_types())
+            cerr << "The netcdf handler tried to print an attribute that has an unrecognized type. (2)" << endl;
+        else
+            throw InternalErr(__FILE__, __LINE__,
+                "The netcdf handler tried to print an attribute that has an unrecognized type. (2)");
+        break;
     }
 
     return "";
@@ -304,7 +297,7 @@ static void append_values(int ncid, int v, int len, nc_type datatype, char *attr
 #if NETCDF_VERSION >= 4
     errstat = nc_inq_type(ncid, datatype, 0, &size);
     if (errstat != NC_NOERR)
-        throw Error(errstat, "Could not get the size for the type.");
+    throw Error(errstat, "Could not get the size for the type.");
 #else
     size = nctypelen(datatype);
 #endif
@@ -366,21 +359,21 @@ static void read_attributes_netcdf3(int ncid, int v, int natts, AttrTable *at)
         }
 
         switch (datatype) {
-            case NC_BYTE:
-            case NC_CHAR:
-            case NC_SHORT:
-            case NC_INT:
-            case NC_FLOAT:
-            case NC_DOUBLE:
-                append_values(ncid, v, len, datatype, attrname, at);
-                break;
+        case NC_BYTE:
+        case NC_CHAR:
+        case NC_SHORT:
+        case NC_INT:
+        case NC_FLOAT:
+        case NC_DOUBLE:
+            append_values(ncid, v, len, datatype, attrname, at);
+            break;
 
-            default:
-                if (NCRequestHandler::get_ignore_unknown_types())
-                    cerr << "Unrecognized attribute type." << endl;
-                else
-                    throw InternalErr(__FILE__, __LINE__, "Unrecognized attribute type.");
-                break;
+        default:
+            if (NCRequestHandler::get_ignore_unknown_types())
+                cerr << "Unrecognized attribute type." << endl;
+            else
+                throw InternalErr(__FILE__, __LINE__, "Unrecognized attribute type.");
+            break;
         }
     }
 }
@@ -408,19 +401,19 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
         char attrname[MAX_NC_NAME];
         errstat = nc_inq_attname(ncid, varid, attr_num, attrname);
         if (errstat != NC_NOERR)
-            throw Error(errstat, "Could not get the name for attribute " + long_to_string(attr_num));
+        throw Error(errstat, "Could not get the name for attribute " + long_to_string(attr_num));
 
         // Get datatype and len; len is the number of values.
         nc_type datatype;
         size_t len;
         errstat = nc_inq_att(ncid, varid, attrname, &datatype, &len);
         if (errstat != NC_NOERR)
-            throw Error(errstat, "Could not get the name for attribute '" + string(attrname) + "'");
+        throw Error(errstat, "Could not get the name for attribute '" + string(attrname) + "'");
 
-	BESDEBUG("nc", "nc_inq_att returned datatype = " << datatype << endl);
+        BESDEBUG("nc", "nc_inq_att returned datatype = " << datatype << endl);
 
-        if (is_user_defined_type(ncid, datatype)) { 
-	    // datatype >= NC_FIRSTUSERTYPEID) {
+        if (is_user_defined_type(ncid, datatype)) {
+            // datatype >= NC_FIRSTUSERTYPEID) {
             char type_name[NC_MAX_NAME+1];
             size_t size;
             nc_type base_type;
@@ -428,9 +421,9 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
             int class_type;
             errstat = nc_inq_user_type(ncid, datatype, type_name, &size, &base_type, &nfields, &class_type);
             if (errstat != NC_NOERR)
-                throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
+            throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
 
-	    BESDEBUG("nc", "Before switch(class_type)" << endl);
+            BESDEBUG("nc", "Before switch(class_type)" << endl);
             switch (class_type) {
                 case NC_COMPOUND: {
                     // Make recursive attrs work?
@@ -438,7 +431,7 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
 
                     int errstat = nc_get_att(ncid, varid, attrname, &values[0]);
                     if (errstat != NC_NOERR)
-                        throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
+                    throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
                     for (size_t i = 0; i < nfields; ++i) {
                         char field_name[NC_MAX_NAME+1];
@@ -452,49 +445,49 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                 }
 
                 case NC_VLEN:
-                    if (NCRequestHandler::get_ignore_unknown_types())
-                        cerr << "in build_user_defined; found a vlen." << endl;
-                    else
-                        throw Error("The netCDF handler does not yet support the NC_VLEN type.");
-                    break;
+                if (NCRequestHandler::get_ignore_unknown_types())
+                cerr << "in build_user_defined; found a vlen." << endl;
+                else
+                throw Error("The netCDF handler does not yet support the NC_VLEN type.");
+                break;
 
                 case NC_OPAQUE: {
                     vector<unsigned char> values((len + 1) * size);
 
                     int errstat = nc_get_att(ncid, varid, attrname, &values[0]);
                     if (errstat != NC_NOERR)
-                        throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
+                    throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
                     for (size_t i = 0; i < size; ++i)
-                        at->append_attr(attrname, print_type(NC_BYTE), print_attr(NC_BYTE, i, &values[0]));
+                    at->append_attr(attrname, print_type(NC_BYTE), print_attr(NC_BYTE, i, &values[0]));
 
                     break;
                 }
 
-                case NC_ENUM:{
+                case NC_ENUM: {
                     vector<unsigned char> values((len + 1) * size);
 
                     int errstat = nc_get_att(ncid, varid, attrname, &values[0]);
                     if (errstat != NC_NOERR)
-                        throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
+                    throw Error(errstat, string("Could not get the value for attribute '") + attrname + string("'"));
 
                     nc_type basetype;
                     errstat = nc_inq_enum(ncid, datatype, 0/*char *name*/, &basetype,
-                            0/*size_t *base_sizep*/, 0/*size_t *num_membersp*/);
+                        0/*size_t *base_sizep*/, 0/*size_t *num_membersp*/);
                     if (errstat != NC_NOERR)
-                          throw Error(errstat, string("Could not get the size of the enum base type for '") + attrname + string("'"));
+                    throw Error(errstat, string("Could not get the size of the enum base type for '") + attrname + string("'"));
 
                     for (size_t i = 0; i < size; ++i)
-                         at->append_attr(attrname, print_type(basetype), print_attr(basetype, i, &values[0]));
+                    at->append_attr(attrname, print_type(basetype), print_attr(basetype, i, &values[0]));
 
                     break;
                 }
 
                 default:
-                    throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
+                throw InternalErr(__FILE__, __LINE__, "Expected one of NC_COMPOUND, NC_VLEN, NC_OPAQUE or NC_ENUM");
             }
 
-	    BESDEBUG("nc", "After switch(class-type)" << endl);
+            BESDEBUG("nc", "After switch(class-type)" << endl);
         }
         else {
             switch (datatype) {
@@ -508,10 +501,10 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                 case NC_UBYTE:
                 case NC_USHORT:
                 case NC_UINT:
-		    BESDEBUG("nc", "Before append_values ..." << endl);
-                    append_values(ncid, varid, len, datatype, attrname, at);
-		    BESDEBUG("nc", "After append_values ..." << endl);
-                    break;
+                BESDEBUG("nc", "Before append_values ..." << endl);
+                append_values(ncid, varid, len, datatype, attrname, at);
+                BESDEBUG("nc", "After append_values ..." << endl);
+                break;
 
                 case NC_INT64:
                 case NC_UINT64: {
@@ -525,10 +518,10 @@ static void read_attributes_netcdf4(int ncid, int varid, int natts, AttrTable *a
                 case NC_VLEN:
                 case NC_OPAQUE:
                 case NC_ENUM:
-                    throw InternalErr(__FILE__, __LINE__, "user-defined attribute type not recognized as such!");
+                throw InternalErr(__FILE__, __LINE__, "user-defined attribute type not recognized as such!");
 
                 default:
-                    throw InternalErr(__FILE__, __LINE__, "Unrecognized attribute type.");
+                throw InternalErr(__FILE__, __LINE__, "Unrecognized attribute type.");
             }
         }
     }
@@ -551,33 +544,29 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
 
     int ncid, errstat;
     errstat = nc_open(filename.c_str(), NC_NOWRITE, &ncid);
-    if (errstat != NC_NOERR)
-        throw Error(errstat, "Could not open " + path_to_filename(filename) + ".");
+    if (errstat != NC_NOERR) throw Error(errstat, "NetCDF handler: Could not open " + path_to_filename(filename) + ".");
 
     // how many variables? how many global attributes?
     int nvars, ngatts;
     errstat = nc_inq(ncid, (int *) 0, &nvars, &ngatts, (int *) 0);
     if (errstat != NC_NOERR)
-        throw Error(errstat, "Could not inquire about netcdf file: " + path_to_filename(filename) + ".");
+        throw Error(errstat, "NetCDF handler: Could not inquire about netcdf file: " + path_to_filename(filename) + ".");
 
     // for each variable
     char varname[MAX_NC_NAME];
     int natts = 0;
     nc_type var_type;
     for (int varid = 0; varid < nvars; ++varid) {
-	BESDEBUG("nc", "Top of for loop; for each var..." << endl);
+        BESDEBUG("nc", "Top of for loop; for each var..." << endl);
 
         errstat = nc_inq_var(ncid, varid, varname, &var_type, (int*) 0, (int*) 0, &natts);
         if (errstat != NC_NOERR)
             throw Error(errstat, "Could not get information for variable: " + long_to_string(varid));
 
         AttrTable *attr_table_ptr = das.get_table(varname);
-        if (!attr_table_ptr)
-            attr_table_ptr = das.add_table(varname, new AttrTable);
+        if (!attr_table_ptr) attr_table_ptr = das.add_table(varname, new AttrTable);
 
-	BESDEBUG("nc", "Before READ_ATTRIBUTES_MACRO" << endl);
         READ_ATTRIBUTES_MACRO(ncid, varid, natts, attr_table_ptr);
-	BESDEBUG("nc", "After READ_ATTRIBUTES_MACRO" << endl);
 
         // Add a special attribute for string lengths
         if (var_type == NC_CHAR) {
@@ -586,7 +575,8 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
             int vdimids[MAX_VAR_DIMS]; // variable dimension ids
             errstat = nc_inq_var(ncid, varid, (char *) 0, (nc_type *) 0, &num_dim, vdimids, (int *) 0);
             if (errstat != NC_NOERR)
-                throw Error(errstat, string("Could not read information about a NC_CHAR variable while building the DAS."));
+                throw Error(errstat,
+                    string("NetCDF handler: Could not read information about a NC_CHAR variable while building the DAS."));
 
             if (num_dim == 0) {
                 // a scalar NC_CHAR is stuffed into a string of length 1
@@ -599,7 +589,9 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                 vector<size_t> dim_sizes(num_dim);
                 for (int i = 0; i < num_dim; ++i) {
                     if ((errstat = nc_inq_dimlen(ncid, vdimids[i], &dim_sizes[i])) != NC_NOERR) {
-                        throw Error(errstat, string("Could not read dimension information about the variable `") + varname + string("'."));
+                        throw Error(errstat,
+                            string("NetCDF handler: Could not read dimension information about the variable `") + varname
+                                + string("'."));
                     }
                 }
 
@@ -611,18 +603,18 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
 
 #if NETCDF_VERSION >= 4
         else if (is_user_defined_type(ncid, var_type)) {
-	    //var_type >= NC_FIRSTUSERTYPEID) {
+            //var_type >= NC_FIRSTUSERTYPEID) {
             vector<char> name(MAX_NC_NAME + 1);
             int class_type;
             errstat = nc_inq_user_type(ncid, var_type, &name[0], 0, 0, 0, &class_type);
             if (errstat != NC_NOERR)
-                throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
+            throw(InternalErr(__FILE__, __LINE__, "Could not get information about a user-defined type (" + long_to_string(errstat) + ")."));
 
             switch (class_type) {
                 case NC_OPAQUE: {
                     attr_table_ptr->append_attr("DAP2_OriginalNetCDFBaseType", print_type(NC_STRING), "NC_OPAQUE");
                     attr_table_ptr->append_attr("DAP2_OriginalNetCDFTypeName", print_type(NC_STRING), &name[0]);
-                   break;
+                    break;
                 }
 
                 case NC_ENUM: {
@@ -631,15 +623,15 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                     size_t base_size, num_members;
                     errstat = nc_inq_enum(ncid, var_type, 0/*&name[0]*/, &base_nc_type, &base_size, &num_members);
                     if (errstat != NC_NOERR)
-                        throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum(" + long_to_string(errstat) + ")."));
+                    throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum(" + long_to_string(errstat) + ")."));
 
                     // If the base type is a 64-bit int, bail with an error or
                     // a message about unsupported types
                     if (base_nc_type == NC_INT64 || base_nc_type == NC_UINT64) {
                         if (NCRequestHandler::get_ignore_unknown_types())
-                            cerr << "An Enum uses 64-bit integers, but this handler does not support that type." << endl;
+                        cerr << "An Enum uses 64-bit integers, but this handler does not support that type." << endl;
                         else
-                            throw Error("An Enum uses 64-bit integers, but this handler does not support that type.");
+                        throw Error("An Enum uses 64-bit integers, but this handler does not support that type.");
                         break;
                     }
 
@@ -648,7 +640,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                         vector<char> member_value(base_size);
                         errstat = nc_inq_enum_member(ncid, var_type, i, &member_name[0], &member_value[0]);
                         if (errstat != NC_NOERR)
-                            throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum value (" + long_to_string(errstat) + ")."));
+                        throw(InternalErr(__FILE__, __LINE__, "Could not get information about an enum value (" + long_to_string(errstat) + ")."));
                         attr_table_ptr->append_attr("DAP2_EnumValues", print_type(base_nc_type), print_attr(base_nc_type, 0, &member_value[0]));
                         attr_table_ptr->append_attr("DAP2_EnumNames", print_type(NC_STRING), &member_name[0]);
                     }
@@ -660,7 +652,7 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
                 }
 
                 default:
-                    break;
+                break;
             }
         }
 #endif // NETCDF_VERSION >= 4
@@ -678,16 +670,17 @@ void nc_read_dataset_attributes(DAS &das, const string &filename)
     int xdimid;
     char dimname[MAX_NC_NAME];
     nc_type datatype = NC_CHAR;
-    nc_inq(ncid, (int *) 0, (int *) 0, (int *) 0, &xdimid);
+    if ((errstat = nc_inq(ncid, (int *) 0, (int *) 0, (int *) 0, &xdimid)) != NC_NOERR)
+        throw InternalErr(__FILE__, __LINE__, string("NetCDF handler: Could not access variable information: ") + nc_strerror(errstat));
     if (xdimid != -1) {
-        nc_inq_dim(ncid, xdimid, dimname, (size_t *) 0);
+        if ((errstat = nc_inq_dim(ncid, xdimid, dimname, (size_t *) 0)) != NC_NOERR)
+            throw InternalErr(__FILE__, __LINE__, string("NetCDF handler: Could not access dimension information: ") + nc_strerror(errstat));
         string print_rep = print_attr(datatype, 0, dimname);
         AttrTable *attr_table_ptr = das.add_table("DODS_EXTRA", new AttrTable);
         attr_table_ptr->append_attr("Unlimited_Dimension", print_type(datatype), print_rep);
     }
 
-    if (nc_close(ncid) != NC_NOERR)
-        throw InternalErr(__FILE__, __LINE__, "ncdds: Could not close the dataset!");
+    if (nc_close(ncid) != NC_NOERR) throw InternalErr(__FILE__, __LINE__, "NetCDF handler: Could not close the dataset!");
 
     BESDEBUG("nc", "Exiting nc_read_dataset_attributes" << endl);
 }
