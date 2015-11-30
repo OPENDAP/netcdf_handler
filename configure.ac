@@ -96,7 +96,7 @@ modulesdir=$BES_MODULE_DIR
 AC_SUBST(modulesdir)
 
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([bes-testsuite/Makefile bes-testsuite/atlocal bes-testsuite/package.m4 bes-testsuite/bes.conf])
+AC_CONFIG_FILES([bes-testsuite/Makefile bes-testsuite/atlocal bes-testsuite/bes.conf])
 AC_CONFIG_FILES([bes-testsuite/generate_metadata_baseline.sh], [chmod +x bes-testsuite/generate_metadata_baseline.sh])
 AC_CONFIG_FILES([bes-testsuite/generate_data_baseline.sh], [chmod +x bes-testsuite/generate_data_baseline.sh])
 
