@@ -40,10 +40,10 @@
         <Dim name="/TIME"/>
         <Dim name="/COADSY"/>
         <Dim name="/COADSX"/>
-        <Attribute name="missing_value" type="Byte">
+        <Attribute name="missing_value" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
-        <Attribute name="_FillValue" type="Byte">
+        <Attribute name="_FillValue" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
         <Attribute name="long_name" type="String">
@@ -63,10 +63,10 @@
         <Dim name="/TIME"/>
         <Dim name="/COADSY"/>
         <Dim name="/COADSX"/>
-        <Attribute name="missing_value" type="Byte">
+        <Attribute name="missing_value" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
-        <Attribute name="_FillValue" type="Byte">
+        <Attribute name="_FillValue" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
         <Attribute name="long_name" type="String">
@@ -86,10 +86,10 @@
         <Dim name="/TIME"/>
         <Dim name="/COADSY"/>
         <Dim name="/COADSX"/>
-        <Attribute name="missing_value" type="Byte">
+        <Attribute name="missing_value" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
-        <Attribute name="_FillValue" type="Byte">
+        <Attribute name="_FillValue" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
         <Attribute name="long_name" type="String">
@@ -109,10 +109,10 @@
         <Dim name="/TIME"/>
         <Dim name="/COADSY"/>
         <Dim name="/COADSX"/>
-        <Attribute name="missing_value" type="Byte">
+        <Attribute name="missing_value" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
-        <Attribute name="_FillValue" type="Byte">
+        <Attribute name="_FillValue" type="Float32">
             <Value>-9.99999979e+33</Value>
         </Attribute>
         <Attribute name="long_name" type="String">

@@ -50,7 +50,8 @@ endif
 
 # TESTSUITE_3 is always built, but not TESTSUITE_4
 
-check-local: atconfig atlocal $(srcdir)/package.m4 $(TESTSUITE_3) $(TESTSUITE_4)
+check-local: atconfig atlocal $(srcdir)/package.m4 $(TESTSUITE_3) $(TESTSUITE_4) \
+handler_tests_macros.m4
 	$(SHELL) '$(TESTSUITE_3)' $(TESTSUITEFLAGS)
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' $(TESTSUITEFLAGS)
 
