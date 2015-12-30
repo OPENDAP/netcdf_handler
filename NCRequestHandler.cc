@@ -170,7 +170,7 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 {
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
-		sw.start("BESInterface::nc_build_das", dhi.data[REQUEST_ID]);
+		sw.start("NCRequestHandler::nc_build_das", dhi.data[REQUEST_ID]);
 
     BESDEBUG("nc", "In NCRequestHandler::nc_build_das" << endl);
 
@@ -217,7 +217,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
 
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
-		sw.start("BESInterface::nc_build_dds", dhi.data[REQUEST_ID]);
+		sw.start("NCRequestHandler::nc_build_dds", dhi.data[REQUEST_ID]);
 
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDDSResponse *bdds = dynamic_cast<BESDDSResponse *> (response);
@@ -300,7 +300,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 {
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
-		sw.start("BESInterface::nc_build_data", dhi.data[REQUEST_ID]);
+		sw.start("NCRequestHandler::nc_build_data", dhi.data[REQUEST_ID]);
 
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *> (response);
@@ -376,7 +376,7 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
-		sw.start("BESInterface::nc_build_dmr", dhi.data[REQUEST_ID]);
+		sw.start("NCRequestHandler::nc_build_dmr", dhi.data[REQUEST_ID]);
 
 	// Because this code does not yet know how to build a DMR directly, use
 	// the DMR ctor that builds a DMR using a 'full DDS' (a DDS with attributes).
@@ -434,7 +434,7 @@ bool NCRequestHandler::nc_build_help(BESDataHandlerInterface & dhi)
 {
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
-		sw.start("BESInterface::nc_build_help", dhi.data[REQUEST_ID]);
+		sw.start("NCRequestHandler::nc_build_help", dhi.data[REQUEST_ID]);
 
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESInfo *info = dynamic_cast<BESInfo *> (response);
@@ -464,7 +464,7 @@ bool NCRequestHandler::nc_build_version(BESDataHandlerInterface & dhi)
 {
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
-		sw.start("BESInterface::nc_build_version", dhi.data[REQUEST_ID]);
+		sw.start("NCRequestHandler::nc_build_version", dhi.data[REQUEST_ID]);
 
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESVersionInfo *info = dynamic_cast<BESVersionInfo *> (response);
