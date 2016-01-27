@@ -1,3 +1,29 @@
+2016-01-26  James Gallagher  <jgallagher@opendap.org>
+
+	Updated autotest tests, macros and Makefile.am files
+
+2015-12-30  James Gallagher  <jgallagher@opendap.org>
+
+	Changed the strings passed to the stopwatch code in NCRequestHandler
+	It used BESInterface and not NCRequestHandler. No idea why...
+
+2015-12-17  James Gallagher  <jgallagher@opendap.org>
+
+	Tests fixed for the new DMR code in libdap
+
+2015-11-30  Patrick West  <pwest@vsto.tw.rpi.edu>
+
+	Removed package.m4 configuration
+	package.m4.in was possibly removed in a previous commit. Removed the
+	reference from configure.ac.
+
+2015-10-27  James Gallagher  <jgallagher@opendap.org>
+
+	Update for bes 3.16.0 release
+
+2015-10-23  James Gallagher  <jgallagher@opendap.org>
+
+	coverity fixes
 2015-10-23  James Gallagher  <jgallagher@opendap.org>
 
 	coverity fixes
