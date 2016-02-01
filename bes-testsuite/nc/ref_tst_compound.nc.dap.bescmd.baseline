@@ -20,10 +20,10 @@
         <Attribute name="count" type="Int32">
             <Value>-99</Value>
         </Attribute>
-        <Attribute name="relhum" type="Byte">
+        <Attribute name="relhum" type="Float32">
             <Value>-99.0000000</Value>
         </Attribute>
-        <Attribute name="time" type="Float32">
+        <Attribute name="time" type="Float64">
             <Value>-99.00000000000000</Value>
         </Attribute>
     </Attribute>
