@@ -57,7 +57,7 @@ CLEANFILES = *~ nc.conf
 
 sample_datadir = $(datadir)/hyrax/data/nc
 sample_data_DATA = data/bears.nc data/bears.nc.das data/coads_climatology.nc \
-data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html zero_length_array.nc
+data/fnoc1.nc data/fnoc1.das data/fnoc1.nc.html data/zero_length_array.nc
 
 install-data-local: nc.conf
 	@currdate=`date +"%y%m%d%H%M"`; \
