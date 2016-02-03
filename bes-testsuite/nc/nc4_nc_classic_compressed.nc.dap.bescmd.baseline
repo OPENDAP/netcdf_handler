@@ -37,11 +37,11 @@
         <Attribute name="units" type="String">
             <Value>meters</Value>
         </Attribute>
-        <Attribute name="valid_range" type="Float32">
+        <Attribute name="valid_range" type="Float64">
             <Value>0.000000000000000</Value>
             <Value>5000.000000000000</Value>
         </Attribute>
-        <Attribute name="_FillValue" type="Byte">
+        <Attribute name="_FillValue" type="Float32">
             <Value>1.00000000</Value>
         </Attribute>
         <Attribute name="DAP4_Checksum_CRC32" type="String">
@@ -66,7 +66,7 @@
         <Dim name="/time"/>
         <Dim name="/lat"/>
         <Dim name="/lon"/>
-        <Attribute name="_FillValue" type="Float32">
+        <Attribute name="_FillValue" type="Float64">
             <Value>-9999.000000000000</Value>
         </Attribute>
         <Attribute name="DAP4_Checksum_CRC32" type="String">
@@ -113,7 +113,7 @@
         <Attribute name="title" type="String">
             <Value>Hyrax/netcdf handler test file 1</Value>
         </Attribute>
-        <Attribute name="version" type="Float32">
+        <Attribute name="version" type="Float64">
             <Value>1.000000000000000</Value>
         </Attribute>
         <Attribute name="description" type="String">
