@@ -27,14 +27,14 @@
             <Value>-2147483648</Value>
             <Value>2147483647</Value>
         </Attribute>
-        <Attribute name="Gf" type="Byte">
+        <Attribute name="Gf" type="Float32">
             <Value>-3.40282347e+38</Value>
             <Value>3.40282347e+38</Value>
             <Value>-3.40282347e+38</Value>
             <Value>3.40282347e+38</Value>
             <Value>531.000000</Value>
         </Attribute>
-        <Attribute name="Gd" type="Float32">
+        <Attribute name="Gd" type="Float64">
             <Value>-1.797693134862316e+308</Value>
             <Value>1.797693134862316e+308</Value>
             <Value>-1.000000000000000</Value>
