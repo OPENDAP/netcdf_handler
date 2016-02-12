@@ -170,7 +170,7 @@ static Grid *build_grid(Array *ar, int ndims, const nc_type array_type,
 
     const string &filename = ar->dataset();
     Grid *gr = new NCGrid(ar->name(), filename);
-    gr->add_var(ar, array);
+    gr->add_var(ar, libdap::array);
 
     // Build and add BaseType/Array instances for the maps
     for (int d = 0; d < ndims; ++d) {
