@@ -101,7 +101,7 @@ NCArray::operator=(const NCArray &rhs)
     for all of the dimensions of the array. The value-result parameters must
     point to arrays large enough to hold values for all of the array's
     dimensions (i.e., if the instance is a three dimensional array, each of
-    \e cor, \e step and \e egd must have at least three dimensions.
+    \e cor, \e step and \e egd must have at least three dimensions).
 
     @param cor A value-result parameter of 'corner values' for the hyperslab.
     @param step A value-result parameter of step values for the hyperslab.
@@ -123,13 +123,14 @@ NCArray::format_constraint(size_t *cor, ptrdiff_t *step, size_t *edg,
         start = dimension_start(p, true);
         stride = dimension_stride(p, true);
         stop = dimension_stop(p, true);
+#if 0
         // Check for an empty constraint and use the whole dimension if so.
         if (start + stop + stride == 0) {
             start = dimension_start(p, false);
             stride = dimension_stride(p, false);
             stop = dimension_stop(p, false);
         }
-
+#endif
         cor[id] = start;
         step[id] = stride;
         edg[id] = ((stop - start) / stride) + 1; // count of elements
