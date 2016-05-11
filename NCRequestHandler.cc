@@ -321,7 +321,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         }
 
         bdds->set_container(dhi.container->get_symbolic_name());
-        DataDDS *dds = bdds->get_dds();
+        DDS *dds = bdds->get_dds();
         string accessed = dhi.container->access();
         dds->filename(accessed);
 
