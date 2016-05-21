@@ -53,6 +53,8 @@
 #include <BESContextManager.h>
 #include <BESDMRResponse.h>
 
+#include <ObjMemCache.h>
+
 #include <InternalErr.h>
 #include <Ancillary.h>
 
@@ -70,6 +72,11 @@ bool NCRequestHandler::_ignore_unknown_types_set = false;
 
 bool NCRequestHandler::_promote_byte_to_short = false;
 bool NCRequestHandler::_promote_byte_to_short_set = false;
+
+unsigned int NCRequestHandler::_das_cache_entries = 100;
+float NCRequestHandler::_das_cache_purge_level = 0.2;
+
+ObjMemCache *das_cache = 0;
 
 extern void nc_read_dataset_attributes(DAS & das, const string & filename);
 extern void nc_read_dataset_variables(DDS & dds, const string & filename);
@@ -96,9 +103,57 @@ static bool version_ge(const string &version, float value)
     return false; // quiet warnings...
 }
 
+/**
+ * Stolen from the HDF5 handler code
+ */
+static bool get_bool_key(const string &key, bool def_val)
+{
+    bool found = false;
+    string doset = "";
+    const string dosettrue = "true";
+    const string dosetyes = "yes";
+
+    TheBESKeys::TheKeys()->get_value(key, doset, found);
+    if (true == found) {
+        doset = BESUtil::lowercase(doset);
+        return (dosettrue == doset || dosetyes == doset);
+    }
+    return def_val;
+}
+
+static unsigned int get_uint_key(const string &key, unsigned int def_val)
+{
+    bool found = false;
+    string doset = "";
+
+    TheBESKeys::TheKeys()->get_value(key, doset, found);
+    if (true == found) {
+        return atoi(doset.c_str()); // use better code TODO
+    }
+    else {
+        return def_val;
+    }
+}
+
+static float get_float_key(const string &key, float def_val)
+{
+    bool found = false;
+    string doset = "";
+
+    TheBESKeys::TheKeys()->get_value(key, doset, found);
+    if (true == found) {
+        return atof(doset.c_str()); // use better code TODO
+    }
+    else {
+        return def_val;
+    }
+}
+
 NCRequestHandler::NCRequestHandler(const string &name) :
     BESRequestHandler(name)
 {
+    das_cache = new ObjMemCache();
+
     BESDEBUG("nc", "In NCRequestHandler::NCRequestHandler" << endl);
 
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
@@ -110,6 +165,8 @@ NCRequestHandler::NCRequestHandler(const string &name) :
 
     add_handler(HELP_RESPONSE, NCRequestHandler::nc_build_help);
     add_handler(VERS_RESPONSE, NCRequestHandler::nc_build_version);
+
+    // TODO replace with get_bool_key above 5/21/16 jhrg
 
     // Look for the SHowSharedDims property, if it has not been set
     if (NCRequestHandler::_show_shared_dims_set == false) {
@@ -159,6 +216,9 @@ NCRequestHandler::NCRequestHandler(const string &name) :
         }
     }
 
+    NCRequestHandler::_das_cache_entries = get_uint_key("NC.DASCacheEntries", 100);
+    NCRequestHandler::_das_cache_purge_level = get_float_key("NC.DASCachePurgeLevel", 0.2);
+
     BESDEBUG("nc", "Exiting NCRequestHandler::NCRequestHandler" << endl);
 }
 
@@ -182,8 +242,23 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         bdas->set_container(dhi.container->get_symbolic_name());
         DAS *das = bdas->get_das();
         string accessed = dhi.container->access();
-        nc_read_dataset_attributes(*das, accessed);
-        Ancillary::read_ancillary_das(*das, accessed);
+
+        // Look in memory cache
+        DAS *cached_das_ptr = static_cast<DAS*>(das_cache->get(accessed));
+        if (cached_das_ptr) {
+            // copy the cached DAS into the BES response object
+            *das = *cached_das_ptr;
+        }
+        else {
+            nc_read_dataset_attributes(*das, accessed);
+            Ancillary::read_ancillary_das(*das, accessed);
+            // Purge cache and then add this to the cache
+            if (das_cache->size() > das_cache_size())
+                das_cache->purge(das_cache_purge_level());
+            // add a copy
+            das_cache->add(new DAS(*das), accessed);
+        }
+
         bdas->clear_container();
     }
     catch (BESError &e) {

@@ -29,6 +29,8 @@
 
 #include <BESRequestHandler.h>
 
+class ObjMemCache;  // in bes/dap
+
 class NCRequestHandler: public BESRequestHandler {
 private:
 	static bool _show_shared_dims;
@@ -39,6 +41,11 @@ private:
 
 	static bool _promote_byte_to_short_set;
 	static bool _promote_byte_to_short;
+
+	static unsigned int _das_cache_entries;
+	static float _das_cache_purge_level;
+
+	static ObjMemCache *das_cache;
 
 public:
 	NCRequestHandler(const string &name);
@@ -62,6 +69,14 @@ public:
 	static bool get_promote_byte_to_short()
 	{
 		return _promote_byte_to_short;
+	}
+	static unsigned int das_cache_size()
+	{
+	    return _das_cache_entries;
+	}
+	static float das_cache_purge_level()
+	{
+	    return _das_cache_purge_level;
 	}
 };
 
