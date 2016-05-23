@@ -499,7 +499,7 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 
 	try {
         DMR* cached_dmr_ptr = 0;
-        if (dmr_cache && (cached_dmr_ptr = static_cast<DMR*>(dds_cache->get(data_path)))) {
+        if (dmr_cache && (cached_dmr_ptr = static_cast<DMR*>(dmr_cache->get(data_path)))) {
             // copy the cached DMR into the BES response object
             BESDEBUG(NC_NAME, "DMR Cached hit for : " << data_path << endl);
             *dmr = *cached_dmr_ptr; // Copy the referenced object
@@ -517,7 +517,7 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
             if (dmr_cache) {
                 // add a copy
                 BESDEBUG(NC_NAME, "DMR added to the cache for : " << data_path << endl);
-                dds_cache->add(new DMR(*dmr), data_path);
+                dmr_cache->add(new DMR(*dmr), data_path);
             }
         }
 
