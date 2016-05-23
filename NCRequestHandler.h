@@ -45,7 +45,7 @@ private:
 	static unsigned int _das_cache_entries;
 	static float _das_cache_purge_level;
 
-	static ObjMemCache *das_cache;
+    static ObjMemCache *das_cache;
 
 public:
 	NCRequestHandler(const string &name);
@@ -70,11 +70,11 @@ public:
 	{
 		return _promote_byte_to_short;
 	}
-	static unsigned int das_cache_size()
+	static unsigned int get_das_cache_entries()
 	{
 	    return _das_cache_entries;
 	}
-	static float das_cache_purge_level()
+	static float get_das_cache_purge_level()
 	{
 	    return _das_cache_purge_level;
 	}

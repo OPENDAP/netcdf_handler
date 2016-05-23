@@ -76,7 +76,7 @@ bool NCRequestHandler::_promote_byte_to_short_set = false;
 unsigned int NCRequestHandler::_das_cache_entries = 100;
 float NCRequestHandler::_das_cache_purge_level = 0.2;
 
-ObjMemCache *das_cache = 0;
+ObjMemCache *NCRequestHandler::das_cache = 0;
 
 extern void nc_read_dataset_attributes(DAS & das, const string & filename);
 extern void nc_read_dataset_variables(DDS & dds, const string & filename);
@@ -152,8 +152,6 @@ static float get_float_key(const string &key, float def_val)
 NCRequestHandler::NCRequestHandler(const string &name) :
     BESRequestHandler(name)
 {
-    das_cache = new ObjMemCache();
-
     BESDEBUG("nc", "In NCRequestHandler::NCRequestHandler" << endl);
 
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
@@ -216,8 +214,11 @@ NCRequestHandler::NCRequestHandler(const string &name) :
         }
     }
 
-    NCRequestHandler::_das_cache_entries = get_uint_key("NC.DASCacheEntries", 100);
+    NCRequestHandler::_das_cache_entries = get_uint_key("NC.DASCacheEntries", 0);
     NCRequestHandler::_das_cache_purge_level = get_float_key("NC.DASCachePurgeLevel", 0.2);
+
+    if (get_das_cache_entries())    // else it stays at its default of null
+        das_cache = new ObjMemCache();
 
     BESDEBUG("nc", "Exiting NCRequestHandler::NCRequestHandler" << endl);
 }
@@ -238,25 +239,27 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
     BESDASResponse *bdas = dynamic_cast<BESDASResponse *> (response);
     if (!bdas)
         throw BESInternalError("cast error", __FILE__, __LINE__);
+
     try {
         bdas->set_container(dhi.container->get_symbolic_name());
         DAS *das = bdas->get_das();
         string accessed = dhi.container->access();
 
-        // Look in memory cache
-        DAS *cached_das_ptr = static_cast<DAS*>(das_cache->get(accessed));
-        if (cached_das_ptr) {
+        // Look in memory cache if it's initialized
+        DAS *cached_das_ptr = 0;
+        if (das_cache && (cached_das_ptr = static_cast<DAS*>(das_cache->get(accessed)))) {
             // copy the cached DAS into the BES response object
             *das = *cached_das_ptr;
         }
         else {
             nc_read_dataset_attributes(*das, accessed);
             Ancillary::read_ancillary_das(*das, accessed);
-            // Purge cache and then add this to the cache
-            if (das_cache->size() > das_cache_size())
-                das_cache->purge(das_cache_purge_level());
-            // add a copy
-            das_cache->add(new DAS(*das), accessed);
+            // Purge cache and then add this to the cache (if its init'd)
+            if (das_cache) {
+                if (das_cache->size() > get_das_cache_entries()) das_cache->purge(get_das_cache_purge_level());
+                // add a copy
+                das_cache->add(new DAS(*das), accessed);
+            }
         }
 
         bdas->clear_container();
