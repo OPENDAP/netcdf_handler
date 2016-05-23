@@ -249,6 +249,7 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         DAS *cached_das_ptr = 0;
         if (das_cache && (cached_das_ptr = static_cast<DAS*>(das_cache->get(accessed)))) {
             // copy the cached DAS into the BES response object
+            BESDEBUG("nc", "DAS Cached hit for : " << accessed << endl);
             *das = *cached_das_ptr;
         }
         else {

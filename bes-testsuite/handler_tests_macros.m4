@@ -24,14 +24,16 @@ m4_define([_AT_BESCMD_TEST], [dnl
 
     input=$1
     baseline=$2
+    cached=$3
+    AS_IF([test -n "$cached" -a x$cached = xcached], [cached="-r 3"])
 
     AS_IF([test -n "$baselines" -a x$baselines = xyes],
         [
-        AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $input], [], [stdout])
+        AT_CHECK([besstandalone $cached -c $abs_builddir/bes.conf -i $input], [], [stdout])
         AT_CHECK([mv stdout $baseline.tmp])
         ],
         [
-        AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $input], [], [stdout])
+        AT_CHECK([besstandalone $cached -c $abs_builddir/bes.conf -i $input], [], [stdout])
         AT_CHECK([diff -b -B $baseline stdout])
         AT_XFAIL_IF([test "$3" = "xfail"])
         ])
@@ -127,6 +129,9 @@ m4_define([_AT_BESCMD_NETCDF_TEST],  [dnl
     
 m4_define([AT_BESCMD_RESPONSE_TEST],
 [_AT_BESCMD_TEST([$abs_srcdir/$1], [$abs_srcdir/$1.baseline])])
+
+m4_define([AT_BESCMD_CACHED_RESPONSE_TEST],
+[_AT_BESCMD_TEST([$abs_srcdir/$1], [$abs_srcdir/$1.baseline], [cached])])
 
 m4_define([AT_BESCMD_BINARYDATA_RESPONSE_TEST],
 [_AT_BESCMD_BINARYDATA_TEST([$abs_srcdir/$1], [$abs_srcdir/$1.baseline], [$2])])
