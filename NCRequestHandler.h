@@ -31,6 +31,10 @@
 
 class ObjMemCache;  // in bes/dap
 
+namespace libdap {
+class DDS;
+}
+
 class NCRequestHandler: public BESRequestHandler {
 private:
 	static bool _show_shared_dims;
@@ -42,10 +46,14 @@ private:
 	static bool _promote_byte_to_short_set;
 	static bool _promote_byte_to_short;
 
-	static unsigned int _das_cache_entries;
-	static float _das_cache_purge_level;
+	static unsigned int _cache_entries;
+	static float _cache_purge_level;
 
     static ObjMemCache *das_cache;
+    static ObjMemCache *dds_cache;
+    static ObjMemCache *dmr_cache;
+
+    static void build_dds_with_attributes(const std::string& dataset_name, const std::string& container_name, libdap::DDS* dds);
 
 public:
 	NCRequestHandler(const string &name);
@@ -70,13 +78,13 @@ public:
 	{
 		return _promote_byte_to_short;
 	}
-	static unsigned int get_das_cache_entries()
+	static unsigned int get_cache_entries()
 	{
-	    return _das_cache_entries;
+	    return _cache_entries;
 	}
-	static float get_das_cache_purge_level()
+	static float get_cache_purge_level()
 	{
-	    return _das_cache_purge_level;
+	    return _cache_purge_level;
 	}
 };
 

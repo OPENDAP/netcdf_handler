@@ -73,10 +73,12 @@ bool NCRequestHandler::_ignore_unknown_types_set = false;
 bool NCRequestHandler::_promote_byte_to_short = false;
 bool NCRequestHandler::_promote_byte_to_short_set = false;
 
-unsigned int NCRequestHandler::_das_cache_entries = 100;
-float NCRequestHandler::_das_cache_purge_level = 0.2;
+unsigned int NCRequestHandler::_cache_entries = 100;
+float NCRequestHandler::_cache_purge_level = 0.2;
 
 ObjMemCache *NCRequestHandler::das_cache = 0;
+ObjMemCache *NCRequestHandler::dds_cache = 0;
+ObjMemCache *NCRequestHandler::dmr_cache = 0;
 
 extern void nc_read_dataset_attributes(DAS & das, const string & filename);
 extern void nc_read_dataset_variables(DDS & dds, const string & filename);
@@ -152,7 +154,7 @@ static float get_float_key(const string &key, float def_val)
 NCRequestHandler::NCRequestHandler(const string &name) :
     BESRequestHandler(name)
 {
-    BESDEBUG("nc", "In NCRequestHandler::NCRequestHandler" << endl);
+    BESDEBUG(NC_NAME, "In NCRequestHandler::NCRequestHandler" << endl);
 
     add_handler(DAS_RESPONSE, NCRequestHandler::nc_build_das);
     add_handler(DDS_RESPONSE, NCRequestHandler::nc_build_dds);
@@ -214,17 +216,23 @@ NCRequestHandler::NCRequestHandler(const string &name) :
         }
     }
 
-    NCRequestHandler::_das_cache_entries = get_uint_key("NC.DASCacheEntries", 0);
-    NCRequestHandler::_das_cache_purge_level = get_float_key("NC.DASCachePurgeLevel", 0.2);
+    NCRequestHandler::_cache_entries = get_uint_key("NC.CacheEntries", 0);
+    NCRequestHandler::_cache_purge_level = get_float_key("NC.CachePurgeLevel", 0.2);
 
-    if (get_das_cache_entries())    // else it stays at its default of null
-        das_cache = new ObjMemCache();
+    if (get_cache_entries()) {  // else it stays at its default of null
+        das_cache = new ObjMemCache(get_cache_entries(), get_cache_purge_level());
+        dds_cache = new ObjMemCache(get_cache_entries(), get_cache_purge_level());
+        dmr_cache = new ObjMemCache(get_cache_entries(), get_cache_purge_level());
+    }
 
-    BESDEBUG("nc", "Exiting NCRequestHandler::NCRequestHandler" << endl);
+    BESDEBUG(NC_NAME, "Exiting NCRequestHandler::NCRequestHandler" << endl);
 }
 
 NCRequestHandler::~NCRequestHandler()
 {
+    delete das_cache;
+    delete dds_cache;
+    delete dmr_cache;
 }
 
 bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
@@ -233,7 +241,7 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
 	if (BESISDEBUG( TIMING_LOG ))
 		sw.start("NCRequestHandler::nc_build_das", dhi.data[REQUEST_ID]);
 
-    BESDEBUG("nc", "In NCRequestHandler::nc_build_das" << endl);
+    BESDEBUG(NC_NAME, "In NCRequestHandler::nc_build_das" << endl);
 
     BESResponseObject *response = dhi.response_handler->get_response_object();
     BESDASResponse *bdas = dynamic_cast<BESDASResponse *> (response);
@@ -241,24 +249,25 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         throw BESInternalError("cast error", __FILE__, __LINE__);
 
     try {
-        bdas->set_container(dhi.container->get_symbolic_name());
+        string container_name = bdas->get_explicit_containers() ? dhi.container->get_symbolic_name(): "";
+
         DAS *das = bdas->get_das();
+        if (!container_name.empty()) das->container_name(container_name);
         string accessed = dhi.container->access();
 
         // Look in memory cache if it's initialized
         DAS *cached_das_ptr = 0;
         if (das_cache && (cached_das_ptr = static_cast<DAS*>(das_cache->get(accessed)))) {
             // copy the cached DAS into the BES response object
-            BESDEBUG("nc", "DAS Cached hit for : " << accessed << endl);
+            BESDEBUG(NC_NAME, "DAS Cached hit for : " << accessed << endl);
             *das = *cached_das_ptr;
         }
         else {
             nc_read_dataset_attributes(*das, accessed);
             Ancillary::read_ancillary_das(*das, accessed);
-            // Purge cache and then add this to the cache (if its init'd)
             if (das_cache) {
-                if (das_cache->size() > get_das_cache_entries()) das_cache->purge(get_das_cache_purge_level());
                 // add a copy
+                BESDEBUG(NC_NAME, "DAS added to the cache for : " << accessed << endl);
                 das_cache->add(new DAS(*das), accessed);
             }
         }
@@ -287,8 +296,64 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
         throw ex;
     }
 
-    BESDEBUG("nc", "Exiting NCRequestHandler::nc_build_das" << endl);
+    BESDEBUG(NC_NAME, "Exiting NCRequestHandler::nc_build_das" << endl);
     return true;
+}
+
+/**
+ * @brief Using the empty DDS object, build a DDS
+ * @param dataset_name
+ * @param container_name
+ * @param dds
+ */
+void NCRequestHandler::build_dds_with_attributes(const string& dataset_name, const string& container_name, DDS* dds)
+{
+    // Look in memory cache if it's initialized
+    DDS* cached_dds_ptr = 0;
+    if (dds_cache && (cached_dds_ptr = static_cast<DDS*>(dds_cache->get(dataset_name)))) {
+        // copy the cached DDS into the BES response object
+        BESDEBUG(NC_NAME, "DDS Cached hit for : " << dataset_name << endl);
+        *dds = *cached_dds_ptr; // Copy the referenced object
+    }
+    else {
+        if (!container_name.empty()) dds->container_name(container_name);
+        dds->filename(dataset_name);
+
+        nc_read_dataset_variables(*dds, dataset_name);
+
+        DAS* das = 0;
+        if (das_cache && (das = static_cast<DAS*>(das_cache->get(dataset_name)))) {
+            BESDEBUG(NC_NAME, "DAS Cached hit for : " << dataset_name << endl);
+            dds->transfer_attributes(das); // no need to cop the cached DAS
+        }
+        else {
+            das = new DAS;
+            // This looks at the 'use explicit containers' prop, and if true
+            // sets the current container for the DAS.
+            if (!container_name.empty()) das->container_name(container_name);
+
+            nc_read_dataset_attributes(*das, dataset_name);
+            Ancillary::read_ancillary_das(*das, dataset_name);
+
+            dds->transfer_attributes(das);
+
+            // Only free the DAS if it's not added to the cache
+            if (das_cache) {
+                // add a copy
+                BESDEBUG(NC_NAME, "DAS added to the cache for : " << dataset_name << endl);
+                das_cache->add(das, dataset_name);
+            }
+            else {
+                delete das;
+            }
+        }
+
+        if (dds_cache) {
+            // add a copy
+            BESDEBUG(NC_NAME, "DDS added to the cache for : " << dataset_name << endl);
+            dds_cache->add(new DDS(*dds), dataset_name);
+        }
+    }
 }
 
 bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
@@ -311,7 +376,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
             bool context_found = false;
             string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
             if (context_found) {
-                BESDEBUG("nc", "xdap_accept: " << context_value << endl);
+                BESDEBUG(NC_NAME, "xdap_accept: " << context_value << endl);
                 if (version_ge(context_value, 3.2))
                     NCRequestHandler::_show_shared_dims = false;
                 else
@@ -319,35 +384,13 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
             }
         }
 
-        bdds->set_container(dhi.container->get_symbolic_name());
+        string container_name = bdds->get_explicit_containers() ? dhi.container->get_symbolic_name(): "";
         DDS *dds = bdds->get_dds();
-        string accessed = dhi.container->access();
-        dds->filename(accessed);
 
-        nc_read_dataset_variables(*dds, accessed);
-
-        BESDEBUG("nc", "NCRequestHandler::nc_build_dds, accessed: " << accessed << endl);
-#if 0
-        Ancillary::read_ancillary_dds(*dds, accessed);
-#endif
-
-        DAS *das = new DAS;
-        BESDASResponse bdas(das);
-        bdas.set_container(dhi.container->get_symbolic_name());
-        nc_read_dataset_attributes(*das, accessed);
-        Ancillary::read_ancillary_das(*das, accessed);
-
-        BESDEBUG("nc", "Prior to dds->transfer_attributes" << endl);
-
-        dds->transfer_attributes(das);
-
-#if 0
-        ConstraintEvaluator & ce = bdds->get_ce();
-        ce.add_function("ugrid_restrict", function_ugrid_restrict);
-#endif
+        // Build a DDS in the empty DDS object
+        build_dds_with_attributes(dhi.container->access(), container_name, dds);
 
         bdds->set_constraint(dhi);
-
         bdds->clear_container();
     }
     catch (BESError &e) {
@@ -391,7 +434,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
             bool context_found = false;
             string context_value = BESContextManager::TheManager()->get_context("xdap_accept", context_found);
             if (context_found) {
-                BESDEBUG("nc", "xdap_accept: " << context_value << endl);
+                BESDEBUG(NC_NAME, "xdap_accept: " << context_value << endl);
                 if (version_ge(context_value, 3.2))
                     NCRequestHandler::_show_shared_dims = false;
                 else
@@ -399,28 +442,11 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
             }
         }
 
-        bdds->set_container(dhi.container->get_symbolic_name());
+        string container_name = bdds->get_explicit_containers() ? dhi.container->get_symbolic_name(): "";
         DDS *dds = bdds->get_dds();
-        string accessed = dhi.container->access();
-        dds->filename(accessed);
 
-        nc_read_dataset_variables(*dds, accessed);
-
-#if 0
-        Ancillary::read_ancillary_dds(*dds, accessed);
-#endif
-        DAS *das = new DAS;
-        BESDASResponse bdas(das);
-        bdas.set_container(dhi.container->get_symbolic_name());
-        nc_read_dataset_attributes(*das, accessed);
-        Ancillary::read_ancillary_das(*das, accessed);
-
-        dds->transfer_attributes(das);
-
-#if 0
-        ConstraintEvaluator & ce = bdds->get_ce();
-        ce.add_function("ugrid_restrict", function_ugrid_restrict);
-#endif
+        // Build a DDS in the empty DDS object
+        build_dds_with_attributes(dhi.container->access(), container_name, dds);
 
         bdds->set_constraint(dhi);
         bdds->clear_container();
@@ -452,28 +478,57 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
 
 bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 {
-
 	BESStopWatch sw;
 	if (BESISDEBUG( TIMING_LOG ))
 		sw.start("NCRequestHandler::nc_build_dmr", dhi.data[REQUEST_ID]);
 
-	// Because this code does not yet know how to build a DMR directly, use
-	// the DMR ctor that builds a DMR using a 'full DDS' (a DDS with attributes).
-	// First step, build the 'full DDS'
-	string data_path = dhi.container->access();
+    // Extract the DMR Response object - this holds the DMR used by the
+    // other parts of the framework.
+    BESResponseObject *response = dhi.response_handler->get_response_object();
+    BESDMRResponse &bdmr = dynamic_cast<BESDMRResponse &>(*response);
 
-	BaseTypeFactory factory;
-	DDS dds(&factory, name_path(data_path), "3.2");
-	dds.filename(data_path);
+    // Because this code does not yet know how to build a DMR directly, use
+    // the DMR ctor that builds a DMR using a 'full DDS' (a DDS with attributes).
+    // First step, build the 'full DDS'
+    string data_path = dhi.container->access();
+
+    // Get the DMR made by the BES in the BES/dap/BESDMRResponseHandler, make sure there's a
+    // factory we can use and then dump the DAP2 variables and attributes in using the
+    // BaseType::transform_to_dap4() method that transforms individual variables
+    DMR *dmr = bdmr.get_dmr();
 
 	try {
-		nc_read_dataset_variables(dds, data_path);
+        DMR* cached_dmr_ptr = 0;
+        if (dmr_cache && (cached_dmr_ptr = static_cast<DMR*>(dds_cache->get(data_path)))) {
+            // copy the cached DMR into the BES response object
+            BESDEBUG(NC_NAME, "DMR Cached hit for : " << data_path << endl);
+            *dmr = *cached_dmr_ptr; // Copy the referenced object
+        }
+        else {
+            BaseTypeFactory factory;
+            DDS dds(&factory, name_path(data_path), "3.2");
 
-		DAS das;
-		nc_read_dataset_attributes(das, data_path);
-		Ancillary::read_ancillary_das(das, data_path);
-		dds.transfer_attributes(&das);
-	}
+            // This will get the DDS, either by building it or from the cache
+            build_dds_with_attributes(data_path, "", &dds);
+
+            dmr->set_factory(new D4BaseTypeFactory);
+            dmr->build_using_dds(dds);
+
+            if (dmr_cache) {
+                // add a copy
+                BESDEBUG(NC_NAME, "DMR added to the cache for : " << data_path << endl);
+                dds_cache->add(new DMR(*dmr), data_path);
+            }
+        }
+
+        // Instead of fiddling with the internal storage of the DHI object,
+        // (by setting dhi.data[DAP4_CONSTRAINT], etc., directly) use these
+        // methods to set the constraints. But, why? Ans: from Patrick is that
+        // in the 'container' mode of BES each container can have a different
+        // CE.
+        bdmr.set_dap4_constraint(dhi);
+        bdmr.set_dap4_function(dhi);
+    }
 	catch (InternalErr &e) {
 		throw BESDapError(e.get_error_message(), true, e.get_error_code(), __FILE__, __LINE__);
 	}
@@ -483,28 +538,6 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 	catch (...) {
 		throw BESDapError("Caught unknown error build NC DMR response", true, unknown_error, __FILE__, __LINE__);
 	}
-
-	// Extract the DMR Response object - this holds the DMR used by the
-	// other parts of the framework.
-	BESResponseObject *response = dhi.response_handler->get_response_object();
-	BESDMRResponse &bdmr = dynamic_cast<BESDMRResponse &>(*response);
-
-	// Get the DMR made by the BES in the BES/dap/BESDMRResponseHandler, make sure there's a
-	// factory we can use and then dump the DAP2 variables and attributes in using the
-	// BaseType::transform_to_dap4() method that transforms individual variables
-	DMR *dmr = bdmr.get_dmr();
-	dmr->set_factory(new D4BaseTypeFactory);
-	dmr->build_using_dds(dds);
-
-	// Instead of fiddling with the internal storage of the DHI object,
-	// (by setting dhi.data[DAP4_CONSTRAINT], etc., directly) use these
-	// methods to set the constraints. But, why? Ans: from Patrick is that
-	// in the 'container' mode of BES each container can have a different
-	// CE.
-	bdmr.set_dap4_constraint(dhi);
-	bdmr.set_dap4_function(dhi);
-
-	// What about async and store_result? See BESDapTransmit::send_dap4_data()
 
 	return true;
 }
