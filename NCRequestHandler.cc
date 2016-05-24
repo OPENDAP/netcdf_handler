@@ -306,12 +306,13 @@ bool NCRequestHandler::nc_build_das(BESDataHandlerInterface & dhi)
  * @param container_name
  * @param dds
  */
-void NCRequestHandler::build_dds_with_attributes(const string& dataset_name, const string& container_name, DDS* dds)
+void NCRequestHandler::get_dds_with_attributes(const string& dataset_name, const string& container_name, DDS* dds)
 {
     // Look in memory cache if it's initialized
     DDS* cached_dds_ptr = 0;
     if (dds_cache && (cached_dds_ptr = static_cast<DDS*>(dds_cache->get(dataset_name)))) {
-        // copy the cached DDS into the BES response object
+        // copy the cached DDS into the BES response object. Assume that any cached DDS
+        // includes the DAS information.
         BESDEBUG(NC_NAME, "DDS Cached hit for : " << dataset_name << endl);
         *dds = *cached_dds_ptr; // Copy the referenced object
     }
@@ -388,7 +389,7 @@ bool NCRequestHandler::nc_build_dds(BESDataHandlerInterface & dhi)
         DDS *dds = bdds->get_dds();
 
         // Build a DDS in the empty DDS object
-        build_dds_with_attributes(dhi.container->access(), container_name, dds);
+        get_dds_with_attributes(dhi.container->access(), container_name, dds);
 
         bdds->set_constraint(dhi);
         bdds->clear_container();
@@ -446,7 +447,7 @@ bool NCRequestHandler::nc_build_data(BESDataHandlerInterface & dhi)
         DDS *dds = bdds->get_dds();
 
         // Build a DDS in the empty DDS object
-        build_dds_with_attributes(dhi.container->access(), container_name, dds);
+        get_dds_with_attributes(dhi.container->access(), container_name, dds);
 
         bdds->set_constraint(dhi);
         bdds->clear_container();
@@ -490,7 +491,7 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
     // Because this code does not yet know how to build a DMR directly, use
     // the DMR ctor that builds a DMR using a 'full DDS' (a DDS with attributes).
     // First step, build the 'full DDS'
-    string data_path = dhi.container->access();
+    string dataset_name = dhi.container->access();
 
     // Get the DMR made by the BES in the BES/dap/BESDMRResponseHandler, make sure there's a
     // factory we can use and then dump the DAP2 variables and attributes in using the
@@ -499,25 +500,57 @@ bool NCRequestHandler::nc_build_dmr(BESDataHandlerInterface &dhi)
 
 	try {
         DMR* cached_dmr_ptr = 0;
-        if (dmr_cache && (cached_dmr_ptr = static_cast<DMR*>(dmr_cache->get(data_path)))) {
+        if (dmr_cache && (cached_dmr_ptr = static_cast<DMR*>(dmr_cache->get(dataset_name)))) {
             // copy the cached DMR into the BES response object
-            BESDEBUG(NC_NAME, "DMR Cached hit for : " << data_path << endl);
+            BESDEBUG(NC_NAME, "DMR Cached hit for : " << dataset_name << endl);
             *dmr = *cached_dmr_ptr; // Copy the referenced object
         }
         else {
+#if 0
+            // this version builds and caches the DDS/DAS info.
             BaseTypeFactory factory;
-            DDS dds(&factory, name_path(data_path), "3.2");
+            DDS dds(&factory, name_path(dataset_name), "3.2");
 
             // This will get the DDS, either by building it or from the cache
-            build_dds_with_attributes(data_path, "", &dds);
+            get_dds_with_attributes(dataset_name, "", &dds);
 
             dmr->set_factory(new D4BaseTypeFactory);
             dmr->build_using_dds(dds);
+#else
+            // This version builds a DDS only to build the resulting DMR. The DDS is
+            // not cached. It does look in the DDS cache, just in case...
+            dmr->set_factory(new D4BaseTypeFactory);
+
+            DDS *dds_ptr = 0;
+            if (dds_cache && (dds_ptr = static_cast<DDS*>(dds_cache->get(dataset_name)))) {
+                // Use the cached DDS; Assume that all cached DDS objects hold DAS info too
+                BESDEBUG(NC_NAME, "DDS Cached hit (while building DMR) for : " << dataset_name << endl);
+
+                dmr->build_using_dds(*dds_ptr);
+            }
+            else {
+                // Build a throw-away DDS; don't bother to cache it. DMR's don't support
+                // containers.
+                BaseTypeFactory factory;
+                DDS dds(&factory, name_path(dataset_name), "3.2");
+
+                dds.filename(dataset_name);
+                nc_read_dataset_variables(dds, dataset_name);
+
+                DAS das;
+
+                nc_read_dataset_attributes(das, dataset_name);
+                Ancillary::read_ancillary_das(das, dataset_name);
+
+                dds.transfer_attributes(&das);
+                dmr->build_using_dds(dds);
+            }
+#endif
 
             if (dmr_cache) {
                 // add a copy
-                BESDEBUG(NC_NAME, "DMR added to the cache for : " << data_path << endl);
-                dmr_cache->add(new DMR(*dmr), data_path);
+                BESDEBUG(NC_NAME, "DMR added to the cache for : " << dataset_name << endl);
+                dmr_cache->add(new DMR(*dmr), dataset_name);
             }
         }
 
