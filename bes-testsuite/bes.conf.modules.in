@@ -72,3 +72,7 @@ BES.DefaultResponseMethod=POST
 #                                                                       #
 #-----------------------------------------------------------------------#
 NC.ShowSharedDimensions=false
+
+NC.CacheEntries = 100
+# NC.CachePurgeLevel = 0.2
+
