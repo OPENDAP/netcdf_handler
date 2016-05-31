@@ -60,15 +60,15 @@ NC.PromoteByteToShort=true
 
 # Caching. 
 # 
-# The netCDF handler can cache (in memory) many of the different responses
-# it builds. If the NC.CacheEntries value is zero (the default) the cache
-# is turned off. Setting the NC.CacheEntries to a value greater than zero 
-# enables caching in memory that number of responses. The cache uses a LRU
-# policy for purging old entries. Remove the comment from the following line
-# to turn this on; tune its behavior by changing the value. Note that this 
-# feature is off by default.
+# The netCDF handler can cache (in memory) many of the different
+# responses it builds. If the NC.CacheEntries value is zero, the cache
+# is turned off. Setting the NC.CacheEntries to a value greater than
+# zero enables caching in memory that number of responses. The cache
+# uses a LRU policy for purging old entries; tune its behavior by
+# changing the value and the CachePurgeLevel value below. Note that
+# this feature is on by default.
 
-# NC.CacheEntries = 100
+NC.CacheEntries = 100
 
 # The NC.CachePurgeLevel key determines how much of the in-memory cache is
 # removed when it is purged. The value 0.2 (the default) configures the 
