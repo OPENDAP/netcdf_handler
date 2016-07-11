@@ -188,7 +188,7 @@ static string print_attr(nc_type type, int loc, void *vals)
 
     case NC_DOUBLE: {
         gp.dp = (double *) vals;
-        double valAtLoc = *(gp.fp + loc);
+        double valAtLoc = *(gp.dp + loc);
 
         rep << std::showpoint;
         rep << std::setprecision(16);
