@@ -163,11 +163,17 @@ static string print_attr(nc_type type, int loc, void *vals)
 
     case NC_FLOAT: {
         gp.fp = (float *) vals;
+        float valAtLoc = *(gp.fp + loc);
 
         rep << std::showpoint;
         rep << std::setprecision(9);
 
-        rep << *(gp.fp + loc);
+        if(isnan(valAtLoc)){
+            rep << "NaN";
+        }
+        else {
+            rep << valAtLoc;
+        }
         // If there's no decimal point and the rep does not use scientific
         // notation, add a decimal point. This little jaunt was taken because
         // this code is modeled after older code and that's what it did. I'm
@@ -182,9 +188,18 @@ static string print_attr(nc_type type, int loc, void *vals)
 
     case NC_DOUBLE: {
         gp.dp = (double *) vals;
+        double valAtLoc = *(gp.dp + loc);
+
         rep << std::showpoint;
         rep << std::setprecision(16);
-        rep << *(gp.dp + loc);
+
+
+        if(isnan(valAtLoc)){
+            rep << "NaN";
+        }
+        else {
+            rep << valAtLoc;
+        }
         string tmp_value = rep.str();
         if (tmp_value.find('.') == string::npos && tmp_value.find('e') == string::npos
             && tmp_value.find('E') == string::npos && tmp_value.find("nan") == string::npos
