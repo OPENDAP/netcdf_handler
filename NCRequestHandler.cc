@@ -31,6 +31,7 @@
 #include <exception>
 
 #include <DMR.h>
+#include <DataDDS.h>
 #include <mime_util.h>
 #include <D4BaseTypeFactory.h>
 
