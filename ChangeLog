@@ -1,3 +1,24 @@
+2016-09-22  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed DataDDS include and libdap namespace after repairing the BESDataDDSResponse header
+
+2016-07-11  Nathan Potter  <ndp@opendap.org>
+
+	Merge pull request #3 from OPENDAP/nan_patch
+	Nan patch Woohoo!
+
+2016-07-11  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed a minor issue in ncdas.cc
+	Float value was used when the double value from the union should of been used.
+
+2016-06-22  Nathan Potter  <ndp@opendap.org>
+
+	Added code to change the ascii representation of a NaN value from 'nan' to 'NaN'. There are unanticipated side effects in the tests.
+
+2016-06-01  James Gallagher  <jgallagher@opendap.org>
+
+	Hyrax 1.13.1
 2016-05-31  James Gallagher  <jgallagher@opendap.org>
 
 	Merge pull request #2 from OPENDAP/mem_cache
