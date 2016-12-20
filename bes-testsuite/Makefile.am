@@ -15,10 +15,10 @@ noinst_DATA = bes.conf
 
 CLEANFILES = bes.conf
 
-EXTRA_DIST = nc netcdf_handlerTest.at $(TESTSUITE_3) $(TESTSUITE_4) \
-        atlocal.in $(srcdir)/package.m4 bes.conf.in \
-        bes.conf.modules.in handler_tests_macros.m4 \
-        nc4_netcdf_handler_tests.at
+EXTRA_DIST = nc netcdf_handlerTest netcdf_handlerTest.at \
+nc4_netcdf_handler_tests nc4_netcdf_handler_tests.at \
+atlocal.in package.m4 bes.conf.in bes.conf.modules.in \
+handler_tests_macros.m4
 
 DISTCLEANFILES = atconfig
 
@@ -58,7 +58,6 @@ $(srcdir)/handler_tests_macros.m4
 clean-local:
 	test ! -f '$(TESTSUITE_3)' || $(SHELL) '$(TESTSUITE_3)' --clean
 	test ! -f '$(TESTSUITE_4)' || $(SHELL) '$(TESTSUITE_4)' --clean
-	-rm -f $(TESTSUITE_3) $(TESTSUITE_4) $(srcdir)/package.m4
 	
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
