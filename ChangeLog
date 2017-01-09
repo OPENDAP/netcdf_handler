@@ -1,3 +1,16 @@
+2016-12-20  James Gallagher  <jgallagher@opendap.org>
+
+	Made data files mde 644 (no exec) in netcdf_handler
+
+	Added test *.at files to EXTRA_DIST in Makefile.am
+
+2016-11-02  James Gallagher  <jgallagher@opendap.org>
+
+	Hyrax 1.13.2
+
+2016-09-22  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed DataDDS include and libdap namespace after repairing the BESDataDDSResponse header
 2016-09-22  James Gallagher  <jgallagher@opendap.org>
 
 	Fixed DataDDS include and libdap namespace after repairing the BESDataDDSResponse header
