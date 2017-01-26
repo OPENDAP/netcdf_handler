@@ -53,6 +53,7 @@
 #include <DDS.h>
 #include <mime_util.h>
 #include <util.h>
+#include <BESDebug.h>
 
 #include "NCRequestHandler.h"
 #include "nc_util.h"
@@ -408,9 +409,19 @@ static bool find_matching_coordinate_variable(int ncid, int var,
             if (errstat != NC_NOERR)
                 throw Error("netcdf: could not get name or dimension number for variable " + long_to_string(varid));
 
-            // Map arrays can only be one dimensioanl in DAP2 so if we are here
-            // and this thing has more than one dimension it's not a DAP2 Grid
+            // Map arrays can only be one dimensional in DAP2 so if we are here
+            // and this thing has more than one dimension it's not a valid
+            // Map array for a DAP2 Grid so return false.
             if(candidate_ndims!=1){
+                char array_name[MAX_NC_NAME];
+            	errstat = nc_inq_varname(ncid, var, array_name);
+                if (errstat != NC_NOERR)
+                    throw Error("netcdf: could not get name or dimension number for variable " + long_to_string(var));
+
+               BESDEBUG("nc", "ncdds.c - find_matching_coordinate_variable() The array '" << array_name << "' is not a grid because the "
+                		"candidate Map array '" << candidate_name << " has " <<
+						candidate_ndims << " dimensions and DAP2 Map arrays must have "
+								"a single dimension" << endl);
             	return false;
             }
 
