@@ -486,9 +486,16 @@ bool NCArray::read()
     size_t edg[MAX_NC_DIMS];      /* edges of hyper-cube */
     ptrdiff_t step[MAX_NC_DIMS];  /* stride of hyper-cube */
     bool has_stride;
-    for(unsigned int i=0; i<MAX_NC_DIMS; i++){
-		cor[i] = edg[i] = step[i] = 0;
-    }
+    /**
+     * Zero the constraint should not be required, but when there
+     * are mismatches in dimensionality it caues trouble.
+     * Which is a good thing because it shows a broken thing.
+     * Zeroing the array may be the right thing, but in this
+     * case I only enable it as a bugging step.
+     */
+//    for(unsigned int i=0; i<MAX_NC_DIMS; i++){
+//		cor[i] = edg[i] = step[i] = 0;
+//    }
     long nels = format_constraint(cor, step, edg, &has_stride);
     ostringstream oss;
     for(unsigned int i=0; i<MAX_NC_DIMS; i++){

@@ -399,6 +399,21 @@ static bool find_matching_coordinate_variable(int ncid, int var,
                 throw Error(msg);
             }
 
+            char candidate_name[MAX_NC_NAME];
+            nc_type candidate_nctype;
+            int candidate_ndims;
+            int candidate_dim_ids[MAX_VAR_DIMS];
+
+            int errstat = nc_inq_var(ncid, varid, candidate_name, &candidate_nctype, &candidate_ndims, candidate_dim_ids, (int *) 0);
+            if (errstat != NC_NOERR)
+                throw Error("netcdf: could not get name or dimension number for variable " + long_to_string(varid));
+
+            // Map arrays can only be one dimensioanl in DAP2 so if we are here
+            // and this thing has more than one dimension it's not a DAP2 Grid
+            if(candidate_ndims!=1){
+            	return false;
+            }
+
             return true;
         }
     }
