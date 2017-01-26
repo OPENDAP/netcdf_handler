@@ -106,6 +106,7 @@ static bool version_ge(const string &version, float value)
     return false; // quiet warnings...
 }
 
+#if 0
 /**
  * Stolen from the HDF5 handler code
  */
@@ -123,6 +124,7 @@ static bool get_bool_key(const string &key, bool def_val)
     }
     return def_val;
 }
+#endif
 
 static unsigned int get_uint_key(const string &key, unsigned int def_val)
 {
