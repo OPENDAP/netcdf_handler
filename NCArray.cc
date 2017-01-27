@@ -175,8 +175,13 @@ void NCArray::do_cardinal_array_read(int ncid, int varid, nc_type datatype,
                     errstat = nc_get_vars(ncid, varid, cor, edg, step, &values[0]);
                 else
                     errstat = nc_get_vara(ncid, varid, cor, edg, &values[0]);
-                if (errstat != NC_NOERR)
-                    throw Error(errstat, string("Could not get the value for variable '") + name() + string("' (NCArray::do_cardinal_array_read)"));
+                if (errstat != NC_NOERR){
+                	ostringstream oss;
+                	oss << "NCArray::do_cardinal_array_read() - Could not get the value for Array variable '" << name() << "'.";
+                	oss << " dimensions: " << dimensions(true);
+                	oss << " nc_get_vara() errstat: " << errstat;
+                    throw Error(errstat, oss.str());
+                }
                 // Do not set has_values to true here because the 'true' state
                 // indicates that the values for an entire compound have been
                 // read.
@@ -481,8 +486,27 @@ bool NCArray::read()
     size_t edg[MAX_NC_DIMS];      /* edges of hyper-cube */
     ptrdiff_t step[MAX_NC_DIMS];  /* stride of hyper-cube */
     bool has_stride;
-    long nels = format_constraint(cor, step, edg, &has_stride);
+#if 0
 
+    /**
+     * Zero the constraint should not be required, but when there
+     * are mismatches in dimensionality it caues trouble.
+     * Which is a good thing because it shows a broken thing.
+     * Zeroing the array may be the right thing, but in this
+     * case I only enable it as a bugging step.
+     */
+    for(unsigned int i=0; i<MAX_NC_DIMS; i++){
+        cor[i] = edg[i] = step[i] = 0;
+     }
+#endif
+    long nels = format_constraint(cor, step, edg, &has_stride);
+#if 0
+    ostringstream oss;
+    for(unsigned int i=0; i<MAX_NC_DIMS; i++){
+    	oss << cor[i] <<  ", " << edg[i] << ", " << step[i] << endl;
+    }
+    BESDEBUG("nc", "NCArray::read() - corners, edges, stride" << endl << oss.str() << endl);
+#endif
     vector<char> values;
     do_array_read(ncid, varid, datatype, values, false /*has_values*/, 0 /*values_offset*/,
             nels, cor, edg, step, has_stride);

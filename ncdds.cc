@@ -53,6 +53,7 @@
 #include <DDS.h>
 #include <mime_util.h>
 #include <util.h>
+#include <BESDebug.h>
 
 #include "NCRequestHandler.h"
 #include "nc_util.h"
@@ -362,47 +363,73 @@ static BaseType *build_user_defined(int ncid, int varid, nc_type xtype, const st
      at (only) all the shared dimensions?
  */
 static bool find_matching_coordinate_variable(int ncid, int var,
-        char dimname[], size_t dim_sz, nc_type *match_type)
+		char dimname[], size_t dim_sz, nc_type *match_type)
 {
-    // For netCDF, a Grid's Map must be a netCDF dimension
-    int id;
-    // get the id matching the name.
-    int status = nc_inq_dimid(ncid, dimname, &id);
-    if (status == NC_NOERR) {
-        // get the length, the name was matched above
-        size_t length;
-        status = nc_inq_dimlen(ncid, id, &length);
-        if (status != NC_NOERR) {
-            string msg = "netcdf 3: could not get size for dimension ";
-            msg += long_to_string(id);
-            msg += " in variable ";
-            msg += string(dimname);
-            throw Error(msg);
-        }
-        if (length == dim_sz) {
-            // Both the name and size match and it's a dimension, so we've
-            // found our 'matching coordinate variable'. To get the type,
-            // Must find the variable with the name that matches the dimension.
-            int varid = -1;
-            status = nc_inq_varid(ncid, dimname, &varid);
-            // A variable cannot be its own coordinate variable.
-            // The unlimited dimension does not correspond to a variable,
-            // hence the status error is means the named thing is not a
-            // coordinate; it's not an error as far as the handler is concerned.
-            if (var == varid || status != NC_NOERR)
-                return false;
+	// For netCDF, a Grid's Map must be a netCDF dimension
+	int id;
+	// get the id matching the name.
+	int status = nc_inq_dimid(ncid, dimname, &id);
+	if (status == NC_NOERR) {
+		// get the length, the name was matched above
+		size_t length;
+		status = nc_inq_dimlen(ncid, id, &length);
+		if (status != NC_NOERR) {
+			string msg = "netcdf 3: could not get size for dimension ";
+			msg += long_to_string(id);
+			msg += " in variable ";
+			msg += string(dimname);
+			throw Error(msg);
+		}
+		if (length == dim_sz) {
+			// Both the name and size match and it's a dimension, so we've
+			// found our 'matching coordinate variable'. To get the type,
+			// Must find the variable with the name that matches the dimension.
+			int varid = -1;
+			status = nc_inq_varid(ncid, dimname, &varid);
+			// A variable cannot be its own coordinate variable.
+			// The unlimited dimension does not correspond to a variable,
+			// hence the status error is means the named thing is not a
+			// coordinate; it's not an error as far as the handler is concerned.
+			if (var == varid || status != NC_NOERR)
+				return false;
 
-            status = nc_inq_vartype(ncid, varid, match_type);
-            if (status != NC_NOERR) {
-                string msg = "netcdf 3: could not get type variable ";
-                msg += string(dimname);
-                throw Error(msg);
-            }
+			status = nc_inq_vartype(ncid, varid, match_type);
+			if (status != NC_NOERR) {
+				string msg = "netcdf 3: could not get type variable ";
+				msg += string(dimname);
+				throw Error(msg);
+			}
 
-            return true;
-        }
-    }
-    return false;
+			char candidate_name[MAX_NC_NAME];
+			nc_type candidate_nctype;
+			int candidate_ndims;
+			int candidate_dim_ids[MAX_VAR_DIMS];
+
+			int errstat = nc_inq_var(ncid, varid, candidate_name, &candidate_nctype, &candidate_ndims, candidate_dim_ids, (int *) 0);
+			if (errstat != NC_NOERR)
+				throw Error("netcdf: could not get name or dimension number for variable " + long_to_string(varid));
+
+			// Map arrays can only be one dimensional in DAP2 so if we are here
+			// and this thing has more than one dimension it's not a valid
+			// Map array for a DAP2 Grid so return false.
+			if(candidate_ndims!=1){
+				char array_name[MAX_NC_NAME];
+				errstat = nc_inq_varname(ncid, var, array_name);
+				if (errstat != NC_NOERR)
+					throw Error("netcdf: could not get name or dimension number for variable " + long_to_string(var));
+
+				BESDEBUG("nc", "ncdds.c - find_matching_coordinate_variable() The array '"
+						<< array_name << "' is not a grid because the "
+						"candidate Map array '" << candidate_name << " has " <<
+						candidate_ndims << " dimensions and DAP2 Map arrays must have "
+						"a single dimension" << endl);
+				return false;
+			}
+
+			return true;
+		}
+	}
+	return false;
 }
 
 /** Is the variable a DAP Grid?
